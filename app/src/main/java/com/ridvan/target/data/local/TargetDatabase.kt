@@ -4,22 +4,25 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.ridvan.target.data.local.dao.DailyLogDao
 import com.ridvan.target.data.local.dao.ExamDao
 import com.ridvan.target.data.local.dao.ResourceDao
 import com.ridvan.target.data.local.dao.TopicDao
+import com.ridvan.target.data.local.entity.DailyLog
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.Resource
 import com.ridvan.target.data.local.entity.Topic
 
 @Database(
-    entities = [Exam::class, Topic::class, Resource::class],
-    version = 1,
+    entities = [Exam::class, Topic::class, Resource::class, DailyLog::class],
+    version = 2,
     exportSchema = false,
 )
 abstract class TargetDatabase : RoomDatabase() {
     abstract fun examDao(): ExamDao
     abstract fun topicDao(): TopicDao
     abstract fun resourceDao(): ResourceDao
+    abstract fun dailyLogDao(): DailyLogDao
 
     companion object {
         @Volatile
@@ -31,7 +34,7 @@ abstract class TargetDatabase : RoomDatabase() {
                     context.applicationContext,
                     TargetDatabase::class.java,
                     "target.db",
-                ).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2).build().also { INSTANCE = it }
             }
     }
 }

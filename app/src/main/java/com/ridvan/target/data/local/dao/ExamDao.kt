@@ -25,10 +25,11 @@ interface ExamDao {
     @Query(
         """
         SELECT exams.*,
-               COUNT(topics.id) AS totalTopics,
-               SUM(CASE WHEN topics.status = 'DONE' THEN 1 ELSE 0 END) AS doneTopics
+               COUNT(leaf.id) AS totalTopics,
+               SUM(CASE WHEN leaf.status = 'DONE' THEN 1 ELSE 0 END) AS doneTopics
         FROM exams
-        LEFT JOIN topics ON topics.examId = exams.id
+        LEFT JOIN topics leaf ON leaf.examId = exams.id
+            AND NOT EXISTS (SELECT 1 FROM topics child WHERE child.parentTopicId = leaf.id)
         GROUP BY exams.id
         ORDER BY exams.createdAt DESC
         """

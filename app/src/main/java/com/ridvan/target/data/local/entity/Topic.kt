@@ -13,15 +13,27 @@ import androidx.room.PrimaryKey
             parentColumns = ["id"],
             childColumns = ["examId"],
             onDelete = ForeignKey.CASCADE,
-        )
+        ),
+        ForeignKey(
+            entity = Topic::class,
+            parentColumns = ["id"],
+            childColumns = ["parentTopicId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
     ],
-    indices = [Index("examId")],
+    indices = [Index("examId"), Index("parentTopicId")],
 )
 data class Topic(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val examId: Long,
+    val parentTopicId: Long? = null,
     val name: String,
     val orderIndex: Int,
     val status: TopicStatus = TopicStatus.NOT_STARTED,
     val lastStudiedAt: Long? = null,
+    val testCount: Int? = null,
+    val questionCount: Int? = null,
+    val goalStartDate: Long? = null,
+    val goalEndDate: Long? = null,
+    val dailyQuestionTarget: Int? = null,
 )

@@ -19,8 +19,11 @@ interface TopicDao {
     @Delete
     suspend fun delete(topic: Topic)
 
-    @Query("SELECT * FROM topics WHERE examId = :examId ORDER BY orderIndex ASC")
-    fun getByExamId(examId: Long): Flow<List<Topic>>
+    @Query("SELECT * FROM topics WHERE examId = :examId AND parentTopicId IS NULL ORDER BY orderIndex ASC")
+    fun getTopLevelByExamId(examId: Long): Flow<List<Topic>>
+
+    @Query("SELECT * FROM topics WHERE parentTopicId = :parentTopicId ORDER BY orderIndex ASC")
+    fun getChildren(parentTopicId: Long): Flow<List<Topic>>
 
     @Query("SELECT * FROM topics WHERE id = :topicId")
     fun getById(topicId: Long): Flow<Topic?>
