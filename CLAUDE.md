@@ -4,15 +4,17 @@
 
 A personal, fully offline Android app for organizing exam study materials and tracking study progress. Not tied to any specific exam — the user defines whatever exam(s) they're preparing for, then organizes materials underneath.
 
-Hierarchy: **Exam → Topic (nestable) → Resource**
+Hierarchy: **Exam → Topic (nestable) → {Question Bank, Practice Exam, Lecture Note}**
 
 - **Exam**: something the user is preparing for — name, exam date (`targetDate`), study-start date, exam location, registration open/close dates. All optional except name.
-- **Topic**: a subject/chapter/sub-chapter within an Exam (name, ordering, status, last-studied date). Topics can nest to any depth via an optional `parentTopicId` — e.g. an exam's YKS → Chemistry → TYT → "Topic 1" is just four Topic rows nested three deep. This is deliberate: the schema doesn't hardcode any specific exam's structure (like YKS's TYT/AYT split); depth and shape are whatever the user builds.
-  - A Topic can carry question-bank stats (`testCount`, `questionCount`) and a study goal (`goalStartDate`, `goalEndDate`, `dailyQuestionTarget`) for the material it directly holds.
-  - **Daily logs**: one row per Topic per day (questions solved, minutes spent), keyed uniquely on (topic, date) — re-logging the same day overwrites rather than duplicating. Whether a day "met the goal" is always derived by comparing that day's solved count to `dailyQuestionTarget`, never stored as its own field — there is no separate outcome enum to drift out of sync with the actual number.
-- **Resource**: study material attached to a Topic. v1 supports two types:
-  - **Note** — text typed directly in the app.
-  - **File** — any file imported via Android's Storage Access Framework (SAF), copied into app-private storage on import (so it survives even if the original file is moved/deleted on the phone). Opened via an `ACTION_VIEW` intent to whatever app the user already has for that file type.
+- **Topic**: a subject/chapter/sub-chapter within an Exam (name, ordering, status, last-studied date). Topics can nest to any depth via an optional `parentTopicId` — e.g. YKS → Chemistry → TYT is three Topic rows nested two deep. This is deliberate: the schema doesn't hardcode any specific exam's structure (like YKS's Subject/TYT-AYT split); depth and shape are whatever the user builds. A Topic also does double duty as a reusable "curriculum topic" name (e.g. "Mol Kavramı") that a Question Bank's stats or a Practice Exam's subject score can point at — same entity, two uses.
+  - A Topic can carry a study goal (`goalStartDate`, `goalEndDate`, `dailyQuestionTarget`).
+  - **Daily logs**: one row per Topic per day (questions solved, minutes spent), keyed uniquely on (topic, date) — re-logging the same day overwrites rather than duplicating. Whether a day "met the goal" is always derived by comparing that day's solved count to `dailyQuestionTarget`, never stored as its own field.
+- **Question Bank**: filed under a Topic branch (e.g. "Chemistry → TYT"). Links to curriculum Topics via `QuestionBankTopicStat` (test count + question count *per topic per bank*) — the same topic can appear in multiple question banks with different counts in each, since the stats live on the link, not on the Topic.
+- **Practice Exam**: attaches directly to an Exam (not to a specific Topic) with a free-text `examType` (e.g. "TYT"/"AYT") — a "General" exam spans every subject at once, so it can't hang off one Topic branch. Has a scheduled date, allotted/actual time, and one `PracticeExamSubjectScore` row per subject covered (correct/incorrect/blank counts, net = correct − incorrect/4, computed not stored). One score row = subject-specific exam; multiple = General — derived from the row count, not a stored flag.
+- **Lecture Note**: belongs to one Topic; typed text and/or an imported file (same SAF pattern as below). Each read is logged as a `LectureNoteReadEvent` row (timestamp) rather than a counter, so read count / last-read / "nth read" are all derived from that history.
+
+An older generic `Resource` (Note/File) entity + `TopicDetailScreen` still exist in code but are slated for removal once real screens exist for the three kinds above — see Current status.
 
 Progress tracking: each Topic has a status (`Not Started` / `In Progress` / `Done`) and a last-studied timestamp. Each Exam shows a completion percentage rolled up from its **leaf** Topics' statuses only (a Topic that just holds sub-topics isn't itself counted). A dashboard screen lists all Exams with their completion %.
 
@@ -20,7 +22,7 @@ Reminders (e.g. for registration deadlines or daily study goals) are a planned f
 
 ## Explicitly out of scope for v1 (do not build unless asked)
 
-- Interactive quizzing / self-testing with scored attempts. Question-bank resources are just Note or File resources in v1 — no answer-checking, no scoring, no spaced repetition yet.
+- Interactive quizzing / self-testing with scored attempts, or spaced repetition. Question banks track test/question counts per topic, not individual questions or answers.
 - Search, tags, local notifications/reminders.
 - Backup/export/restore.
 - Any form of sync, accounts, or network access of any kind.
@@ -36,7 +38,7 @@ These are candidate v2+ features. Don't scaffold data model fields or UI for the
 
 - **Language**: Kotlin
 - **UI**: Jetpack Compose, Material 3
-- **Persistence**: Room (SQLite) for Exam/Topic/Resource/DailyLog data. Schema changes go through a real `Migration` (see `data/local/Migrations.kt`) — `fallbackToDestructiveMigration()` is deliberately not used, since there's real on-device study data to preserve across schema changes.
+- **Persistence**: Room (SQLite) — Exam, Topic, DailyLog, QuestionBank/QuestionBankTopicStat, PracticeExam/PracticeExamSubjectScore, LectureNote/LectureNoteReadEvent, plus the older Resource/DailyLog. Schema changes go through a real `Migration` (see `data/local/Migrations.kt`) — `fallbackToDestructiveMigration()` is deliberately not used, since there's real on-device study data to preserve across schema changes. Room's runtime validator requires an *exact* column match against the entity, not a superset — a removed field needs an actual `ALTER TABLE ... DROP COLUMN`, not just deleting it from the Kotlin entity.
 - **Architecture**: MVVM — Composable screens + ViewModel (StateFlow) per screen area
 - **Navigation**: Jetpack Navigation Compose. Screen flow: Exam List (dashboard) → Exam Detail (Topic list) → Topic Detail (Resource list)
 - **File import**: `ACTION_OPEN_DOCUMENT` (SAF) to pick files; copy bytes into the app's private external files dir on import rather than relying on a persisted URI permission
@@ -52,6 +54,8 @@ Target device is a single personal phone (Samsung, One UI 8.5, Android 16) — t
 
 ## Current status
 
-Project scaffolded and pushed to GitHub. Data model (Exam/Topic/Resource/DailyLog entities + DAOs, `TargetDatabase` at schema version 2 with a real migration from v1) is implemented; completion % is computed on read from leaf topics only, never stored. Navigation Compose wires three screens — Exam List (dashboard) → Exam Detail (topic list) → Topic Detail (note resources) — all confirmed working end-to-end on-device (add exam → add topic → cycle status → add note), including the v1→v2 migration verified against real on-device data.
+Project scaffolded and pushed to GitHub. `TargetDatabase` is at schema version 3 (real migrations from v1, each verified on-device against the developer's actual data, not a fresh install). Navigation Compose wires three screens — Exam List (dashboard) → Exam Detail (topic list) → Topic Detail (note resources) — confirmed working end-to-end on-device (add exam → add topic → cycle status → add note).
 
-Not yet built: any UI for the newer Topic/Exam fields (nested sub-topics beyond one level, question-bank stats, study goals, daily check-in logging, exam metadata like registration dates/location), SAF file-import for File-type resources, and reminders. Those are the next features.
+Data layer has Exam/Topic/DailyLog plus the newer QuestionBank/QuestionBankTopicStat, PracticeExam/PracticeExamSubjectScore, and LectureNote/LectureNoteReadEvent entities and DAOs — **no UI for any of these six yet**. The older Resource entity + TopicDetailScreen (Note-only) are still what's actually on screen; they'll be removed once real screens exist for the three new kinds (a question-bank editor, a practice-exam scorer, a lecture-note viewer with read-tracking) — that's the next feature to build, and it's a substantial one.
+
+Also not yet built: UI for the Exam/Topic metadata fields already in the schema (registration dates/location, study goals, daily check-in logging), SAF file-import, and reminders.
