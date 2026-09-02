@@ -43,9 +43,9 @@ Target device is a single personal phone (Samsung, One UI 8.5, Android 16) — t
 
 - Package id: `com.ridvan.target`
 - Build/run: `./gradlew assembleDebug` to build, `./gradlew installDebug` to install to the connected device (or use Android Studio's Run button / VS Code equivalent). Deploy target is the developer's own phone over adb (USB or wireless debugging) — no emulator setup exists or is needed.
-- Git: commit after each feature is working and tested on-device, with a descriptive commit message. Don't batch unrelated features into one commit.
+- Git: commit after each feature is working and tested on-device, with a descriptive commit message, then push to `origin/main` (GitHub) — don't leave commits sitting local-only. Don't batch unrelated features into one commit.
 - Editor: development happens primarily in VS Code with the Claude Code CLI; Android Studio is used occasionally just for SDK management / Gradle sync, not as the primary editor.
 
 ## Current status
 
-Project scaffolded (Empty Activity / Compose template), pushed to GitHub, confirmed building and running on the developer's phone. Room data model (Exam/Topic/Resource entities + DAOs, `TargetDatabase`, `TargetApplication`) is implemented and builds successfully; completion % is computed on read, not stored. No screens/ViewModels/navigation or SAF file-import yet — those are the next features to build.
+Project scaffolded (Empty Activity / Compose template), pushed to GitHub, confirmed building and running on the developer's phone. Room data model (Exam/Topic/Resource entities + DAOs, `TargetDatabase`, `TargetApplication`) is implemented; completion % is computed on read, not stored. First screen (Exam List / dashboard, with a working add-exam flow wired to Room) is implemented and confirmed running on-device. No Exam Detail / Topic Detail screens, navigation, or SAF file-import yet — those are the next features to build.
