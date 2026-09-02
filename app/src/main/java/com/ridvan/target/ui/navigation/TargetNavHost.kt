@@ -2,6 +2,7 @@ package com.ridvan.target.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -14,13 +15,30 @@ import com.ridvan.target.ui.examlist.ExamListScreen
 import com.ridvan.target.ui.home.HomeScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
+import com.ridvan.target.ui.shell.ShellNavigation
 import com.ridvan.target.ui.user.UserEditScreen
+
+private fun NavHostController.navigateToShellDestination(route: Any) {
+    navigate(route) {
+        popUpTo<HomeRoute> { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
 
 @Composable
 fun TargetNavHost() {
     val navController = rememberNavController()
     val application = LocalContext.current.applicationContext as TargetApplication
     val startDestination = if (application.preferences.currentUserId != null) HomeRoute else LoginRoute
+
+    val shellNavigation = ShellNavigation(
+        onNavigateHome = { navController.navigateToShellDestination(HomeRoute) },
+        onNavigateExams = { navController.navigateToShellDestination(ExamListRoute) },
+        onNavigateCourses = { navController.navigateToShellDestination(CourseListRoute) },
+        onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
+        onNavigateSettings = { navController.navigateToShellDestination(SettingsRoute) },
+    )
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable<LoginRoute> {
@@ -36,16 +54,11 @@ fun TargetNavHost() {
             )
         }
         composable<HomeRoute> {
-            HomeScreen(
-                onNavigateExams = { navController.navigate(ExamListRoute) },
-                onNavigateCourses = { navController.navigate(CourseListRoute) },
-                onNavigateUser = { navController.navigate(UserEditRoute) },
-                onNavigateSettings = { navController.navigate(SettingsRoute) },
-            )
+            HomeScreen(shellNavigation = shellNavigation)
         }
         composable<ExamListRoute> {
             ExamListScreen(
-                onBack = { navController.popBackStack() },
+                shellNavigation = shellNavigation,
                 onExamClick = { examId -> navController.navigate(ExamDetailRoute(examId)) },
             )
         }
@@ -59,13 +72,16 @@ fun TargetNavHost() {
             SectionDetailScreen(onBack = { navController.popBackStack() })
         }
         composable<CourseListRoute> {
-            CourseListScreen(onBack = { navController.popBackStack() })
+            CourseListScreen(shellNavigation = shellNavigation)
         }
         composable<UserEditRoute> {
-            UserEditScreen(onBack = { navController.popBackStack() })
+            UserEditScreen(
+                shellNavigation = shellNavigation,
+                onSaved = { navController.navigateToShellDestination(HomeRoute) },
+            )
         }
         composable<SettingsRoute> {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(shellNavigation = shellNavigation)
         }
     }
 }

@@ -9,17 +9,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,11 +26,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.entity.PreferredNameSource
 import com.ridvan.target.ui.common.PreferredNameSelector
+import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellNavigation
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserEditScreen(
-    onBack: () -> Unit,
+    shellNavigation: ShellNavigation,
+    onSaved: () -> Unit,
     viewModel: UserEditViewModel = viewModel(),
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
@@ -70,18 +65,7 @@ fun UserEditScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit profile") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
+    AppShell(navigation = shellNavigation, title = "Edit profile") { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -171,7 +155,7 @@ fun UserEditScreen(
                         firstName, middleName, lastName, username, email,
                         preferredNameSource, preferredNameCustomText,
                         oldPassword, newPassword, confirmNewPassword,
-                        onBack,
+                        onSaved,
                     )
                 },
                 modifier = Modifier.padding(top = 16.dp),
