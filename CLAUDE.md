@@ -4,15 +4,19 @@
 
 A personal, fully offline Android app for organizing exam study materials and tracking study progress. Not tied to any specific exam — the user defines whatever exam(s) they're preparing for, then organizes materials underneath.
 
-Hierarchy: **Exam → Topic → Resource**
+Hierarchy: **Exam → Topic (nestable) → Resource**
 
-- **Exam**: something the user is preparing for (name, optional target date).
-- **Topic**: a subject/chapter within an Exam (name, ordering, status, last-studied date).
+- **Exam**: something the user is preparing for — name, exam date (`targetDate`), study-start date, exam location, registration open/close dates. All optional except name.
+- **Topic**: a subject/chapter/sub-chapter within an Exam (name, ordering, status, last-studied date). Topics can nest to any depth via an optional `parentTopicId` — e.g. an exam's YKS → Chemistry → TYT → "Topic 1" is just four Topic rows nested three deep. This is deliberate: the schema doesn't hardcode any specific exam's structure (like YKS's TYT/AYT split); depth and shape are whatever the user builds.
+  - A Topic can carry question-bank stats (`testCount`, `questionCount`) and a study goal (`goalStartDate`, `goalEndDate`, `dailyQuestionTarget`) for the material it directly holds.
+  - **Daily logs**: one row per Topic per day (questions solved, minutes spent), keyed uniquely on (topic, date) — re-logging the same day overwrites rather than duplicating. Whether a day "met the goal" is always derived by comparing that day's solved count to `dailyQuestionTarget`, never stored as its own field — there is no separate outcome enum to drift out of sync with the actual number.
 - **Resource**: study material attached to a Topic. v1 supports two types:
   - **Note** — text typed directly in the app.
   - **File** — any file imported via Android's Storage Access Framework (SAF), copied into app-private storage on import (so it survives even if the original file is moved/deleted on the phone). Opened via an `ACTION_VIEW` intent to whatever app the user already has for that file type.
 
-Progress tracking: each Topic has a status (`Not Started` / `In Progress` / `Done`) and a last-studied timestamp. Each Exam shows a completion percentage rolled up from its Topics' statuses. A dashboard screen lists all Exams with their completion %.
+Progress tracking: each Topic has a status (`Not Started` / `In Progress` / `Done`) and a last-studied timestamp. Each Exam shows a completion percentage rolled up from its **leaf** Topics' statuses only (a Topic that just holds sub-topics isn't itself counted). A dashboard screen lists all Exams with their completion %.
+
+Reminders (e.g. for registration deadlines or daily study goals) are a planned future addition — not built yet, don't scaffold for them speculatively.
 
 ## Explicitly out of scope for v1 (do not build unless asked)
 
@@ -32,7 +36,7 @@ These are candidate v2+ features. Don't scaffold data model fields or UI for the
 
 - **Language**: Kotlin
 - **UI**: Jetpack Compose, Material 3
-- **Persistence**: Room (SQLite) for Exam/Topic/Resource/progress data
+- **Persistence**: Room (SQLite) for Exam/Topic/Resource/DailyLog data. Schema changes go through a real `Migration` (see `data/local/Migrations.kt`) — `fallbackToDestructiveMigration()` is deliberately not used, since there's real on-device study data to preserve across schema changes.
 - **Architecture**: MVVM — Composable screens + ViewModel (StateFlow) per screen area
 - **Navigation**: Jetpack Navigation Compose. Screen flow: Exam List (dashboard) → Exam Detail (Topic list) → Topic Detail (Resource list)
 - **File import**: `ACTION_OPEN_DOCUMENT` (SAF) to pick files; copy bytes into the app's private external files dir on import rather than relying on a persisted URI permission
@@ -48,4 +52,6 @@ Target device is a single personal phone (Samsung, One UI 8.5, Android 16) — t
 
 ## Current status
 
-Project scaffolded (Empty Activity / Compose template), pushed to GitHub, confirmed building and running on the developer's phone. Room data model (Exam/Topic/Resource entities + DAOs, `TargetDatabase`, `TargetApplication`) is implemented; completion % is computed on read, not stored. First screen (Exam List / dashboard, with a working add-exam flow wired to Room) is implemented and confirmed running on-device. No Exam Detail / Topic Detail screens, navigation, or SAF file-import yet — those are the next features to build.
+Project scaffolded and pushed to GitHub. Data model (Exam/Topic/Resource/DailyLog entities + DAOs, `TargetDatabase` at schema version 2 with a real migration from v1) is implemented; completion % is computed on read from leaf topics only, never stored. Navigation Compose wires three screens — Exam List (dashboard) → Exam Detail (topic list) → Topic Detail (note resources) — all confirmed working end-to-end on-device (add exam → add topic → cycle status → add note), including the v1→v2 migration verified against real on-device data.
+
+Not yet built: any UI for the newer Topic/Exam fields (nested sub-topics beyond one level, question-bank stats, study goals, daily check-in logging, exam metadata like registration dates/location), SAF file-import for File-type resources, and reminders. Those are the next features.
