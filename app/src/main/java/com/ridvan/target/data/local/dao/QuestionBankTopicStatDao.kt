@@ -22,12 +22,51 @@ interface QuestionBankTopicStatDao {
 
     @Query(
         """
-        SELECT question_bank_topic_stats.*, topics.name AS topicName
+        SELECT question_bank_topic_stats.*,
+               topics.name AS topicName,
+               question_banks.name AS questionBankName,
+               COALESCE(attempts.testsCompleted, 0) AS testsCompleted,
+               COALESCE(attempts.questionsCompleted, 0) AS questionsCompleted
         FROM question_bank_topic_stats
         JOIN topics ON topics.id = question_bank_topic_stats.topicId
+        JOIN question_banks ON question_banks.id = question_bank_topic_stats.questionBankId
+        LEFT JOIN (
+            SELECT questionBankId, topicId,
+                   COUNT(*) AS testsCompleted,
+                   SUM(questionsSolved) AS questionsCompleted
+            FROM test_attempts
+            WHERE questionBankId IS NOT NULL
+            GROUP BY questionBankId, topicId
+        ) attempts ON attempts.questionBankId = question_bank_topic_stats.questionBankId
+            AND attempts.topicId = question_bank_topic_stats.topicId
         WHERE question_bank_topic_stats.questionBankId = :questionBankId
         ORDER BY topics.name ASC
         """
     )
-    fun getByQuestionBankId(questionBankId: Long): Flow<List<QuestionBankTopicStatWithTopic>>
+    fun getByQuestionBankId(questionBankId: Long): Flow<List<QuestionBankTopicStatProgress>>
+
+    @Query(
+        """
+        SELECT question_bank_topic_stats.*,
+               topics.name AS topicName,
+               question_banks.name AS questionBankName,
+               COALESCE(attempts.testsCompleted, 0) AS testsCompleted,
+               COALESCE(attempts.questionsCompleted, 0) AS questionsCompleted
+        FROM question_bank_topic_stats
+        JOIN topics ON topics.id = question_bank_topic_stats.topicId
+        JOIN question_banks ON question_banks.id = question_bank_topic_stats.questionBankId
+        LEFT JOIN (
+            SELECT questionBankId, topicId,
+                   COUNT(*) AS testsCompleted,
+                   SUM(questionsSolved) AS questionsCompleted
+            FROM test_attempts
+            WHERE questionBankId IS NOT NULL
+            GROUP BY questionBankId, topicId
+        ) attempts ON attempts.questionBankId = question_bank_topic_stats.questionBankId
+            AND attempts.topicId = question_bank_topic_stats.topicId
+        WHERE question_bank_topic_stats.topicId = :topicId
+        ORDER BY question_banks.name ASC
+        """
+    )
+    fun getByTopicId(topicId: Long): Flow<List<QuestionBankTopicStatProgress>>
 }

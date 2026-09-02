@@ -6,21 +6,28 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "daily_logs",
+    tableName = "test_attempts",
     foreignKeys = [
         ForeignKey(
             entity = Topic::class,
             parentColumns = ["id"],
             childColumns = ["topicId"],
             onDelete = ForeignKey.CASCADE,
-        )
+        ),
+        ForeignKey(
+            entity = QuestionBank::class,
+            parentColumns = ["id"],
+            childColumns = ["questionBankId"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
     ],
-    indices = [Index(value = ["topicId", "date"], unique = true)],
+    indices = [Index("topicId"), Index("questionBankId")],
 )
-data class DailyLog(
+data class TestAttempt(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val topicId: Long,
-    val date: Long,
-    val questionsSolved: Int = 0,
-    val minutesSpent: Int = 0,
+    val questionBankId: Long? = null,
+    val startedAt: Long,
+    val finishedAt: Long,
+    val questionsSolved: Int,
 )

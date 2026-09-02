@@ -147,3 +147,26 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         )
     }
 }
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS test_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                topicId INTEGER NOT NULL,
+                questionBankId INTEGER,
+                startedAt INTEGER NOT NULL,
+                finishedAt INTEGER NOT NULL,
+                questionsSolved INTEGER NOT NULL,
+                FOREIGN KEY(topicId) REFERENCES topics(id) ON DELETE CASCADE,
+                FOREIGN KEY(questionBankId) REFERENCES question_banks(id) ON DELETE SET NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_test_attempts_topicId ON test_attempts(topicId)")
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_test_attempts_questionBankId ON test_attempts(questionBankId)"
+        )
+    }
+}
