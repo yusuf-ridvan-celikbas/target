@@ -48,4 +48,4 @@ Target device is a single personal phone (Samsung, One UI 8.5, Android 16) — t
 
 ## Current status
 
-Project scaffolded (Empty Activity / Compose template), pushed to GitHub, confirmed building and running on the developer's phone. Data model (Room entities for Exam/Topic/Resource/progress) has not been implemented yet — that's the next feature to build.
+Project scaffolded (Empty Activity / Compose template), pushed to GitHub, confirmed building and running on the developer's phone. Room data model (Exam/Topic/Resource entities + DAOs, `TargetDatabase`, `TargetApplication`) is implemented and builds successfully; completion % is computed on read, not stored. No screens/ViewModels/navigation or SAF file-import yet — those are the next features to build.
