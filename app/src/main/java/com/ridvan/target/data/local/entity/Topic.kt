@@ -31,8 +31,6 @@ data class Topic(
     val orderIndex: Int,
     val status: TopicStatus = TopicStatus.NOT_STARTED,
     val lastStudiedAt: Long? = null,
-    val testCount: Int? = null,
-    val questionCount: Int? = null,
     val goalStartDate: Long? = null,
     val goalEndDate: Long? = null,
     val dailyQuestionTarget: Int? = null,
