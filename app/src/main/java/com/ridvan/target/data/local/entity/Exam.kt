@@ -13,14 +13,21 @@ import androidx.room.PrimaryKey
             parentColumns = ["id"],
             childColumns = ["examTypeId"],
             onDelete = ForeignKey.CASCADE,
-        )
+        ),
+        ForeignKey(
+            entity = User::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
     ],
-    indices = [Index("examTypeId")],
+    indices = [Index("examTypeId"), Index("userId")],
 )
 data class Exam(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val examTypeId: Long,
+    val userId: Long? = null,
     val hasSections: Boolean,
     val examDate: Long? = null,
     val studyStartDate: Long? = null,

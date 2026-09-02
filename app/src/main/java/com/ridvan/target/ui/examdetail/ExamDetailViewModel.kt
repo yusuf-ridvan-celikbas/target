@@ -29,12 +29,14 @@ class ExamDetailViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
     private val examId: Long = savedStateHandle.toRoute<ExamDetailRoute>().examId
-    private val database = (application as TargetApplication).database
+    private val targetApplication = application as TargetApplication
+    private val database = targetApplication.database
     private val examDao: ExamDao = database.examDao()
     private val examTypeDao: ExamTypeDao = database.examTypeDao()
     private val sectionDao: SectionDao = database.sectionDao()
     private val courseDao: CourseDao = database.courseDao()
     private val examCourseDao: ExamCourseDao = database.examCourseDao()
+    private val userId = targetApplication.preferences.currentUserId
 
     val exam: StateFlow<Exam?> = examDao.getById(examId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -80,10 +82,10 @@ class ExamDetailViewModel(
 
     fun addCourse(name: String) {
         val trimmed = name.trim()
-        if (trimmed.isEmpty()) return
+        if (trimmed.isEmpty() || userId == null) return
         viewModelScope.launch {
-            val existing = courseDao.getAll().first().firstOrNull { it.name == trimmed }
-            val courseId = existing?.id ?: courseDao.insert(Course(name = trimmed))
+            val existing = courseDao.getByUserId(userId).first().firstOrNull { it.name == trimmed }
+            val courseId = existing?.id ?: courseDao.insert(Course(name = trimmed, userId = userId))
             if (courses.value.none { it.examCourse.courseId == courseId }) {
                 examCourseDao.insert(ExamCourse(examId = examId, courseId = courseId))
             }

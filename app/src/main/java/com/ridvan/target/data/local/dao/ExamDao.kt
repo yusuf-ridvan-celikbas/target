@@ -27,8 +27,9 @@ interface ExamDao {
         SELECT exams.*, exam_types.name AS examTypeName
         FROM exams
         JOIN exam_types ON exam_types.id = exams.examTypeId
+        WHERE exams.userId = :userId
         ORDER BY exams.createdAt DESC
         """
     )
-    fun getAllWithType(): Flow<List<ExamWithType>>
+    fun getAllWithTypeByUserId(userId: Long): Flow<List<ExamWithType>>
 }
