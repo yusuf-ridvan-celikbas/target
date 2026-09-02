@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
-import com.ridvan.target.ui.topicdetail.TopicDetailScreen
+import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 
 @Composable
 fun TargetNavHost() {
@@ -20,12 +20,12 @@ fun TargetNavHost() {
         }
         composable<ExamDetailRoute> {
             ExamDetailScreen(
-                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+                onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
                 onBack = { navController.popBackStack() },
             )
         }
-        composable<TopicDetailRoute> {
-            TopicDetailScreen(onBack = { navController.popBackStack() })
+        composable<SectionDetailRoute> {
+            SectionDetailScreen(onBack = { navController.popBackStack() })
         }
     }
 }

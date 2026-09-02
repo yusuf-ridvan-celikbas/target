@@ -6,19 +6,21 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "lecture_note_read_events",
+    tableName = "sections",
     foreignKeys = [
         ForeignKey(
-            entity = LectureNote::class,
+            entity = Exam::class,
             parentColumns = ["id"],
-            childColumns = ["lectureNoteId"],
+            childColumns = ["examId"],
             onDelete = ForeignKey.CASCADE,
         )
     ],
-    indices = [Index("lectureNoteId")],
+    indices = [Index("examId")],
 )
-data class LectureNoteReadEvent(
+data class Section(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val lectureNoteId: Long,
-    val readAt: Long = System.currentTimeMillis(),
+    val examId: Long,
+    val name: String,
+    val date: Long? = null,
+    val orderIndex: Int,
 )

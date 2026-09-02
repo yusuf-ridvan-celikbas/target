@@ -1,8 +1,9 @@
-package com.ridvan.target.ui.examdetail
+package com.ridvan.target.ui.sectiondetail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,9 +13,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,31 +39,27 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
-import com.ridvan.target.data.local.entity.Section
-import com.ridvan.target.ui.common.AddOrEditExamDialog
+import com.ridvan.target.data.local.dao.SectionCourseWithCourse
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExamDetailScreen(
-    onSectionClick: (Long) -> Unit,
+fun SectionDetailScreen(
     onBack: () -> Unit,
-    viewModel: ExamDetailViewModel = viewModel(),
+    viewModel: SectionDetailViewModel = viewModel(),
 ) {
-    val exam by viewModel.exam.collectAsStateWithLifecycle()
-    val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
-    val sections by viewModel.sections.collectAsStateWithLifecycle()
-    val courses by viewModel.courses.collectAsStateWithLifecycle()
+    val section by viewModel.section.collectAsStateWithLifecycle()
+    val assignedCourses by viewModel.assignedCourses.collectAsStateWithLifecycle()
+    val availableCourses by viewModel.availableCourses.collectAsStateWithLifecycle()
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    var showAddSectionDialog by remember { mutableStateOf(false) }
-    var showAddCourseDialog by remember { mutableStateOf(false) }
+    var showAddCoursesDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(exam?.name.orEmpty()) },
+                title = { Text(section?.name.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -68,37 +67,31 @@ fun ExamDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit exam")
+                        Icon(Icons.Filled.Edit, contentDescription = "Edit section")
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete exam")
+                        Icon(Icons.Filled.Delete, contentDescription = "Delete section")
                     }
                 },
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showAddCoursesDialog = true }) {
+                Text("+")
+            }
+        },
     ) { innerPadding ->
-        LazyColumn(modifier = Modifier.fillMaxWidth().padding(innerPadding)) {
-            exam?.let { currentExam ->
-                item { ExamSummary(currentExam.examDate, currentExam.studyStartDate, currentExam.hasSections) }
-            }
-
-            item { SectionHeader("Courses", onAddClick = { showAddCourseDialog = true }) }
-            if (courses.isEmpty()) {
-                item { EmptyHint("No courses yet.") }
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            Text(
+                "Date: ${section?.date?.let { formatDate(it) } ?: "Not set"}",
+                modifier = Modifier.padding(16.dp),
+            )
+            if (assignedCourses.isEmpty()) {
+                Text("No courses assigned yet.", modifier = Modifier.padding(horizontal = 16.dp))
             } else {
-                items(courses, key = { "course-${it.examCourse.id}" }) { course ->
-                    CourseRow(course, onRemove = { viewModel.removeCourse(course.examCourse) })
-                    HorizontalDivider()
-                }
-            }
-
-            if (exam?.hasSections == true) {
-                item { SectionHeader("Sections", onAddClick = { showAddSectionDialog = true }) }
-                if (sections.isEmpty()) {
-                    item { EmptyHint("No sections yet.") }
-                } else {
-                    items(sections, key = { "section-${it.id}" }) { section ->
-                        SectionRow(section, onClick = { onSectionClick(section.id) })
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(assignedCourses, key = { it.sectionCourse.id }) { course ->
+                        AssignedCourseRow(course, onRemove = { viewModel.removeCourse(course.sectionCourse) })
                         HorizontalDivider()
                     }
                 }
@@ -106,12 +99,12 @@ fun ExamDetailScreen(
         }
     }
 
-    if (showEditDialog && exam != null) {
-        AddOrEditExamDialog(
-            examTypes = examTypes,
-            initial = exam,
-            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate ->
-                viewModel.updateExam(name, examTypeId, hasSections, examDate, studyStartDate)
+    if (showEditDialog && section != null) {
+        EditSectionDialog(
+            initialName = section!!.name,
+            initialDate = section!!.date,
+            onConfirm = { name, date ->
+                viewModel.updateSection(name, date)
                 showEditDialog = false
             },
             onDismiss = { showEditDialog = false },
@@ -121,11 +114,11 @@ fun ExamDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete exam?") },
-            text = { Text("This removes the exam and everything filed under it.") },
+            title = { Text("Delete section?") },
+            text = { Text("This removes the section and its course assignments.") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteExam()
+                    viewModel.deleteSection()
                     showDeleteConfirm = false
                     onBack()
                 }) { Text("Delete") }
@@ -136,56 +129,20 @@ fun ExamDetailScreen(
         )
     }
 
-    if (showAddCourseDialog) {
-        AddNameDialog(
-            title = "Add course",
-            onConfirm = { name ->
-                viewModel.addCourse(name)
-                showAddCourseDialog = false
+    if (showAddCoursesDialog) {
+        PickCoursesDialog(
+            available = availableCourses,
+            onConfirm = { courseIds ->
+                viewModel.assignCourses(courseIds)
+                showAddCoursesDialog = false
             },
-            onDismiss = { showAddCourseDialog = false },
-        )
-    }
-
-    if (showAddSectionDialog) {
-        AddSectionDialog(
-            onConfirm = { name, date ->
-                viewModel.addSection(name, date)
-                showAddSectionDialog = false
-            },
-            onDismiss = { showAddSectionDialog = false },
+            onDismiss = { showAddCoursesDialog = false },
         )
     }
 }
 
 @Composable
-private fun ExamSummary(examDate: Long?, studyStartDate: Long?, hasSections: Boolean) {
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-        if (!hasSections) {
-            Text("Exam date: ${examDate?.let { formatDate(it) } ?: "Not set"}")
-        }
-        Text("Study start: ${studyStartDate?.let { formatDate(it) } ?: "Not set"}")
-    }
-}
-
-@Composable
-private fun SectionHeader(title: String, onAddClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(title, modifier = Modifier.weight(1f))
-        TextButton(onClick = onAddClick) { Text("+ Add") }
-    }
-}
-
-@Composable
-private fun EmptyHint(text: String) {
-    Text(text, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
-}
-
-@Composable
-private fun CourseRow(course: ExamCourseWithCourse, onRemove: () -> Unit) {
+private fun AssignedCourseRow(course: SectionCourseWithCourse, onRemove: () -> Unit) {
     ListItem(
         headlineContent = { Text(course.courseName) },
         trailingContent = {
@@ -197,30 +154,39 @@ private fun CourseRow(course: ExamCourseWithCourse, onRemove: () -> Unit) {
 }
 
 @Composable
-private fun SectionRow(section: Section, onClick: () -> Unit) {
-    ListItem(
-        headlineContent = { Text(section.name) },
-        supportingContent = { Text(section.date?.let { formatDate(it) } ?: "No date set") },
-        modifier = Modifier.clickable(onClick = onClick),
-    )
-}
-
-@Composable
-private fun AddNameDialog(title: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
-    var name by remember { mutableStateOf("") }
+private fun PickCoursesDialog(
+    available: List<ExamCourseWithCourse>,
+    onConfirm: (Set<Long>) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
+        title = { Text("Add courses") },
         text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") },
-                singleLine = true,
-            )
+            if (available.isEmpty()) {
+                Text("All of the exam's courses are already assigned to this section.")
+            } else {
+                Column {
+                    available.forEach { item ->
+                        val courseId = item.examCourse.courseId
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selected = if (courseId in selected) selected - courseId else selected + courseId
+                                },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(checked = courseId in selected, onCheckedChange = null)
+                            Text(item.courseName)
+                        }
+                    }
+                }
+            }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text("Add") }
+            TextButton(onClick = { onConfirm(selected) }, enabled = selected.isNotEmpty()) { Text("Add") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }
@@ -230,14 +196,19 @@ private fun AddNameDialog(title: String, onConfirm: (String) -> Unit, onDismiss:
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddSectionDialog(onConfirm: (name: String, date: Long?) -> Unit, onDismiss: () -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf<Long?>(null) }
+private fun EditSectionDialog(
+    initialName: String,
+    initialDate: Long?,
+    onConfirm: (name: String, date: Long?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var name by remember { mutableStateOf(initialName) }
+    var date by remember { mutableStateOf(initialDate) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add section") },
+        title = { Text("Edit section") },
         text = {
             Column {
                 OutlinedTextField(
@@ -253,7 +224,7 @@ private fun AddSectionDialog(onConfirm: (name: String, date: Long?) -> Unit, onD
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name, date) }, enabled = name.isNotBlank()) { Text("Add") }
+            TextButton(onClick = { onConfirm(name, date) }, enabled = name.isNotBlank()) { Text("Save") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }

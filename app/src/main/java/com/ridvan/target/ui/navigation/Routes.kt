@@ -9,4 +9,4 @@ object ExamListRoute
 data class ExamDetailRoute(val examId: Long)
 
 @Serializable
-data class TopicDetailRoute(val topicId: Long)
+data class SectionDetailRoute(val sectionId: Long)

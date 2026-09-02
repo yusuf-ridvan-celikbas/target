@@ -6,30 +6,28 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "question_bank_topic_stats",
+    tableName = "section_courses",
     foreignKeys = [
         ForeignKey(
-            entity = QuestionBank::class,
+            entity = Section::class,
             parentColumns = ["id"],
-            childColumns = ["questionBankId"],
+            childColumns = ["sectionId"],
             onDelete = ForeignKey.CASCADE,
         ),
         ForeignKey(
-            entity = Topic::class,
+            entity = Course::class,
             parentColumns = ["id"],
-            childColumns = ["topicId"],
+            childColumns = ["courseId"],
             onDelete = ForeignKey.CASCADE,
         ),
     ],
     indices = [
-        Index(value = ["questionBankId", "topicId"], unique = true),
-        Index("topicId"),
+        Index(value = ["sectionId", "courseId"], unique = true),
+        Index("courseId"),
     ],
 )
-data class QuestionBankTopicStat(
+data class SectionCourse(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val questionBankId: Long,
-    val topicId: Long,
-    val testCount: Int? = null,
-    val questionCount: Int? = null,
+    val sectionId: Long,
+    val courseId: Long,
 )

@@ -1,16 +1,28 @@
 package com.ridvan.target.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "exams")
+@Entity(
+    tableName = "exams",
+    foreignKeys = [
+        ForeignKey(
+            entity = ExamType::class,
+            parentColumns = ["id"],
+            childColumns = ["examTypeId"],
+            onDelete = ForeignKey.CASCADE,
+        )
+    ],
+    indices = [Index("examTypeId")],
+)
 data class Exam(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val targetDate: Long? = null,
+    val examTypeId: Long,
+    val hasSections: Boolean,
+    val examDate: Long? = null,
     val studyStartDate: Long? = null,
-    val examLocation: String? = null,
-    val registrationStartDate: Long? = null,
-    val registrationEndDate: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

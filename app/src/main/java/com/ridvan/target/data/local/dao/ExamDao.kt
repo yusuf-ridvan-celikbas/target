@@ -24,15 +24,11 @@ interface ExamDao {
 
     @Query(
         """
-        SELECT exams.*,
-               COUNT(leaf.id) AS totalTopics,
-               SUM(CASE WHEN leaf.status = 'DONE' THEN 1 ELSE 0 END) AS doneTopics
+        SELECT exams.*, exam_types.name AS examTypeName
         FROM exams
-        LEFT JOIN topics leaf ON leaf.examId = exams.id
-            AND NOT EXISTS (SELECT 1 FROM topics child WHERE child.parentTopicId = leaf.id)
-        GROUP BY exams.id
+        JOIN exam_types ON exam_types.id = exams.examTypeId
         ORDER BY exams.createdAt DESC
         """
     )
-    fun getAllWithProgress(): Flow<List<ExamWithProgress>>
+    fun getAllWithType(): Flow<List<ExamWithType>>
 }
