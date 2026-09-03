@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
+import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
@@ -85,12 +86,14 @@ fun ExamDetailScreen(
     ) { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(innerPadding)) {
             exam?.let { currentExam ->
+                val isLanguageExam = examTypes.firstOrNull { it.id == currentExam.examTypeId }?.name == LANGUAGE_EXAM_TYPE_NAME
                 val languageName = languages.firstOrNull { it.id == currentExam.languageId }?.name
                 item {
                     ExamSummary(
                         currentExam.examDate,
                         currentExam.studyStartDate,
                         currentExam.hasSections,
+                        isLanguageExam,
                         languageName,
                     )
                 }
@@ -175,13 +178,21 @@ fun ExamDetailScreen(
 }
 
 @Composable
-private fun ExamSummary(examDate: Long?, studyStartDate: Long?, hasSections: Boolean, languageName: String?) {
+private fun ExamSummary(
+    examDate: Long?,
+    studyStartDate: Long?,
+    hasSections: Boolean,
+    isLanguageExam: Boolean,
+    languageName: String?,
+) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         if (!hasSections) {
             Text("Exam date: ${examDate?.let { formatDate(it) } ?: "Not set"}")
         }
         Text("Study start: ${studyStartDate?.let { formatDate(it) } ?: "Not set"}")
-        languageName?.let { Text("Language: $it") }
+        if (isLanguageExam) {
+            Text("Language: ${languageName ?: "No language set"}")
+        }
     }
 }
 

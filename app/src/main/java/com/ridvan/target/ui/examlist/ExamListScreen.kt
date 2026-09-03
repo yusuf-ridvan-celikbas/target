@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.ExamWithType
+import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.shell.AppShell
@@ -80,7 +81,11 @@ private fun ExamRow(item: ExamWithType, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(item.exam.name) },
         supportingContent = {
-            val typeText = item.languageName?.let { "${item.examTypeName} · $it" } ?: item.examTypeName
+            val typeText = if (item.examTypeName == LANGUAGE_EXAM_TYPE_NAME) {
+                "${item.examTypeName} · ${item.languageName ?: "No language set"}"
+            } else {
+                item.examTypeName
+            }
             val secondary = if (item.exam.hasSections) {
                 "$typeText · Sectioned"
             } else {
