@@ -35,6 +35,7 @@ fun HomeScreen(
                     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                         append(currentUser?.preferredName ?: "")
                     }
+                    append("!")
                 },
             )
         }
