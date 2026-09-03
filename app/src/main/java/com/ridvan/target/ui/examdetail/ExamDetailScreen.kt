@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +20,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
+import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.formatDate
@@ -51,6 +54,7 @@ fun ExamDetailScreen(
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val courses by viewModel.courses.collectAsStateWithLifecycle()
+    val availableCoursesToAdd by viewModel.availableCoursesToAdd.collectAsStateWithLifecycle()
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -137,10 +141,11 @@ fun ExamDetailScreen(
     }
 
     if (showAddCourseDialog) {
-        AddNameDialog(
-            title = "Add course",
-            onConfirm = { name ->
-                viewModel.addCourse(name)
+        AddCourseDialog(
+            availableCourses = availableCoursesToAdd,
+            onConfirm = { name, selectedIds ->
+                if (name.isNotBlank()) viewModel.addCourse(name)
+                if (selectedIds.isNotEmpty()) viewModel.addExistingCourses(selectedIds)
                 showAddCourseDialog = false
             },
             onDismiss = { showAddCourseDialog = false },
@@ -206,21 +211,54 @@ private fun SectionRow(section: Section, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AddNameDialog(title: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+private fun AddCourseDialog(
+    availableCourses: List<Course>,
+    onConfirm: (newName: String, selectedIds: Set<Long>) -> Unit,
+    onDismiss: () -> Unit,
+) {
     var name by remember { mutableStateOf("") }
+    var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
+        title = { Text("Add course") },
         text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") },
-                singleLine = true,
-            )
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("New course name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (availableCourses.isNotEmpty()) {
+                    Text(
+                        "Or pick existing courses",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                    )
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        availableCourses.forEach { course ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selected = if (course.id in selected) selected - course.id else selected + course.id
+                                    },
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(checked = course.id in selected, onCheckedChange = null)
+                                Text(course.name)
+                            }
+                        }
+                    }
+                }
+            }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text("Add") }
+            TextButton(
+                onClick = { onConfirm(name, selected) },
+                enabled = name.isNotBlank() || selected.isNotEmpty(),
+            ) { Text("Add") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }

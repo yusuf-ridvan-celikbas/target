@@ -20,7 +20,9 @@ import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.navigation.ExamDetailRoute
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -49,6 +51,14 @@ class ExamDetailViewModel(
 
     val courses: StateFlow<List<ExamCourseWithCourse>> = examCourseDao.getByExamId(examId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val availableCoursesToAdd: StateFlow<List<Course>> = combine(
+        userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()),
+        courses,
+    ) { allCourses, attached ->
+        val attachedIds = attached.map { it.examCourse.courseId }.toSet()
+        allCourses.filterNot { it.id in attachedIds }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun updateExam(name: String, examTypeId: Long, hasSections: Boolean, examDate: Long?, studyStartDate: Long?) {
         val trimmed = name.trim()
@@ -84,10 +94,21 @@ class ExamDetailViewModel(
         val trimmed = name.trim()
         if (trimmed.isEmpty() || userId == null) return
         viewModelScope.launch {
-            val existing = courseDao.getByUserId(userId).first().firstOrNull { it.name == trimmed }
+            val existing = courseDao.getByUserId(userId).first().firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
             val courseId = existing?.id ?: courseDao.insert(Course(name = trimmed, userId = userId))
             if (courses.value.none { it.examCourse.courseId == courseId }) {
                 examCourseDao.insert(ExamCourse(examId = examId, courseId = courseId))
+            }
+        }
+    }
+
+    fun addExistingCourses(courseIds: Set<Long>) {
+        if (courseIds.isEmpty()) return
+        viewModelScope.launch {
+            courseIds.forEach { courseId ->
+                if (courses.value.none { it.examCourse.courseId == courseId }) {
+                    examCourseDao.insert(ExamCourse(examId = examId, courseId = courseId))
+                }
             }
         }
     }
