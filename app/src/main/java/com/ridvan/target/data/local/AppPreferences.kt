@@ -21,6 +21,14 @@ class AppPreferences(context: Context) {
         _isDarkMode.value = enabled
     }
 
+    private val _useBlueAppIcon = MutableStateFlow(prefs.getBoolean(KEY_APP_ICON_BLUE, false))
+    val useBlueAppIcon: StateFlow<Boolean> = _useBlueAppIcon.asStateFlow()
+
+    fun setUseBlueAppIcon(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_APP_ICON_BLUE, enabled).apply()
+        _useBlueAppIcon.value = enabled
+    }
+
     var currentUserId: Long?
         get() = prefs.getLong(KEY_USER_ID, NO_USER).takeIf { it != NO_USER }
         set(value) {
@@ -32,6 +40,7 @@ class AppPreferences(context: Context) {
     private companion object {
         const val PREFS_NAME = "target_prefs"
         const val KEY_DARK_MODE = "dark_mode"
+        const val KEY_APP_ICON_BLUE = "app_icon_blue"
         const val KEY_USER_ID = "current_user_id"
         const val NO_USER = -1L
     }

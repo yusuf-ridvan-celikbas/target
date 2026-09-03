@@ -1,14 +1,20 @@
 package com.ridvan.target.ui.settings
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -21,14 +27,63 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val isDarkMode by viewModel.isDarkMode.collectAsStateWithLifecycle()
+    val useBlueAppIcon by viewModel.useBlueAppIcon.collectAsStateWithLifecycle()
 
     AppShell(navigation = shellNavigation, title = "Settings") { innerPadding ->
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("Dark mode", modifier = Modifier.weight(1f).padding(end = 8.dp))
-            Switch(checked = isDarkMode, onCheckedChange = { viewModel.setDarkMode(it) })
+        Column(modifier = Modifier.fillMaxWidth().padding(innerPadding)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Dark mode", modifier = Modifier.weight(1f).padding(end = 8.dp))
+                Switch(checked = isDarkMode, onCheckedChange = { viewModel.setDarkMode(it) })
+            }
+            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Text("App Icon Preference")
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                    IconToggleSegment(
+                        text = "White",
+                        selected = !useBlueAppIcon,
+                        onClick = { viewModel.setUseBlueAppIcon(false) },
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconToggleSegment(
+                        text = "Blue",
+                        selected = useBlueAppIcon,
+                        onClick = { viewModel.setUseBlueAppIcon(true) },
+                        modifier = Modifier.weight(1f).padding(start = 4.dp),
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun IconToggleSegment(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val containerColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        label = "iconToggleContainerColor",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "iconToggleContentColor",
+    )
+    Surface(
+        color = containerColor,
+        contentColor = contentColor,
+        shape = MaterialTheme.shapes.small,
+        modifier = modifier.clickable(onClick = onClick),
+    ) {
+        Text(
+            text,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+        )
     }
 }
