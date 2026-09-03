@@ -1,8 +1,10 @@
 package com.ridvan.target.ui.courselist
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +17,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,9 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.entity.Course
+import com.ridvan.target.ui.common.CourseIconAvatar
+import com.ridvan.target.ui.common.CourseIconPicker
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellNavigation
 
@@ -72,11 +78,12 @@ fun CourseListScreen(
     }
 
     if (showAddDialog) {
-        NameDialog(
+        CourseDialog(
             title = "Add course",
             initialName = "",
-            onConfirm = { name ->
-                viewModel.addCourse(name)
+            initialIcon = null,
+            onConfirm = { name, icon ->
+                viewModel.addCourse(name, icon)
                 showAddDialog = false
             },
             onDismiss = { showAddDialog = false },
@@ -84,11 +91,12 @@ fun CourseListScreen(
     }
 
     editingCourse?.let { course ->
-        NameDialog(
-            title = "Rename course",
+        CourseDialog(
+            title = "Edit course",
             initialName = course.name,
-            onConfirm = { name ->
-                viewModel.renameCourse(course, name)
+            initialIcon = course.icon,
+            onConfirm = { name, icon ->
+                viewModel.updateCourse(course, name, icon)
                 editingCourse = null
             },
             onDismiss = { editingCourse = null },
@@ -116,11 +124,12 @@ fun CourseListScreen(
 @Composable
 private fun CourseRow(course: Course, onEdit: () -> Unit, onDelete: () -> Unit) {
     ListItem(
+        leadingContent = { CourseIconAvatar(course.icon) },
         headlineContent = { Text(course.name) },
         trailingContent = {
             Row {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Rename course")
+                    Icon(Icons.Filled.Edit, contentDescription = "Edit course")
                 }
                 IconButton(onClick = onDelete) {
                     Icon(Icons.Filled.Delete, contentDescription = "Delete course")
@@ -131,21 +140,41 @@ private fun CourseRow(course: Course, onEdit: () -> Unit, onDelete: () -> Unit) 
 }
 
 @Composable
-private fun NameDialog(title: String, initialName: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+private fun CourseDialog(
+    title: String,
+    initialName: String,
+    initialIcon: String?,
+    onConfirm: (name: String, icon: String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
     var name by remember { mutableStateOf(initialName) }
+    var icon by remember { mutableStateOf(initialIcon) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") },
-                singleLine = true,
-            )
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    "Icon",
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                )
+                CourseIconPicker(
+                    selectedKey = icon,
+                    onSelect = { icon = it },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text("Save") }
+            TextButton(onClick = { onConfirm(name, icon) }, enabled = name.isNotBlank()) { Text("Save") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }

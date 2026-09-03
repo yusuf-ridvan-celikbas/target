@@ -6,4 +6,5 @@ import com.ridvan.target.data.local.entity.SectionCourse
 data class SectionCourseWithCourse(
     @Embedded val sectionCourse: SectionCourse,
     val courseName: String,
+    val courseIcon: String?,
 )

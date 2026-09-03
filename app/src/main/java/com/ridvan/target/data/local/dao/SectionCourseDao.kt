@@ -17,7 +17,7 @@ interface SectionCourseDao {
 
     @Query(
         """
-        SELECT section_courses.*, courses.name AS courseName
+        SELECT section_courses.*, courses.name AS courseName, courses.icon AS courseIcon
         FROM section_courses
         JOIN courses ON courses.id = section_courses.courseId
         WHERE section_courses.sectionId = :sectionId

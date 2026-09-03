@@ -21,5 +21,6 @@ data class Course(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val userId: Long? = null,
+    val icon: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

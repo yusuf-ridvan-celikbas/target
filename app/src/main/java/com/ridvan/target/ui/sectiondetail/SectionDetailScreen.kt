@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.SectionCourseWithCourse
+import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,6 +145,7 @@ fun SectionDetailScreen(
 @Composable
 private fun AssignedCourseRow(course: SectionCourseWithCourse, onRemove: () -> Unit) {
     ListItem(
+        leadingContent = { CourseIconAvatar(course.courseIcon) },
         headlineContent = { Text(course.courseName) },
         trailingContent = {
             IconButton(onClick = onRemove) {
@@ -179,6 +181,7 @@ private fun PickCoursesDialog(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Checkbox(checked = courseId in selected, onCheckedChange = null)
+                            CourseIconAvatar(item.courseIcon, modifier = Modifier.padding(end = 8.dp))
                             Text(item.courseName)
                         }
                     }

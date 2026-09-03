@@ -29,7 +29,7 @@ import com.ridvan.target.data.local.entity.User
         SectionCourse::class,
         User::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 abstract class TargetDatabase : RoomDatabase() {
@@ -51,7 +51,7 @@ abstract class TargetDatabase : RoomDatabase() {
                     context.applicationContext,
                     TargetDatabase::class.java,
                     "target.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { INSTANCE = it }
             }
     }
 }

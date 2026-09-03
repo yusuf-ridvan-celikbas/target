@@ -19,16 +19,16 @@ class CourseListViewModel(application: Application) : AndroidViewModel(applicati
     val courses: StateFlow<List<Course>> = (userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun addCourse(name: String) {
+    fun addCourse(name: String, icon: String?) {
         val trimmed = name.trim()
         if (trimmed.isEmpty() || userId == null) return
-        viewModelScope.launch { courseDao.insert(Course(name = trimmed, userId = userId)) }
+        viewModelScope.launch { courseDao.insert(Course(name = trimmed, userId = userId, icon = icon)) }
     }
 
-    fun renameCourse(course: Course, newName: String) {
+    fun updateCourse(course: Course, newName: String, icon: String?) {
         val trimmed = newName.trim()
         if (trimmed.isEmpty()) return
-        viewModelScope.launch { courseDao.update(course.copy(name = trimmed)) }
+        viewModelScope.launch { courseDao.update(course.copy(name = trimmed, icon = icon)) }
     }
 
     fun deleteCourse(course: Course) {

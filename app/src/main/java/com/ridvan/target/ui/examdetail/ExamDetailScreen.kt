@@ -41,6 +41,7 @@ import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
+import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -192,6 +193,7 @@ private fun EmptyHint(text: String) {
 @Composable
 private fun CourseRow(course: ExamCourseWithCourse, onRemove: () -> Unit) {
     ListItem(
+        leadingContent = { CourseIconAvatar(course.courseIcon) },
         headlineContent = { Text(course.courseName) },
         trailingContent = {
             IconButton(onClick = onRemove) {
@@ -247,6 +249,7 @@ private fun AddCourseDialog(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Checkbox(checked = course.id in selected, onCheckedChange = null)
+                                CourseIconAvatar(course.icon, modifier = Modifier.padding(end = 8.dp))
                                 Text(course.name)
                             }
                         }
