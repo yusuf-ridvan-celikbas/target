@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
@@ -81,6 +83,7 @@ fun AppShell(
                 }
                 NavigationDrawerItem(
                     label = { Text("Exams") },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -90,6 +93,7 @@ fun AppShell(
                 )
                 NavigationDrawerItem(
                     label = { Text("Courses") },
+                    icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
