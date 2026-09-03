@@ -19,6 +19,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
@@ -91,6 +92,7 @@ fun AppShell(
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                 NavigationDrawerItem(
                     label = { Text("Courses") },
                     icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) },
@@ -130,14 +132,15 @@ fun AppShell(
                         }
                         DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
                             DropdownMenuItem(
-                                text = { Text("User") },
+                                text = { Text("User Settings") },
                                 onClick = {
                                     overflowExpanded = false
                                     navigation.onNavigateUser()
                                 },
                             )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                             DropdownMenuItem(
-                                text = { Text("Settings") },
+                                text = { Text("App Settings") },
                                 onClick = {
                                     overflowExpanded = false
                                     navigation.onNavigateSettings()
