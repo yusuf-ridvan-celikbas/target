@@ -28,15 +28,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.ExamType
+import com.ridvan.target.data.local.entity.Language
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddOrEditExamDialog(
     examTypes: List<ExamType>,
+    languages: List<Language>,
     initial: Exam? = null,
-    onConfirm: (name: String, examTypeId: Long, hasSections: Boolean, examDate: Long?, studyStartDate: Long?) -> Unit,
+    onConfirm: (name: String, examTypeId: Long, hasSections: Boolean, examDate: Long?, studyStartDate: Long?, languageId: Long?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by remember { mutableStateOf(initial?.name ?: "") }
@@ -44,9 +47,12 @@ fun AddOrEditExamDialog(
     var hasSections by remember { mutableStateOf(initial?.hasSections ?: false) }
     var examDate by remember { mutableStateOf(initial?.examDate) }
     var studyStartDate by remember { mutableStateOf(initial?.studyStartDate) }
+    var selectedLanguageId by remember { mutableStateOf(initial?.languageId) }
 
     var showExamDatePicker by remember { mutableStateOf(false) }
     var showStudyStartDatePicker by remember { mutableStateOf(false) }
+
+    val isLanguageExam = examTypes.firstOrNull { it.id == selectedTypeId }?.name == LANGUAGE_EXAM_TYPE_NAME
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -66,6 +72,14 @@ fun AddOrEditExamDialog(
                     selectedId = selectedTypeId,
                     onSelect = { selectedTypeId = it },
                 )
+
+                if (isLanguageExam) {
+                    LanguageField(
+                        languages = languages,
+                        selectedId = selectedLanguageId,
+                        onSelect = { selectedLanguageId = it },
+                    )
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -98,7 +112,7 @@ fun AddOrEditExamDialog(
             TextButton(
                 onClick = {
                     val typeId = selectedTypeId ?: return@TextButton
-                    onConfirm(name, typeId, hasSections, examDate, studyStartDate)
+                    onConfirm(name, typeId, hasSections, examDate, studyStartDate, selectedLanguageId.takeIf { isLanguageExam })
                 },
                 enabled = name.isNotBlank() && selectedTypeId != null,
             ) {
@@ -164,6 +178,32 @@ private fun ExamTypeField(examTypes: List<ExamType>, selectedId: Long?, onSelect
                     text = { Text(type.name) },
                     onClick = {
                         onSelect(type.id)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LanguageField(languages: List<Language>, selectedId: Long?, onSelect: (Long) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
+            Text("Language", style = MaterialTheme.typography.labelSmall)
+            Text(
+                languages.firstOrNull { it.id == selectedId }?.name
+                    ?: if (languages.isEmpty()) "No languages yet — add some from the Languages screen" else "Select",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            languages.forEach { language ->
+                DropdownMenuItem(
+                    text = { Text(language.name) },
+                    onClick = {
+                        onSelect(language.id)
                         expanded = false
                     },
                 )

@@ -13,6 +13,7 @@ import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
 import com.ridvan.target.ui.home.HomeScreen
+import com.ridvan.target.ui.languagelist.LanguageListScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.shell.ShellNavigation
@@ -36,6 +37,7 @@ fun TargetNavHost() {
         onNavigateHome = { navController.navigateToShellDestination(HomeRoute) },
         onNavigateExams = { navController.navigateToShellDestination(ExamListRoute) },
         onNavigateCourses = { navController.navigateToShellDestination(CourseListRoute) },
+        onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsRoute) },
     )
@@ -73,6 +75,9 @@ fun TargetNavHost() {
         }
         composable<CourseListRoute> {
             CourseListScreen(shellNavigation = shellNavigation)
+        }
+        composable<LanguageListRoute> {
+            LanguageListScreen(shellNavigation = shellNavigation)
         }
         composable<UserEditRoute> {
             UserEditScreen(

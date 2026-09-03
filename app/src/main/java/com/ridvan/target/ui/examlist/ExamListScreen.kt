@@ -33,6 +33,7 @@ fun ExamListScreen(
 ) {
     val exams by viewModel.exams.collectAsStateWithLifecycle()
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
+    val languages by viewModel.languages.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
 
     AppShell(
@@ -64,8 +65,9 @@ fun ExamListScreen(
     if (showAddDialog) {
         AddOrEditExamDialog(
             examTypes = examTypes,
-            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate ->
-                viewModel.addExam(name, examTypeId, hasSections, examDate, studyStartDate)
+            languages = languages,
+            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate, languageId ->
+                viewModel.addExam(name, examTypeId, hasSections, examDate, studyStartDate, languageId)
                 showAddDialog = false
             },
             onDismiss = { showAddDialog = false },
@@ -78,11 +80,12 @@ private fun ExamRow(item: ExamWithType, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(item.exam.name) },
         supportingContent = {
+            val typeText = item.languageName?.let { "${item.examTypeName} · $it" } ?: item.examTypeName
             val secondary = if (item.exam.hasSections) {
-                "${item.examTypeName} · Sectioned"
+                "$typeText · Sectioned"
             } else {
                 val dateText = item.exam.examDate?.let { formatDate(it) } ?: "No date set"
-                "${item.examTypeName} · $dateText"
+                "$typeText · $dateText"
             }
             Text(secondary)
         },

@@ -24,6 +24,9 @@ data class SectionDetailRoute(val sectionId: Long)
 object CourseListRoute
 
 @Serializable
+object LanguageListRoute
+
+@Serializable
 object UserEditRoute
 
 @Serializable

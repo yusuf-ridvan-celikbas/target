@@ -42,3 +42,22 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
         db.execSQL("ALTER TABLE courses ADD COLUMN icon TEXT")
     }
 }
+
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS languages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_languages_userId ON languages(userId)")
+
+        db.execSQL("ALTER TABLE exams ADD COLUMN languageId INTEGER REFERENCES languages(id) ON DELETE SET NULL")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_exams_languageId ON exams(languageId)")
+    }
+}

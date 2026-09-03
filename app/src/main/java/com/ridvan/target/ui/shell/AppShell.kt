@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -46,6 +47,7 @@ data class ShellNavigation(
     val onNavigateHome: () -> Unit,
     val onNavigateExams: () -> Unit,
     val onNavigateCourses: () -> Unit,
+    val onNavigateLanguages: () -> Unit,
     val onNavigateUser: () -> Unit,
     val onNavigateSettings: () -> Unit,
 )
@@ -100,6 +102,17 @@ fun AppShell(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateCourses()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                NavigationDrawerItem(
+                    label = { Text("Languages") },
+                    icon = { Icon(Icons.Filled.Translate, contentDescription = null) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigateLanguages()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )

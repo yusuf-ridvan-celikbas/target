@@ -7,8 +7,10 @@ import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.ExamDao
 import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.ExamTypeDao
+import com.ridvan.target.data.local.dao.LanguageDao
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.ExamType
+import com.ridvan.target.data.local.entity.Language
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -20,6 +22,7 @@ class ExamListViewModel(application: Application) : AndroidViewModel(application
     private val database = targetApplication.database
     private val examDao: ExamDao = database.examDao()
     private val examTypeDao: ExamTypeDao = database.examTypeDao()
+    private val languageDao: LanguageDao = database.languageDao()
     private val userId = targetApplication.preferences.currentUserId
 
     val exams: StateFlow<List<ExamWithType>> =
@@ -29,7 +32,17 @@ class ExamListViewModel(application: Application) : AndroidViewModel(application
     val examTypes: StateFlow<List<ExamType>> = examTypeDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun addExam(name: String, examTypeId: Long, hasSections: Boolean, examDate: Long?, studyStartDate: Long?) {
+    val languages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun addExam(
+        name: String,
+        examTypeId: Long,
+        hasSections: Boolean,
+        examDate: Long?,
+        studyStartDate: Long?,
+        languageId: Long?,
+    ) {
         val trimmed = name.trim()
         if (trimmed.isEmpty() || userId == null) return
         viewModelScope.launch {
@@ -41,6 +54,7 @@ class ExamListViewModel(application: Application) : AndroidViewModel(application
                     hasSections = hasSections,
                     examDate = if (hasSections) null else examDate,
                     studyStartDate = studyStartDate,
+                    languageId = languageId,
                 ),
             )
         }

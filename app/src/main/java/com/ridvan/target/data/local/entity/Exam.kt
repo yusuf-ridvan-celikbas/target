@@ -20,8 +20,14 @@ import androidx.room.PrimaryKey
             childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE,
         ),
+        ForeignKey(
+            entity = Language::class,
+            parentColumns = ["id"],
+            childColumns = ["languageId"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
     ],
-    indices = [Index("examTypeId"), Index("userId")],
+    indices = [Index("examTypeId"), Index("userId"), Index("languageId")],
 )
 data class Exam(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -31,5 +37,6 @@ data class Exam(
     val hasSections: Boolean,
     val examDate: Long? = null,
     val studyStartDate: Long? = null,
+    val languageId: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

@@ -11,11 +11,14 @@ import com.ridvan.target.data.local.dao.ExamCourseDao
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.ExamDao
 import com.ridvan.target.data.local.dao.ExamTypeDao
+import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
+import com.ridvan.target.data.local.dao.LanguageDao
 import com.ridvan.target.data.local.dao.SectionDao
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.ExamCourse
 import com.ridvan.target.data.local.entity.ExamType
+import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.navigation.ExamDetailRoute
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,12 +41,16 @@ class ExamDetailViewModel(
     private val sectionDao: SectionDao = database.sectionDao()
     private val courseDao: CourseDao = database.courseDao()
     private val examCourseDao: ExamCourseDao = database.examCourseDao()
+    private val languageDao: LanguageDao = database.languageDao()
     private val userId = targetApplication.preferences.currentUserId
 
     val exam: StateFlow<Exam?> = examDao.getById(examId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val examTypes: StateFlow<List<ExamType>> = examTypeDao.getAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val languages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val sections: StateFlow<List<Section>> = sectionDao.getByExamId(examId)
@@ -60,17 +67,26 @@ class ExamDetailViewModel(
         allCourses.filterNot { it.id in attachedIds }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun updateExam(name: String, examTypeId: Long, hasSections: Boolean, examDate: Long?, studyStartDate: Long?) {
+    fun updateExam(
+        name: String,
+        examTypeId: Long,
+        hasSections: Boolean,
+        examDate: Long?,
+        studyStartDate: Long?,
+        languageId: Long?,
+    ) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
         viewModelScope.launch {
             val current = exam.value ?: return@launch
+            val isLanguageExam = examTypes.value.firstOrNull { it.id == examTypeId }?.name == LANGUAGE_EXAM_TYPE_NAME
             examDao.update(
                 current.copy(
                     name = trimmed,
                     examTypeId = examTypeId,
                     examDate = if (hasSections) null else examDate,
                     studyStartDate = studyStartDate,
+                    languageId = if (isLanguageExam) languageId else null,
                 ),
             )
         }

@@ -53,6 +53,7 @@ fun ExamDetailScreen(
 ) {
     val exam by viewModel.exam.collectAsStateWithLifecycle()
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
+    val languages by viewModel.languages.collectAsStateWithLifecycle()
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val courses by viewModel.courses.collectAsStateWithLifecycle()
     val availableCoursesToAdd by viewModel.availableCoursesToAdd.collectAsStateWithLifecycle()
@@ -84,7 +85,15 @@ fun ExamDetailScreen(
     ) { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(innerPadding)) {
             exam?.let { currentExam ->
-                item { ExamSummary(currentExam.examDate, currentExam.studyStartDate, currentExam.hasSections) }
+                val languageName = languages.firstOrNull { it.id == currentExam.languageId }?.name
+                item {
+                    ExamSummary(
+                        currentExam.examDate,
+                        currentExam.studyStartDate,
+                        currentExam.hasSections,
+                        languageName,
+                    )
+                }
             }
 
             item { SectionHeader("Courses", onAddClick = { showAddCourseDialog = true }) }
@@ -114,9 +123,10 @@ fun ExamDetailScreen(
     if (showEditDialog && exam != null) {
         AddOrEditExamDialog(
             examTypes = examTypes,
+            languages = languages,
             initial = exam,
-            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate ->
-                viewModel.updateExam(name, examTypeId, hasSections, examDate, studyStartDate)
+            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate, languageId ->
+                viewModel.updateExam(name, examTypeId, hasSections, examDate, studyStartDate, languageId)
                 showEditDialog = false
             },
             onDismiss = { showEditDialog = false },
@@ -165,12 +175,13 @@ fun ExamDetailScreen(
 }
 
 @Composable
-private fun ExamSummary(examDate: Long?, studyStartDate: Long?, hasSections: Boolean) {
+private fun ExamSummary(examDate: Long?, studyStartDate: Long?, hasSections: Boolean, languageName: String?) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         if (!hasSections) {
             Text("Exam date: ${examDate?.let { formatDate(it) } ?: "Not set"}")
         }
         Text("Study start: ${studyStartDate?.let { formatDate(it) } ?: "Not set"}")
+        languageName?.let { Text("Language: $it") }
     }
 }
 

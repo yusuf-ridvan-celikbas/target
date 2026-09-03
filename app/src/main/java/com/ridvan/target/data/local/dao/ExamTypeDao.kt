@@ -7,10 +7,12 @@ import androidx.room.Transaction
 import com.ridvan.target.data.local.entity.ExamType
 import kotlinx.coroutines.flow.Flow
 
+const val LANGUAGE_EXAM_TYPE_NAME = "Language Exam"
+
 private val DEFAULT_EXAM_TYPE_NAMES = listOf(
     "University Entrance Exam",
     "High School Entrance Exam",
-    "Language Exam",
+    LANGUAGE_EXAM_TYPE_NAME,
     "Vocational Exam",
 )
 

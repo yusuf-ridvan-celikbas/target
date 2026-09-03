@@ -24,9 +24,10 @@ interface ExamDao {
 
     @Query(
         """
-        SELECT exams.*, exam_types.name AS examTypeName
+        SELECT exams.*, exam_types.name AS examTypeName, languages.name AS languageName
         FROM exams
         JOIN exam_types ON exam_types.id = exams.examTypeId
+        LEFT JOIN languages ON languages.id = exams.languageId
         WHERE exams.userId = :userId
         ORDER BY exams.createdAt DESC
         """
