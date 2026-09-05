@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.ui.auth.LoginScreen
 import com.ridvan.target.ui.auth.RegisterScreen
+import com.ridvan.target.ui.courselist.CourseListByTypeScreen
 import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
@@ -17,6 +18,8 @@ import com.ridvan.target.ui.languagelist.LanguageListScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.shell.ShellNavigation
+import com.ridvan.target.ui.studysource.CourseStudySourceScreen
+import com.ridvan.target.ui.studysource.LanguageStudySourceScreen
 import com.ridvan.target.ui.user.UserEditScreen
 
 private fun NavHostController.navigateToShellDestination(route: Any) {
@@ -74,10 +77,29 @@ fun TargetNavHost() {
             SectionDetailScreen(onBack = { navController.popBackStack() })
         }
         composable<CourseListRoute> {
-            CourseListScreen(shellNavigation = shellNavigation)
+            CourseListScreen(
+                shellNavigation = shellNavigation,
+                onCourseTypeClick = { examType -> navController.navigate(CourseListByTypeRoute(examType.id)) },
+                onLanguageTypeClick = { navController.navigate(LanguageListRoute) },
+            )
+        }
+        composable<CourseListByTypeRoute> {
+            CourseListByTypeScreen(
+                onCourseClick = { courseId -> navController.navigate(CourseStudySourceRoute(courseId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<CourseStudySourceRoute> {
+            CourseStudySourceScreen(onBack = { navController.popBackStack() })
         }
         composable<LanguageListRoute> {
-            LanguageListScreen(shellNavigation = shellNavigation)
+            LanguageListScreen(
+                shellNavigation = shellNavigation,
+                onLanguageClick = { languageId -> navController.navigate(LanguageStudySourceRoute(languageId)) },
+            )
+        }
+        composable<LanguageStudySourceRoute> {
+            LanguageStudySourceScreen(onBack = { navController.popBackStack() })
         }
         composable<UserEditRoute> {
             UserEditScreen(

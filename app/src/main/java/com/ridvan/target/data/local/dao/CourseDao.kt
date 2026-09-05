@@ -22,6 +22,9 @@ interface CourseDao {
     @Query("SELECT * FROM courses WHERE userId = :userId ORDER BY name ASC")
     fun getByUserId(userId: Long): Flow<List<Course>>
 
+    @Query("SELECT * FROM courses WHERE userId = :userId AND examTypeId = :examTypeId ORDER BY name ASC")
+    fun getByUserIdAndExamTypeId(userId: Long, examTypeId: Long): Flow<List<Course>>
+
     @Query("SELECT * FROM courses WHERE id = :courseId")
     fun getById(courseId: Long): Flow<Course?>
 }

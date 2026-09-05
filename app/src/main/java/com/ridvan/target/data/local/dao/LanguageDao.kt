@@ -21,4 +21,7 @@ interface LanguageDao {
 
     @Query("SELECT * FROM languages WHERE userId = :userId ORDER BY name ASC")
     fun getByUserId(userId: Long): Flow<List<Language>>
+
+    @Query("SELECT * FROM languages WHERE id = :languageId")
+    fun getById(languageId: Long): Flow<Language?>
 }

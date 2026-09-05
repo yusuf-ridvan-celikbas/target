@@ -21,14 +21,19 @@ import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.navigation.ExamDetailRoute
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ExamDetailViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
@@ -59,8 +64,12 @@ class ExamDetailViewModel(
     val courses: StateFlow<List<ExamCourseWithCourse>> = examCourseDao.getByExamId(examId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    private val coursesForExamType: Flow<List<Course>> = exam.filterNotNull().flatMapLatest { currentExam ->
+        userId?.let { courseDao.getByUserIdAndExamTypeId(it, currentExam.examTypeId) } ?: flowOf(emptyList())
+    }
+
     val availableCoursesToAdd: StateFlow<List<Course>> = combine(
-        userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()),
+        coursesForExamType,
         courses,
     ) { allCourses, attached ->
         val attachedIds = attached.map { it.examCourse.courseId }.toSet()
@@ -108,10 +117,13 @@ class ExamDetailViewModel(
 
     fun addCourse(name: String) {
         val trimmed = name.trim()
-        if (trimmed.isEmpty() || userId == null) return
+        val currentExam = exam.value
+        if (trimmed.isEmpty() || userId == null || currentExam == null) return
         viewModelScope.launch {
-            val existing = courseDao.getByUserId(userId).first().firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
-            val courseId = existing?.id ?: courseDao.insert(Course(name = trimmed, userId = userId))
+            val existing = courseDao.getByUserIdAndExamTypeId(userId, currentExam.examTypeId).first()
+                .firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
+            val courseId = existing?.id
+                ?: courseDao.insert(Course(name = trimmed, userId = userId, examTypeId = currentExam.examTypeId))
             if (courses.value.none { it.examCourse.courseId == courseId }) {
                 examCourseDao.insert(ExamCourse(examId = examId, courseId = courseId))
             }

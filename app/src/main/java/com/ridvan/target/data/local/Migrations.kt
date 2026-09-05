@@ -61,3 +61,36 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_exams_languageId ON exams(languageId)")
     }
 }
+
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE courses ADD COLUMN examTypeId INTEGER REFERENCES exam_types(id) ON DELETE SET NULL")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_courses_examTypeId ON courses(examTypeId)")
+        // Best-effort backfill: infer a pre-existing course's exam type from an exam it's already attached to.
+        db.execSQL(
+            """
+            UPDATE courses SET examTypeId = (
+                SELECT e.examTypeId FROM exam_courses ec
+                JOIN exams e ON e.id = ec.examId
+                WHERE ec.courseId = courses.id
+                LIMIT 1
+            )
+            WHERE examTypeId IS NULL
+            """.trimIndent()
+        )
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS study_sources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                courseId INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+                languageId INTEGER REFERENCES languages(id) ON DELETE CASCADE,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_study_sources_courseId ON study_sources(courseId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_study_sources_languageId ON study_sources(languageId)")
+    }
+}

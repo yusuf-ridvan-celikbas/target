@@ -1,6 +1,5 @@
-package com.ridvan.target.ui.languagelist
+package com.ridvan.target.ui.studysource
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,65 +7,75 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ridvan.target.data.local.entity.Language
-import com.ridvan.target.ui.shell.AppShell
-import com.ridvan.target.ui.shell.ShellNavigation
+import com.ridvan.target.data.local.entity.StudySource
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LanguageListScreen(
-    shellNavigation: ShellNavigation,
-    onLanguageClick: (Long) -> Unit,
-    viewModel: LanguageListViewModel = viewModel(),
+internal fun StudySourceListContent(
+    title: String,
+    studySources: List<StudySource>,
+    onAdd: (String) -> Unit,
+    onUpdate: (StudySource, String) -> Unit,
+    onDelete: (StudySource) -> Unit,
+    onBack: () -> Unit,
 ) {
-    val languages by viewModel.languages.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
-    var editingLanguage by remember { mutableStateOf<Language?>(null) }
-    var deletingLanguage by remember { mutableStateOf<Language?>(null) }
+    var editingSource by remember { mutableStateOf<StudySource?>(null) }
+    var deletingSource by remember { mutableStateOf<StudySource?>(null) }
 
-    AppShell(
-        navigation = shellNavigation,
-        title = "Languages",
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
                 Text("+")
             }
         },
     ) { innerPadding ->
-        if (languages.isEmpty()) {
+        if (studySources.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No languages yet. Tap + to add one.")
+                Text("No study sources yet. Tap + to add one.")
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                items(languages, key = { it.id }) { language ->
-                    LanguageRow(
-                        language = language,
-                        onClick = { onLanguageClick(language.id) },
-                        onEdit = { editingLanguage = language },
-                        onDelete = { deletingLanguage = language },
+                items(studySources, key = { it.id }) { source ->
+                    StudySourceRow(
+                        source = source,
+                        onEdit = { editingSource = source },
+                        onDelete = { deletingSource = source },
                     )
                     HorizontalDivider()
                 }
@@ -75,67 +84,71 @@ fun LanguageListScreen(
     }
 
     if (showAddDialog) {
-        NameDialog(
-            title = "Add language",
+        StudySourceNameDialog(
+            title = "Add study source",
             initialName = "",
             onConfirm = { name ->
-                viewModel.addLanguage(name)
+                onAdd(name)
                 showAddDialog = false
             },
             onDismiss = { showAddDialog = false },
         )
     }
 
-    editingLanguage?.let { language ->
-        NameDialog(
-            title = "Edit language",
-            initialName = language.name,
+    editingSource?.let { source ->
+        StudySourceNameDialog(
+            title = "Edit study source",
+            initialName = source.name,
             onConfirm = { name ->
-                viewModel.updateLanguage(language, name)
-                editingLanguage = null
+                onUpdate(source, name)
+                editingSource = null
             },
-            onDismiss = { editingLanguage = null },
+            onDismiss = { editingSource = null },
         )
     }
 
-    deletingLanguage?.let { language ->
+    deletingSource?.let { source ->
         AlertDialog(
-            onDismissRequest = { deletingLanguage = null },
-            title = { Text("Delete language?") },
-            text = { Text("This removes \"${language.name}\" from any exams it's assigned to.") },
+            onDismissRequest = { deletingSource = null },
+            title = { Text("Delete study source?") },
+            text = { Text("This removes \"${source.name}\".") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteLanguage(language)
-                    deletingLanguage = null
+                    onDelete(source)
+                    deletingSource = null
                 }) { Text("Delete") }
             },
             dismissButton = {
-                TextButton(onClick = { deletingLanguage = null }) { Text("Cancel") }
+                TextButton(onClick = { deletingSource = null }) { Text("Cancel") }
             },
         )
     }
 }
 
 @Composable
-private fun LanguageRow(language: Language, onClick: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun StudySourceRow(source: StudySource, onEdit: () -> Unit, onDelete: () -> Unit) {
     ListItem(
-        headlineContent = { Text(language.name) },
+        headlineContent = { Text(source.name) },
         trailingContent = {
             Row {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Edit language")
+                    Icon(Icons.Filled.Edit, contentDescription = "Edit study source")
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete language")
+                    Icon(Icons.Filled.Delete, contentDescription = "Delete study source")
                 }
             }
         },
-        modifier = Modifier.clickable(onClick = onClick),
     )
 }
 
 @Composable
-private fun NameDialog(title: String, initialName: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+private fun StudySourceNameDialog(
+    title: String,
+    initialName: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
     var name by remember { mutableStateOf(initialName) }
     AlertDialog(
         onDismissRequest = onDismiss,

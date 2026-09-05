@@ -11,6 +11,7 @@ import com.ridvan.target.data.local.dao.ExamTypeDao
 import com.ridvan.target.data.local.dao.LanguageDao
 import com.ridvan.target.data.local.dao.SectionCourseDao
 import com.ridvan.target.data.local.dao.SectionDao
+import com.ridvan.target.data.local.dao.StudySourceDao
 import com.ridvan.target.data.local.dao.UserDao
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
@@ -19,6 +20,7 @@ import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.data.local.entity.SectionCourse
+import com.ridvan.target.data.local.entity.StudySource
 import com.ridvan.target.data.local.entity.User
 
 @Database(
@@ -31,8 +33,9 @@ import com.ridvan.target.data.local.entity.User
         SectionCourse::class,
         User::class,
         Language::class,
+        StudySource::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class TargetDatabase : RoomDatabase() {
@@ -44,6 +47,7 @@ abstract class TargetDatabase : RoomDatabase() {
     abstract fun sectionCourseDao(): SectionCourseDao
     abstract fun userDao(): UserDao
     abstract fun languageDao(): LanguageDao
+    abstract fun studySourceDao(): StudySourceDao
 
     companion object {
         @Volatile
@@ -55,7 +59,7 @@ abstract class TargetDatabase : RoomDatabase() {
                     context.applicationContext,
                     TargetDatabase::class.java,
                     "target.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build().also { INSTANCE = it }
             }
     }
 }
