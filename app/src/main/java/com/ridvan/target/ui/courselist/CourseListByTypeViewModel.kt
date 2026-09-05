@@ -4,10 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.entity.Course
-import com.ridvan.target.ui.navigation.CourseListByTypeRoute
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -19,7 +17,10 @@ class CourseListByTypeViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
-    private val examTypeId: Long = savedStateHandle.toRoute<CourseListByTypeRoute>().examTypeId
+    // Read by argument name rather than androidx.navigation.toRoute<CourseListByTypeRoute>() —
+    // this ViewModel backs both CourseListByTypeRoute (Courses flow) and
+    // StudySourceCourseListByTypeRoute (Study Sources flow), which share the "examTypeId" arg name.
+    private val examTypeId: Long = checkNotNull(savedStateHandle.get<Long>("examTypeId"))
     private val targetApplication = application as TargetApplication
     private val courseDao = targetApplication.database.courseDao()
     private val examTypeDao = targetApplication.database.examTypeDao()

@@ -48,6 +48,12 @@ data class LanguageStudySourceRoute(val languageId: Long)
 object StudySourceHomeRoute
 
 @Serializable
+data class StudySourceCourseListByTypeRoute(val examTypeId: Long)
+
+@Serializable
+object StudySourceLanguageExamCoursesRoute
+
+@Serializable
 object UserEditRoute
 
 @Serializable

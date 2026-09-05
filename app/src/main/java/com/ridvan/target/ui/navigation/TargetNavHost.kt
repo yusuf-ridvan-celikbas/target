@@ -92,8 +92,8 @@ fun TargetNavHost() {
         composable<StudySourceHomeRoute> {
             StudySourceHomeScreen(
                 shellNavigation = shellNavigation,
-                onCourseTypeClick = { examType -> navController.navigate(CourseListByTypeRoute(examType.id)) },
-                onLanguageTypeClick = { navController.navigate(LanguageExamCoursesRoute) },
+                onCourseTypeClick = { examType -> navController.navigate(StudySourceCourseListByTypeRoute(examType.id)) },
+                onLanguageTypeClick = { navController.navigate(StudySourceLanguageExamCoursesRoute) },
             )
         }
         composable<CourseListByTypeRoute> {
@@ -105,6 +105,18 @@ fun TargetNavHost() {
         composable<LanguageExamCoursesRoute> {
             LanguageExamCoursesScreen(
                 onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<StudySourceCourseListByTypeRoute> {
+            CourseListByTypeScreen(
+                onCourseClick = { courseId -> navController.navigate(CourseStudySourceRoute(courseId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<StudySourceLanguageExamCoursesRoute> {
+            LanguageExamCoursesScreen(
+                onLanguageClick = { languageId -> navController.navigate(LanguageStudySourceRoute(languageId)) },
                 onBack = { navController.popBackStack() },
             )
         }
