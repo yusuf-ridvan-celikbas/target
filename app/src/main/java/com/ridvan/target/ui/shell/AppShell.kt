@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
@@ -47,6 +48,7 @@ data class ShellNavigation(
     val onNavigateHome: () -> Unit,
     val onNavigateExams: () -> Unit,
     val onNavigateCourses: () -> Unit,
+    val onNavigateStudySources: () -> Unit,
     val onNavigateLanguages: () -> Unit,
     val onNavigateUser: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -102,6 +104,17 @@ fun AppShell(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateCourses()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                NavigationDrawerItem(
+                    label = { Text("Study Sources") },
+                    icon = { Icon(Icons.Filled.Bookmark, contentDescription = null) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigateStudySources()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )

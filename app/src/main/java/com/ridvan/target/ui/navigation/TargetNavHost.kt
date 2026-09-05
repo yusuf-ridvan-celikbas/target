@@ -14,12 +14,14 @@ import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
 import com.ridvan.target.ui.home.HomeScreen
+import com.ridvan.target.ui.languagelist.LanguageExamCoursesScreen
 import com.ridvan.target.ui.languagelist.LanguageListScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.shell.ShellNavigation
 import com.ridvan.target.ui.studysource.CourseStudySourceScreen
 import com.ridvan.target.ui.studysource.LanguageStudySourceScreen
+import com.ridvan.target.ui.studysource.StudySourceHomeScreen
 import com.ridvan.target.ui.user.UserEditScreen
 
 private fun NavHostController.navigateToShellDestination(route: Any) {
@@ -40,6 +42,7 @@ fun TargetNavHost() {
         onNavigateHome = { navController.navigateToShellDestination(HomeRoute) },
         onNavigateExams = { navController.navigateToShellDestination(ExamListRoute) },
         onNavigateCourses = { navController.navigateToShellDestination(CourseListRoute) },
+        onNavigateStudySources = { navController.navigateToShellDestination(StudySourceHomeRoute) },
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsRoute) },
@@ -80,12 +83,25 @@ fun TargetNavHost() {
             CourseListScreen(
                 shellNavigation = shellNavigation,
                 onCourseTypeClick = { examType -> navController.navigate(CourseListByTypeRoute(examType.id)) },
-                onLanguageTypeClick = { navController.navigate(LanguageListRoute) },
+                onLanguageTypeClick = { navController.navigate(LanguageExamCoursesRoute) },
+            )
+        }
+        composable<StudySourceHomeRoute> {
+            StudySourceHomeScreen(
+                shellNavigation = shellNavigation,
+                onCourseTypeClick = { examType -> navController.navigate(CourseListByTypeRoute(examType.id)) },
+                onLanguageTypeClick = { navController.navigate(LanguageExamCoursesRoute) },
             )
         }
         composable<CourseListByTypeRoute> {
             CourseListByTypeScreen(
                 onCourseClick = { courseId -> navController.navigate(CourseStudySourceRoute(courseId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<LanguageExamCoursesRoute> {
+            LanguageExamCoursesScreen(
+                onLanguageClick = { languageId -> navController.navigate(LanguageStudySourceRoute(languageId)) },
                 onBack = { navController.popBackStack() },
             )
         }
