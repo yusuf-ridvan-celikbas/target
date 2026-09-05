@@ -2,19 +2,13 @@ package com.ridvan.target.ui.languagelist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -40,8 +34,6 @@ fun LanguageListScreen(
 ) {
     val languages by viewModel.languages.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
-    var editingLanguage by remember { mutableStateOf<Language?>(null) }
-    var deletingLanguage by remember { mutableStateOf<Language?>(null) }
 
     AppShell(
         navigation = shellNavigation,
@@ -62,12 +54,7 @@ fun LanguageListScreen(
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 items(languages, key = { it.id }) { language ->
-                    LanguageRow(
-                        language = language,
-                        onClick = { onLanguageClick(language.id) },
-                        onEdit = { editingLanguage = language },
-                        onDelete = { deletingLanguage = language },
-                    )
+                    LanguageRow(language = language, onClick = { onLanguageClick(language.id) })
                     HorizontalDivider()
                 }
             }
@@ -85,51 +72,12 @@ fun LanguageListScreen(
             onDismiss = { showAddDialog = false },
         )
     }
-
-    editingLanguage?.let { language ->
-        NameDialog(
-            title = "Edit language",
-            initialName = language.name,
-            onConfirm = { name ->
-                viewModel.updateLanguage(language, name)
-                editingLanguage = null
-            },
-            onDismiss = { editingLanguage = null },
-        )
-    }
-
-    deletingLanguage?.let { language ->
-        AlertDialog(
-            onDismissRequest = { deletingLanguage = null },
-            title = { Text("Delete language?") },
-            text = { Text("This removes \"${language.name}\" from any exams it's assigned to.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.deleteLanguage(language)
-                    deletingLanguage = null
-                }) { Text("Delete") }
-            },
-            dismissButton = {
-                TextButton(onClick = { deletingLanguage = null }) { Text("Cancel") }
-            },
-        )
-    }
 }
 
 @Composable
-private fun LanguageRow(language: Language, onClick: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun LanguageRow(language: Language, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(language.name) },
-        trailingContent = {
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Edit language")
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete language")
-                }
-            }
-        },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }

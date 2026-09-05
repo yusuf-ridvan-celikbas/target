@@ -24,14 +24,4 @@ class LanguageListViewModel(application: Application) : AndroidViewModel(applica
         if (trimmed.isEmpty() || userId == null) return
         viewModelScope.launch { languageDao.insert(Language(name = trimmed, userId = userId)) }
     }
-
-    fun updateLanguage(language: Language, newName: String) {
-        val trimmed = newName.trim()
-        if (trimmed.isEmpty()) return
-        viewModelScope.launch { languageDao.update(language.copy(name = trimmed)) }
-    }
-
-    fun deleteLanguage(language: Language) {
-        viewModelScope.launch { languageDao.delete(language) }
-    }
 }

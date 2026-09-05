@@ -3,7 +3,6 @@ package com.ridvan.target.ui.courselist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,8 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -50,8 +47,6 @@ fun CourseListByTypeScreen(
     val examTypeName by viewModel.examTypeName.collectAsStateWithLifecycle()
     val courses by viewModel.courses.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
-    var editingCourse by remember { mutableStateOf<Course?>(null) }
-    var deletingCourse by remember { mutableStateOf<Course?>(null) }
 
     Scaffold(
         topBar = {
@@ -80,12 +75,7 @@ fun CourseListByTypeScreen(
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 items(courses, key = { it.id }) { course ->
-                    CourseRow(
-                        course = course,
-                        onClick = { onCourseClick(course.id) },
-                        onEdit = { editingCourse = course },
-                        onDelete = { deletingCourse = course },
-                    )
+                    CourseRow(course = course, onClick = { onCourseClick(course.id) })
                     HorizontalDivider()
                 }
             }
@@ -104,53 +94,13 @@ fun CourseListByTypeScreen(
             onDismiss = { showAddDialog = false },
         )
     }
-
-    editingCourse?.let { course ->
-        CourseDialog(
-            title = "Edit course",
-            initialName = course.name,
-            initialIcon = course.icon,
-            onConfirm = { name, icon ->
-                viewModel.updateCourse(course, name, icon)
-                editingCourse = null
-            },
-            onDismiss = { editingCourse = null },
-        )
-    }
-
-    deletingCourse?.let { course ->
-        AlertDialog(
-            onDismissRequest = { deletingCourse = null },
-            title = { Text("Delete course?") },
-            text = { Text("This removes \"${course.name}\" from any exams or sections it's assigned to.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.deleteCourse(course)
-                    deletingCourse = null
-                }) { Text("Delete") }
-            },
-            dismissButton = {
-                TextButton(onClick = { deletingCourse = null }) { Text("Cancel") }
-            },
-        )
-    }
 }
 
 @Composable
-private fun CourseRow(course: Course, onClick: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun CourseRow(course: Course, onClick: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.icon) },
         headlineContent = { Text(course.name) },
-        trailingContent = {
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Edit course")
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete course")
-                }
-            }
-        },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }

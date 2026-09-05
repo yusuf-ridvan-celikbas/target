@@ -6,14 +6,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.ui.auth.LoginScreen
 import com.ridvan.target.ui.auth.RegisterScreen
 import com.ridvan.target.ui.courselist.CourseListByTypeScreen
 import com.ridvan.target.ui.courselist.CourseListScreen
+import com.ridvan.target.ui.coursedetail.CourseDetailScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
 import com.ridvan.target.ui.home.HomeScreen
+import com.ridvan.target.ui.languagedetail.LanguageDetailScreen
 import com.ridvan.target.ui.languagelist.LanguageExamCoursesScreen
 import com.ridvan.target.ui.languagelist.LanguageListScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
@@ -95,23 +98,37 @@ fun TargetNavHost() {
         }
         composable<CourseListByTypeRoute> {
             CourseListByTypeScreen(
-                onCourseClick = { courseId -> navController.navigate(CourseStudySourceRoute(courseId)) },
+                onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
                 onBack = { navController.popBackStack() },
             )
         }
         composable<LanguageExamCoursesRoute> {
             LanguageExamCoursesScreen(
-                onLanguageClick = { languageId -> navController.navigate(LanguageStudySourceRoute(languageId)) },
+                onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<CourseDetailRoute> { backStackEntry ->
+            val courseId = backStackEntry.toRoute<CourseDetailRoute>().courseId
+            CourseDetailScreen(
+                onStudySourcesClick = { navController.navigate(CourseStudySourceRoute(courseId)) },
                 onBack = { navController.popBackStack() },
             )
         }
         composable<CourseStudySourceRoute> {
             CourseStudySourceScreen(onBack = { navController.popBackStack() })
         }
+        composable<LanguageDetailRoute> { backStackEntry ->
+            val languageId = backStackEntry.toRoute<LanguageDetailRoute>().languageId
+            LanguageDetailScreen(
+                onStudySourcesClick = { navController.navigate(LanguageStudySourceRoute(languageId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
         composable<LanguageListRoute> {
             LanguageListScreen(
                 shellNavigation = shellNavigation,
-                onLanguageClick = { languageId -> navController.navigate(LanguageStudySourceRoute(languageId)) },
+                onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
             )
         }
         composable<LanguageStudySourceRoute> {

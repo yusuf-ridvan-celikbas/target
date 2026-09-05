@@ -40,14 +40,4 @@ class CourseListByTypeViewModel(
             courseDao.insert(Course(name = trimmed, userId = userId, icon = icon, examTypeId = examTypeId))
         }
     }
-
-    fun updateCourse(course: Course, newName: String, icon: String?) {
-        val trimmed = newName.trim()
-        if (trimmed.isEmpty()) return
-        viewModelScope.launch { courseDao.update(course.copy(name = trimmed, icon = icon)) }
-    }
-
-    fun deleteCourse(course: Course) {
-        viewModelScope.launch { courseDao.delete(course) }
-    }
 }
