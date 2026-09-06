@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -22,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.SectionCourseWithCourse
+import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.formatDate
 
@@ -91,14 +96,27 @@ fun SectionDetailScreen(
             if (assignedCourses.isEmpty()) {
                 Text("No courses assigned yet.", modifier = Modifier.padding(horizontal = 16.dp))
             } else {
+                val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(assignedCourses, key = { it.sectionCourse.id }) { course ->
-                        AssignedCourseRow(
-                            course,
-                            onClick = { onCourseClick(course.sectionCourse.courseId) },
-                            onRemove = { viewModel.removeCourse(course.sectionCourse) },
-                        )
-                        HorizontalDivider()
+                    sectionCourseGroups(assignedCourses).forEach { (label, groupCourses) ->
+                        val expanded = expandedGroups[label] ?: false
+                        item {
+                            SectionCourseGroupHeader(
+                                label,
+                                expanded = expanded,
+                                onToggleExpand = { expandedGroups[label] = !expanded },
+                            )
+                        }
+                        if (expanded) {
+                            items(groupCourses, key = { it.sectionCourse.id }) { course ->
+                                AssignedCourseRow(
+                                    course,
+                                    onClick = { onCourseClick(course.sectionCourse.courseId) },
+                                    onRemove = { viewModel.removeCourse(course.sectionCourse) },
+                                )
+                                HorizontalDivider()
+                            }
+                        }
                     }
                 }
             }
@@ -144,6 +162,31 @@ fun SectionDetailScreen(
             },
             onDismiss = { showAddCoursesDialog = false },
         )
+    }
+}
+
+private fun sectionCourseGroups(courses: List<SectionCourseWithCourse>): List<Pair<String, List<SectionCourseWithCourse>>> {
+    val byCategory = courses.groupBy { it.courseCategory }
+    return listOfNotNull(
+        byCategory[CourseCategory.QUANTITATIVE]?.let { "Quantitative" to it },
+        byCategory[CourseCategory.VERBAL]?.let { "Verbal" to it },
+        byCategory[null]?.let { "Uncategorized" to it },
+    )
+}
+
+@Composable
+private fun SectionCourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        IconButton(onClick = onToggleExpand) {
+            Icon(
+                if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = if (expanded) "Collapse $label" else "Expand $label",
+            )
+        }
     }
 }
 
