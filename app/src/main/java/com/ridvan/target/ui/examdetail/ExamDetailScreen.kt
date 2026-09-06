@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -63,6 +65,8 @@ fun ExamDetailScreen(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showAddSectionDialog by remember { mutableStateOf(false) }
     var showAddCourseDialog by remember { mutableStateOf(false) }
+    var coursesExpanded by remember { mutableStateOf(false) }
+    var sectionsExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -99,24 +103,42 @@ fun ExamDetailScreen(
                 }
             }
 
-            item { SectionHeader("Courses", onAddClick = { showAddCourseDialog = true }) }
-            if (courses.isEmpty()) {
-                item { EmptyHint("No courses yet.") }
-            } else {
-                items(courses, key = { "course-${it.examCourse.id}" }) { course ->
-                    CourseRow(course, onRemove = { viewModel.removeCourse(course.examCourse) })
-                    HorizontalDivider()
+            item {
+                SectionHeader(
+                    "Courses",
+                    onAddClick = { showAddCourseDialog = true },
+                    expanded = coursesExpanded,
+                    onToggleExpand = { coursesExpanded = !coursesExpanded },
+                )
+            }
+            if (coursesExpanded) {
+                if (courses.isEmpty()) {
+                    item { EmptyHint("No courses yet.") }
+                } else {
+                    items(courses, key = { "course-${it.examCourse.id}" }) { course ->
+                        CourseRow(course, onRemove = { viewModel.removeCourse(course.examCourse) })
+                        HorizontalDivider()
+                    }
                 }
             }
 
             if (exam?.hasSections == true) {
-                item { SectionHeader("Sections", onAddClick = { showAddSectionDialog = true }) }
-                if (sections.isEmpty()) {
-                    item { EmptyHint("No sections yet.") }
-                } else {
-                    items(sections, key = { "section-${it.id}" }) { section ->
-                        SectionRow(section, onClick = { onSectionClick(section.id) })
-                        HorizontalDivider()
+                item {
+                    SectionHeader(
+                        "Sections",
+                        onAddClick = { showAddSectionDialog = true },
+                        expanded = sectionsExpanded,
+                        onToggleExpand = { sectionsExpanded = !sectionsExpanded },
+                    )
+                }
+                if (sectionsExpanded) {
+                    if (sections.isEmpty()) {
+                        item { EmptyHint("No sections yet.") }
+                    } else {
+                        items(sections, key = { "section-${it.id}" }) { section ->
+                            SectionRow(section, onClick = { onSectionClick(section.id) })
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -197,13 +219,26 @@ private fun ExamSummary(
 }
 
 @Composable
-private fun SectionHeader(title: String, onAddClick: () -> Unit) {
+private fun SectionHeader(
+    title: String,
+    onAddClick: () -> Unit,
+    expanded: Boolean? = null,
+    onToggleExpand: (() -> Unit)? = null,
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, modifier = Modifier.weight(1f))
         TextButton(onClick = onAddClick) { Text("+ Add") }
+        if (expanded != null && onToggleExpand != null) {
+            IconButton(onClick = onToggleExpand) {
+                Icon(
+                    if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = if (expanded) "Collapse courses" else "Expand courses",
+                )
+            }
+        }
     }
 }
 
