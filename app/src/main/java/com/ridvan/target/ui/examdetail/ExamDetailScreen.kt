@@ -54,6 +54,7 @@ import com.ridvan.target.ui.common.formatDate
 fun ExamDetailScreen(
     onSectionClick: (Long) -> Unit,
     onCourseClick: (Long) -> Unit,
+    onLanguageClick: (Long) -> Unit,
     onBack: () -> Unit,
     viewModel: ExamDetailViewModel = viewModel(),
 ) {
@@ -98,7 +99,8 @@ fun ExamDetailScreen(
 
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(innerPadding)) {
             currentExam?.let {
-                val languageName = languages.firstOrNull { language -> language.id == currentExam.languageId }?.name
+                val languageId = currentExam.languageId
+                val languageName = languages.firstOrNull { language -> language.id == languageId }?.name
                 item {
                     ExamSummary(
                         currentExam.examDate,
@@ -106,6 +108,7 @@ fun ExamDetailScreen(
                         currentExam.hasSections,
                         isLanguageExam,
                         languageName,
+                        onLanguageClick = { languageId?.let(onLanguageClick) },
                     )
                 }
             }
@@ -231,6 +234,7 @@ private fun ExamSummary(
     hasSections: Boolean,
     isLanguageExam: Boolean,
     languageName: String?,
+    onLanguageClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         if (!hasSections) {
@@ -238,7 +242,11 @@ private fun ExamSummary(
         }
         Text("Study start: ${studyStartDate?.let { formatDate(it) } ?: "Not set"}")
         if (isLanguageExam) {
-            Text("Language: ${languageName ?: "No language set"}")
+            val languageModifier = if (languageName != null) Modifier.clickable(onClick = onLanguageClick) else Modifier
+            Text(
+                "Language: ${languageName ?: "No language set"}",
+                modifier = languageModifier,
+            )
         }
     }
 }

@@ -85,6 +85,7 @@ fun TargetNavHost() {
             ExamDetailScreen(
                 onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
                 onBack = { navController.popBackStack() },
             )
         }
