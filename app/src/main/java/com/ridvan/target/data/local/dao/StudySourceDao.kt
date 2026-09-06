@@ -24,4 +24,7 @@ interface StudySourceDao {
 
     @Query("SELECT * FROM study_sources WHERE languageId = :languageId ORDER BY name ASC")
     fun getByLanguageId(languageId: Long): Flow<List<StudySource>>
+
+    @Query("SELECT * FROM study_sources WHERE id = :id")
+    fun getById(id: Long): Flow<StudySource?>
 }

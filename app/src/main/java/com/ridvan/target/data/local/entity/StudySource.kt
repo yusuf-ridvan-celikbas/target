@@ -28,5 +28,7 @@ data class StudySource(
     val name: String,
     val courseId: Long? = null,
     val languageId: Long? = null,
+    val type: StudySourceType? = null,
+    val publisher: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

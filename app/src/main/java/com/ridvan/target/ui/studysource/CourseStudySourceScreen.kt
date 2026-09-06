@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun CourseStudySourceScreen(
+    onSourceClick: (Long) -> Unit,
     onBack: () -> Unit,
     viewModel: CourseStudySourceViewModel = viewModel(),
 ) {
@@ -17,8 +18,7 @@ fun CourseStudySourceScreen(
         title = course?.name.orEmpty(),
         studySources = studySources,
         onAdd = viewModel::addStudySource,
-        onUpdate = viewModel::updateStudySource,
-        onDelete = viewModel::deleteStudySource,
+        onSourceClick = onSourceClick,
         onBack = onBack,
     )
 }

@@ -100,3 +100,10 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         db.execSQL("ALTER TABLE courses ADD COLUMN category TEXT")
     }
 }
+
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE study_sources ADD COLUMN type TEXT")
+        db.execSQL("ALTER TABLE study_sources ADD COLUMN publisher TEXT")
+    }
+}

@@ -25,6 +25,7 @@ import com.ridvan.target.ui.shell.ShellNavigation
 import com.ridvan.target.ui.studysource.CourseStudySourceScreen
 import com.ridvan.target.ui.studysource.LanguageStudySourceScreen
 import com.ridvan.target.ui.studysource.StudySourceHomeScreen
+import com.ridvan.target.ui.studysourcedetail.StudySourceDetailScreen
 import com.ridvan.target.ui.switchaccount.SwitchAccountScreen
 import com.ridvan.target.ui.user.UserEditScreen
 
@@ -141,7 +142,10 @@ fun TargetNavHost() {
             )
         }
         composable<CourseStudySourceRoute> {
-            CourseStudySourceScreen(onBack = { navController.popBackStack() })
+            CourseStudySourceScreen(
+                onSourceClick = { sourceId -> navController.navigate(StudySourceDetailRoute(sourceId)) },
+                onBack = { navController.popBackStack() },
+            )
         }
         composable<LanguageDetailRoute> { backStackEntry ->
             val languageId = backStackEntry.toRoute<LanguageDetailRoute>().languageId
@@ -157,7 +161,13 @@ fun TargetNavHost() {
             )
         }
         composable<LanguageStudySourceRoute> {
-            LanguageStudySourceScreen(onBack = { navController.popBackStack() })
+            LanguageStudySourceScreen(
+                onSourceClick = { sourceId -> navController.navigate(StudySourceDetailRoute(sourceId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<StudySourceDetailRoute> {
+            StudySourceDetailScreen(onBack = { navController.popBackStack() })
         }
         composable<UserEditRoute> {
             UserEditScreen(
