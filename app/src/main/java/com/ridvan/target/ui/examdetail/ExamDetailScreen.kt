@@ -37,6 +37,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -244,7 +248,21 @@ private fun ExamSummary(
         if (isLanguageExam) {
             val languageModifier = if (languageName != null) Modifier.clickable(onClick = onLanguageClick) else Modifier
             Text(
-                "Language: ${languageName ?: "No language set"}",
+                buildAnnotatedString {
+                    append("Language: ")
+                    if (languageName != null) {
+                        withStyle(
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline,
+                            ),
+                        ) {
+                            append(languageName)
+                        }
+                    } else {
+                        append("No language set")
+                    }
+                },
                 modifier = languageModifier,
             )
         }
