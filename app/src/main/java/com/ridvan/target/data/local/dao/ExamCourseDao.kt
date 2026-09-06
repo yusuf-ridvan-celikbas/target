@@ -17,7 +17,7 @@ interface ExamCourseDao {
 
     @Query(
         """
-        SELECT exam_courses.*, courses.name AS courseName, courses.icon AS courseIcon
+        SELECT exam_courses.*, courses.name AS courseName, courses.icon AS courseIcon, courses.category AS courseCategory
         FROM exam_courses
         JOIN courses ON courses.id = exam_courses.courseId
         WHERE exam_courses.examId = :examId

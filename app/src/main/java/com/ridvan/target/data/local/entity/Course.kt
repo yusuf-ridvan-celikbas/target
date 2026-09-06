@@ -29,5 +29,6 @@ data class Course(
     val userId: Long? = null,
     val icon: String? = null,
     val examTypeId: Long? = null,
+    val category: CourseCategory? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

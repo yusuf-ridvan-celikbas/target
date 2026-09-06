@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.entity.Course
+import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.ui.navigation.CourseDetailRoute
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,12 +30,12 @@ class CourseDetailViewModel(
     val examTypes: StateFlow<List<ExamType>> = examTypeDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun updateCourse(name: String, icon: String?, examTypeId: Long) {
+    fun updateCourse(name: String, icon: String?, examTypeId: Long, category: CourseCategory?) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
         viewModelScope.launch {
             val current = course.value ?: return@launch
-            courseDao.update(current.copy(name = trimmed, icon = icon, examTypeId = examTypeId))
+            courseDao.update(current.copy(name = trimmed, icon = icon, examTypeId = examTypeId, category = category))
         }
     }
 

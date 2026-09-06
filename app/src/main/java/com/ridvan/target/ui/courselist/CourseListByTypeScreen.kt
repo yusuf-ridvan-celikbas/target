@@ -3,6 +3,7 @@ package com.ridvan.target.ui.courselist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -25,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.entity.Course
+import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.CourseIconPicker
 
@@ -73,10 +78,23 @@ fun CourseListByTypeScreen(
                 Text("No courses yet. Tap + to add one.")
             }
         } else {
+            val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                items(courses, key = { it.id }) { course ->
-                    CourseRow(course = course, onClick = { onCourseClick(course.id) })
-                    HorizontalDivider()
+                courseGroups(courses).forEach { (label, groupCourses) ->
+                    val expanded = expandedGroups[label] ?: false
+                    item {
+                        CourseGroupHeader(
+                            label,
+                            expanded = expanded,
+                            onToggleExpand = { expandedGroups[label] = !expanded },
+                        )
+                    }
+                    if (expanded) {
+                        items(groupCourses, key = { it.id }) { course ->
+                            CourseRow(course = course, onClick = { onCourseClick(course.id) })
+                            HorizontalDivider()
+                        }
+                    }
                 }
             }
         }
@@ -93,6 +111,31 @@ fun CourseListByTypeScreen(
             },
             onDismiss = { showAddDialog = false },
         )
+    }
+}
+
+private fun courseGroups(courses: List<Course>): List<Pair<String, List<Course>>> {
+    val byCategory = courses.groupBy { it.category }
+    return listOfNotNull(
+        byCategory[CourseCategory.QUANTITATIVE]?.let { "Quantitative" to it },
+        byCategory[CourseCategory.VERBAL]?.let { "Verbal" to it },
+        byCategory[null]?.let { "Uncategorized" to it },
+    )
+}
+
+@Composable
+private fun CourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        IconButton(onClick = onToggleExpand) {
+            Icon(
+                if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = if (expanded) "Collapse $label" else "Expand $label",
+            )
+        }
     }
 }
 

@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.Course
+import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.CourseIconAvatar
@@ -51,6 +53,7 @@ import com.ridvan.target.ui.common.formatDate
 @Composable
 fun ExamDetailScreen(
     onSectionClick: (Long) -> Unit,
+    onCourseClick: (Long) -> Unit,
     onBack: () -> Unit,
     viewModel: ExamDetailViewModel = viewModel(),
 ) {
@@ -67,6 +70,7 @@ fun ExamDetailScreen(
     var showAddCourseDialog by remember { mutableStateOf(false) }
     var coursesExpanded by remember { mutableStateOf(false) }
     var sectionsExpanded by remember { mutableStateOf(false) }
+    val expandedCourseGroups = remember { mutableStateMapOf<String, Boolean>() }
 
     Scaffold(
         topBar = {
@@ -88,10 +92,13 @@ fun ExamDetailScreen(
             )
         },
     ) { innerPadding ->
+        val currentExam = exam
+        val isLanguageExam = currentExam != null &&
+            examTypes.firstOrNull { it.id == currentExam.examTypeId }?.name == LANGUAGE_EXAM_TYPE_NAME
+
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(innerPadding)) {
-            exam?.let { currentExam ->
-                val isLanguageExam = examTypes.firstOrNull { it.id == currentExam.examTypeId }?.name == LANGUAGE_EXAM_TYPE_NAME
-                val languageName = languages.firstOrNull { it.id == currentExam.languageId }?.name
+            currentExam?.let {
+                val languageName = languages.firstOrNull { language -> language.id == currentExam.languageId }?.name
                 item {
                     ExamSummary(
                         currentExam.examDate,
@@ -103,21 +110,39 @@ fun ExamDetailScreen(
                 }
             }
 
-            item {
-                SectionHeader(
-                    "Courses",
-                    onAddClick = { showAddCourseDialog = true },
-                    expanded = coursesExpanded,
-                    onToggleExpand = { coursesExpanded = !coursesExpanded },
-                )
-            }
-            if (coursesExpanded) {
-                if (courses.isEmpty()) {
-                    item { EmptyHint("No courses yet.") }
-                } else {
-                    items(courses, key = { "course-${it.examCourse.id}" }) { course ->
-                        CourseRow(course, onRemove = { viewModel.removeCourse(course.examCourse) })
-                        HorizontalDivider()
+            if (!isLanguageExam) {
+                item {
+                    SectionHeader(
+                        "Courses",
+                        onAddClick = { showAddCourseDialog = true },
+                        expanded = coursesExpanded,
+                        onToggleExpand = { coursesExpanded = !coursesExpanded },
+                    )
+                }
+                if (coursesExpanded) {
+                    if (courses.isEmpty()) {
+                        item { EmptyHint("No courses yet.") }
+                    } else {
+                        examCourseGroups(courses).forEach { (label, groupCourses) ->
+                            val groupExpanded = expandedCourseGroups[label] ?: false
+                            item {
+                                CourseGroupHeader(
+                                    label,
+                                    expanded = groupExpanded,
+                                    onToggleExpand = { expandedCourseGroups[label] = !groupExpanded },
+                                )
+                            }
+                            if (groupExpanded) {
+                                items(groupCourses, key = { "course-${it.examCourse.id}" }) { course ->
+                                    CourseRow(
+                                        course,
+                                        onClick = { onCourseClick(course.examCourse.courseId) },
+                                        onRemove = { viewModel.removeCourse(course.examCourse) },
+                                    )
+                                    HorizontalDivider()
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -247,8 +272,33 @@ private fun EmptyHint(text: String) {
     Text(text, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
 }
 
+private fun examCourseGroups(courses: List<ExamCourseWithCourse>): List<Pair<String, List<ExamCourseWithCourse>>> {
+    val byCategory = courses.groupBy { it.courseCategory }
+    return listOfNotNull(
+        byCategory[CourseCategory.QUANTITATIVE]?.let { "Quantitative" to it },
+        byCategory[CourseCategory.VERBAL]?.let { "Verbal" to it },
+        byCategory[null]?.let { "Uncategorized" to it },
+    )
+}
+
 @Composable
-private fun CourseRow(course: ExamCourseWithCourse, onRemove: () -> Unit) {
+private fun CourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        IconButton(onClick = onToggleExpand) {
+            Icon(
+                if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = if (expanded) "Collapse $label" else "Expand $label",
+            )
+        }
+    }
+}
+
+@Composable
+private fun CourseRow(course: ExamCourseWithCourse, onClick: () -> Unit, onRemove: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.courseIcon) },
         headlineContent = { Text(course.courseName) },
@@ -257,6 +307,7 @@ private fun CourseRow(course: ExamCourseWithCourse, onRemove: () -> Unit) {
                 Icon(Icons.Filled.Delete, contentDescription = "Remove course")
             }
         },
+        modifier = Modifier.clickable(onClick = onClick),
     )
 }
 

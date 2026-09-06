@@ -1,8 +1,10 @@
 package com.ridvan.target.ui.coursedetail
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -28,10 +31,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
+import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.ui.common.CourseIconPicker
 
@@ -70,6 +75,7 @@ fun CourseDetailScreen(
         Column(modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp)) {
             val examTypeName = examTypes.firstOrNull { it.id == course?.examTypeId }?.name ?: "Not set"
             Text("Exam type: $examTypeName")
+            Text("Category: ${categoryLabel(course?.category)}")
             Button(
                 onClick = onStudySourcesClick,
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -85,8 +91,9 @@ fun CourseDetailScreen(
             initialName = course!!.name,
             initialIcon = course!!.icon,
             initialExamTypeId = course!!.examTypeId,
-            onConfirm = { name, icon, examTypeId ->
-                viewModel.updateCourse(name, icon, examTypeId)
+            initialCategory = course!!.category,
+            onConfirm = { name, icon, examTypeId, category ->
+                viewModel.updateCourse(name, icon, examTypeId, category)
                 showEditDialog = false
             },
             onDismiss = { showEditDialog = false },
@@ -118,12 +125,14 @@ private fun CourseEditDialog(
     initialName: String,
     initialIcon: String?,
     initialExamTypeId: Long?,
-    onConfirm: (name: String, icon: String?, examTypeId: Long) -> Unit,
+    initialCategory: CourseCategory?,
+    onConfirm: (name: String, icon: String?, examTypeId: Long, category: CourseCategory?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by remember { mutableStateOf(initialName) }
     var icon by remember { mutableStateOf(initialIcon) }
     var examTypeId by remember { mutableStateOf(initialExamTypeId ?: examTypes.firstOrNull()?.id) }
+    var category by remember { mutableStateOf(initialCategory) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -142,6 +151,10 @@ private fun CourseEditDialog(
                     selectedId = examTypeId,
                     onSelect = { examTypeId = it },
                 )
+                CourseCategoryField(
+                    selected = category,
+                    onSelect = { category = it },
+                )
                 Text(
                     "Icon",
                     style = MaterialTheme.typography.labelSmall,
@@ -156,7 +169,7 @@ private fun CourseEditDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { examTypeId?.let { onConfirm(name, icon, it) } },
+                onClick = { examTypeId?.let { onConfirm(name, icon, it, category) } },
                 enabled = name.isNotBlank() && examTypeId != null,
             ) { Text("Save") }
         },
@@ -164,6 +177,69 @@ private fun CourseEditDialog(
             TextButton(onClick = onDismiss) { Text("Cancel") }
         },
     )
+}
+
+private fun categoryLabel(category: CourseCategory?): String = when (category) {
+    CourseCategory.QUANTITATIVE -> "Quantitative"
+    CourseCategory.VERBAL -> "Verbal"
+    null -> "Not set"
+}
+
+@Composable
+private fun CourseCategoryField(selected: CourseCategory?, onSelect: (CourseCategory?) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Text("Category", style = MaterialTheme.typography.labelSmall)
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+            CategoryToggleSegment(
+                text = "Unset",
+                selected = selected == null,
+                onClick = { onSelect(null) },
+                modifier = Modifier.weight(1f),
+            )
+            CategoryToggleSegment(
+                text = "Quantitative",
+                selected = selected == CourseCategory.QUANTITATIVE,
+                onClick = { onSelect(CourseCategory.QUANTITATIVE) },
+                modifier = Modifier.weight(1f).padding(start = 4.dp),
+            )
+            CategoryToggleSegment(
+                text = "Verbal",
+                selected = selected == CourseCategory.VERBAL,
+                onClick = { onSelect(CourseCategory.VERBAL) },
+                modifier = Modifier.weight(1f).padding(start = 4.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryToggleSegment(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val containerColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        label = "categoryToggleContainerColor",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "categoryToggleContentColor",
+    )
+    Surface(
+        color = containerColor,
+        contentColor = contentColor,
+        shape = MaterialTheme.shapes.small,
+        modifier = modifier.clickable(onClick = onClick),
+    ) {
+        Text(
+            text,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+        )
+    }
 }
 
 @Composable
