@@ -25,6 +25,7 @@ import com.ridvan.target.ui.shell.ShellNavigation
 import com.ridvan.target.ui.studysource.CourseStudySourceScreen
 import com.ridvan.target.ui.studysource.LanguageStudySourceScreen
 import com.ridvan.target.ui.studysource.StudySourceHomeScreen
+import com.ridvan.target.ui.switchaccount.SwitchAccountScreen
 import com.ridvan.target.ui.user.UserEditScreen
 
 private fun NavHostController.navigateToShellDestination(route: Any) {
@@ -41,6 +42,11 @@ fun TargetNavHost() {
     val application = LocalContext.current.applicationContext as TargetApplication
     val startDestination = if (application.preferences.currentUserId != null) HomeRoute else LoginRoute
 
+    val signOut: () -> Unit = {
+        application.preferences.currentUserId = null
+        navController.navigate(LoginRoute) { popUpTo(0) }
+    }
+
     val shellNavigation = ShellNavigation(
         onNavigateHome = { navController.navigateToShellDestination(HomeRoute) },
         onNavigateExams = { navController.navigateToShellDestination(ExamListRoute) },
@@ -49,6 +55,8 @@ fun TargetNavHost() {
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsRoute) },
+        onLogOut = signOut,
+        onSwitchAccount = { navController.navigate(SwitchAccountRoute) },
     )
 
     NavHost(navController = navController, startDestination = startDestination) {
@@ -154,6 +162,12 @@ fun TargetNavHost() {
         }
         composable<SettingsRoute> {
             SettingsScreen(shellNavigation = shellNavigation)
+        }
+        composable<SwitchAccountRoute> {
+            SwitchAccountScreen(
+                onSwitched = { navController.navigate(HomeRoute) { popUpTo(0) } },
+                onBack = { navController.popBackStack() },
+            )
         }
     }
 }

@@ -58,3 +58,6 @@ object UserEditRoute
 
 @Serializable
 object SettingsRoute
+
+@Serializable
+object SwitchAccountRoute

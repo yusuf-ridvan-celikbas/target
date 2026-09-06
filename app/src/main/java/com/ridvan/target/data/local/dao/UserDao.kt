@@ -21,6 +21,9 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE username = :username LIMIT 1")
     suspend fun getByUsername(username: String): User?
 
+    @Query("SELECT * FROM users ORDER BY preferredName ASC")
+    fun getAll(): Flow<List<User>>
+
     @Query("SELECT COUNT(*) FROM users WHERE username = :username")
     suspend fun countByUsername(username: String): Int
 }

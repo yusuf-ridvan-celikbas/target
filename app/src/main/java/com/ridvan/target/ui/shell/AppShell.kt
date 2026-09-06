@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.SwitchAccount
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
@@ -52,6 +54,8 @@ data class ShellNavigation(
     val onNavigateLanguages: () -> Unit,
     val onNavigateUser: () -> Unit,
     val onNavigateSettings: () -> Unit,
+    val onLogOut: () -> Unit,
+    val onSwitchAccount: () -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +69,7 @@ fun AppShell(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var overflowExpanded by remember { mutableStateOf(false) }
+    var accountMenuExpanded by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -170,6 +175,33 @@ fun AppShell(
                                 onClick = {
                                     overflowExpanded = false
                                     navigation.onNavigateSettings()
+                                },
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            DropdownMenuItem(
+                                text = { Text("Account") },
+                                onClick = {
+                                    overflowExpanded = false
+                                    accountMenuExpanded = true
+                                },
+                            )
+                        }
+                        DropdownMenu(expanded = accountMenuExpanded, onDismissRequest = { accountMenuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Log Out") },
+                                leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
+                                onClick = {
+                                    accountMenuExpanded = false
+                                    navigation.onLogOut()
+                                },
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            DropdownMenuItem(
+                                text = { Text("Switch Account") },
+                                leadingIcon = { Icon(Icons.Filled.SwitchAccount, contentDescription = null) },
+                                onClick = {
+                                    accountMenuExpanded = false
+                                    navigation.onSwitchAccount()
                                 },
                             )
                         }
