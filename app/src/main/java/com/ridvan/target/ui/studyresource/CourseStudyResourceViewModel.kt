@@ -1,4 +1,4 @@
-package com.ridvan.target.ui.studysource
+package com.ridvan.target.ui.studyresource
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -7,34 +7,34 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.entity.Course
-import com.ridvan.target.data.local.entity.StudySource
-import com.ridvan.target.data.local.entity.StudySourceType
-import com.ridvan.target.ui.navigation.CourseStudySourceRoute
+import com.ridvan.target.data.local.entity.StudyResource
+import com.ridvan.target.data.local.entity.StudyResourceType
+import com.ridvan.target.ui.navigation.CourseStudyResourceRoute
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class CourseStudySourceViewModel(
+class CourseStudyResourceViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
-    private val courseId: Long = savedStateHandle.toRoute<CourseStudySourceRoute>().courseId
+    private val courseId: Long = savedStateHandle.toRoute<CourseStudyResourceRoute>().courseId
     private val targetApplication = application as TargetApplication
     private val courseDao = targetApplication.database.courseDao()
-    private val studySourceDao = targetApplication.database.studySourceDao()
+    private val studyResourceDao = targetApplication.database.studyResourceDao()
 
     val course: StateFlow<Course?> = courseDao.getById(courseId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val studySources: StateFlow<List<StudySource>> = studySourceDao.getByCourseId(courseId)
+    val studyResources: StateFlow<List<StudyResource>> = studyResourceDao.getByCourseId(courseId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun addStudySource(name: String, type: StudySourceType, publisher: String?) {
+    fun addStudyResource(name: String, type: StudyResourceType, publisher: String?) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
         viewModelScope.launch {
-            studySourceDao.insert(StudySource(name = trimmed, courseId = courseId, type = type, publisher = publisher))
+            studyResourceDao.insert(StudyResource(name = trimmed, courseId = courseId, type = type, publisher = publisher))
         }
     }
 }

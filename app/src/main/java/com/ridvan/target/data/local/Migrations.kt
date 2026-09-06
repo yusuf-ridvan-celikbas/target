@@ -107,3 +107,15 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
         db.execSQL("ALTER TABLE study_sources ADD COLUMN publisher TEXT")
     }
 }
+
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // "Study Sources" was renamed to "Study Resources" throughout the app; rename the table
+        // and its indices to match rather than recreating them, to preserve existing rows.
+        db.execSQL("ALTER TABLE study_sources RENAME TO study_resources")
+        db.execSQL("DROP INDEX IF EXISTS index_study_sources_courseId")
+        db.execSQL("DROP INDEX IF EXISTS index_study_sources_languageId")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_study_resources_courseId ON study_resources(courseId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_study_resources_languageId ON study_resources(languageId)")
+    }
+}

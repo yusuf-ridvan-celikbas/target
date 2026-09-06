@@ -50,7 +50,7 @@ data class ShellNavigation(
     val onNavigateHome: () -> Unit,
     val onNavigateExams: () -> Unit,
     val onNavigateCourses: () -> Unit,
-    val onNavigateStudySources: () -> Unit,
+    val onNavigateStudyResources: () -> Unit,
     val onNavigateLanguages: () -> Unit,
     val onNavigateUser: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -114,12 +114,12 @@ fun AppShell(
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                 NavigationDrawerItem(
-                    label = { Text("Study Sources") },
+                    label = { Text("Study Resources") },
                     icon = { Icon(Icons.Filled.Bookmark, contentDescription = null) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        navigation.onNavigateStudySources()
+                        navigation.onNavigateStudyResources()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )

@@ -1,4 +1,4 @@
-package com.ridvan.target.ui.studysource
+package com.ridvan.target.ui.studyresource
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -33,24 +33,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ridvan.target.data.local.entity.StudySource
-import com.ridvan.target.data.local.entity.StudySourceType
+import com.ridvan.target.data.local.entity.StudyResource
+import com.ridvan.target.data.local.entity.StudyResourceType
 
-internal fun studySourceTypeLabel(type: StudySourceType?): String = when (type) {
-    StudySourceType.QUESTION_BANK -> "Question Bank"
-    StudySourceType.LECTURE_TEXTBOOK -> "Lecture/Textbook"
-    StudySourceType.PRACTICE_EXAM -> "Practice Exam"
-    StudySourceType.LECTURE_NOTES -> "Lecture Notes"
+internal fun studyResourceTypeLabel(type: StudyResourceType?): String = when (type) {
+    StudyResourceType.QUESTION_BANK -> "Question Bank"
+    StudyResourceType.LECTURE_TEXTBOOK -> "Lecture/Textbook"
+    StudyResourceType.PRACTICE_EXAM -> "Practice Exam"
+    StudyResourceType.LECTURE_NOTES -> "Lecture Notes"
     null -> "Not set"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun StudySourceListContent(
+internal fun StudyResourceListContent(
     title: String,
-    studySources: List<StudySource>,
-    onAdd: (name: String, type: StudySourceType, publisher: String?) -> Unit,
-    onSourceClick: (Long) -> Unit,
+    studyResources: List<StudyResource>,
+    onAdd: (name: String, type: StudyResourceType, publisher: String?) -> Unit,
+    onResourceClick: (Long) -> Unit,
     onBack: () -> Unit,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
@@ -72,17 +72,17 @@ internal fun StudySourceListContent(
             }
         },
     ) { innerPadding ->
-        if (studySources.isEmpty()) {
+        if (studyResources.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No study sources yet. Tap + to add one.")
+                Text("No study resources yet. Tap + to add one.")
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                items(studySources, key = { it.id }) { source ->
-                    StudySourceRow(source = source, onClick = { onSourceClick(source.id) })
+                items(studyResources, key = { it.id }) { resource ->
+                    StudyResourceRow(resource = resource, onClick = { onResourceClick(resource.id) })
                     HorizontalDivider()
                 }
             }
@@ -90,8 +90,8 @@ internal fun StudySourceListContent(
     }
 
     if (showAddDialog) {
-        StudySourceFormDialog(
-            title = "Add study source",
+        StudyResourceFormDialog(
+            title = "Add study resource",
             subjectLabel = title,
             initialName = "",
             initialType = null,
@@ -106,22 +106,22 @@ internal fun StudySourceListContent(
 }
 
 @Composable
-private fun StudySourceRow(source: StudySource, onClick: () -> Unit) {
+private fun StudyResourceRow(resource: StudyResource, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(source.name) },
-        supportingContent = { Text(studySourceTypeLabel(source.type)) },
+        headlineContent = { Text(resource.name) },
+        supportingContent = { Text(studyResourceTypeLabel(resource.type)) },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }
 
 @Composable
-internal fun StudySourceFormDialog(
+internal fun StudyResourceFormDialog(
     title: String,
     subjectLabel: String,
     initialName: String,
-    initialType: StudySourceType?,
+    initialType: StudyResourceType?,
     initialPublisher: String,
-    onConfirm: (name: String, type: StudySourceType, publisher: String?) -> Unit,
+    onConfirm: (name: String, type: StudyResourceType, publisher: String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by remember { mutableStateOf(initialName) }
@@ -142,7 +142,7 @@ internal fun StudySourceFormDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                StudySourceTypeField(
+                StudyResourceTypeField(
                     selectedType = type,
                     onSelect = { type = it },
                 )
@@ -168,17 +168,17 @@ internal fun StudySourceFormDialog(
 }
 
 @Composable
-internal fun StudySourceTypeField(selectedType: StudySourceType?, onSelect: (StudySourceType) -> Unit) {
+internal fun StudyResourceTypeField(selectedType: StudyResourceType?, onSelect: (StudyResourceType) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
             Text("Type", style = MaterialTheme.typography.labelSmall)
-            Text(studySourceTypeLabel(selectedType), style = MaterialTheme.typography.bodyLarge)
+            Text(studyResourceTypeLabel(selectedType), style = MaterialTheme.typography.bodyLarge)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            StudySourceType.entries.forEach { option ->
+            StudyResourceType.entries.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(studySourceTypeLabel(option)) },
+                    text = { Text(studyResourceTypeLabel(option)) },
                     onClick = {
                         onSelect(option)
                         expanded = false

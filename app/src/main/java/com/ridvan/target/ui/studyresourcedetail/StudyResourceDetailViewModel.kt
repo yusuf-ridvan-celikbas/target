@@ -1,4 +1,4 @@
-package com.ridvan.target.ui.studysourcedetail
+package com.ridvan.target.ui.studyresourcedetail
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -6,9 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
-import com.ridvan.target.data.local.entity.StudySource
-import com.ridvan.target.data.local.entity.StudySourceType
-import com.ridvan.target.ui.navigation.StudySourceDetailRoute
+import com.ridvan.target.data.local.entity.StudyResource
+import com.ridvan.target.data.local.entity.StudyResourceType
+import com.ridvan.target.ui.navigation.StudyResourceDetailRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,39 +20,39 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class StudySourceDetailViewModel(
+class StudyResourceDetailViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
-    private val studySourceId: Long = savedStateHandle.toRoute<StudySourceDetailRoute>().studySourceId
+    private val studyResourceId: Long = savedStateHandle.toRoute<StudyResourceDetailRoute>().studyResourceId
     private val database = (application as TargetApplication).database
-    private val studySourceDao = database.studySourceDao()
+    private val studyResourceDao = database.studyResourceDao()
     private val courseDao = database.courseDao()
     private val languageDao = database.languageDao()
 
-    val studySource: StateFlow<StudySource?> = studySourceDao.getById(studySourceId)
+    val studyResource: StateFlow<StudyResource?> = studyResourceDao.getById(studyResourceId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val subjectName: StateFlow<String> = studySource.filterNotNull().flatMapLatest { source ->
+    val subjectName: StateFlow<String> = studyResource.filterNotNull().flatMapLatest { resource ->
         when {
-            source.courseId != null -> courseDao.getById(source.courseId).map { it?.name.orEmpty() }
-            source.languageId != null -> languageDao.getById(source.languageId).map { it?.name.orEmpty() }
+            resource.courseId != null -> courseDao.getById(resource.courseId).map { it?.name.orEmpty() }
+            resource.languageId != null -> languageDao.getById(resource.languageId).map { it?.name.orEmpty() }
             else -> flowOf("")
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
-    fun updateStudySource(name: String, type: StudySourceType, publisher: String?) {
+    fun updateStudyResource(name: String, type: StudyResourceType, publisher: String?) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
         viewModelScope.launch {
-            val current = studySource.value ?: return@launch
-            studySourceDao.update(current.copy(name = trimmed, type = type, publisher = publisher))
+            val current = studyResource.value ?: return@launch
+            studyResourceDao.update(current.copy(name = trimmed, type = type, publisher = publisher))
         }
     }
 
-    fun deleteStudySource() {
+    fun deleteStudyResource() {
         viewModelScope.launch {
-            studySource.value?.let { studySourceDao.delete(it) }
+            studyResource.value?.let { studyResourceDao.delete(it) }
         }
     }
 }

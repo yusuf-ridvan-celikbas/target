@@ -1,4 +1,4 @@
-package com.ridvan.target.ui.studysource
+package com.ridvan.target.ui.studyresource
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +21,7 @@ import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
-fun StudySourceHomeScreen(
+fun StudyResourceHomeScreen(
     shellNavigation: ShellNavigation,
     onCourseTypeClick: (ExamType) -> Unit,
     onLanguageTypeClick: () -> Unit,
@@ -29,7 +29,7 @@ fun StudySourceHomeScreen(
 ) {
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
 
-    AppShell(navigation = shellNavigation, title = "Study Sources") { innerPadding ->
+    AppShell(navigation = shellNavigation, title = "Study Resources") { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             items(examTypes, key = { it.id }) { examType ->
                 ListItem(

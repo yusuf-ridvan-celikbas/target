@@ -30,7 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageDetailScreen(
-    onStudySourcesClick: () -> Unit,
+    onStudyResourcesClick: () -> Unit,
     onBack: () -> Unit,
     viewModel: LanguageDetailViewModel = viewModel(),
 ) {
@@ -60,10 +60,10 @@ fun LanguageDetailScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp)) {
             Button(
-                onClick = onStudySourcesClick,
+                onClick = onStudyResourcesClick,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Study Sources")
+                Text("Study Resources")
             }
         }
     }

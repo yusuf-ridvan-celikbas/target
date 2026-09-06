@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "study_sources",
+    tableName = "study_resources",
     foreignKeys = [
         ForeignKey(
             entity = Course::class,
@@ -23,12 +23,12 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("courseId"), Index("languageId")],
 )
-data class StudySource(
+data class StudyResource(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val courseId: Long? = null,
     val languageId: Long? = null,
-    val type: StudySourceType? = null,
+    val type: StudyResourceType? = null,
     val publisher: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

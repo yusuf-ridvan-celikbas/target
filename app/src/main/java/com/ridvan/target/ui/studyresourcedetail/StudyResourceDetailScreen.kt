@@ -1,4 +1,4 @@
-package com.ridvan.target.ui.studysourcedetail
+package com.ridvan.target.ui.studyresourcedetail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,16 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ridvan.target.ui.studysource.StudySourceFormDialog
-import com.ridvan.target.ui.studysource.studySourceTypeLabel
+import com.ridvan.target.ui.studyresource.StudyResourceFormDialog
+import com.ridvan.target.ui.studyresource.studyResourceTypeLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudySourceDetailScreen(
+fun StudyResourceDetailScreen(
     onBack: () -> Unit,
-    viewModel: StudySourceDetailViewModel = viewModel(),
+    viewModel: StudyResourceDetailViewModel = viewModel(),
 ) {
-    val studySource by viewModel.studySource.collectAsStateWithLifecycle()
+    val studyResource by viewModel.studyResource.collectAsStateWithLifecycle()
     val subjectName by viewModel.subjectName.collectAsStateWithLifecycle()
 
     var showEditDialog by remember { mutableStateOf(false) }
@@ -42,7 +42,7 @@ fun StudySourceDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(studySource?.name.orEmpty()) },
+                title = { Text(studyResource?.name.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -50,10 +50,10 @@ fun StudySourceDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit study source")
+                        Icon(Icons.Filled.Edit, contentDescription = "Edit study resource")
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete study source")
+                        Icon(Icons.Filled.Delete, contentDescription = "Delete study resource")
                     }
                 },
             )
@@ -61,22 +61,22 @@ fun StudySourceDetailScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp)) {
             Text("Subject: $subjectName")
-            Text("Type: ${studySourceTypeLabel(studySource?.type)}")
-            studySource?.publisher?.let { publisher ->
+            Text("Type: ${studyResourceTypeLabel(studyResource?.type)}")
+            studyResource?.publisher?.let { publisher ->
                 Text("Publisher: $publisher")
             }
         }
     }
 
-    if (showEditDialog && studySource != null) {
-        StudySourceFormDialog(
-            title = "Edit study source",
+    if (showEditDialog && studyResource != null) {
+        StudyResourceFormDialog(
+            title = "Edit study resource",
             subjectLabel = subjectName,
-            initialName = studySource!!.name,
-            initialType = studySource!!.type,
-            initialPublisher = studySource!!.publisher.orEmpty(),
+            initialName = studyResource!!.name,
+            initialType = studyResource!!.type,
+            initialPublisher = studyResource!!.publisher.orEmpty(),
             onConfirm = { name, type, publisher ->
-                viewModel.updateStudySource(name, type, publisher)
+                viewModel.updateStudyResource(name, type, publisher)
                 showEditDialog = false
             },
             onDismiss = { showEditDialog = false },
@@ -86,11 +86,11 @@ fun StudySourceDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete study source?") },
-            text = { Text("This removes \"${studySource?.name}\".") },
+            title = { Text("Delete study resource?") },
+            text = { Text("This removes \"${studyResource?.name}\".") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteStudySource()
+                    viewModel.deleteStudyResource()
                     showDeleteConfirm = false
                     onBack()
                 }) { Text("Delete") }

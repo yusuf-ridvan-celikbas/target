@@ -43,7 +43,7 @@ import com.ridvan.target.ui.common.CourseIconPicker
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourseDetailScreen(
-    onStudySourcesClick: () -> Unit,
+    onStudyResourcesClick: () -> Unit,
     onBack: () -> Unit,
     viewModel: CourseDetailViewModel = viewModel(),
 ) {
@@ -77,10 +77,10 @@ fun CourseDetailScreen(
             Text("Exam type: $examTypeName")
             Text("Category: ${categoryLabel(course?.category)}")
             Button(
-                onClick = onStudySourcesClick,
+                onClick = onStudyResourcesClick,
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             ) {
-                Text("Study Sources")
+                Text("Study Resources")
             }
         }
     }

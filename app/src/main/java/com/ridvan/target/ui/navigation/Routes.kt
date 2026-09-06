@@ -36,25 +36,25 @@ data class CourseDetailRoute(val courseId: Long)
 data class LanguageDetailRoute(val languageId: Long)
 
 @Serializable
-data class CourseStudySourceRoute(val courseId: Long)
+data class CourseStudyResourceRoute(val courseId: Long)
 
 @Serializable
 object LanguageListRoute
 
 @Serializable
-data class LanguageStudySourceRoute(val languageId: Long)
+data class LanguageStudyResourceRoute(val languageId: Long)
 
 @Serializable
-data class StudySourceDetailRoute(val studySourceId: Long)
+data class StudyResourceDetailRoute(val studyResourceId: Long)
 
 @Serializable
-object StudySourceHomeRoute
+object StudyResourceHomeRoute
 
 @Serializable
-data class StudySourceCourseListByTypeRoute(val examTypeId: Long)
+data class StudyResourceCourseListByTypeRoute(val examTypeId: Long)
 
 @Serializable
-object StudySourceLanguageExamCoursesRoute
+object StudyResourceLanguageExamCoursesRoute
 
 @Serializable
 object UserEditRoute
