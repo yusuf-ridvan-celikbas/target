@@ -90,7 +90,10 @@ fun TargetNavHost() {
             )
         }
         composable<SectionDetailRoute> {
-            SectionDetailScreen(onBack = { navController.popBackStack() })
+            SectionDetailScreen(
+                onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onBack = { navController.popBackStack() },
+            )
         }
         composable<CourseListRoute> {
             CourseListScreen(

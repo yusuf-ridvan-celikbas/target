@@ -118,15 +118,16 @@ fun ExamDetailScreen(
             }
 
             if (!isLanguageExam) {
+                val hasSections = currentExam?.hasSections == true
                 item {
                     SectionHeader(
                         "Courses",
                         onAddClick = { showAddCourseDialog = true },
-                        expanded = coursesExpanded,
-                        onToggleExpand = { coursesExpanded = !coursesExpanded },
+                        expanded = if (hasSections) null else coursesExpanded,
+                        onToggleExpand = if (hasSections) null else ({ coursesExpanded = !coursesExpanded }),
                     )
                 }
-                if (coursesExpanded) {
+                if (!hasSections && coursesExpanded) {
                     if (courses.isEmpty()) {
                         item { EmptyHint("No courses yet.") }
                     } else {

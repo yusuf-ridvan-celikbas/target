@@ -46,6 +46,7 @@ import com.ridvan.target.ui.common.formatDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SectionDetailScreen(
+    onCourseClick: (Long) -> Unit,
     onBack: () -> Unit,
     viewModel: SectionDetailViewModel = viewModel(),
 ) {
@@ -92,7 +93,11 @@ fun SectionDetailScreen(
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(assignedCourses, key = { it.sectionCourse.id }) { course ->
-                        AssignedCourseRow(course, onRemove = { viewModel.removeCourse(course.sectionCourse) })
+                        AssignedCourseRow(
+                            course,
+                            onClick = { onCourseClick(course.sectionCourse.courseId) },
+                            onRemove = { viewModel.removeCourse(course.sectionCourse) },
+                        )
                         HorizontalDivider()
                     }
                 }
@@ -143,7 +148,7 @@ fun SectionDetailScreen(
 }
 
 @Composable
-private fun AssignedCourseRow(course: SectionCourseWithCourse, onRemove: () -> Unit) {
+private fun AssignedCourseRow(course: SectionCourseWithCourse, onClick: () -> Unit, onRemove: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.courseIcon) },
         headlineContent = { Text(course.courseName) },
@@ -152,6 +157,7 @@ private fun AssignedCourseRow(course: SectionCourseWithCourse, onRemove: () -> U
                 Icon(Icons.Filled.Delete, contentDescription = "Remove course")
             }
         },
+        modifier = Modifier.clickable(onClick = onClick),
     )
 }
 
