@@ -25,7 +25,7 @@ interface StudyResourceTopicDao {
         FROM study_resource_topics
         JOIN topics ON topics.id = study_resource_topics.topicId
         WHERE study_resource_topics.studyResourceId = :studyResourceId
-        ORDER BY topics.name ASC
+        ORDER BY study_resource_topics.orderIndex ASC
         """
     )
     fun getByStudyResourceId(studyResourceId: Long): Flow<List<StudyResourceTopicWithTopic>>

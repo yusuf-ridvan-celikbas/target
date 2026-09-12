@@ -32,4 +32,5 @@ data class StudyResourceTopic(
     val topicId: Long,
     val testCount: Int = 0,
     val questionCount: Int = 0,
+    val orderIndex: Int = 0,
 )

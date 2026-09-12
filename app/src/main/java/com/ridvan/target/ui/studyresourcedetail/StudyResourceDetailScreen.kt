@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -101,8 +103,15 @@ fun StudyResourceDetailScreen(
                     Text(stringResource(R.string.srdetail_no_topics), modifier = Modifier.padding(top = 4.dp))
                 } else {
                     Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                        attachedTopics.forEach { attached ->
-                            TopicRow(attached, onClick = { editingTopic = attached })
+                        attachedTopics.forEachIndexed { index, attached ->
+                            TopicRow(
+                                attached,
+                                onClick = { editingTopic = attached },
+                                isFirst = index == 0,
+                                isLast = index == attachedTopics.lastIndex,
+                                onMoveUp = { viewModel.moveTopicUp(attached.studyResourceTopic) },
+                                onMoveDown = { viewModel.moveTopicDown(attached.studyResourceTopic) },
+                            )
                         }
                     }
                 }
@@ -183,11 +192,28 @@ private fun TopicsSectionHeader(onAddClick: () -> Unit) {
 }
 
 @Composable
-private fun TopicRow(attached: StudyResourceTopicWithTopic, onClick: () -> Unit) {
+private fun TopicRow(
+    attached: StudyResourceTopicWithTopic,
+    onClick: () -> Unit,
+    isFirst: Boolean,
+    isLast: Boolean,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+) {
     ListItem(
         headlineContent = { Text(attached.topicName) },
         supportingContent = {
             Text(stringResource(R.string.counts_tests_questions, attached.studyResourceTopic.testCount, attached.studyResourceTopic.questionCount))
+        },
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onMoveUp, enabled = !isFirst) {
+                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.cd_move_topic_up))
+                }
+                IconButton(onClick = onMoveDown, enabled = !isLast) {
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.cd_move_topic_down))
+                }
+            }
         },
         modifier = Modifier.clickable(onClick = onClick),
     )

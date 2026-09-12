@@ -152,3 +152,25 @@ val MIGRATION_9_10 = object : Migration(9, 10) {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_study_resource_topics_topicId ON study_resource_topics(topicId)")
     }
 }
+
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE study_resource_topics ADD COLUMN orderIndex INTEGER NOT NULL DEFAULT 0")
+        // Backfill orderIndex to match the current alphabetical-by-topic-name order per resource
+        // (a correlated-subquery rank, not a window function, for portability), so migrating
+        // doesn't visually reorder any existing attached-topics list.
+        db.execSQL(
+            """
+            UPDATE study_resource_topics
+            SET orderIndex = (
+                SELECT COUNT(*)
+                FROM study_resource_topics srt2
+                JOIN topics t2 ON t2.id = srt2.topicId
+                JOIN topics t1 ON t1.id = study_resource_topics.topicId
+                WHERE srt2.studyResourceId = study_resource_topics.studyResourceId
+                  AND (t2.name < t1.name OR (t2.name = t1.name AND srt2.id < study_resource_topics.id))
+            )
+            """.trimIndent()
+        )
+    }
+}

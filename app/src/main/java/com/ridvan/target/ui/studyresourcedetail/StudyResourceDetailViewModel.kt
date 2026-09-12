@@ -89,7 +89,10 @@ class StudyResourceDetailViewModel(
                 .firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
             val topicId = existing?.id ?: topicDao.insert(Topic(name = trimmed, courseId = courseId))
             if (attachedTopics.value.none { it.studyResourceTopic.topicId == topicId }) {
-                studyResourceTopicDao.insert(StudyResourceTopic(studyResourceId = studyResourceId, topicId = topicId))
+                val nextOrderIndex = attachedTopics.value.size
+                studyResourceTopicDao.insert(
+                    StudyResourceTopic(studyResourceId = studyResourceId, topicId = topicId, orderIndex = nextOrderIndex)
+                )
             }
         }
     }
@@ -97,11 +100,36 @@ class StudyResourceDetailViewModel(
     fun addExistingTopics(topicIds: Set<Long>) {
         if (topicIds.isEmpty()) return
         viewModelScope.launch {
+            var nextOrderIndex = attachedTopics.value.size
             topicIds.forEach { topicId ->
                 if (attachedTopics.value.none { it.studyResourceTopic.topicId == topicId }) {
-                    studyResourceTopicDao.insert(StudyResourceTopic(studyResourceId = studyResourceId, topicId = topicId))
+                    studyResourceTopicDao.insert(
+                        StudyResourceTopic(studyResourceId = studyResourceId, topicId = topicId, orderIndex = nextOrderIndex)
+                    )
+                    nextOrderIndex++
                 }
             }
+        }
+    }
+
+    fun moveTopicUp(studyResourceTopic: StudyResourceTopic) {
+        val current = attachedTopics.value
+        val index = current.indexOfFirst { it.studyResourceTopic.id == studyResourceTopic.id }
+        if (index <= 0) return
+        swapOrderIndex(current[index].studyResourceTopic, current[index - 1].studyResourceTopic)
+    }
+
+    fun moveTopicDown(studyResourceTopic: StudyResourceTopic) {
+        val current = attachedTopics.value
+        val index = current.indexOfFirst { it.studyResourceTopic.id == studyResourceTopic.id }
+        if (index == -1 || index >= current.size - 1) return
+        swapOrderIndex(current[index].studyResourceTopic, current[index + 1].studyResourceTopic)
+    }
+
+    private fun swapOrderIndex(first: StudyResourceTopic, second: StudyResourceTopic) {
+        viewModelScope.launch {
+            studyResourceTopicDao.update(first.copy(orderIndex = second.orderIndex))
+            studyResourceTopicDao.update(second.copy(orderIndex = first.orderIndex))
         }
     }
 
