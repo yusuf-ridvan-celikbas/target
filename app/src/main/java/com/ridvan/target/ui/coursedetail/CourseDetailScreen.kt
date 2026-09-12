@@ -44,6 +44,7 @@ import com.ridvan.target.ui.common.CourseIconPicker
 @Composable
 fun CourseDetailScreen(
     onStudyResourcesClick: () -> Unit,
+    onTopicsClick: () -> Unit,
     onBack: () -> Unit,
     viewModel: CourseDetailViewModel = viewModel(),
 ) {
@@ -81,6 +82,12 @@ fun CourseDetailScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             ) {
                 Text("Study Resources")
+            }
+            Button(
+                onClick = onTopicsClick,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            ) {
+                Text("Topics")
             }
         }
     }

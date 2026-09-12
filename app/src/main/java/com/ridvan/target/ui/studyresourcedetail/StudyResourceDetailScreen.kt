@@ -1,16 +1,23 @@
 package com.ridvan.target.ui.studyresourcedetail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,10 +27,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.data.local.dao.StudyResourceTopicWithTopic
+import com.ridvan.target.data.local.entity.StudyResourceTopic
+import com.ridvan.target.data.local.entity.StudyResourceType
+import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.studyresource.StudyResourceFormDialog
 import com.ridvan.target.ui.studyresource.studyResourceTypeLabel
 
@@ -35,9 +48,13 @@ fun StudyResourceDetailScreen(
 ) {
     val studyResource by viewModel.studyResource.collectAsStateWithLifecycle()
     val subjectName by viewModel.subjectName.collectAsStateWithLifecycle()
+    val attachedTopics by viewModel.attachedTopics.collectAsStateWithLifecycle()
+    val availableTopicsToAdd by viewModel.availableTopicsToAdd.collectAsStateWithLifecycle()
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showAddTopicDialog by remember { mutableStateOf(false) }
+    var editingTopic by remember { mutableStateOf<StudyResourceTopicWithTopic?>(null) }
 
     Scaffold(
         topBar = {
@@ -64,6 +81,19 @@ fun StudyResourceDetailScreen(
             Text("Type: ${studyResourceTypeLabel(studyResource?.type)}")
             studyResource?.publisher?.let { publisher ->
                 Text("Publisher: $publisher")
+            }
+
+            if (studyResource?.type == StudyResourceType.QUESTION_BANK && studyResource?.courseId != null) {
+                TopicsSectionHeader(onAddClick = { showAddTopicDialog = true })
+                if (attachedTopics.isEmpty()) {
+                    Text("No topics yet.", modifier = Modifier.padding(top = 4.dp))
+                } else {
+                    Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                        attachedTopics.forEach { attached ->
+                            TopicRow(attached, onClick = { editingTopic = attached })
+                        }
+                    }
+                }
             }
         }
     }
@@ -100,4 +130,156 @@ fun StudyResourceDetailScreen(
             },
         )
     }
+
+    if (showAddTopicDialog) {
+        AddTopicDialog(
+            availableTopics = availableTopicsToAdd,
+            onConfirm = { name, selectedIds ->
+                if (name.isNotBlank()) viewModel.addTopic(name)
+                if (selectedIds.isNotEmpty()) viewModel.addExistingTopics(selectedIds)
+                showAddTopicDialog = false
+            },
+            onDismiss = { showAddTopicDialog = false },
+        )
+    }
+
+    editingTopic?.let { attached ->
+        EditTopicCountsDialog(
+            attached = attached,
+            onSave = { testCount, questionCount ->
+                viewModel.updateTopicCounts(attached.studyResourceTopic, testCount, questionCount)
+                editingTopic = null
+            },
+            onRemove = {
+                viewModel.removeTopic(attached.studyResourceTopic)
+                editingTopic = null
+            },
+            onDismiss = { editingTopic = null },
+        )
+    }
+}
+
+@Composable
+private fun TopicsSectionHeader(onAddClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("Topics", modifier = Modifier.weight(1f))
+        TextButton(onClick = onAddClick) { Text("+ Add") }
+    }
+}
+
+@Composable
+private fun TopicRow(attached: StudyResourceTopicWithTopic, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(attached.topicName) },
+        supportingContent = {
+            Text("${attached.studyResourceTopic.testCount} tests · ${attached.studyResourceTopic.questionCount} questions")
+        },
+        modifier = Modifier.clickable(onClick = onClick),
+    )
+}
+
+@Composable
+private fun AddTopicDialog(
+    availableTopics: List<Topic>,
+    onConfirm: (newName: String, selectedIds: Set<Long>) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var selected by remember { mutableStateOf(emptySet<Long>()) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add topic") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("New topic name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (availableTopics.isNotEmpty()) {
+                    Text(
+                        "Or pick existing topics",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                    )
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        availableTopics.forEach { topic ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selected = if (topic.id in selected) selected - topic.id else selected + topic.id
+                                    },
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(checked = topic.id in selected, onCheckedChange = null)
+                                Text(topic.name)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(name, selected) },
+                enabled = name.isNotBlank() || selected.isNotEmpty(),
+            ) { Text("Add") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
+}
+
+@Composable
+private fun EditTopicCountsDialog(
+    attached: StudyResourceTopicWithTopic,
+    onSave: (testCount: Int, questionCount: Int) -> Unit,
+    onRemove: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var testCountText by remember { mutableStateOf(attached.studyResourceTopic.testCount.toString()) }
+    var questionCountText by remember { mutableStateOf(attached.studyResourceTopic.questionCount.toString()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(attached.topicName) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = testCountText,
+                    onValueChange = { input -> if (input.all(Char::isDigit)) testCountText = input },
+                    label = { Text("Test count") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = questionCountText,
+                    onValueChange = { input -> if (input.all(Char::isDigit)) questionCountText = input },
+                    label = { Text("Question count") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                TextButton(onClick = onRemove, modifier = Modifier.padding(top = 8.dp)) {
+                    Text("Remove topic from this resource")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onSave(testCountText.toIntOrNull() ?: 0, questionCountText.toIntOrNull() ?: 0)
+            }) { Text("Save") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
 }

@@ -64,3 +64,9 @@ object SettingsRoute
 
 @Serializable
 object SwitchAccountRoute
+
+@Serializable
+data class TopicListRoute(val courseId: Long)
+
+@Serializable
+data class TopicDetailRoute(val topicId: Long)

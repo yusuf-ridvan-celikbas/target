@@ -119,3 +119,36 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_study_resources_languageId ON study_resources(languageId)")
     }
 }
+
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS topics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                courseId INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_topics_courseId ON topics(courseId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS study_resource_topics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                studyResourceId INTEGER NOT NULL REFERENCES study_resources(id) ON DELETE CASCADE,
+                topicId INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+                testCount INTEGER NOT NULL DEFAULT 0,
+                questionCount INTEGER NOT NULL DEFAULT 0
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_study_resource_topics_studyResourceId_topicId " +
+                "ON study_resource_topics(studyResourceId, topicId)"
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_study_resource_topics_topicId ON study_resource_topics(topicId)")
+    }
+}

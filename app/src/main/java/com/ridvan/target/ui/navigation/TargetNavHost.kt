@@ -27,6 +27,8 @@ import com.ridvan.target.ui.studyresource.LanguageStudyResourceScreen
 import com.ridvan.target.ui.studyresource.StudyResourceHomeScreen
 import com.ridvan.target.ui.studyresourcedetail.StudyResourceDetailScreen
 import com.ridvan.target.ui.switchaccount.SwitchAccountScreen
+import com.ridvan.target.ui.topicdetail.TopicDetailScreen
+import com.ridvan.target.ui.topiclist.TopicListScreen
 import com.ridvan.target.ui.user.UserEditScreen
 
 private fun NavHostController.navigateToShellDestination(route: Any) {
@@ -138,11 +140,24 @@ fun TargetNavHost() {
             val courseId = backStackEntry.toRoute<CourseDetailRoute>().courseId
             CourseDetailScreen(
                 onStudyResourcesClick = { navController.navigate(CourseStudyResourceRoute(courseId)) },
+                onTopicsClick = { navController.navigate(TopicListRoute(courseId)) },
                 onBack = { navController.popBackStack() },
             )
         }
         composable<CourseStudyResourceRoute> {
             CourseStudyResourceScreen(
+                onResourceClick = { resourceId -> navController.navigate(StudyResourceDetailRoute(resourceId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<TopicListRoute> {
+            TopicListScreen(
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<TopicDetailRoute> {
+            TopicDetailScreen(
                 onResourceClick = { resourceId -> navController.navigate(StudyResourceDetailRoute(resourceId)) },
                 onBack = { navController.popBackStack() },
             )
