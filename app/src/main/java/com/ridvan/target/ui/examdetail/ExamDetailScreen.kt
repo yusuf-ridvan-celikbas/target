@@ -54,6 +54,7 @@ import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
+import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -334,7 +335,7 @@ private fun CourseGroupHeader(category: CourseCategory?, expanded: Boolean, onTo
 private fun CourseRow(course: ExamCourseWithCourse, onClick: () -> Unit, onRemove: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.courseIcon) },
-        headlineContent = { Text(course.courseName) },
+        headlineContent = { Text(courseDisplayName(course.courseName)) },
         trailingContent = {
             IconButton(onClick = onRemove) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_course))
@@ -391,7 +392,7 @@ private fun AddCourseDialog(
                             ) {
                                 Checkbox(checked = course.id in selected, onCheckedChange = null)
                                 CourseIconAvatar(course.icon, modifier = Modifier.padding(end = 8.dp))
-                                Text(course.name)
+                                Text(courseDisplayName(course.name))
                             }
                         }
                     }

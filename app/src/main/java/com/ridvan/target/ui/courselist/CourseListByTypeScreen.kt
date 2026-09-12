@@ -44,6 +44,7 @@ import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.CourseIconPicker
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
+import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,7 +149,7 @@ private fun CourseGroupHeader(category: CourseCategory?, expanded: Boolean, onTo
 private fun CourseRow(course: Course, onClick: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.icon) },
-        headlineContent = { Text(course.name) },
+        headlineContent = { Text(courseDisplayName(course.name)) },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }

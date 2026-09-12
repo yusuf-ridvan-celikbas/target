@@ -22,7 +22,7 @@
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
     <string name="label_exams">Sınavlar</string>
-    <string name="label_courses">Kurslar</string>
+    <string name="label_courses">Dersler</string>
     <string name="label_study_resources">Çalışma Kaynakları</string>
     <string name="label_languages">Diller</string>
     <string name="label_home">Ana Sayfa</string>
@@ -145,39 +145,39 @@
     <string name="cd_edit_exam">Sınavı düzenle</string>
     <string name="cd_delete_exam">Sınavı sil</string>
     <string name="action_add_prefixed">+ Ekle</string>
-    <string name="cd_collapse_courses">Kursları daralt</string>
-    <string name="cd_expand_courses">Kursları genişlet</string>
-    <string name="examdetail_no_courses">Henüz kurs yok.</string>
+    <string name="cd_collapse_courses">Dersleri daralt</string>
+    <string name="cd_expand_courses">Dersleri genişlet</string>
+    <string name="examdetail_no_courses">Henüz ders yok.</string>
     <string name="label_sections">Bölümler</string>
     <string name="examdetail_no_sections">Henüz bölüm yok.</string>
     <string name="examdetail_delete_title">Sınav silinsin mi?</string>
     <string name="examdetail_delete_message">Bu, sınavı ve altında kayıtlı her şeyi kaldırır.</string>
-    <string name="dialog_add_course_title">Kurs ekle</string>
-    <string name="label_new_course_name">Yeni kurs adı</string>
-    <string name="label_pick_existing_courses">Ya da mevcut kurslardan seç</string>
+    <string name="dialog_add_course_title">Ders ekle</string>
+    <string name="label_new_course_name">Yeni ders adı</string>
+    <string name="label_pick_existing_courses">Ya da mevcut derslerden seç</string>
     <string name="dialog_add_section_title">Bölüm ekle</string>
     <string name="label_section_name">Bölüm adı</string>
     <string name="cd_collapse_x">%1$s bölümünü daralt</string>
     <string name="cd_expand_x">%1$s bölümünü genişlet</string>
 
     <!-- Course list menu (ui/courselist/CourseListScreen.kt) -->
-    <string name="course_list_title">Kurslar</string>
-    <string name="course_type_bucket_title">%1$s Kursları</string>
+    <string name="course_list_title">Dersler</string>
+    <string name="course_type_bucket_title">%1$s Dersleri</string>
 
     <!-- Course list by type (ui/courselist/CourseListByTypeScreen.kt) -->
-    <string name="course_type_empty">Henüz kurs yok. Eklemek için + tuşuna dokun.</string>
-    <string name="dialog_edit_course_title">Kursu düzenle</string>
+    <string name="course_type_empty">Henüz ders yok. Eklemek için + tuşuna dokun.</string>
+    <string name="dialog_edit_course_title">Dersi düzenle</string>
 
     <!-- Section detail (ui/sectiondetail/SectionDetailScreen.kt) -->
     <string name="sectiondetail_date_prefix">Tarih: %1$s</string>
-    <string name="sectiondetail_no_courses">Henüz kurs atanmadı.</string>
+    <string name="sectiondetail_no_courses">Henüz ders atanmadı.</string>
     <string name="cd_edit_section">Bölümü düzenle</string>
     <string name="cd_delete_section">Bölümü sil</string>
-    <string name="cd_remove_course">Kursu kaldır</string>
+    <string name="cd_remove_course">Dersi kaldır</string>
     <string name="sectiondetail_delete_title">Bölüm silinsin mi?</string>
-    <string name="sectiondetail_delete_message">Bu, bölümü ve kurs atamalarını kaldırır.</string>
-    <string name="dialog_add_courses_title">Kurslar ekle</string>
-    <string name="sectiondetail_all_assigned">Sınavın tüm kursları zaten bu bölüme atanmış.</string>
+    <string name="sectiondetail_delete_message">Bu, bölümü ve ders atamalarını kaldırır.</string>
+    <string name="dialog_add_courses_title">Dersler ekle</string>
+    <string name="sectiondetail_all_assigned">Sınavın tüm dersleri zaten bu bölüme atanmış.</string>
     <string name="dialog_edit_section_title">Bölümü düzenle</string>
 
     <!-- Study Resources (ui/studyresource/*, ui/studyresourcedetail/*) -->
@@ -217,17 +217,41 @@
     <string name="contribution_row_title">%1$s — %2$s</string>
 
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
-    <string name="cd_edit_course">Kursu düzenle</string>
-    <string name="cd_delete_course">Kursu sil</string>
+    <string name="cd_edit_course">Dersi düzenle</string>
+    <string name="cd_delete_course">Dersi sil</string>
     <string name="coursedetail_exam_type">Sınav türü: %1$s</string>
     <string name="coursedetail_category">Kategori: %1$s</string>
-    <string name="coursedetail_delete_title">Kurs silinsin mi?</string>
+    <string name="coursedetail_delete_title">Ders silinsin mi?</string>
     <string name="coursedetail_delete_message">Bu, \"%1$s\" öğesini atandığı sınavlardan veya bölümlerden kaldırır.</string>
+
+    <!-- Known-subject course name translations (ui/common/CourseNameDisplay.kt) -->
+    <string name="course_name_mathematics">Matematik</string>
+    <string name="course_name_advanced_mathematics">İleri Matematik</string>
+    <string name="course_name_geometry">Geometri</string>
+    <string name="course_name_physics">Fizik</string>
+    <string name="course_name_chemistry">Kimya</string>
+    <string name="course_name_biology">Biyoloji</string>
+    <string name="course_name_science">Fen Bilimleri</string>
+    <string name="course_name_turkish">Türkçe</string>
+    <string name="course_name_history">Tarih</string>
+    <string name="course_name_geography">Coğrafya</string>
+    <string name="course_name_literature">Edebiyat</string>
+    <string name="course_name_philosophy">Felsefe</string>
+    <string name="course_name_social_studies">Sosyal Bilgiler</string>
+    <string name="course_name_religious_culture">Din Kültürü ve Ahlak Bilgisi</string>
+    <string name="course_name_art">Sanat</string>
+    <string name="course_name_music">Müzik</string>
+    <string name="course_name_computer_science">Bilgisayar Bilimi</string>
+    <string name="course_name_law">Hukuk</string>
+    <string name="course_name_psychology">Psikoloji</string>
+    <string name="course_name_pe">Beden Eğitimi</string>
+    <string name="course_name_economics">Ekonomi</string>
+    <string name="course_name_english">İngilizce</string>
 
     <!-- Language screens (ui/languagelist/*, ui/languagedetail/*) -->
     <string name="lang_list_empty">Henüz dil yok. Eklemek için + tuşuna dokun.</string>
     <string name="dialog_add_language_title">Dil ekle</string>
-    <string name="label_language_exam_courses">Dil Sınavı Kursları</string>
+    <string name="label_language_exam_courses">Dil Sınavı Dersleri</string>
     <string name="cd_edit_language">Dili düzenle</string>
     <string name="cd_delete_language">Dili sil</string>
     <string name="dialog_edit_language_title">Dili düzenle</string>

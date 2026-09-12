@@ -39,6 +39,7 @@ import com.ridvan.target.data.local.dao.StudyResourceTopicWithTopic
 import com.ridvan.target.data.local.entity.StudyResourceTopic
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.data.local.entity.Topic
+import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.studyresource.StudyResourceFormDialog
 import com.ridvan.target.ui.studyresource.studyResourceTypeLabel
 
@@ -50,6 +51,7 @@ fun StudyResourceDetailScreen(
 ) {
     val studyResource by viewModel.studyResource.collectAsStateWithLifecycle()
     val subjectName by viewModel.subjectName.collectAsStateWithLifecycle()
+    val displaySubjectName = if (studyResource?.courseId != null) courseDisplayName(subjectName) else subjectName
     val attachedTopics by viewModel.attachedTopics.collectAsStateWithLifecycle()
     val availableTopicsToAdd by viewModel.availableTopicsToAdd.collectAsStateWithLifecycle()
 
@@ -79,7 +81,7 @@ fun StudyResourceDetailScreen(
         },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp)) {
-            Text(stringResource(R.string.srdetail_subject, subjectName))
+            Text(stringResource(R.string.srdetail_subject, displaySubjectName))
             Text(stringResource(R.string.srdetail_type, studyResourceTypeLabel(studyResource?.type)))
             studyResource?.publisher?.let { publisher ->
                 Text(stringResource(R.string.srdetail_publisher, publisher))
@@ -103,7 +105,7 @@ fun StudyResourceDetailScreen(
     if (showEditDialog && studyResource != null) {
         StudyResourceFormDialog(
             title = stringResource(R.string.dialog_edit_study_resource_title),
-            subjectLabel = subjectName,
+            subjectLabel = displaySubjectName,
             initialName = studyResource!!.name,
             initialType = studyResource!!.type,
             initialPublisher = studyResource!!.publisher.orEmpty(),

@@ -224,6 +224,32 @@
     <string name="coursedetail_delete_title">Delete course?</string>
     <string name="coursedetail_delete_message">This removes \"%1$s\" from any exams or sections it\'s assigned to.</string>
 
+    <!-- Known-subject course name translations (ui/common/CourseNameDisplay.kt) — English default
+         mirrors the raw value these keys map from; free-text course names outside this list are
+         shown exactly as typed. -->
+    <string name="course_name_mathematics">Mathematics</string>
+    <string name="course_name_advanced_mathematics">Advanced Mathematics</string>
+    <string name="course_name_geometry">Geometry</string>
+    <string name="course_name_physics">Physics</string>
+    <string name="course_name_chemistry">Chemistry</string>
+    <string name="course_name_biology">Biology</string>
+    <string name="course_name_science">Science</string>
+    <string name="course_name_turkish">Turkish</string>
+    <string name="course_name_history">History</string>
+    <string name="course_name_geography">Geography</string>
+    <string name="course_name_literature">Literature</string>
+    <string name="course_name_philosophy">Philosophy</string>
+    <string name="course_name_social_studies">Social Studies</string>
+    <string name="course_name_religious_culture">Religious Culture and Moral Knowledge</string>
+    <string name="course_name_art">Art</string>
+    <string name="course_name_music">Music</string>
+    <string name="course_name_computer_science">Computer Science</string>
+    <string name="course_name_law">Law</string>
+    <string name="course_name_psychology">Psychology</string>
+    <string name="course_name_pe">PE</string>
+    <string name="course_name_economics">Economics</string>
+    <string name="course_name_english">English</string>
+
     <!-- Language screens (ui/languagelist/*, ui/languagedetail/*) -->
     <string name="lang_list_empty">No languages yet. Tap + to add one.</string>
     <string name="dialog_add_language_title">Add language</string>

@@ -42,6 +42,7 @@ import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.ui.common.CourseIconPicker
 import com.ridvan.target.ui.common.courseCategoryValueLabel
+import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +61,7 @@ fun CourseDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(course?.name.orEmpty()) },
+                title = { Text(course?.name?.let { courseDisplayName(it) }.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
@@ -116,7 +117,7 @@ fun CourseDetailScreen(
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
             title = { Text(stringResource(R.string.coursedetail_delete_title)) },
-            text = { Text(stringResource(R.string.coursedetail_delete_message, course?.name.orEmpty())) },
+            text = { Text(stringResource(R.string.coursedetail_delete_message, course?.name?.let { courseDisplayName(it) }.orEmpty())) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteCourse()

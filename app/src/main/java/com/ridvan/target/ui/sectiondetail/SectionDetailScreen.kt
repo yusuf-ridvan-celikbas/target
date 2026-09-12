@@ -49,6 +49,7 @@ import com.ridvan.target.data.local.dao.SectionCourseWithCourse
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
+import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,7 +199,7 @@ private fun SectionCourseGroupHeader(category: CourseCategory?, expanded: Boolea
 private fun AssignedCourseRow(course: SectionCourseWithCourse, onClick: () -> Unit, onRemove: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.courseIcon) },
-        headlineContent = { Text(course.courseName) },
+        headlineContent = { Text(courseDisplayName(course.courseName)) },
         trailingContent = {
             IconButton(onClick = onRemove) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_course))
@@ -235,7 +236,7 @@ private fun PickCoursesDialog(
                         ) {
                             Checkbox(checked = courseId in selected, onCheckedChange = null)
                             CourseIconAvatar(item.courseIcon, modifier = Modifier.padding(end = 8.dp))
-                            Text(item.courseName)
+                            Text(courseDisplayName(item.courseName))
                         }
                     }
                 }

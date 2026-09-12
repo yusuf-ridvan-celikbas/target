@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.ui.common.courseDisplayName
 
 @Composable
 fun CourseStudyResourceScreen(
@@ -15,7 +16,7 @@ fun CourseStudyResourceScreen(
     val studyResources by viewModel.studyResources.collectAsStateWithLifecycle()
 
     StudyResourceListContent(
-        title = course?.name.orEmpty(),
+        title = course?.name?.let { courseDisplayName(it) }.orEmpty(),
         studyResources = studyResources,
         onAdd = viewModel::addStudyResource,
         onResourceClick = onResourceClick,
