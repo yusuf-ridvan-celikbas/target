@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -80,7 +82,13 @@ fun StudyResourceDetailScreen(
             )
         },
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(innerPadding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
             Text(stringResource(R.string.srdetail_subject, displaySubjectName))
             Text(stringResource(R.string.srdetail_type, studyResourceTypeLabel(studyResource?.type)))
             studyResource?.publisher?.let { publisher ->
@@ -197,7 +205,7 @@ private fun AddTopicDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_add_topic_title)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -223,7 +225,7 @@ private fun PickCoursesDialog(
             if (available.isEmpty()) {
                 Text(stringResource(R.string.sectiondetail_all_assigned))
             } else {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     available.forEach { item ->
                         val courseId = item.examCourse.courseId
                         Row(

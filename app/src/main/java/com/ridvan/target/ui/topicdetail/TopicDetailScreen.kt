@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -66,7 +68,13 @@ fun TopicDetailScreen(
             )
         },
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(innerPadding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
             Text(
                 stringResource(R.string.counts_tests_questions, totalTestCount, totalQuestionCount),
                 style = MaterialTheme.typography.headlineSmall,
