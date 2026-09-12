@@ -8,6 +8,7 @@ import com.ridvan.target.data.PasswordHasher
 import com.ridvan.target.data.local.entity.PreferredNameSource
 import com.ridvan.target.data.local.entity.User
 import com.ridvan.target.data.resolvePreferredName
+import com.ridvan.target.ui.common.ErrorMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,8 +27,8 @@ class UserEditViewModel(application: Application) : AndroidViewModel(application
         if (userId != null) userDao.getById(userId) else flowOf(null)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage.asStateFlow()
 
     fun save(
         firstName: String,
@@ -47,13 +48,13 @@ class UserEditViewModel(application: Application) : AndroidViewModel(application
         val trimmedLast = lastName.trim()
         val trimmedUsername = username.trim()
         if (trimmedFirst.isEmpty() || trimmedLast.isEmpty() || trimmedUsername.isEmpty()) {
-            _errorMessage.value = "Fill in all required fields"
+            _errorMessage.value = ErrorMessage.FILL_REQUIRED_FIELDS
             return
         }
         viewModelScope.launch {
             val current = user.value ?: return@launch
             if (trimmedUsername != current.username && userDao.countByUsername(trimmedUsername) > 0) {
-                _errorMessage.value = "That username is already taken"
+                _errorMessage.value = ErrorMessage.USERNAME_TAKEN
                 return@launch
             }
 
@@ -62,15 +63,15 @@ class UserEditViewModel(application: Application) : AndroidViewModel(application
             val wantsPasswordChange = oldPassword.isNotEmpty() || newPassword.isNotEmpty() || confirmNewPassword.isNotEmpty()
             if (wantsPasswordChange) {
                 if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmNewPassword.isEmpty()) {
-                    _errorMessage.value = "Fill in all three password fields to change your password"
+                    _errorMessage.value = ErrorMessage.FILL_ALL_PASSWORD_FIELDS
                     return@launch
                 }
                 if (!PasswordHasher.verify(oldPassword, current.passwordSalt, current.passwordHash)) {
-                    _errorMessage.value = "Current password is incorrect"
+                    _errorMessage.value = ErrorMessage.CURRENT_PASSWORD_INCORRECT
                     return@launch
                 }
                 if (newPassword != confirmNewPassword) {
-                    _errorMessage.value = "New passwords don't match"
+                    _errorMessage.value = ErrorMessage.NEW_PASSWORDS_DONT_MATCH
                     return@launch
                 }
                 newSalt = PasswordHasher.generateSalt()

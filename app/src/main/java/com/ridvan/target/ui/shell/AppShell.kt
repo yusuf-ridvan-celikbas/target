@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
 import kotlinx.coroutines.launch
@@ -92,7 +93,7 @@ fun AppShell(
                     )
                 }
                 NavigationDrawerItem(
-                    label = { Text("Exams") },
+                    label = { Text(stringResource(R.string.label_exams)) },
                     icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) },
                     selected = false,
                     onClick = {
@@ -103,7 +104,7 @@ fun AppShell(
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                 NavigationDrawerItem(
-                    label = { Text("Courses") },
+                    label = { Text(stringResource(R.string.label_courses)) },
                     icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) },
                     selected = false,
                     onClick = {
@@ -114,7 +115,7 @@ fun AppShell(
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                 NavigationDrawerItem(
-                    label = { Text("Study Resources") },
+                    label = { Text(stringResource(R.string.label_study_resources)) },
                     icon = { Icon(Icons.Filled.Bookmark, contentDescription = null) },
                     selected = false,
                     onClick = {
@@ -125,7 +126,7 @@ fun AppShell(
                 )
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                 NavigationDrawerItem(
-                    label = { Text("Languages") },
+                    label = { Text(stringResource(R.string.label_languages)) },
                     icon = { Icon(Icons.Filled.Translate, contentDescription = null) },
                     selected = false,
                     onClick = {
@@ -136,7 +137,7 @@ fun AppShell(
                 )
                 Spacer(Modifier.weight(1f))
                 NavigationDrawerItem(
-                    label = { Text("Home") },
+                    label = { Text(stringResource(R.string.label_home)) },
                     icon = { Icon(Icons.Filled.Home, contentDescription = null) },
                     selected = false,
                     onClick = {
@@ -154,16 +155,16 @@ fun AppShell(
                     title = { Text(title) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.cd_menu))
                         }
                     },
                     actions = {
                         IconButton(onClick = { overflowExpanded = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "More")
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.cd_more))
                         }
                         DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
                             DropdownMenuItem(
-                                text = { Text("User Settings") },
+                                text = { Text(stringResource(R.string.menu_user_settings)) },
                                 onClick = {
                                     overflowExpanded = false
                                     navigation.onNavigateUser()
@@ -171,7 +172,7 @@ fun AppShell(
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                             DropdownMenuItem(
-                                text = { Text("App Settings") },
+                                text = { Text(stringResource(R.string.menu_app_settings)) },
                                 onClick = {
                                     overflowExpanded = false
                                     navigation.onNavigateSettings()
@@ -179,7 +180,7 @@ fun AppShell(
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                             DropdownMenuItem(
-                                text = { Text("Account") },
+                                text = { Text(stringResource(R.string.menu_account)) },
                                 onClick = {
                                     overflowExpanded = false
                                     accountMenuExpanded = true
@@ -188,7 +189,7 @@ fun AppShell(
                         }
                         DropdownMenu(expanded = accountMenuExpanded, onDismissRequest = { accountMenuExpanded = false }) {
                             DropdownMenuItem(
-                                text = { Text("Log Out") },
+                                text = { Text(stringResource(R.string.menu_log_out)) },
                                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
                                 onClick = {
                                     accountMenuExpanded = false
@@ -197,7 +198,7 @@ fun AppShell(
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                             DropdownMenuItem(
-                                text = { Text("Switch Account") },
+                                text = { Text(stringResource(R.string.label_switch_account)) },
                                 leadingIcon = { Icon(Icons.Filled.SwitchAccount, contentDescription = null) },
                                 onClick = {
                                     accountMenuExpanded = false

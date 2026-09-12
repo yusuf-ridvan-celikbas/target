@@ -7,6 +7,7 @@ import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.PasswordHasher
 import com.ridvan.target.data.local.AppPreferences
 import com.ridvan.target.data.local.dao.UserDao
+import com.ridvan.target.ui.common.ErrorMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,13 +17,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val userDao: UserDao = (application as TargetApplication).database.userDao()
     private val preferences: AppPreferences = (application as TargetApplication).preferences
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage.asStateFlow()
 
     fun login(username: String, password: String, onSuccess: () -> Unit) {
         val trimmedUsername = username.trim()
         if (trimmedUsername.isEmpty() || password.isEmpty()) {
-            _errorMessage.value = "Enter your username and password"
+            _errorMessage.value = ErrorMessage.ENTER_USERNAME_PASSWORD
             return
         }
         viewModelScope.launch {
@@ -32,7 +33,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 _errorMessage.value = null
                 onSuccess()
             } else {
-                _errorMessage.value = "Invalid username or password"
+                _errorMessage.value = ErrorMessage.INVALID_USERNAME_PASSWORD
             }
         }
     }

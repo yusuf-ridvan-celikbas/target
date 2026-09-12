@@ -32,16 +32,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.StudyResource
 import com.ridvan.target.data.local.entity.StudyResourceType
 
+@Composable
 internal fun studyResourceTypeLabel(type: StudyResourceType?): String = when (type) {
-    StudyResourceType.QUESTION_BANK -> "Question Bank"
-    StudyResourceType.LECTURE_TEXTBOOK -> "Lecture/Textbook"
-    StudyResourceType.PRACTICE_EXAM -> "Practice Exam"
-    StudyResourceType.LECTURE_NOTES -> "Lecture Notes"
-    null -> "Not set"
+    StudyResourceType.QUESTION_BANK -> stringResource(R.string.sr_type_question_bank)
+    StudyResourceType.LECTURE_TEXTBOOK -> stringResource(R.string.sr_type_lecture_textbook)
+    StudyResourceType.PRACTICE_EXAM -> stringResource(R.string.sr_type_practice_exam)
+    StudyResourceType.LECTURE_NOTES -> stringResource(R.string.sr_type_lecture_notes)
+    null -> stringResource(R.string.common_not_set)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,7 +64,7 @@ internal fun StudyResourceListContent(
                 title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -77,7 +80,7 @@ internal fun StudyResourceListContent(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No study resources yet. Tap + to add one.")
+                Text(stringResource(R.string.sr_list_empty))
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -91,7 +94,7 @@ internal fun StudyResourceListContent(
 
     if (showAddDialog) {
         StudyResourceFormDialog(
-            title = "Add study resource",
+            title = stringResource(R.string.dialog_add_study_resource_title),
             subjectLabel = title,
             initialName = "",
             initialType = null,
@@ -133,12 +136,12 @@ internal fun StudyResourceFormDialog(
         title = { Text(title) },
         text = {
             Column {
-                Text("Subject", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.label_subject), style = MaterialTheme.typography.labelSmall)
                 Text(subjectLabel, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(bottom = 8.dp))
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.common_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -149,7 +152,7 @@ internal fun StudyResourceFormDialog(
                 OutlinedTextField(
                     value = publisher,
                     onValueChange = { publisher = it },
-                    label = { Text("Publisher (optional)") },
+                    label = { Text(stringResource(R.string.label_publisher_optional)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
@@ -159,10 +162,10 @@ internal fun StudyResourceFormDialog(
             TextButton(
                 onClick = { type?.let { onConfirm(name, it, publisher.trim().ifBlank { null }) } },
                 enabled = name.isNotBlank() && type != null,
-            ) { Text("Save") }
+            ) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }
@@ -172,7 +175,7 @@ internal fun StudyResourceTypeField(selectedType: StudyResourceType?, onSelect: 
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text("Type", style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(R.string.label_type), style = MaterialTheme.typography.labelSmall)
             Text(studyResourceTypeLabel(selectedType), style = MaterialTheme.typography.bodyLarge)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {

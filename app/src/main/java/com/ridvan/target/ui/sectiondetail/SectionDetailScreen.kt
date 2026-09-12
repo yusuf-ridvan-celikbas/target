@@ -39,13 +39,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.SectionCourseWithCourse
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.CourseIconAvatar
+import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,15 +72,15 @@ fun SectionDetailScreen(
                 title = { Text(section?.name.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit section")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_edit_section))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete section")
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_section))
                     }
                 },
             )
@@ -90,21 +93,21 @@ fun SectionDetailScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             Text(
-                "Date: ${section?.date?.let { formatDate(it) } ?: "Not set"}",
+                stringResource(R.string.sectiondetail_date_prefix, section?.date?.let { formatDate(it) } ?: stringResource(R.string.common_not_set)),
                 modifier = Modifier.padding(16.dp),
             )
             if (assignedCourses.isEmpty()) {
-                Text("No courses assigned yet.", modifier = Modifier.padding(horizontal = 16.dp))
+                Text(stringResource(R.string.sectiondetail_no_courses), modifier = Modifier.padding(horizontal = 16.dp))
             } else {
-                val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
+                val expandedGroups = remember { mutableStateMapOf<CourseCategory?, Boolean>() }
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    sectionCourseGroups(assignedCourses).forEach { (label, groupCourses) ->
-                        val expanded = expandedGroups[label] ?: false
+                    sectionCourseGroups(assignedCourses).forEach { (category, groupCourses) ->
+                        val expanded = expandedGroups[category] ?: false
                         item {
                             SectionCourseGroupHeader(
-                                label,
+                                category,
                                 expanded = expanded,
-                                onToggleExpand = { expandedGroups[label] = !expanded },
+                                onToggleExpand = { expandedGroups[category] = !expanded },
                             )
                         }
                         if (expanded) {
@@ -138,17 +141,17 @@ fun SectionDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete section?") },
-            text = { Text("This removes the section and its course assignments.") },
+            title = { Text(stringResource(R.string.sectiondetail_delete_title)) },
+            text = { Text(stringResource(R.string.sectiondetail_delete_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteSection()
                     showDeleteConfirm = false
                     onBack()
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.common_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -165,17 +168,18 @@ fun SectionDetailScreen(
     }
 }
 
-private fun sectionCourseGroups(courses: List<SectionCourseWithCourse>): List<Pair<String, List<SectionCourseWithCourse>>> {
+private fun sectionCourseGroups(courses: List<SectionCourseWithCourse>): List<Pair<CourseCategory?, List<SectionCourseWithCourse>>> {
     val byCategory = courses.groupBy { it.courseCategory }
     return listOfNotNull(
-        byCategory[CourseCategory.QUANTITATIVE]?.let { "Quantitative" to it },
-        byCategory[CourseCategory.VERBAL]?.let { "Verbal" to it },
-        byCategory[null]?.let { "Uncategorized" to it },
+        byCategory[CourseCategory.QUANTITATIVE]?.let { CourseCategory.QUANTITATIVE to it },
+        byCategory[CourseCategory.VERBAL]?.let { CourseCategory.VERBAL to it },
+        byCategory[null]?.let { null to it },
     )
 }
 
 @Composable
-private fun SectionCourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: () -> Unit) {
+private fun SectionCourseGroupHeader(category: CourseCategory?, expanded: Boolean, onToggleExpand: () -> Unit) {
+    val label = courseCategoryGroupLabel(category)
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -184,7 +188,7 @@ private fun SectionCourseGroupHeader(label: String, expanded: Boolean, onToggleE
         IconButton(onClick = onToggleExpand) {
             Icon(
                 if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                contentDescription = if (expanded) "Collapse $label" else "Expand $label",
+                contentDescription = if (expanded) stringResource(R.string.cd_collapse_x, label) else stringResource(R.string.cd_expand_x, label),
             )
         }
     }
@@ -197,7 +201,7 @@ private fun AssignedCourseRow(course: SectionCourseWithCourse, onClick: () -> Un
         headlineContent = { Text(course.courseName) },
         trailingContent = {
             IconButton(onClick = onRemove) {
-                Icon(Icons.Filled.Delete, contentDescription = "Remove course")
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_course))
             }
         },
         modifier = Modifier.clickable(onClick = onClick),
@@ -213,10 +217,10 @@ private fun PickCoursesDialog(
     var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add courses") },
+        title = { Text(stringResource(R.string.dialog_add_courses_title)) },
         text = {
             if (available.isEmpty()) {
-                Text("All of the exam's courses are already assigned to this section.")
+                Text(stringResource(R.string.sectiondetail_all_assigned))
             } else {
                 Column {
                     available.forEach { item ->
@@ -238,10 +242,10 @@ private fun PickCoursesDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(selected) }, enabled = selected.isNotEmpty()) { Text("Add") }
+            TextButton(onClick = { onConfirm(selected) }, enabled = selected.isNotEmpty()) { Text(stringResource(R.string.common_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }
@@ -260,26 +264,26 @@ private fun EditSectionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit section") },
+        title = { Text(stringResource(R.string.dialog_edit_section_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Section name") },
+                    label = { Text(stringResource(R.string.label_section_name)) },
                     singleLine = true,
                 )
                 Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { showDatePicker = true }) {
-                    Text("Date")
-                    Text(date?.let { formatDate(it) } ?: "Tap to set")
+                    Text(stringResource(R.string.label_date))
+                    Text(date?.let { formatDate(it) } ?: stringResource(R.string.common_tap_to_set))
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name, date) }, enabled = name.isNotBlank()) { Text("Save") }
+            TextButton(onClick = { onConfirm(name, date) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 
@@ -291,10 +295,10 @@ private fun EditSectionDialog(
                 TextButton(onClick = {
                     date = state.selectedDateMillis
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.common_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         ) {
             DatePicker(state = state)

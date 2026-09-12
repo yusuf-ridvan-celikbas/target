@@ -27,7 +27,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.ExamType
@@ -56,13 +58,13 @@ fun AddOrEditExamDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (initial == null) "New exam" else "Edit exam") },
+        title = { Text(stringResource(if (initial == null) R.string.exam_dialog_new_title else R.string.exam_dialog_edit_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Exam name") },
+                    label = { Text(stringResource(R.string.exam_field_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -85,7 +87,7 @@ fun AddOrEditExamDialog(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Has multiple sections", modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.exam_has_sections), modifier = Modifier.weight(1f))
                     Switch(
                         checked = hasSections,
                         onCheckedChange = { hasSections = it },
@@ -95,14 +97,14 @@ fun AddOrEditExamDialog(
 
                 if (!hasSections) {
                     DateField(
-                        label = "Exam date",
+                        label = stringResource(R.string.exam_field_exam_date),
                         value = examDate,
                         onClick = { showExamDatePicker = true },
                     )
                 }
 
                 DateField(
-                    label = "Study start date (optional)",
+                    label = stringResource(R.string.exam_field_study_start_date),
                     value = studyStartDate,
                     onClick = { showStudyStartDatePicker = true },
                 )
@@ -116,11 +118,11 @@ fun AddOrEditExamDialog(
                 },
                 enabled = name.isNotBlank() && selectedTypeId != null,
             ) {
-                Text(if (initial == null) "Add" else "Save")
+                Text(stringResource(if (initial == null) R.string.common_add else R.string.common_save))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 
@@ -132,10 +134,10 @@ fun AddOrEditExamDialog(
                 TextButton(onClick = {
                     examDate = state.selectedDateMillis
                     showExamDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.common_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showExamDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showExamDatePicker = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         ) {
             DatePicker(state = state)
@@ -150,10 +152,10 @@ fun AddOrEditExamDialog(
                 TextButton(onClick = {
                     studyStartDate = state.selectedDateMillis
                     showStudyStartDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.common_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showStudyStartDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showStudyStartDatePicker = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         ) {
             DatePicker(state = state)
@@ -166,16 +168,17 @@ private fun ExamTypeField(examTypes: List<ExamType>, selectedId: Long?, onSelect
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text("Exam type", style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(R.string.exam_field_type_label), style = MaterialTheme.typography.labelSmall)
             Text(
-                examTypes.firstOrNull { it.id == selectedId }?.name ?: "Select",
+                examTypes.firstOrNull { it.id == selectedId }?.name?.let { examTypeDisplayName(it) }
+                    ?: stringResource(R.string.common_select),
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             examTypes.forEach { type ->
                 DropdownMenuItem(
-                    text = { Text(type.name) },
+                    text = { Text(examTypeDisplayName(type.name)) },
                     onClick = {
                         onSelect(type.id)
                         expanded = false
@@ -191,10 +194,10 @@ private fun LanguageField(languages: List<Language>, selectedId: Long?, onSelect
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text("Language", style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(R.string.label_language), style = MaterialTheme.typography.labelSmall)
             Text(
                 languages.firstOrNull { it.id == selectedId }?.name
-                    ?: if (languages.isEmpty()) "No languages yet — add some from the Languages screen" else "Select",
+                    ?: if (languages.isEmpty()) stringResource(R.string.exam_no_languages_hint) else stringResource(R.string.common_select),
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
@@ -216,6 +219,6 @@ private fun LanguageField(languages: List<Language>, selectedId: Long?, onSelect
 private fun DateField(label: String, value: Long?, onClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable(onClick = onClick)) {
         Text(label, style = MaterialTheme.typography.labelSmall)
-        Text(value?.let { formatDate(it) } ?: "Tap to set", style = MaterialTheme.typography.bodyLarge)
+        Text(value?.let { formatDate(it) } ?: stringResource(R.string.common_tap_to_set), style = MaterialTheme.typography.bodyLarge)
     }
 }

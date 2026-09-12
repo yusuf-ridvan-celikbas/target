@@ -1,0 +1,236 @@
+<resources>
+    <string name="app_name">Target</string>
+
+    <!-- Common / shared across many screens -->
+    <string name="common_cancel">İptal</string>
+    <string name="common_save">Kaydet</string>
+    <string name="common_add">Ekle</string>
+    <string name="common_delete">Sil</string>
+    <string name="common_ok">Tamam</string>
+    <string name="common_name">Ad</string>
+    <string name="common_not_set">Ayarlanmadı</string>
+    <string name="common_select">Seç</string>
+    <string name="common_tap_to_set">Ayarlamak için dokun</string>
+    <string name="common_no_language_set">Dil ayarlanmadı</string>
+    <string name="common_no_publisher">Yayıncı yok</string>
+    <string name="cd_back">Geri</string>
+    <string name="label_icon">Simge</string>
+    <string name="label_date">Tarih</string>
+    <string name="label_language">Dil</string>
+    <string name="counts_tests_questions">%1$d test · %2$d soru</string>
+    <string name="delete_confirm_generic">Bu, \"%1$s\" öğesini kaldırır.</string>
+
+    <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
+    <string name="label_exams">Sınavlar</string>
+    <string name="label_courses">Kurslar</string>
+    <string name="label_study_resources">Çalışma Kaynakları</string>
+    <string name="label_languages">Diller</string>
+    <string name="label_home">Ana Sayfa</string>
+    <string name="cd_menu">Menü</string>
+    <string name="cd_more">Diğer</string>
+    <string name="menu_user_settings">Kullanıcı Ayarları</string>
+    <string name="menu_app_settings">Uygulama Ayarları</string>
+    <string name="menu_account">Hesap</string>
+    <string name="menu_log_out">Çıkış Yap</string>
+    <string name="label_switch_account">Hesap Değiştir</string>
+
+    <!-- Auth: Login / Register / Preferred name selector -->
+    <string name="login_title">Giriş yap</string>
+    <string name="login_register_prompt">Hesabın yok mu? Kayıt ol</string>
+    <string name="register_title">Kayıt Ol</string>
+    <string name="register_login_prompt">Zaten bir hesabın var mı? Giriş yap</string>
+    <string name="field_first_name">Ad</string>
+    <string name="field_middle_name_optional">İkinci ad (isteğe bağlı)</string>
+    <string name="field_last_name">Soyad</string>
+    <string name="field_username">Kullanıcı adı</string>
+    <string name="field_email_optional">E-posta (isteğe bağlı)</string>
+    <string name="field_password">Şifre</string>
+    <string name="preferred_name_label">Tercih edilen ad</string>
+    <string name="preferred_name_first">İlk ad</string>
+    <string name="preferred_name_middle">İkinci ad</string>
+    <string name="preferred_name_use_last_name">Soyadını kullan</string>
+    <string name="preferred_name_use_username">Kullanıcı adını kullan</string>
+    <string name="preferred_name_other">Diğer</string>
+
+    <!-- Error messages surfaced from ViewModels (see ui/common/ErrorMessage.kt) -->
+    <string name="error_enter_username_password">Kullanıcı adını ve şifreni gir</string>
+    <string name="error_invalid_username_password">Geçersiz kullanıcı adı veya şifre</string>
+    <string name="error_fill_required_fields">Tüm zorunlu alanları doldur</string>
+    <string name="error_username_taken">Bu kullanıcı adı zaten alınmış</string>
+    <string name="error_fill_all_password_fields">Şifreni değiştirmek için üç şifre alanının tümünü doldur</string>
+    <string name="error_current_password_incorrect">Mevcut şifre yanlış</string>
+    <string name="error_new_passwords_dont_match">Yeni şifreler eşleşmiyor</string>
+    <string name="error_enter_password">Şifreyi gir</string>
+    <string name="error_incorrect_password">Yanlış şifre</string>
+
+    <!-- User Edit (ui/user/UserEditScreen.kt) -->
+    <string name="user_edit_title">Profili düzenle</string>
+    <string name="user_edit_change_password">Şifreyi değiştir</string>
+    <string name="user_edit_current_password">Mevcut şifre</string>
+    <string name="user_edit_new_password">Yeni şifre</string>
+    <string name="user_edit_confirm_new_password">Yeni şifreyi onayla</string>
+
+    <!-- Settings (ui/settings/SettingsScreen.kt) -->
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_dark_mode">Karanlık mod</string>
+    <string name="settings_app_icon_preference">Uygulama Simgesi Tercihi</string>
+    <string name="settings_icon_white">Beyaz</string>
+    <string name="settings_icon_blue">Mavi</string>
+    <string name="settings_language_preference">Dil Tercihi</string>
+    <string name="settings_language_english">İngilizce</string>
+    <string name="settings_language_turkish">Türkçe</string>
+
+    <!-- Switch Account (ui/switchaccount/SwitchAccountScreen.kt) -->
+    <string name="switch_account_empty">Bu cihazda başka hesap yok.</string>
+    <string name="switch_account_login_as">%1$s olarak giriş yap</string>
+    <string name="action_log_in_caps">Giriş Yap</string>
+
+    <!-- Home (ui/home/HomeScreen.kt) -->
+    <string name="home_welcome_prefix">"Target\'a hoş geldin, "</string>
+    <string name="home_welcome_suffix">!</string>
+
+    <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
+         change the underlying English DB values these map from) -->
+    <string name="exam_type_university_entrance">Üniversiteye Giriş Sınavı</string>
+    <string name="exam_type_high_school_entrance">Liseye Giriş Sınavı</string>
+    <string name="exam_type_language_exam">Dil Sınavı</string>
+    <string name="exam_type_vocational_exam">Mesleki Sınav</string>
+
+    <!-- Category (Course.category / StudyResourceType-style fixed labels) -->
+    <string name="category_quantitative">Sayısal</string>
+    <string name="category_verbal">Sözel</string>
+    <string name="category_uncategorized">Kategorisiz</string>
+    <string name="category_unset">Ayarsız</string>
+    <string name="label_category">Kategori</string>
+
+    <!-- Course icon labels (ui/common/CourseIcons.kt content descriptions) -->
+    <string name="icon_math">Matematik</string>
+    <string name="icon_calculus">Kalkülüs</string>
+    <string name="icon_science">Fen Bilimleri</string>
+    <string name="icon_biology">Biyoloji</string>
+    <string name="icon_geography">Coğrafya</string>
+    <string name="icon_history">Tarih</string>
+    <string name="icon_language">Dil</string>
+    <string name="icon_literature">Edebiyat</string>
+    <string name="icon_art">Sanat</string>
+    <string name="icon_music">Müzik</string>
+    <string name="icon_computer_science">Bilgisayar Bilimi</string>
+    <string name="icon_law">Hukuk</string>
+    <string name="icon_psychology">Psikoloji</string>
+    <string name="icon_pe">Beden Eğitimi</string>
+    <string name="icon_economics">Ekonomi</string>
+    <string name="icon_other">Diğer (+)</string>
+    <string name="icon_favorite">Favori</string>
+
+    <!-- Exam form dialog (ui/common/ExamFormDialog.kt) -->
+    <string name="exam_dialog_new_title">Yeni sınav</string>
+    <string name="exam_dialog_edit_title">Sınavı düzenle</string>
+    <string name="exam_field_name">Sınav adı</string>
+    <string name="exam_field_type_label">Sınav türü</string>
+    <string name="exam_no_languages_hint">Henüz dil yok — Diller ekranından biraz ekle</string>
+    <string name="exam_has_sections">Birden fazla bölümü var</string>
+    <string name="exam_field_exam_date">Sınav tarihi</string>
+    <string name="exam_field_study_start_date">Çalışmaya başlama tarihi (isteğe bağlı)</string>
+
+    <!-- Exam list (ui/examlist/ExamListScreen.kt) -->
+    <string name="exam_list_title">Sınavlar</string>
+    <string name="exam_list_empty">Henüz sınav yok. Eklemek için + tuşuna dokun.</string>
+    <string name="exam_row_sectioned">Bölümlü</string>
+    <string name="exam_row_no_date_set">Tarih ayarlanmadı</string>
+
+    <!-- Exam detail (ui/examdetail/ExamDetailScreen.kt) -->
+    <string name="examdetail_exam_date">Sınav tarihi: %1$s</string>
+    <string name="examdetail_study_start">Çalışmaya başlama: %1$s</string>
+    <string name="examdetail_language_prefix">"Dil: "</string>
+    <string name="cd_edit_exam">Sınavı düzenle</string>
+    <string name="cd_delete_exam">Sınavı sil</string>
+    <string name="action_add_prefixed">+ Ekle</string>
+    <string name="cd_collapse_courses">Kursları daralt</string>
+    <string name="cd_expand_courses">Kursları genişlet</string>
+    <string name="examdetail_no_courses">Henüz kurs yok.</string>
+    <string name="label_sections">Bölümler</string>
+    <string name="examdetail_no_sections">Henüz bölüm yok.</string>
+    <string name="examdetail_delete_title">Sınav silinsin mi?</string>
+    <string name="examdetail_delete_message">Bu, sınavı ve altında kayıtlı her şeyi kaldırır.</string>
+    <string name="dialog_add_course_title">Kurs ekle</string>
+    <string name="label_new_course_name">Yeni kurs adı</string>
+    <string name="label_pick_existing_courses">Ya da mevcut kurslardan seç</string>
+    <string name="dialog_add_section_title">Bölüm ekle</string>
+    <string name="label_section_name">Bölüm adı</string>
+    <string name="cd_collapse_x">%1$s bölümünü daralt</string>
+    <string name="cd_expand_x">%1$s bölümünü genişlet</string>
+
+    <!-- Course list menu (ui/courselist/CourseListScreen.kt) -->
+    <string name="course_list_title">Kurslar</string>
+    <string name="course_type_bucket_title">%1$s Kursları</string>
+
+    <!-- Course list by type (ui/courselist/CourseListByTypeScreen.kt) -->
+    <string name="course_type_empty">Henüz kurs yok. Eklemek için + tuşuna dokun.</string>
+    <string name="dialog_edit_course_title">Kursu düzenle</string>
+
+    <!-- Section detail (ui/sectiondetail/SectionDetailScreen.kt) -->
+    <string name="sectiondetail_date_prefix">Tarih: %1$s</string>
+    <string name="sectiondetail_no_courses">Henüz kurs atanmadı.</string>
+    <string name="cd_edit_section">Bölümü düzenle</string>
+    <string name="cd_delete_section">Bölümü sil</string>
+    <string name="cd_remove_course">Kursu kaldır</string>
+    <string name="sectiondetail_delete_title">Bölüm silinsin mi?</string>
+    <string name="sectiondetail_delete_message">Bu, bölümü ve kurs atamalarını kaldırır.</string>
+    <string name="dialog_add_courses_title">Kurslar ekle</string>
+    <string name="sectiondetail_all_assigned">Sınavın tüm kursları zaten bu bölüme atanmış.</string>
+    <string name="dialog_edit_section_title">Bölümü düzenle</string>
+
+    <!-- Study Resources (ui/studyresource/*, ui/studyresourcedetail/*) -->
+    <string name="sr_type_question_bank">Soru Bankası</string>
+    <string name="sr_type_lecture_textbook">Ders/Kitap</string>
+    <string name="sr_type_practice_exam">Deneme Sınavı</string>
+    <string name="sr_type_lecture_notes">Ders Notları</string>
+    <string name="sr_list_empty">Henüz çalışma kaynağı yok. Eklemek için + tuşuna dokun.</string>
+    <string name="dialog_add_study_resource_title">Çalışma kaynağı ekle</string>
+    <string name="label_subject">Konu</string>
+    <string name="label_type">Tür</string>
+    <string name="label_publisher_optional">Yayıncı (isteğe bağlı)</string>
+    <string name="dialog_edit_study_resource_title">Çalışma kaynağını düzenle</string>
+    <string name="cd_delete_study_resource">Çalışma kaynağını sil</string>
+    <string name="srdetail_subject">Konu: %1$s</string>
+    <string name="srdetail_type">Tür: %1$s</string>
+    <string name="srdetail_publisher">Yayıncı: %1$s</string>
+    <string name="srdetail_no_topics">Henüz konu yok.</string>
+    <string name="label_new_topic_name">Yeni konu adı</string>
+    <string name="label_pick_existing_topics">Ya da mevcut konulardan seç</string>
+    <string name="label_test_count">Test sayısı</string>
+    <string name="label_question_count">Soru sayısı</string>
+    <string name="action_remove_topic_from_resource">Konuyu bu kaynaktan kaldır</string>
+    <string name="srdetail_delete_title">Çalışma kaynağı silinsin mi?</string>
+
+    <!-- Topics (ui/topiclist/*, ui/topicdetail/*) -->
+    <string name="label_topics">Konular</string>
+    <string name="topiclist_title">%1$s Konuları</string>
+    <string name="topiclist_empty">Henüz konu yok. Eklemek için + tuşuna dokun.</string>
+    <string name="dialog_add_topic_title">Konu ekle</string>
+    <string name="cd_dialog_edit_topic">Konuyu düzenle</string>
+    <string name="cd_delete_topic">Konuyu sil</string>
+    <string name="topicdetail_subtitle">Bu konuyu kapsayan tüm çalışma kaynaklarında</string>
+    <string name="topicdetail_no_contributions">Bu konuyu henüz hiçbir çalışma kaynağı kapsamıyor.</string>
+    <string name="topicdetail_delete_title">Konu silinsin mi?</string>
+    <string name="topicdetail_delete_message">Bu, \"%1$s\" öğesini ve onu kapsayan her çalışma kaynağındaki sayılarını kaldırır.</string>
+    <string name="contribution_row_title">%1$s — %2$s</string>
+
+    <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
+    <string name="cd_edit_course">Kursu düzenle</string>
+    <string name="cd_delete_course">Kursu sil</string>
+    <string name="coursedetail_exam_type">Sınav türü: %1$s</string>
+    <string name="coursedetail_category">Kategori: %1$s</string>
+    <string name="coursedetail_delete_title">Kurs silinsin mi?</string>
+    <string name="coursedetail_delete_message">Bu, \"%1$s\" öğesini atandığı sınavlardan veya bölümlerden kaldırır.</string>
+
+    <!-- Language screens (ui/languagelist/*, ui/languagedetail/*) -->
+    <string name="lang_list_empty">Henüz dil yok. Eklemek için + tuşuna dokun.</string>
+    <string name="dialog_add_language_title">Dil ekle</string>
+    <string name="label_language_exam_courses">Dil Sınavı Kursları</string>
+    <string name="cd_edit_language">Dili düzenle</string>
+    <string name="cd_delete_language">Dili sil</string>
+    <string name="dialog_edit_language_title">Dili düzenle</string>
+    <string name="languagedetail_delete_title">Dil silinsin mi?</string>
+    <string name="languagedetail_delete_message">Bu, \"%1$s\" öğesini atandığı sınavlardan kaldırır.</string>
+</resources>

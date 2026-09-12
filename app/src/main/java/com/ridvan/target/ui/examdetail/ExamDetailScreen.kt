@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.Course
@@ -51,6 +53,7 @@ import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.CourseIconAvatar
+import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +78,7 @@ fun ExamDetailScreen(
     var showAddCourseDialog by remember { mutableStateOf(false) }
     var coursesExpanded by remember { mutableStateOf(false) }
     var sectionsExpanded by remember { mutableStateOf(false) }
-    val expandedCourseGroups = remember { mutableStateMapOf<String, Boolean>() }
+    val expandedCourseGroups = remember { mutableStateMapOf<CourseCategory?, Boolean>() }
 
     Scaffold(
         topBar = {
@@ -83,15 +86,15 @@ fun ExamDetailScreen(
                 title = { Text(exam?.name.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit exam")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_edit_exam))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete exam")
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_exam))
                     }
                 },
             )
@@ -121,7 +124,7 @@ fun ExamDetailScreen(
                 val hasSections = currentExam?.hasSections == true
                 item {
                     SectionHeader(
-                        "Courses",
+                        stringResource(R.string.label_courses),
                         onAddClick = { showAddCourseDialog = true },
                         expanded = if (hasSections) null else coursesExpanded,
                         onToggleExpand = if (hasSections) null else ({ coursesExpanded = !coursesExpanded }),
@@ -129,15 +132,15 @@ fun ExamDetailScreen(
                 }
                 if (!hasSections && coursesExpanded) {
                     if (courses.isEmpty()) {
-                        item { EmptyHint("No courses yet.") }
+                        item { EmptyHint(stringResource(R.string.examdetail_no_courses)) }
                     } else {
-                        examCourseGroups(courses).forEach { (label, groupCourses) ->
-                            val groupExpanded = expandedCourseGroups[label] ?: false
+                        examCourseGroups(courses).forEach { (category, groupCourses) ->
+                            val groupExpanded = expandedCourseGroups[category] ?: false
                             item {
                                 CourseGroupHeader(
-                                    label,
+                                    category,
                                     expanded = groupExpanded,
-                                    onToggleExpand = { expandedCourseGroups[label] = !groupExpanded },
+                                    onToggleExpand = { expandedCourseGroups[category] = !groupExpanded },
                                 )
                             }
                             if (groupExpanded) {
@@ -158,7 +161,7 @@ fun ExamDetailScreen(
             if (exam?.hasSections == true) {
                 item {
                     SectionHeader(
-                        "Sections",
+                        stringResource(R.string.label_sections),
                         onAddClick = { showAddSectionDialog = true },
                         expanded = sectionsExpanded,
                         onToggleExpand = { sectionsExpanded = !sectionsExpanded },
@@ -166,7 +169,7 @@ fun ExamDetailScreen(
                 }
                 if (sectionsExpanded) {
                     if (sections.isEmpty()) {
-                        item { EmptyHint("No sections yet.") }
+                        item { EmptyHint(stringResource(R.string.examdetail_no_sections)) }
                     } else {
                         items(sections, key = { "section-${it.id}" }) { section ->
                             SectionRow(section, onClick = { onSectionClick(section.id) })
@@ -194,17 +197,17 @@ fun ExamDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete exam?") },
-            text = { Text("This removes the exam and everything filed under it.") },
+            title = { Text(stringResource(R.string.examdetail_delete_title)) },
+            text = { Text(stringResource(R.string.examdetail_delete_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteExam()
                     showDeleteConfirm = false
                     onBack()
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.common_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -243,14 +246,16 @@ private fun ExamSummary(
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         if (!hasSections) {
-            Text("Exam date: ${examDate?.let { formatDate(it) } ?: "Not set"}")
+            Text(stringResource(R.string.examdetail_exam_date, examDate?.let { formatDate(it) } ?: stringResource(R.string.common_not_set)))
         }
-        Text("Study start: ${studyStartDate?.let { formatDate(it) } ?: "Not set"}")
+        Text(stringResource(R.string.examdetail_study_start, studyStartDate?.let { formatDate(it) } ?: stringResource(R.string.common_not_set)))
         if (isLanguageExam) {
             val languageModifier = if (languageName != null) Modifier.clickable(onClick = onLanguageClick) else Modifier
+            val languagePrefix = stringResource(R.string.examdetail_language_prefix)
+            val noLanguageSet = stringResource(R.string.common_no_language_set)
             Text(
                 buildAnnotatedString {
-                    append("Language: ")
+                    append(languagePrefix)
                     if (languageName != null) {
                         withStyle(
                             SpanStyle(
@@ -261,7 +266,7 @@ private fun ExamSummary(
                             append(languageName)
                         }
                     } else {
-                        append("No language set")
+                        append(noLanguageSet)
                     }
                 },
                 modifier = languageModifier,
@@ -282,12 +287,12 @@ private fun SectionHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, modifier = Modifier.weight(1f))
-        TextButton(onClick = onAddClick) { Text("+ Add") }
+        TextButton(onClick = onAddClick) { Text(stringResource(R.string.action_add_prefixed)) }
         if (expanded != null && onToggleExpand != null) {
             IconButton(onClick = onToggleExpand) {
                 Icon(
                     if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    contentDescription = if (expanded) "Collapse courses" else "Expand courses",
+                    contentDescription = if (expanded) stringResource(R.string.cd_collapse_courses) else stringResource(R.string.cd_expand_courses),
                 )
             }
         }
@@ -299,17 +304,18 @@ private fun EmptyHint(text: String) {
     Text(text, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
 }
 
-private fun examCourseGroups(courses: List<ExamCourseWithCourse>): List<Pair<String, List<ExamCourseWithCourse>>> {
+private fun examCourseGroups(courses: List<ExamCourseWithCourse>): List<Pair<CourseCategory?, List<ExamCourseWithCourse>>> {
     val byCategory = courses.groupBy { it.courseCategory }
     return listOfNotNull(
-        byCategory[CourseCategory.QUANTITATIVE]?.let { "Quantitative" to it },
-        byCategory[CourseCategory.VERBAL]?.let { "Verbal" to it },
-        byCategory[null]?.let { "Uncategorized" to it },
+        byCategory[CourseCategory.QUANTITATIVE]?.let { CourseCategory.QUANTITATIVE to it },
+        byCategory[CourseCategory.VERBAL]?.let { CourseCategory.VERBAL to it },
+        byCategory[null]?.let { null to it },
     )
 }
 
 @Composable
-private fun CourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: () -> Unit) {
+private fun CourseGroupHeader(category: CourseCategory?, expanded: Boolean, onToggleExpand: () -> Unit) {
+    val label = courseCategoryGroupLabel(category)
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -318,7 +324,7 @@ private fun CourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: 
         IconButton(onClick = onToggleExpand) {
             Icon(
                 if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                contentDescription = if (expanded) "Collapse $label" else "Expand $label",
+                contentDescription = if (expanded) stringResource(R.string.cd_collapse_x, label) else stringResource(R.string.cd_expand_x, label),
             )
         }
     }
@@ -331,7 +337,7 @@ private fun CourseRow(course: ExamCourseWithCourse, onClick: () -> Unit, onRemov
         headlineContent = { Text(course.courseName) },
         trailingContent = {
             IconButton(onClick = onRemove) {
-                Icon(Icons.Filled.Delete, contentDescription = "Remove course")
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_course))
             }
         },
         modifier = Modifier.clickable(onClick = onClick),
@@ -342,7 +348,7 @@ private fun CourseRow(course: ExamCourseWithCourse, onClick: () -> Unit, onRemov
 private fun SectionRow(section: Section, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(section.name) },
-        supportingContent = { Text(section.date?.let { formatDate(it) } ?: "No date set") },
+        supportingContent = { Text(section.date?.let { formatDate(it) } ?: stringResource(R.string.common_not_set)) },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }
@@ -357,19 +363,19 @@ private fun AddCourseDialog(
     var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add course") },
+        title = { Text(stringResource(R.string.dialog_add_course_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("New course name") },
+                    label = { Text(stringResource(R.string.label_new_course_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 if (availableCourses.isNotEmpty()) {
                     Text(
-                        "Or pick existing courses",
+                        stringResource(R.string.label_pick_existing_courses),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                     )
@@ -396,10 +402,10 @@ private fun AddCourseDialog(
             TextButton(
                 onClick = { onConfirm(name, selected) },
                 enabled = name.isNotBlank() || selected.isNotEmpty(),
-            ) { Text("Add") }
+            ) { Text(stringResource(R.string.common_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }
@@ -413,26 +419,26 @@ private fun AddSectionDialog(onConfirm: (name: String, date: Long?) -> Unit, onD
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add section") },
+        title = { Text(stringResource(R.string.dialog_add_section_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Section name") },
+                    label = { Text(stringResource(R.string.label_section_name)) },
                     singleLine = true,
                 )
                 Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { showDatePicker = true }) {
-                    Text("Date")
-                    Text(date?.let { formatDate(it) } ?: "Tap to set")
+                    Text(stringResource(R.string.label_date))
+                    Text(date?.let { formatDate(it) } ?: stringResource(R.string.common_tap_to_set))
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name, date) }, enabled = name.isNotBlank()) { Text("Add") }
+            TextButton(onClick = { onConfirm(name, date) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 
@@ -444,10 +450,10 @@ private fun AddSectionDialog(onConfirm: (name: String, date: Long?) -> Unit, onD
                 TextButton(onClick = {
                     date = state.selectedDateMillis
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.common_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         ) {
             DatePicker(state = state)

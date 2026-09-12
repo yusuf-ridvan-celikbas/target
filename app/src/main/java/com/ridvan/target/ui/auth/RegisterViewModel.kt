@@ -10,6 +10,7 @@ import com.ridvan.target.data.local.dao.UserDao
 import com.ridvan.target.data.local.entity.PreferredNameSource
 import com.ridvan.target.data.local.entity.User
 import com.ridvan.target.data.resolvePreferredName
+import com.ridvan.target.ui.common.ErrorMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +20,8 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
     private val userDao: UserDao = (application as TargetApplication).database.userDao()
     private val preferences: AppPreferences = (application as TargetApplication).preferences
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage.asStateFlow()
 
     fun register(
         firstName: String,
@@ -38,12 +39,12 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
         val trimmedLast = lastName.trim()
         val trimmedUsername = username.trim()
         if (trimmedFirst.isEmpty() || trimmedLast.isEmpty() || trimmedUsername.isEmpty() || password.isEmpty()) {
-            _errorMessage.value = "Fill in all required fields"
+            _errorMessage.value = ErrorMessage.FILL_REQUIRED_FIELDS
             return
         }
         viewModelScope.launch {
             if (userDao.countByUsername(trimmedUsername) > 0) {
-                _errorMessage.value = "That username is already taken"
+                _errorMessage.value = ErrorMessage.USERNAME_TAKEN
                 return@launch
             }
             val salt = PasswordHasher.generateSalt()

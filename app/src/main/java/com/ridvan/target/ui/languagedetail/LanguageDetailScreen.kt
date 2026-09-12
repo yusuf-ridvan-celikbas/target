@@ -23,9 +23,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,15 +46,15 @@ fun LanguageDetailScreen(
                 title = { Text(language?.name.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit language")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_edit_language))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete language")
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_language))
                     }
                 },
             )
@@ -63,7 +65,7 @@ fun LanguageDetailScreen(
                 onClick = onStudyResourcesClick,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Study Resources")
+                Text(stringResource(R.string.label_study_resources))
             }
         }
     }
@@ -82,17 +84,17 @@ fun LanguageDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete language?") },
-            text = { Text("This removes \"${language?.name}\" from any exams it's assigned to.") },
+            title = { Text(stringResource(R.string.languagedetail_delete_title)) },
+            text = { Text(stringResource(R.string.languagedetail_delete_message, language?.name.orEmpty())) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteLanguage()
                     showDeleteConfirm = false
                     onBack()
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.common_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -103,20 +105,20 @@ private fun LanguageEditDialog(initialName: String, onConfirm: (String) -> Unit,
     var name by remember { mutableStateOf(initialName) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit language") },
+        title = { Text(stringResource(R.string.dialog_edit_language_title)) },
         text = {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.common_name)) },
                 singleLine = true,
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text("Save") }
+            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }

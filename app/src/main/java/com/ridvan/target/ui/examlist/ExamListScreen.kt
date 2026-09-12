@@ -17,11 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.ui.common.AddOrEditExamDialog
+import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellNavigation
@@ -39,7 +42,7 @@ fun ExamListScreen(
 
     AppShell(
         navigation = shellNavigation,
-        title = "Exams",
+        title = stringResource(R.string.exam_list_title),
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
                 Text("+")
@@ -51,7 +54,7 @@ fun ExamListScreen(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No exams yet. Tap + to add one.")
+                Text(stringResource(R.string.exam_list_empty))
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -81,15 +84,16 @@ private fun ExamRow(item: ExamWithType, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(item.exam.name) },
         supportingContent = {
+            val displayTypeName = examTypeDisplayName(item.examTypeName)
             val typeText = if (item.examTypeName == LANGUAGE_EXAM_TYPE_NAME) {
-                "${item.examTypeName} · ${item.languageName ?: "No language set"}"
+                "$displayTypeName · ${item.languageName ?: stringResource(R.string.common_no_language_set)}"
             } else {
-                item.examTypeName
+                displayTypeName
             }
             val secondary = if (item.exam.hasSections) {
-                "$typeText · Sectioned"
+                "$typeText · ${stringResource(R.string.exam_row_sectioned)}"
             } else {
-                val dateText = item.exam.examDate?.let { formatDate(it) } ?: "No date set"
+                val dateText = item.exam.examDate?.let { formatDate(it) } ?: stringResource(R.string.exam_row_no_date_set)
                 "$typeText · $dateText"
             }
             Text(secondary)

@@ -8,6 +8,7 @@ import com.ridvan.target.data.PasswordHasher
 import com.ridvan.target.data.local.AppPreferences
 import com.ridvan.target.data.local.dao.UserDao
 import com.ridvan.target.data.local.entity.User
+import com.ridvan.target.ui.common.ErrorMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,12 +27,12 @@ class SwitchAccountViewModel(application: Application) : AndroidViewModel(applic
         .map { users -> users.filter { it.id != currentUserId } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage.asStateFlow()
 
     fun switchTo(user: User, password: String, onSuccess: () -> Unit) {
         if (password.isEmpty()) {
-            _errorMessage.value = "Enter the password"
+            _errorMessage.value = ErrorMessage.ENTER_PASSWORD
             return
         }
         viewModelScope.launch {
@@ -40,7 +41,7 @@ class SwitchAccountViewModel(application: Application) : AndroidViewModel(applic
                 _errorMessage.value = null
                 onSuccess()
             } else {
-                _errorMessage.value = "Incorrect password"
+                _errorMessage.value = ErrorMessage.INCORRECT_PASSWORD
             }
         }
     }

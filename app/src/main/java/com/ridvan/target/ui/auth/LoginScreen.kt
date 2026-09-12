@@ -19,10 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
+import com.ridvan.target.ui.common.text
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +39,7 @@ fun LoginScreen(
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Log in") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.login_title)) }) },
     ) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp).imePadding(),
@@ -45,29 +48,29 @@ fun LoginScreen(
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username") },
+                label = { Text(stringResource(R.string.field_username)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.field_password)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
             errorMessage?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                Text(it.text(), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
             }
             TextButton(
                 onClick = { viewModel.login(username, password, onLoginSuccess) },
                 modifier = Modifier.padding(top = 16.dp),
             ) {
-                Text("Log in")
+                Text(stringResource(R.string.login_title))
             }
             TextButton(onClick = onNavigateToRegister) {
-                Text("Don't have an account? Register")
+                Text(stringResource(R.string.login_register_prompt))
             }
         }
     }

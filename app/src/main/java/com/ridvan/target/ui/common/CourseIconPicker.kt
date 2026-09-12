@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -35,7 +36,7 @@ fun CourseIconPicker(
             val isSelected = option.key == selectedKey
             Icon(
                 imageVector = option.icon,
-                contentDescription = option.label,
+                contentDescription = stringResource(option.labelRes),
                 tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .aspectRatio(1f)

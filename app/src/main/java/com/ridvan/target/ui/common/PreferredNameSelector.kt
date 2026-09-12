@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.PreferredNameSource
 
 @Composable
@@ -30,17 +32,17 @@ fun PreferredNameSelector(
     val toggleActive = source == PreferredNameSource.FIRST || source == PreferredNameSource.MIDDLE
 
     Column(modifier = modifier) {
-        Text("Preferred name", style = MaterialTheme.typography.labelSmall)
+        Text(stringResource(R.string.preferred_name_label), style = MaterialTheme.typography.labelSmall)
         Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
             ToggleSegment(
-                text = "First",
+                text = stringResource(R.string.preferred_name_first),
                 selected = source == PreferredNameSource.FIRST,
                 dimmed = !toggleActive,
                 onClick = { onSourceChange(PreferredNameSource.FIRST) },
                 modifier = Modifier.weight(1f),
             )
             ToggleSegment(
-                text = "Middle",
+                text = stringResource(R.string.preferred_name_middle),
                 selected = source == PreferredNameSource.MIDDLE,
                 dimmed = !toggleActive,
                 onClick = { onSourceChange(PreferredNameSource.MIDDLE) },
@@ -48,17 +50,17 @@ fun PreferredNameSelector(
             )
         }
         CheckboxOption(
-            label = "Use Last Name",
+            label = stringResource(R.string.preferred_name_use_last_name),
             checked = source == PreferredNameSource.LAST,
             onCheck = { onSourceChange(PreferredNameSource.LAST) },
         )
         CheckboxOption(
-            label = "Use Username",
+            label = stringResource(R.string.preferred_name_use_username),
             checked = source == PreferredNameSource.USERNAME,
             onCheck = { onSourceChange(PreferredNameSource.USERNAME) },
         )
         CheckboxOption(
-            label = "Other",
+            label = stringResource(R.string.preferred_name_other),
             checked = source == PreferredNameSource.OTHER,
             onCheck = { onSourceChange(PreferredNameSource.OTHER) },
         )
@@ -66,7 +68,7 @@ fun PreferredNameSelector(
             OutlinedTextField(
                 value = customText,
                 onValueChange = onCustomTextChange,
-                label = { Text("Preferred name") },
+                label = { Text(stringResource(R.string.preferred_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )

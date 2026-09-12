@@ -34,13 +34,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.CourseIconPicker
+import com.ridvan.target.ui.common.courseCategoryGroupLabel
+import com.ridvan.target.ui.common.examTypeDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,10 +60,10 @@ fun CourseListByTypeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("$examTypeName Courses") },
+                title = { Text(stringResource(R.string.course_type_bucket_title, examTypeDisplayName(examTypeName))) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -75,18 +79,18 @@ fun CourseListByTypeScreen(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No courses yet. Tap + to add one.")
+                Text(stringResource(R.string.course_type_empty))
             }
         } else {
-            val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
+            val expandedGroups = remember { mutableStateMapOf<CourseCategory?, Boolean>() }
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                courseGroups(courses).forEach { (label, groupCourses) ->
-                    val expanded = expandedGroups[label] ?: false
+                courseGroups(courses).forEach { (category, groupCourses) ->
+                    val expanded = expandedGroups[category] ?: false
                     item {
                         CourseGroupHeader(
-                            label,
+                            category,
                             expanded = expanded,
-                            onToggleExpand = { expandedGroups[label] = !expanded },
+                            onToggleExpand = { expandedGroups[category] = !expanded },
                         )
                     }
                     if (expanded) {
@@ -102,7 +106,7 @@ fun CourseListByTypeScreen(
 
     if (showAddDialog) {
         CourseDialog(
-            title = "Add course",
+            title = stringResource(R.string.dialog_add_course_title),
             initialName = "",
             initialIcon = null,
             onConfirm = { name, icon ->
@@ -114,17 +118,18 @@ fun CourseListByTypeScreen(
     }
 }
 
-private fun courseGroups(courses: List<Course>): List<Pair<String, List<Course>>> {
+private fun courseGroups(courses: List<Course>): List<Pair<CourseCategory?, List<Course>>> {
     val byCategory = courses.groupBy { it.category }
     return listOfNotNull(
-        byCategory[CourseCategory.QUANTITATIVE]?.let { "Quantitative" to it },
-        byCategory[CourseCategory.VERBAL]?.let { "Verbal" to it },
-        byCategory[null]?.let { "Uncategorized" to it },
+        byCategory[CourseCategory.QUANTITATIVE]?.let { CourseCategory.QUANTITATIVE to it },
+        byCategory[CourseCategory.VERBAL]?.let { CourseCategory.VERBAL to it },
+        byCategory[null]?.let { null to it },
     )
 }
 
 @Composable
-private fun CourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: () -> Unit) {
+private fun CourseGroupHeader(category: CourseCategory?, expanded: Boolean, onToggleExpand: () -> Unit) {
+    val label = courseCategoryGroupLabel(category)
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -133,7 +138,7 @@ private fun CourseGroupHeader(label: String, expanded: Boolean, onToggleExpand: 
         IconButton(onClick = onToggleExpand) {
             Icon(
                 if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                contentDescription = if (expanded) "Collapse $label" else "Expand $label",
+                contentDescription = if (expanded) stringResource(R.string.cd_collapse_x, label) else stringResource(R.string.cd_expand_x, label),
             )
         }
     }
@@ -166,12 +171,12 @@ private fun CourseDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.common_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    "Icon",
+                    stringResource(R.string.label_icon),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                 )
@@ -183,10 +188,10 @@ private fun CourseDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name, icon) }, enabled = name.isNotBlank()) { Text("Save") }
+            TextButton(onClick = { onConfirm(name, icon) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }

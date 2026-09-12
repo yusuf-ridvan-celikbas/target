@@ -29,8 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.TopicWithTotals
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,10 +49,10 @@ fun TopicListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("$courseName Topics") },
+                title = { Text(stringResource(R.string.topiclist_title, courseName)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -66,7 +68,7 @@ fun TopicListScreen(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No topics yet. Tap + to add one.")
+                Text(stringResource(R.string.topiclist_empty))
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -93,7 +95,7 @@ fun TopicListScreen(
 private fun TopicRow(topic: TopicWithTotals, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(topic.topic.name) },
-        supportingContent = { Text("${topic.totalTestCount} tests · ${topic.totalQuestionCount} questions") },
+        supportingContent = { Text(stringResource(R.string.counts_tests_questions, topic.totalTestCount, topic.totalQuestionCount)) },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }
@@ -103,23 +105,23 @@ private fun AddTopicDialog(onConfirm: (name: String) -> Unit, onDismiss: () -> U
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add topic") },
+        title = { Text(stringResource(R.string.dialog_add_topic_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.common_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text("Save") }
+            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }

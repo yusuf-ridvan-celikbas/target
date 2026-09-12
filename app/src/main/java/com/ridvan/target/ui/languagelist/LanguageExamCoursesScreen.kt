@@ -27,8 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Language
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,10 +46,10 @@ fun LanguageExamCoursesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Language Exam Courses") },
+                title = { Text(stringResource(R.string.label_language_exam_courses)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
             )
@@ -63,7 +65,7 @@ fun LanguageExamCoursesScreen(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No languages yet. Tap + to add one.")
+                Text(stringResource(R.string.lang_list_empty))
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -77,7 +79,7 @@ fun LanguageExamCoursesScreen(
 
     if (showAddDialog) {
         LanguageNameDialog(
-            title = "Add language",
+            title = stringResource(R.string.dialog_add_language_title),
             initialName = "",
             onConfirm = { name ->
                 viewModel.addLanguage(name)
@@ -106,15 +108,15 @@ private fun LanguageNameDialog(title: String, initialName: String, onConfirm: (S
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.common_name)) },
                 singleLine = true,
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text("Save") }
+            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }

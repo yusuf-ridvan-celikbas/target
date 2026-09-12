@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import com.ridvan.target.TargetApplication
+import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.data.local.AppPreferences
 import kotlinx.coroutines.flow.StateFlow
 
@@ -37,5 +38,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         )
 
         preferences.setUseBlueAppIcon(enabled)
+    }
+
+    val appLanguage: StateFlow<AppLanguage> = preferences.appLanguage
+
+    fun setAppLanguage(language: AppLanguage) {
+        preferences.setAppLanguage(language)
     }
 }

@@ -1,3 +1,236 @@
 <resources>
     <string name="app_name">Target</string>
+
+    <!-- Common / shared across many screens -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_add">Add</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_ok">OK</string>
+    <string name="common_name">Name</string>
+    <string name="common_not_set">Not set</string>
+    <string name="common_select">Select</string>
+    <string name="common_tap_to_set">Tap to set</string>
+    <string name="common_no_language_set">No language set</string>
+    <string name="common_no_publisher">No publisher</string>
+    <string name="cd_back">Back</string>
+    <string name="label_icon">Icon</string>
+    <string name="label_date">Date</string>
+    <string name="label_language">Language</string>
+    <string name="counts_tests_questions">%1$d tests · %2$d questions</string>
+    <string name="delete_confirm_generic">This removes \"%1$s\".</string>
+
+    <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
+    <string name="label_exams">Exams</string>
+    <string name="label_courses">Courses</string>
+    <string name="label_study_resources">Study Resources</string>
+    <string name="label_languages">Languages</string>
+    <string name="label_home">Home</string>
+    <string name="cd_menu">Menu</string>
+    <string name="cd_more">More</string>
+    <string name="menu_user_settings">User Settings</string>
+    <string name="menu_app_settings">App Settings</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_log_out">Log Out</string>
+    <string name="label_switch_account">Switch Account</string>
+
+    <!-- Auth: Login / Register / Preferred name selector -->
+    <string name="login_title">Log in</string>
+    <string name="login_register_prompt">Don\'t have an account? Register</string>
+    <string name="register_title">Register</string>
+    <string name="register_login_prompt">Already have an account? Log in</string>
+    <string name="field_first_name">First name</string>
+    <string name="field_middle_name_optional">Middle name (optional)</string>
+    <string name="field_last_name">Last name</string>
+    <string name="field_username">Username</string>
+    <string name="field_email_optional">Email (optional)</string>
+    <string name="field_password">Password</string>
+    <string name="preferred_name_label">Preferred name</string>
+    <string name="preferred_name_first">First</string>
+    <string name="preferred_name_middle">Middle</string>
+    <string name="preferred_name_use_last_name">Use Last Name</string>
+    <string name="preferred_name_use_username">Use Username</string>
+    <string name="preferred_name_other">Other</string>
+
+    <!-- Error messages surfaced from ViewModels (see ui/common/ErrorMessage.kt) -->
+    <string name="error_enter_username_password">Enter your username and password</string>
+    <string name="error_invalid_username_password">Invalid username or password</string>
+    <string name="error_fill_required_fields">Fill in all required fields</string>
+    <string name="error_username_taken">That username is already taken</string>
+    <string name="error_fill_all_password_fields">Fill in all three password fields to change your password</string>
+    <string name="error_current_password_incorrect">Current password is incorrect</string>
+    <string name="error_new_passwords_dont_match">New passwords don\'t match</string>
+    <string name="error_enter_password">Enter the password</string>
+    <string name="error_incorrect_password">Incorrect password</string>
+
+    <!-- User Edit (ui/user/UserEditScreen.kt) -->
+    <string name="user_edit_title">Edit profile</string>
+    <string name="user_edit_change_password">Change password</string>
+    <string name="user_edit_current_password">Current password</string>
+    <string name="user_edit_new_password">New password</string>
+    <string name="user_edit_confirm_new_password">Confirm new password</string>
+
+    <!-- Settings (ui/settings/SettingsScreen.kt) -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_app_icon_preference">App Icon Preference</string>
+    <string name="settings_icon_white">White</string>
+    <string name="settings_icon_blue">Blue</string>
+    <string name="settings_language_preference">Language Preference</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_turkish">Turkish</string>
+
+    <!-- Switch Account (ui/switchaccount/SwitchAccountScreen.kt) -->
+    <string name="switch_account_empty">No other accounts on this device.</string>
+    <string name="switch_account_login_as">Log in as %1$s</string>
+    <string name="action_log_in_caps">Log In</string>
+
+    <!-- Home (ui/home/HomeScreen.kt) -->
+    <string name="home_welcome_prefix">"Welcome to Target, "</string>
+    <string name="home_welcome_suffix">!</string>
+
+    <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
+         change the underlying English DB values these map from) -->
+    <string name="exam_type_university_entrance">University Entrance Exam</string>
+    <string name="exam_type_high_school_entrance">High School Entrance Exam</string>
+    <string name="exam_type_language_exam">Language Exam</string>
+    <string name="exam_type_vocational_exam">Vocational Exam</string>
+
+    <!-- Category (Course.category / StudyResourceType-style fixed labels) -->
+    <string name="category_quantitative">Quantitative</string>
+    <string name="category_verbal">Verbal</string>
+    <string name="category_uncategorized">Uncategorized</string>
+    <string name="category_unset">Unset</string>
+    <string name="label_category">Category</string>
+
+    <!-- Course icon labels (ui/common/CourseIcons.kt content descriptions) -->
+    <string name="icon_math">Math</string>
+    <string name="icon_calculus">Calculus</string>
+    <string name="icon_science">Science</string>
+    <string name="icon_biology">Biology</string>
+    <string name="icon_geography">Geography</string>
+    <string name="icon_history">History</string>
+    <string name="icon_language">Language</string>
+    <string name="icon_literature">Literature</string>
+    <string name="icon_art">Art</string>
+    <string name="icon_music">Music</string>
+    <string name="icon_computer_science">Computer Science</string>
+    <string name="icon_law">Law</string>
+    <string name="icon_psychology">Psychology</string>
+    <string name="icon_pe">PE</string>
+    <string name="icon_economics">Economics</string>
+    <string name="icon_other">Other (+)</string>
+    <string name="icon_favorite">Favorite</string>
+
+    <!-- Exam form dialog (ui/common/ExamFormDialog.kt) -->
+    <string name="exam_dialog_new_title">New exam</string>
+    <string name="exam_dialog_edit_title">Edit exam</string>
+    <string name="exam_field_name">Exam name</string>
+    <string name="exam_field_type_label">Exam type</string>
+    <string name="exam_no_languages_hint">No languages yet — add some from the Languages screen</string>
+    <string name="exam_has_sections">Has multiple sections</string>
+    <string name="exam_field_exam_date">Exam date</string>
+    <string name="exam_field_study_start_date">Study start date (optional)</string>
+
+    <!-- Exam list (ui/examlist/ExamListScreen.kt) -->
+    <string name="exam_list_title">Exams</string>
+    <string name="exam_list_empty">No exams yet. Tap + to add one.</string>
+    <string name="exam_row_sectioned">Sectioned</string>
+    <string name="exam_row_no_date_set">No date set</string>
+
+    <!-- Exam detail (ui/examdetail/ExamDetailScreen.kt) -->
+    <string name="examdetail_exam_date">Exam date: %1$s</string>
+    <string name="examdetail_study_start">Study start: %1$s</string>
+    <string name="examdetail_language_prefix">"Language: "</string>
+    <string name="cd_edit_exam">Edit exam</string>
+    <string name="cd_delete_exam">Delete exam</string>
+    <string name="action_add_prefixed">+ Add</string>
+    <string name="cd_collapse_courses">Collapse courses</string>
+    <string name="cd_expand_courses">Expand courses</string>
+    <string name="examdetail_no_courses">No courses yet.</string>
+    <string name="label_sections">Sections</string>
+    <string name="examdetail_no_sections">No sections yet.</string>
+    <string name="examdetail_delete_title">Delete exam?</string>
+    <string name="examdetail_delete_message">This removes the exam and everything filed under it.</string>
+    <string name="dialog_add_course_title">Add course</string>
+    <string name="label_new_course_name">New course name</string>
+    <string name="label_pick_existing_courses">Or pick existing courses</string>
+    <string name="dialog_add_section_title">Add section</string>
+    <string name="label_section_name">Section name</string>
+    <string name="cd_collapse_x">Collapse %1$s</string>
+    <string name="cd_expand_x">Expand %1$s</string>
+
+    <!-- Course list menu (ui/courselist/CourseListScreen.kt) -->
+    <string name="course_list_title">Courses</string>
+    <string name="course_type_bucket_title">%1$s Courses</string>
+
+    <!-- Course list by type (ui/courselist/CourseListByTypeScreen.kt) -->
+    <string name="course_type_empty">No courses yet. Tap + to add one.</string>
+    <string name="dialog_edit_course_title">Edit course</string>
+
+    <!-- Section detail (ui/sectiondetail/SectionDetailScreen.kt) -->
+    <string name="sectiondetail_date_prefix">Date: %1$s</string>
+    <string name="sectiondetail_no_courses">No courses assigned yet.</string>
+    <string name="cd_edit_section">Edit section</string>
+    <string name="cd_delete_section">Delete section</string>
+    <string name="cd_remove_course">Remove course</string>
+    <string name="sectiondetail_delete_title">Delete section?</string>
+    <string name="sectiondetail_delete_message">This removes the section and its course assignments.</string>
+    <string name="dialog_add_courses_title">Add courses</string>
+    <string name="sectiondetail_all_assigned">All of the exam\'s courses are already assigned to this section.</string>
+    <string name="dialog_edit_section_title">Edit section</string>
+
+    <!-- Study Resources (ui/studyresource/*, ui/studyresourcedetail/*) -->
+    <string name="sr_type_question_bank">Question Bank</string>
+    <string name="sr_type_lecture_textbook">Lecture/Textbook</string>
+    <string name="sr_type_practice_exam">Practice Exam</string>
+    <string name="sr_type_lecture_notes">Lecture Notes</string>
+    <string name="sr_list_empty">No study resources yet. Tap + to add one.</string>
+    <string name="dialog_add_study_resource_title">Add study resource</string>
+    <string name="label_subject">Subject</string>
+    <string name="label_type">Type</string>
+    <string name="label_publisher_optional">Publisher (optional)</string>
+    <string name="dialog_edit_study_resource_title">Edit study resource</string>
+    <string name="cd_delete_study_resource">Delete study resource</string>
+    <string name="srdetail_subject">Subject: %1$s</string>
+    <string name="srdetail_type">Type: %1$s</string>
+    <string name="srdetail_publisher">Publisher: %1$s</string>
+    <string name="srdetail_no_topics">No topics yet.</string>
+    <string name="label_new_topic_name">New topic name</string>
+    <string name="label_pick_existing_topics">Or pick existing topics</string>
+    <string name="label_test_count">Test count</string>
+    <string name="label_question_count">Question count</string>
+    <string name="action_remove_topic_from_resource">Remove topic from this resource</string>
+    <string name="srdetail_delete_title">Delete study resource?</string>
+
+    <!-- Topics (ui/topiclist/*, ui/topicdetail/*) -->
+    <string name="label_topics">Topics</string>
+    <string name="topiclist_title">%1$s Topics</string>
+    <string name="topiclist_empty">No topics yet. Tap + to add one.</string>
+    <string name="dialog_add_topic_title">Add topic</string>
+    <string name="cd_dialog_edit_topic">Edit topic</string>
+    <string name="cd_delete_topic">Delete topic</string>
+    <string name="topicdetail_subtitle">Across every study resource covering this topic</string>
+    <string name="topicdetail_no_contributions">No study resources cover this topic yet.</string>
+    <string name="topicdetail_delete_title">Delete topic?</string>
+    <string name="topicdetail_delete_message">This removes \"%1$s\" and its counts from every study resource that covers it.</string>
+    <string name="contribution_row_title">%1$s — %2$s</string>
+
+    <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
+    <string name="cd_edit_course">Edit course</string>
+    <string name="cd_delete_course">Delete course</string>
+    <string name="coursedetail_exam_type">Exam type: %1$s</string>
+    <string name="coursedetail_category">Category: %1$s</string>
+    <string name="coursedetail_delete_title">Delete course?</string>
+    <string name="coursedetail_delete_message">This removes \"%1$s\" from any exams or sections it\'s assigned to.</string>
+
+    <!-- Language screens (ui/languagelist/*, ui/languagedetail/*) -->
+    <string name="lang_list_empty">No languages yet. Tap + to add one.</string>
+    <string name="dialog_add_language_title">Add language</string>
+    <string name="label_language_exam_courses">Language Exam Courses</string>
+    <string name="cd_edit_language">Edit language</string>
+    <string name="cd_delete_language">Delete language</string>
+    <string name="dialog_edit_language_title">Edit language</string>
+    <string name="languagedetail_delete_title">Delete language?</string>
+    <string name="languagedetail_delete_message">This removes \"%1$s\" from any exams it\'s assigned to.</string>
 </resources>

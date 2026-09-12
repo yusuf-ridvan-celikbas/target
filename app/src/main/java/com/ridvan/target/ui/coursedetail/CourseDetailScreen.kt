@@ -31,14 +31,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.ui.common.CourseIconPicker
+import com.ridvan.target.ui.common.courseCategoryValueLabel
+import com.ridvan.target.ui.common.examTypeDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,35 +63,36 @@ fun CourseDetailScreen(
                 title = { Text(course?.name.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit course")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_edit_course))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete course")
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_course))
                     }
                 },
             )
         },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp)) {
-            val examTypeName = examTypes.firstOrNull { it.id == course?.examTypeId }?.name ?: "Not set"
-            Text("Exam type: $examTypeName")
-            Text("Category: ${categoryLabel(course?.category)}")
+            val examTypeName = examTypes.firstOrNull { it.id == course?.examTypeId }?.name?.let { examTypeDisplayName(it) }
+                ?: stringResource(R.string.common_not_set)
+            Text(stringResource(R.string.coursedetail_exam_type, examTypeName))
+            Text(stringResource(R.string.coursedetail_category, courseCategoryValueLabel(course?.category)))
             Button(
                 onClick = onStudyResourcesClick,
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             ) {
-                Text("Study Resources")
+                Text(stringResource(R.string.label_study_resources))
             }
             Button(
                 onClick = onTopicsClick,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {
-                Text("Topics")
+                Text(stringResource(R.string.label_topics))
             }
         }
     }
@@ -110,17 +115,17 @@ fun CourseDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete course?") },
-            text = { Text("This removes \"${course?.name}\" from any exams or sections it's assigned to.") },
+            title = { Text(stringResource(R.string.coursedetail_delete_title)) },
+            text = { Text(stringResource(R.string.coursedetail_delete_message, course?.name.orEmpty())) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteCourse()
                     showDeleteConfirm = false
                     onBack()
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.common_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -143,13 +148,13 @@ private fun CourseEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit course") },
+        title = { Text(stringResource(R.string.dialog_edit_course_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.common_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -163,7 +168,7 @@ private fun CourseEditDialog(
                     onSelect = { category = it },
                 )
                 Text(
-                    "Icon",
+                    stringResource(R.string.label_icon),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                 )
@@ -178,39 +183,33 @@ private fun CourseEditDialog(
             TextButton(
                 onClick = { examTypeId?.let { onConfirm(name, icon, it, category) } },
                 enabled = name.isNotBlank() && examTypeId != null,
-            ) { Text("Save") }
+            ) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
-}
-
-private fun categoryLabel(category: CourseCategory?): String = when (category) {
-    CourseCategory.QUANTITATIVE -> "Quantitative"
-    CourseCategory.VERBAL -> "Verbal"
-    null -> "Not set"
 }
 
 @Composable
 private fun CourseCategoryField(selected: CourseCategory?, onSelect: (CourseCategory?) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Text("Category", style = MaterialTheme.typography.labelSmall)
+        Text(stringResource(R.string.label_category), style = MaterialTheme.typography.labelSmall)
         Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
             CategoryToggleSegment(
-                text = "Unset",
+                text = stringResource(R.string.category_unset),
                 selected = selected == null,
                 onClick = { onSelect(null) },
                 modifier = Modifier.weight(1f),
             )
             CategoryToggleSegment(
-                text = "Quantitative",
+                text = stringResource(R.string.category_quantitative),
                 selected = selected == CourseCategory.QUANTITATIVE,
                 onClick = { onSelect(CourseCategory.QUANTITATIVE) },
                 modifier = Modifier.weight(1f).padding(start = 4.dp),
             )
             CategoryToggleSegment(
-                text = "Verbal",
+                text = stringResource(R.string.category_verbal),
                 selected = selected == CourseCategory.VERBAL,
                 onClick = { onSelect(CourseCategory.VERBAL) },
                 modifier = Modifier.weight(1f).padding(start = 4.dp),
@@ -254,16 +253,16 @@ private fun CourseExamTypeField(examTypes: List<ExamType>, selectedId: Long?, on
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text("Exam type", style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(R.string.exam_field_type_label), style = MaterialTheme.typography.labelSmall)
             Text(
-                examTypes.firstOrNull { it.id == selectedId }?.name ?: "Select",
+                examTypes.firstOrNull { it.id == selectedId }?.name?.let { examTypeDisplayName(it) } ?: stringResource(R.string.common_select),
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             examTypes.forEach { type ->
                 DropdownMenuItem(
-                    text = { Text(type.name) },
+                    text = { Text(examTypeDisplayName(type.name)) },
                     onClick = {
                         onSelect(type.id)
                         expanded = false

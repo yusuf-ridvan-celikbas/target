@@ -12,10 +12,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.ExamType
+import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.courselist.CourseListViewModel
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellNavigation
@@ -29,11 +32,11 @@ fun StudyResourceHomeScreen(
 ) {
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
 
-    AppShell(navigation = shellNavigation, title = "Study Resources") { innerPadding ->
+    AppShell(navigation = shellNavigation, title = stringResource(R.string.label_study_resources)) { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             items(examTypes, key = { it.id }) { examType ->
                 ListItem(
-                    headlineContent = { Text("${examType.name} Courses") },
+                    headlineContent = { Text(stringResource(R.string.course_type_bucket_title, examTypeDisplayName(examType.name))) },
                     modifier = Modifier.fillMaxWidth().clickable {
                         if (examType.name == LANGUAGE_EXAM_TYPE_NAME) onLanguageTypeClick() else onCourseTypeClick(examType)
                     },

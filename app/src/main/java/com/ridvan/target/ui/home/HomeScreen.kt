@@ -8,12 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellNavigation
 
@@ -29,13 +31,15 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentAlignment = Alignment.Center,
         ) {
+            val prefix = stringResource(R.string.home_welcome_prefix)
+            val suffix = stringResource(R.string.home_welcome_suffix)
             Text(
                 buildAnnotatedString {
-                    append("Welcome to Target, ")
+                    append(prefix)
                     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                         append(currentUser?.preferredName ?: "")
                     }
-                    append("!")
+                    append(suffix)
                 },
             )
         }

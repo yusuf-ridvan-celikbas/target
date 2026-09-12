@@ -20,12 +20,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.PreferredNameSource
 import com.ridvan.target.ui.common.PreferredNameSelector
+import com.ridvan.target.ui.common.text
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellNavigation
 
@@ -65,7 +68,7 @@ fun UserEditScreen(
         }
     }
 
-    AppShell(navigation = shellNavigation, title = "Edit profile") { innerPadding ->
+    AppShell(navigation = shellNavigation, title = stringResource(R.string.user_edit_title)) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -77,35 +80,35 @@ fun UserEditScreen(
             OutlinedTextField(
                 value = firstName,
                 onValueChange = { firstName = it },
-                label = { Text("First name") },
+                label = { Text(stringResource(R.string.field_first_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = middleName,
                 onValueChange = { middleName = it },
-                label = { Text("Middle name (optional)") },
+                label = { Text(stringResource(R.string.field_middle_name_optional)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
             OutlinedTextField(
                 value = lastName,
                 onValueChange = { lastName = it },
-                label = { Text("Last name") },
+                label = { Text(stringResource(R.string.field_last_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username") },
+                label = { Text(stringResource(R.string.field_username)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email (optional)") },
+                label = { Text(stringResource(R.string.field_email_optional)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
@@ -120,11 +123,11 @@ fun UserEditScreen(
             )
             Spacer(Modifier.height(24.dp))
 
-            Text("Change password", style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(R.string.user_edit_change_password), style = MaterialTheme.typography.labelSmall)
             OutlinedTextField(
                 value = oldPassword,
                 onValueChange = { oldPassword = it },
-                label = { Text("Current password") },
+                label = { Text(stringResource(R.string.user_edit_current_password)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -132,7 +135,7 @@ fun UserEditScreen(
             OutlinedTextField(
                 value = newPassword,
                 onValueChange = { newPassword = it },
-                label = { Text("New password") },
+                label = { Text(stringResource(R.string.user_edit_new_password)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -140,14 +143,14 @@ fun UserEditScreen(
             OutlinedTextField(
                 value = confirmNewPassword,
                 onValueChange = { confirmNewPassword = it },
-                label = { Text("Confirm new password") },
+                label = { Text(stringResource(R.string.user_edit_confirm_new_password)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
 
             errorMessage?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                Text(it.text(), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
             }
             TextButton(
                 onClick = {
@@ -160,7 +163,7 @@ fun UserEditScreen(
                 },
                 modifier = Modifier.padding(top = 16.dp),
             ) {
-                Text("Save")
+                Text(stringResource(R.string.common_save))
             }
         }
     }
