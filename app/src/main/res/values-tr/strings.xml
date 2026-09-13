@@ -199,6 +199,7 @@
     <string name="sr_type_lecture_textbook">Ders/Kitap</string>
     <string name="sr_type_practice_exam">Deneme Sınavı</string>
     <string name="sr_type_lecture_notes">Ders Notları</string>
+    <string name="filter_all_study_resource_types">Tüm Türler</string>
     <string name="sr_list_empty">Henüz çalışma kaynağı yok. Eklemek için + tuşuna dokun.</string>
     <string name="sr_row_subtitle">%1$s · %2$s</string>
     <string name="dialog_add_study_resource_title">Çalışma kaynağı ekle</string>

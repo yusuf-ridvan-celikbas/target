@@ -43,4 +43,16 @@ interface PracticeExamEntryDao {
         """
     )
     fun getAllForUser(userId: Long): Flow<List<PracticeExamEntryWithContext>>
+
+    @Query(
+        """
+        SELECT COUNT(*) AS totalEntries,
+               COALESCE(SUM(correctCount), 0) AS totalCorrect,
+               COALESCE(SUM(wrongCount), 0) AS totalWrong,
+               COALESCE(SUM(durationMinutes), 0) AS totalDurationMinutes
+        FROM practice_exam_entries
+        WHERE studyResourceId IN (:studyResourceIds)
+        """
+    )
+    fun getEntryTotals(studyResourceIds: List<Long>): Flow<PracticeExamEntryTotals>
 }

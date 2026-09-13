@@ -52,6 +52,8 @@ internal fun studyResourceTypeLabel(type: StudyResourceType?): String = when (ty
 internal fun StudyResourceListContent(
     title: String,
     studyResources: List<StudyResource>,
+    selectedType: StudyResourceType?,
+    onTypeSelect: (StudyResourceType?) -> Unit,
     onAdd: (name: String, type: StudyResourceType, publisher: String?) -> Unit,
     onResourceClick: (Long) -> Unit,
     onBack: () -> Unit,
@@ -77,6 +79,9 @@ internal fun StudyResourceListContent(
         },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                StudyResourceTypeFilterField(selectedType = selectedType, onSelect = onTypeSelect)
+            }
             summary?.let { content ->
                 Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) { content() }
             }
@@ -176,6 +181,30 @@ internal fun StudyResourceFormDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
+}
+
+@Composable
+internal fun StudyResourceTypeFilterField(selectedType: StudyResourceType?, onSelect: (StudyResourceType?) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val allLabel = stringResource(R.string.filter_all_study_resource_types)
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
+            Text(stringResource(R.string.label_type), style = MaterialTheme.typography.labelSmall)
+            Text(selectedType?.let { studyResourceTypeLabel(it) } ?: allLabel, style = MaterialTheme.typography.bodyLarge)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); expanded = false })
+            StudyResourceType.entries.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(studyResourceTypeLabel(option)) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
 }
 
 @Composable

@@ -12,11 +12,14 @@ fun LanguageStudyResourceScreen(
     viewModel: LanguageStudyResourceViewModel = viewModel(),
 ) {
     val language by viewModel.language.collectAsStateWithLifecycle()
-    val studyResources by viewModel.studyResources.collectAsStateWithLifecycle()
+    val studyResources by viewModel.filteredStudyResources.collectAsStateWithLifecycle()
+    val selectedType by viewModel.selectedType.collectAsStateWithLifecycle()
 
     StudyResourceListContent(
         title = language?.name.orEmpty(),
         studyResources = studyResources,
+        selectedType = selectedType,
+        onTypeSelect = viewModel::setType,
         onAdd = viewModel::addStudyResource,
         onResourceClick = onResourceClick,
         onBack = onBack,

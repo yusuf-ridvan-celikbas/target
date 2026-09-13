@@ -10,8 +10,11 @@ import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.StudyResource
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.ui.navigation.LanguageStudyResourceRoute
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -29,6 +32,17 @@ class LanguageStudyResourceViewModel(
 
     val studyResources: StateFlow<List<StudyResource>> = studyResourceDao.getByLanguageId(languageId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val _selectedType = MutableStateFlow<StudyResourceType?>(null)
+    val selectedType: StateFlow<StudyResourceType?> = _selectedType.asStateFlow()
+
+    val filteredStudyResources: StateFlow<List<StudyResource>> = combine(studyResources, _selectedType) { list, type ->
+        if (type == null) list else list.filter { it.type == type }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun setType(type: StudyResourceType?) {
+        _selectedType.value = type
+    }
 
     fun addStudyResource(name: String, type: StudyResourceType, publisher: String?) {
         val trimmed = name.trim()
