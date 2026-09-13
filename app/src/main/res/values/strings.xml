@@ -163,6 +163,7 @@
     <!-- Course list menu (ui/courselist/CourseListScreen.kt) -->
     <string name="course_list_title">Courses</string>
     <string name="course_type_bucket_title">%1$s Courses</string>
+    <string name="course_type_bucket_title_resources">%1$s Resources</string>
 
     <!-- Course list by type (ui/courselist/CourseListByTypeScreen.kt) -->
     <string name="course_type_empty">No courses yet. Tap + to add one.</string>
@@ -270,6 +271,7 @@
     <string name="lang_list_empty">No languages yet. Tap + to add one.</string>
     <string name="dialog_add_language_title">Add language</string>
     <string name="label_language_exam_courses">Language Exam Courses</string>
+    <string name="label_language_exam_resources">Language Exam Resources</string>
     <string name="cd_edit_language">Edit language</string>
     <string name="cd_delete_language">Delete language</string>
     <string name="dialog_edit_language_title">Edit language</string>

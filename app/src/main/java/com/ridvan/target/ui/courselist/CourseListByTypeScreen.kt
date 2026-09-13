@@ -52,6 +52,7 @@ import com.ridvan.target.ui.common.examTypeDisplayName
 fun CourseListByTypeScreen(
     onCourseClick: (Long) -> Unit,
     onBack: () -> Unit,
+    titleFormatRes: Int = R.string.course_type_bucket_title,
     viewModel: CourseListByTypeViewModel = viewModel(),
 ) {
     val examTypeName by viewModel.examTypeName.collectAsStateWithLifecycle()
@@ -61,7 +62,7 @@ fun CourseListByTypeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.course_type_bucket_title, examTypeDisplayName(examTypeName))) },
+                title = { Text(stringResource(titleFormatRes, examTypeDisplayName(examTypeName))) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

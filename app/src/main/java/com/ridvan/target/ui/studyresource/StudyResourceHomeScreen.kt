@@ -36,7 +36,7 @@ fun StudyResourceHomeScreen(
         LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             items(examTypes, key = { it.id }) { examType ->
                 ListItem(
-                    headlineContent = { Text(stringResource(R.string.course_type_bucket_title, examTypeDisplayName(examType.name))) },
+                    headlineContent = { Text(stringResource(R.string.course_type_bucket_title_resources, examTypeDisplayName(examType.name))) },
                     modifier = Modifier.fillMaxWidth().clickable {
                         if (examType.name == LANGUAGE_EXAM_TYPE_NAME) onLanguageTypeClick() else onCourseTypeClick(examType)
                     },

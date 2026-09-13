@@ -38,6 +38,7 @@ import com.ridvan.target.data.local.entity.Language
 fun LanguageExamCoursesScreen(
     onLanguageClick: (Long) -> Unit,
     onBack: () -> Unit,
+    titleRes: Int = R.string.label_language_exam_courses,
     viewModel: LanguageListViewModel = viewModel(),
 ) {
     val languages by viewModel.languages.collectAsStateWithLifecycle()
@@ -46,7 +47,7 @@ fun LanguageExamCoursesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.label_language_exam_courses)) },
+                title = { Text(stringResource(titleRes)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.ridvan.target.R
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.ui.auth.LoginScreen
 import com.ridvan.target.ui.auth.RegisterScreen
@@ -130,12 +131,14 @@ fun TargetNavHost() {
             CourseListByTypeScreen(
                 onCourseClick = { courseId -> navController.navigate(CourseStudyResourceRoute(courseId)) },
                 onBack = { navController.popBackStack() },
+                titleFormatRes = R.string.course_type_bucket_title_resources,
             )
         }
         composable<StudyResourceLanguageExamCoursesRoute> {
             LanguageExamCoursesScreen(
                 onLanguageClick = { languageId -> navController.navigate(LanguageStudyResourceRoute(languageId)) },
                 onBack = { navController.popBackStack() },
+                titleRes = R.string.label_language_exam_resources,
             )
         }
         composable<TopicHomeRoute> {
