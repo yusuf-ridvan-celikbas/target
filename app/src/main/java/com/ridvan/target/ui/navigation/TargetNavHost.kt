@@ -16,6 +16,7 @@ import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.coursedetail.CourseDetailScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
+import com.ridvan.target.ui.help.HelpScreen
 import com.ridvan.target.ui.home.HomeScreen
 import com.ridvan.target.ui.languagedetail.LanguageDetailScreen
 import com.ridvan.target.ui.languagelist.LanguageExamCoursesScreen
@@ -59,6 +60,7 @@ fun TargetNavHost() {
         onNavigateStudyResources = { navController.navigateToShellDestination(StudyResourceHomeRoute) },
         onNavigateTopics = { navController.navigateToShellDestination(TopicHomeRoute) },
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
+        onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
         onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsRoute) },
         onLogOut = signOut,
@@ -217,6 +219,9 @@ fun TargetNavHost() {
         }
         composable<SettingsRoute> {
             SettingsScreen(shellNavigation = shellNavigation)
+        }
+        composable<HelpRoute> {
+            HelpScreen(shellNavigation = shellNavigation)
         }
         composable<SwitchAccountRoute> {
             SwitchAccountScreen(

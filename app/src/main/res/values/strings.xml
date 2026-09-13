@@ -25,6 +25,7 @@
     <string name="label_courses">Courses</string>
     <string name="label_study_resources">Study Resources</string>
     <string name="label_languages">Languages</string>
+    <string name="label_help">Help</string>
     <string name="label_home">Home</string>
     <string name="cd_menu">Menu</string>
     <string name="cd_more">More</string>
@@ -278,4 +279,24 @@
     <string name="dialog_edit_language_title">Edit language</string>
     <string name="languagedetail_delete_title">Delete language?</string>
     <string name="languagedetail_delete_message">This removes \"%1$s\" from any exams it\'s assigned to.</string>
+
+    <!-- Help (ui/help/HelpScreen.kt) -->
+    <string name="help_getting_started_title">Getting Started</string>
+    <string name="help_getting_started_body">Register creates a new account with your name and a password; Login signs into an existing one. You can add more accounts anytime and switch between them from the account menu (⋮ → Account → Switch Account) without losing any data.</string>
+    <string name="help_exams_title">Exams</string>
+    <string name="help_exams_body">Add an exam from the Exams screen, choosing its type (University Entrance, High School Entrance, Language, or Vocational). If the exam has sections (like TYT/AYT), courses are picked per section instead of one flat list. A Language Exam has a single language field instead of a course pool.</string>
+    <string name="help_courses_title">Courses</string>
+    <string name="help_courses_body">Courses are organized by exam type — tap Courses in the menu, pick a bucket, and either browse or tap the arrow to preview and jump straight to a course. Each course can have an icon and, for University/High School/Vocational courses, a Quantitative or Verbal category for grouping.</string>
+    <string name="help_study_resources_title">Study Resources</string>
+    <string name="help_study_resources_body">A Study Resource is a book, question bank, or other material you\'re using for a course or language — give it a type (Question Bank, Lecture/Textbook, Practice Exam, or Lecture Notes) and an optional publisher. Reach them from a course\'s page, or browse everything at once from Study Resources in the menu.</string>
+    <string name="help_topics_title">Topics</string>
+    <string name="help_topics_body">For Question Bank resources, track how many tests and questions cover each topic. A topic\'s page shows the total across every Question Bank that covers it, broken down by publisher — useful for comparing how thoroughly different books cover the same topic. Reorder a resource\'s topic list by pressing and holding the handle.</string>
+    <string name="help_languages_title">Languages</string>
+    <string name="help_languages_body">Languages (like French or German) work like courses but for Language Exams — manage them from the Languages menu item, or from a Language Exam\'s own page.</string>
+    <string name="help_shortcuts_title">Quick Shortcuts</string>
+    <string name="help_shortcuts_body">In Courses, Study Resources, and Topics, tap the arrow next to an exam type to expand it in place and jump straight to a course — no need to open the full list first.</string>
+    <string name="help_backup_title">Backing Up a Course\'s Question Banks</string>
+    <string name="help_backup_body">From a course\'s page, Export saves all its Question Bank topics and counts to a CSV file you can share or save anywhere. Import reads that same format back in — matching resources by name and publisher, updating counts for topics that already exist and adding anything new.</string>
+    <string name="help_settings_title">Settings</string>
+    <string name="help_settings_body">Change the app\'s theme, switch between the white and blue launcher icons, and pick English or Turkish from Settings, reached from the ⋮ menu.</string>
 </resources>

@@ -25,6 +25,7 @@
     <string name="label_courses">Dersler</string>
     <string name="label_study_resources">Çalışma Kaynakları</string>
     <string name="label_languages">Diller</string>
+    <string name="label_help">Yardım</string>
     <string name="label_home">Ana Sayfa</string>
     <string name="cd_menu">Menü</string>
     <string name="cd_more">Diğer</string>
@@ -276,4 +277,24 @@
     <string name="dialog_edit_language_title">Dili düzenle</string>
     <string name="languagedetail_delete_title">Dil silinsin mi?</string>
     <string name="languagedetail_delete_message">Bu, \"%1$s\" öğesini atandığı sınavlardan kaldırır.</string>
+
+    <!-- Help (ui/help/HelpScreen.kt) -->
+    <string name="help_getting_started_title">Başlarken</string>
+    <string name="help_getting_started_body">Kayıt Ol, adınız ve bir şifreyle yeni bir hesap oluşturur; Giriş Yap mevcut bir hesaba girer. İstediğiniz zaman yeni hesaplar ekleyebilir ve hesap menüsünden (⋮ → Hesap → Hesap Değiştir) veri kaybı olmadan hesaplar arasında geçiş yapabilirsiniz.</string>
+    <string name="help_exams_title">Sınavlar</string>
+    <string name="help_exams_body">Sınavlar ekranından türünü seçerek (Üniversiteye Giriş Sınavı, Lise Giriş Sınavı, Dil Sınavı veya Meslek Sınavı) bir sınav ekleyin. Sınavın bölümleri varsa (TYT/AYT gibi) dersler tek bir listeden değil, bölüm bazında seçilir. Dil Sınavlarında ders havuzu yerine tek bir dil alanı bulunur.</string>
+    <string name="help_courses_title">Dersler</string>
+    <string name="help_courses_body">Dersler sınav türüne göre gruplanır — menüden Dersler\'e dokunun, bir grup seçin ve ya listeye göz atın ya da ok işaretine dokunarak bir dersi hızlıca önizleyip doğrudan açın. Her dersin bir simgesi ve Üniversite/Lise/Meslek dersleri için gruplamaya yarayan bir Sayısal veya Sözel kategorisi olabilir.</string>
+    <string name="help_study_resources_title">Çalışma Kaynakları</string>
+    <string name="help_study_resources_body">Çalışma kaynağı, bir ders veya dil için kullandığınız kitap, soru bankası ya da başka bir materyaldir — bir tür (Soru Bankası, Ders Kitabı, Deneme Sınavı veya Ders Notları) ve isteğe bağlı bir yayıncı belirtin. Bir dersin sayfasından ulaşabilir, ya da menüdeki Çalışma Kaynakları\'ndan hepsine birden göz atabilirsiniz.</string>
+    <string name="help_topics_title">Konular</string>
+    <string name="help_topics_body">Soru Bankası kaynaklarında, her konunun kaç test ve soru içerdiğini takip edin. Bir konunun sayfası, o konuyu kapsayan tüm soru bankalarındaki toplamı, yayıncıya göre ayrılmış şekilde gösterir — farklı kitapların aynı konuyu ne kadar kapsadığını karşılaştırmak için kullanışlıdır. Bir kaynağın konu listesini tutup sürükleyerek yeniden sıralayabilirsiniz.</string>
+    <string name="help_languages_title">Diller</string>
+    <string name="help_languages_body">Diller (Fransızca veya Almanca gibi) Dil Sınavları için derslerle aynı şekilde çalışır — menüdeki Diller\'den ya da bir Dil Sınavının kendi sayfasından yönetebilirsiniz.</string>
+    <string name="help_shortcuts_title">Hızlı Kısayollar</string>
+    <string name="help_shortcuts_body">Dersler, Çalışma Kaynakları ve Konular\'da, bir sınav türünün yanındaki ok işaretine dokunarak onu yerinde genişletebilir ve bir derse doğrudan atlayabilirsiniz — önce tam listeyi açmanıza gerek kalmaz.</string>
+    <string name="help_backup_title">Bir Dersin Soru Bankalarını Yedekleme</string>
+    <string name="help_backup_body">Bir dersin sayfasından Dışa Aktar, tüm Soru Bankası konularını ve sayılarını paylaşabileceğiniz ya da herhangi bir yere kaydedebileceğiniz bir CSV dosyasına kaydeder. İçe Aktar aynı formatı geri okur — kaynakları isim ve yayıncıya göre eşleştirir, var olan konuların sayılarını günceller ve yeni olanları ekler.</string>
+    <string name="help_settings_title">Ayarlar</string>
+    <string name="help_settings_body">⋮ menüsünden ulaşılan Ayarlar\'dan uygulamanın temasını değiştirebilir, beyaz ve mavi başlatıcı simgeleri arasında geçiş yapabilir ve İngilizce veya Türkçe seçebilirsiniz.</string>
 </resources>
