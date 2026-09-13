@@ -257,6 +257,25 @@
     <string name="topicprogress_detach_title">Bu konu kaldırılsın mı?</string>
     <string name="topicprogress_detach_message">Bu, konuyu bu kaynaktan kaldırır ve burada kayıtlı %1$d oturumu siler.</string>
 
+    <!-- Statistics (ui/statistics/StatisticsScreen.kt) -->
+    <string name="label_statistics">İstatistikler</string>
+    <string name="statistics_title">İstatistikler</string>
+    <string name="label_exam">Sınav</string>
+    <string name="label_course">Ders</string>
+    <string name="label_topic">Konu</string>
+    <string name="filter_all_exams">Tüm Sınavlar</string>
+    <string name="filter_all_courses">Tüm Dersler</string>
+    <string name="filter_all_topics">Tüm Konular</string>
+    <string name="period_daily">Günlük</string>
+    <string name="period_weekly">Haftalık</string>
+    <string name="period_monthly">Aylık</string>
+    <string name="period_all_time">Tüm zamanlar</string>
+    <string name="stat_accuracy_label">Doğruluk: %%%1$d</string>
+    <string name="stat_pace_label">Hız: %1$s dk/soru · %2$s dk/test</string>
+    <string name="topic_with_course_title">%1$s (%2$s)</string>
+    <string name="statistics_empty">Bu seçim için henüz oturum kaydedilmedi.</string>
+    <string name="label_breakdown">Dağılım</string>
+
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Dersi düzenle</string>
     <string name="cd_export_course_csv">Soru Bankası verilerini dışa aktar</string>

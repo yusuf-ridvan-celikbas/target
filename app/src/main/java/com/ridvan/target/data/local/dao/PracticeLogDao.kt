@@ -34,4 +34,17 @@ interface PracticeLogDao {
         """
     )
     fun getProgressTotals(studyResourceIds: List<Long>): Flow<PracticeLogTotals>
+
+    @Query(
+        """
+        SELECT practice_logs.*, topics.id AS topicId, topics.name AS topicName, topics.courseId AS courseId
+        FROM practice_logs
+        JOIN study_resource_topics ON study_resource_topics.id = practice_logs.studyResourceTopicId
+        JOIN topics ON topics.id = study_resource_topics.topicId
+        JOIN courses ON courses.id = topics.courseId
+        WHERE courses.userId = :userId
+        ORDER BY practice_logs.loggedAt ASC
+        """
+    )
+    fun getAllForUser(userId: Long): Flow<List<PracticeLogWithTopicContext>>
 }

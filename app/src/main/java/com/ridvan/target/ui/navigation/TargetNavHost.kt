@@ -28,6 +28,7 @@ import com.ridvan.target.ui.studyresource.CourseStudyResourceScreen
 import com.ridvan.target.ui.studyresource.LanguageStudyResourceScreen
 import com.ridvan.target.ui.studyresource.StudyResourceHomeScreen
 import com.ridvan.target.ui.studyresourcedetail.StudyResourceDetailScreen
+import com.ridvan.target.ui.statistics.StatisticsScreen
 import com.ridvan.target.ui.switchaccount.SwitchAccountScreen
 import com.ridvan.target.ui.topicdetail.TopicDetailScreen
 import com.ridvan.target.ui.topicprogress.TopicProgressScreen
@@ -60,6 +61,7 @@ fun TargetNavHost() {
         onNavigateCourses = { navController.navigateToShellDestination(CourseListRoute) },
         onNavigateStudyResources = { navController.navigateToShellDestination(StudyResourceHomeRoute) },
         onNavigateTopics = { navController.navigateToShellDestination(TopicHomeRoute) },
+        onNavigateStatistics = { navController.navigateToShellDestination(StatisticsRoute) },
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
         onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
@@ -216,6 +218,12 @@ fun TargetNavHost() {
         composable<TopicProgressRoute> {
             TopicProgressScreen(
                 onBack = { navController.popBackStack() },
+            )
+        }
+        composable<StatisticsRoute> {
+            StatisticsScreen(
+                shellNavigation = shellNavigation,
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
             )
         }
         composable<UserEditRoute> {

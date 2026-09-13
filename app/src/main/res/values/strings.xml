@@ -257,6 +257,25 @@
     <string name="topicprogress_detach_title">Remove this topic?</string>
     <string name="topicprogress_detach_message">This removes it from this resource and deletes %1$d logged session(s) for it here.</string>
 
+    <!-- Statistics (ui/statistics/StatisticsScreen.kt) -->
+    <string name="label_statistics">Statistics</string>
+    <string name="statistics_title">Statistics</string>
+    <string name="label_exam">Exam</string>
+    <string name="label_course">Course</string>
+    <string name="label_topic">Topic</string>
+    <string name="filter_all_exams">All Exams</string>
+    <string name="filter_all_courses">All Courses</string>
+    <string name="filter_all_topics">All Topics</string>
+    <string name="period_daily">Daily</string>
+    <string name="period_weekly">Weekly</string>
+    <string name="period_monthly">Monthly</string>
+    <string name="period_all_time">All-time</string>
+    <string name="stat_accuracy_label">Accuracy: %1$d%%</string>
+    <string name="stat_pace_label">Pace: %1$s min/question · %2$s min/test</string>
+    <string name="topic_with_course_title">%1$s (%2$s)</string>
+    <string name="statistics_empty">No sessions logged yet for this selection.</string>
+    <string name="label_breakdown">Breakdown</string>
+
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Edit course</string>
     <string name="cd_export_course_csv">Export Question Bank data</string>

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
@@ -58,6 +59,7 @@ data class ShellNavigation(
     val onNavigateCourses: () -> Unit,
     val onNavigateStudyResources: () -> Unit,
     val onNavigateTopics: () -> Unit,
+    val onNavigateStatistics: () -> Unit,
     val onNavigateLanguages: () -> Unit,
     val onNavigateHelp: () -> Unit,
     val onNavigateUser: () -> Unit,
@@ -141,6 +143,17 @@ fun AppShell(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateTopics()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                NavigationDrawerItem(
+                    label = { Text(stringResource(R.string.label_statistics)) },
+                    icon = { Icon(Icons.Filled.BarChart, contentDescription = null) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigateStatistics()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )
