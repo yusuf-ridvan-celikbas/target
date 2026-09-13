@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +40,7 @@ fun StudyResourceHomeScreen(
             items(examTypes, key = { it.id }) { examType ->
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.course_type_bucket_title_resources, examTypeDisplayName(examType.name))) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth().clickable {
                         if (examType.name == LANGUAGE_EXAM_TYPE_NAME) onLanguageTypeClick() else onCourseTypeClick(examType)
                     },
