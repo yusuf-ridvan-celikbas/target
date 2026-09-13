@@ -234,6 +234,9 @@
 
     <!-- Topic progress (ui/topicprogress/TopicProgressScreen.kt) -->
     <string name="label_target_counts">Hedef: %1$d test · %2$d soru</string>
+    <string name="label_remaining_counts">Kalan: %1$d test · %2$d soru</string>
+    <string name="label_tests_remaining_hint">En fazla %1$d</string>
+    <string name="label_questions_remaining_hint">Doğru + yanlış en fazla %1$d</string>
     <string name="progress_aggregate">%1$d test · %2$d doğru · %3$d yanlış · Net %4$s · Toplam %5$s</string>
     <string name="duration_format">%1$dsa %2$ddk</string>
     <string name="action_log_session">+ Oturum Ekle</string>
