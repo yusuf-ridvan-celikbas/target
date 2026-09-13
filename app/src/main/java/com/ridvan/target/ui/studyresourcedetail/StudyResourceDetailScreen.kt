@@ -1,6 +1,9 @@
 package com.ridvan.target.ui.studyresourcedetail
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,9 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,17 +29,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.withTimeoutOrNull
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.StudyResourceTopicWithTopic
 import com.ridvan.target.data.local.entity.StudyResourceTopic
@@ -102,18 +115,12 @@ fun StudyResourceDetailScreen(
                 if (attachedTopics.isEmpty()) {
                     Text(stringResource(R.string.srdetail_no_topics), modifier = Modifier.padding(top = 4.dp))
                 } else {
-                    Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                        attachedTopics.forEachIndexed { index, attached ->
-                            TopicRow(
-                                attached,
-                                onClick = { editingTopic = attached },
-                                isFirst = index == 0,
-                                isLast = index == attachedTopics.lastIndex,
-                                onMoveUp = { viewModel.moveTopicUp(attached.studyResourceTopic) },
-                                onMoveDown = { viewModel.moveTopicDown(attached.studyResourceTopic) },
-                            )
-                        }
-                    }
+                    ReorderableTopicsList(
+                        attachedTopics = attachedTopics,
+                        onRowClick = { editingTopic = it },
+                        onReorder = { orderedIds -> viewModel.reorderTopics(orderedIds) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    )
                 }
             }
         }
@@ -192,13 +199,127 @@ private fun TopicsSectionHeader(onAddClick: () -> Unit) {
 }
 
 @Composable
+private fun ReorderableTopicsList(
+    attachedTopics: List<StudyResourceTopicWithTopic>,
+    onRowClick: (StudyResourceTopicWithTopic) -> Unit,
+    onReorder: (orderedStudyResourceTopicIds: List<Long>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var orderedIds by remember { mutableStateOf(attachedTopics.map { it.studyResourceTopic.id }) }
+    var draggingId by remember { mutableStateOf<Long?>(null) }
+    var dragOffsetY by remember { mutableStateOf(0f) }
+    val itemHeightPx = remember { mutableStateMapOf<Long, Int>() }
+
+    LaunchedEffect(attachedTopics) {
+        if (draggingId == null) {
+            orderedIds = attachedTopics.map { it.studyResourceTopic.id }
+        }
+    }
+
+    val byId = attachedTopics.associateBy { it.studyResourceTopic.id }
+
+    Column(modifier = modifier) {
+        orderedIds.forEach { id ->
+            val attached = byId[id] ?: return@forEach
+            key(id) {
+                val isDragging = draggingId == id
+                TopicRow(
+                    attached = attached,
+                    onClick = { onRowClick(attached) },
+                    modifier = Modifier
+                        .onSizeChanged { size -> itemHeightPx[id] = size.height }
+                        .zIndex(if (isDragging) 1f else 0f)
+                        .graphicsLayer { translationY = if (isDragging) dragOffsetY else 0f },
+                    dragHandleModifier = Modifier.pointerInput(id) {
+                        detectDragHandleGesture(
+                            onDragStart = {
+                                draggingId = id
+                                dragOffsetY = 0f
+                            },
+                            onDragEnd = {
+                                draggingId = null
+                                dragOffsetY = 0f
+                                onReorder(orderedIds)
+                            },
+                            onDragCancel = {
+                                draggingId = null
+                                dragOffsetY = 0f
+                            },
+                            onDrag = { dragAmount ->
+                                dragOffsetY += dragAmount.y
+                                val currentIndex = orderedIds.indexOf(id)
+                                if (dragOffsetY > 0) {
+                                    val belowIndex = currentIndex + 1
+                                    if (belowIndex < orderedIds.size) {
+                                        val belowHeight = itemHeightPx[orderedIds[belowIndex]]
+                                        if (belowHeight != null && dragOffsetY > belowHeight / 2f) {
+                                            orderedIds = orderedIds.toMutableList().apply { add(belowIndex, removeAt(currentIndex)) }
+                                            dragOffsetY -= belowHeight
+                                        }
+                                    }
+                                } else if (dragOffsetY < 0) {
+                                    val aboveIndex = currentIndex - 1
+                                    if (aboveIndex >= 0) {
+                                        val aboveHeight = itemHeightPx[orderedIds[aboveIndex]]
+                                        if (aboveHeight != null && -dragOffsetY > aboveHeight / 2f) {
+                                            orderedIds = orderedIds.toMutableList().apply { add(aboveIndex, removeAt(currentIndex)) }
+                                            dragOffsetY += aboveHeight
+                                        }
+                                    }
+                                }
+                            },
+                        )
+                    },
+                )
+            }
+        }
+    }
+}
+
+/**
+ * A long-press-then-drag detector for a small drag handle nested inside a scrollable container.
+ * Claims the touch (consumes it) from the very first down, so the ancestor's `verticalScroll`
+ * never sees an unconsumed move and starts scrolling the page out from under the drag.
+ */
+private suspend fun PointerInputScope.detectDragHandleGesture(
+    onDragStart: () -> Unit,
+    onDrag: (dragAmount: Offset) -> Unit,
+    onDragEnd: () -> Unit,
+    onDragCancel: () -> Unit,
+) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        down.consume()
+        val pointerId = down.id
+        val releasedBeforeLongPress = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+            var released = false
+            while (!released) {
+                val event = awaitPointerEvent()
+                val change = event.changes.firstOrNull { it.id == pointerId }
+                if (change == null || !change.pressed) {
+                    released = true
+                } else {
+                    change.consume()
+                }
+            }
+        } != null
+        if (!releasedBeforeLongPress) {
+            onDragStart()
+            val success = drag(pointerId) { change ->
+                onDrag(change.positionChange())
+                change.consume()
+            }
+            if (success) onDragEnd() else onDragCancel()
+        }
+    }
+}
+
+@Composable
 private fun TopicRow(
     attached: StudyResourceTopicWithTopic,
     onClick: () -> Unit,
-    isFirst: Boolean,
-    isLast: Boolean,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit,
+    modifier: Modifier = Modifier,
+    dragHandleModifier: Modifier = Modifier,
 ) {
     ListItem(
         headlineContent = { Text(attached.topicName) },
@@ -206,16 +327,13 @@ private fun TopicRow(
             Text(stringResource(R.string.counts_tests_questions, attached.studyResourceTopic.testCount, attached.studyResourceTopic.questionCount))
         },
         trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onMoveUp, enabled = !isFirst) {
-                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.cd_move_topic_up))
-                }
-                IconButton(onClick = onMoveDown, enabled = !isLast) {
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.cd_move_topic_down))
-                }
-            }
+            Icon(
+                Icons.Filled.DragHandle,
+                contentDescription = stringResource(R.string.cd_drag_topic_handle),
+                modifier = dragHandleModifier,
+            )
         },
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = modifier.clickable(onClick = onClick),
     )
 }
 

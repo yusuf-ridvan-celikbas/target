@@ -112,24 +112,15 @@ class StudyResourceDetailViewModel(
         }
     }
 
-    fun moveTopicUp(studyResourceTopic: StudyResourceTopic) {
-        val current = attachedTopics.value
-        val index = current.indexOfFirst { it.studyResourceTopic.id == studyResourceTopic.id }
-        if (index <= 0) return
-        swapOrderIndex(current[index].studyResourceTopic, current[index - 1].studyResourceTopic)
-    }
-
-    fun moveTopicDown(studyResourceTopic: StudyResourceTopic) {
-        val current = attachedTopics.value
-        val index = current.indexOfFirst { it.studyResourceTopic.id == studyResourceTopic.id }
-        if (index == -1 || index >= current.size - 1) return
-        swapOrderIndex(current[index].studyResourceTopic, current[index + 1].studyResourceTopic)
-    }
-
-    private fun swapOrderIndex(first: StudyResourceTopic, second: StudyResourceTopic) {
+    fun reorderTopics(orderedStudyResourceTopicIds: List<Long>) {
+        val byId = attachedTopics.value.associateBy { it.studyResourceTopic.id }
         viewModelScope.launch {
-            studyResourceTopicDao.update(first.copy(orderIndex = second.orderIndex))
-            studyResourceTopicDao.update(second.copy(orderIndex = first.orderIndex))
+            orderedStudyResourceTopicIds.forEachIndexed { index, id ->
+                val studyResourceTopic = byId[id]?.studyResourceTopic ?: return@forEachIndexed
+                if (studyResourceTopic.orderIndex != index) {
+                    studyResourceTopicDao.update(studyResourceTopic.copy(orderIndex = index))
+                }
+            }
         }
     }
 
