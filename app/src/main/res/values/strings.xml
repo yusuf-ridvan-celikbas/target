@@ -232,6 +232,27 @@
     <string name="topicdetail_delete_message">This removes \"%1$s\" and its counts from every study resource that covers it.</string>
     <string name="contribution_row_title">%1$s — %2$s</string>
 
+    <!-- Topic progress (ui/topicprogress/TopicProgressScreen.kt) -->
+    <string name="label_target_counts">Target: %1$d tests · %2$d questions</string>
+    <string name="progress_aggregate">%1$d tests · %2$d solved · %3$d unsolved · Net %4$s · %5$s total</string>
+    <string name="duration_format">%1$dh %2$dm</string>
+    <string name="action_log_session">+ Log Session</string>
+    <string name="dialog_log_session_title">Log session</string>
+    <string name="dialog_edit_session_title">Edit session</string>
+    <string name="label_tests_solved">Tests solved</string>
+    <string name="label_solved_count">Solved (correct)</string>
+    <string name="label_unsolved_count">Unsolved (wrong)</string>
+    <string name="label_hours">Hours</string>
+    <string name="label_minutes">Minutes</string>
+    <string name="action_delete_session">Delete this session</string>
+    <string name="progress_no_sessions">No sessions logged yet. Tap + Log Session to add one.</string>
+    <string name="session_row_summary">%1$d tests · %2$d✓ / %3$d✗ · %4$s</string>
+    <string name="cd_edit_target_counts">Edit target counts</string>
+    <string name="cd_detach_topic">Remove topic from resource</string>
+    <string name="dialog_edit_target_counts_title">Edit target counts</string>
+    <string name="topicprogress_detach_title">Remove this topic?</string>
+    <string name="topicprogress_detach_message">This removes it from this resource and deletes %1$d logged session(s) for it here.</string>
+
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Edit course</string>
     <string name="cd_export_course_csv">Export Question Bank data</string>

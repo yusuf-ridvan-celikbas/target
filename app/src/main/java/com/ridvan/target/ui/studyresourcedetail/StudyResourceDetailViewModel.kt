@@ -136,13 +136,4 @@ class StudyResourceDetailViewModel(
         }
     }
 
-    fun updateTopicCounts(studyResourceTopic: StudyResourceTopic, testCount: Int, questionCount: Int) {
-        viewModelScope.launch {
-            studyResourceTopicDao.update(studyResourceTopic.copy(testCount = testCount, questionCount = questionCount))
-        }
-    }
-
-    fun removeTopic(studyResourceTopic: StudyResourceTopic) {
-        viewModelScope.launch { studyResourceTopicDao.delete(studyResourceTopic) }
-    }
 }

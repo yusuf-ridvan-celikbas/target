@@ -174,3 +174,22 @@ val MIGRATION_10_11 = object : Migration(10, 11) {
         )
     }
 }
+
+val MIGRATION_11_12 = object : Migration(11, 12) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS practice_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                studyResourceTopicId INTEGER NOT NULL REFERENCES study_resource_topics(id) ON DELETE CASCADE,
+                testsSolved INTEGER NOT NULL,
+                solvedCount INTEGER NOT NULL,
+                unsolvedCount INTEGER NOT NULL,
+                durationMinutes INTEGER NOT NULL,
+                loggedAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_logs_studyResourceTopicId ON practice_logs(studyResourceTopicId)")
+    }
+}

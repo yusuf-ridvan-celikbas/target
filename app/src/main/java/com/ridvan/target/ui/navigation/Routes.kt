@@ -79,3 +79,6 @@ data class TopicCourseListByTypeRoute(val examTypeId: Long)
 
 @Serializable
 object HelpRoute
+
+@Serializable
+data class TopicProgressRoute(val studyResourceTopicId: Long)

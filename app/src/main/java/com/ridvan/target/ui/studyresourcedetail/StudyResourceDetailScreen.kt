@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -46,7 +45,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,7 +52,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.withTimeoutOrNull
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.StudyResourceTopicWithTopic
-import com.ridvan.target.data.local.entity.StudyResourceTopic
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.courseDisplayName
@@ -66,6 +63,7 @@ import com.ridvan.target.ui.studyresource.studyResourceTypeLabel
 fun StudyResourceDetailScreen(
     onBack: () -> Unit,
     onDuplicated: (newStudyResourceId: Long) -> Unit,
+    onOpenTopicProgress: (studyResourceTopicId: Long) -> Unit,
     viewModel: StudyResourceDetailViewModel = viewModel(),
 ) {
     val studyResource by viewModel.studyResource.collectAsStateWithLifecycle()
@@ -77,7 +75,6 @@ fun StudyResourceDetailScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showAddTopicDialog by remember { mutableStateOf(false) }
-    var editingTopic by remember { mutableStateOf<StudyResourceTopicWithTopic?>(null) }
 
     Scaffold(
         topBar = {
@@ -123,7 +120,7 @@ fun StudyResourceDetailScreen(
                 } else {
                     ReorderableTopicsList(
                         attachedTopics = attachedTopics,
-                        onRowClick = { editingTopic = it },
+                        onRowClick = { onOpenTopicProgress(it.studyResourceTopic.id) },
                         onReorder = { orderedIds -> viewModel.reorderTopics(orderedIds) },
                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     )
@@ -174,21 +171,6 @@ fun StudyResourceDetailScreen(
                 showAddTopicDialog = false
             },
             onDismiss = { showAddTopicDialog = false },
-        )
-    }
-
-    editingTopic?.let { attached ->
-        EditTopicCountsDialog(
-            attached = attached,
-            onSave = { testCount, questionCount ->
-                viewModel.updateTopicCounts(attached.studyResourceTopic, testCount, questionCount)
-                editingTopic = null
-            },
-            onRemove = {
-                viewModel.removeTopic(attached.studyResourceTopic)
-                editingTopic = null
-            },
-            onDismiss = { editingTopic = null },
         )
     }
 }
@@ -392,53 +374,6 @@ private fun AddTopicDialog(
                 onClick = { onConfirm(name, selected) },
                 enabled = name.isNotBlank() || selected.isNotEmpty(),
             ) { Text(stringResource(R.string.common_add)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
-}
-
-@Composable
-private fun EditTopicCountsDialog(
-    attached: StudyResourceTopicWithTopic,
-    onSave: (testCount: Int, questionCount: Int) -> Unit,
-    onRemove: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var testCountText by remember { mutableStateOf(attached.studyResourceTopic.testCount.toString()) }
-    var questionCountText by remember { mutableStateOf(attached.studyResourceTopic.questionCount.toString()) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(attached.topicName) },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = testCountText,
-                    onValueChange = { input -> if (input.all(Char::isDigit)) testCountText = input },
-                    label = { Text(stringResource(R.string.label_test_count)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = questionCountText,
-                    onValueChange = { input -> if (input.all(Char::isDigit)) questionCountText = input },
-                    label = { Text(stringResource(R.string.label_question_count)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                )
-                TextButton(onClick = onRemove, modifier = Modifier.padding(top = 8.dp)) {
-                    Text(stringResource(R.string.action_remove_topic_from_resource))
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onSave(testCountText.toIntOrNull() ?: 0, questionCountText.toIntOrNull() ?: 0)
-            }) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }

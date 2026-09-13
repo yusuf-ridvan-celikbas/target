@@ -32,6 +32,16 @@ interface StudyResourceTopicDao {
 
     @Query(
         """
+        SELECT study_resource_topics.*, topics.name AS topicName
+        FROM study_resource_topics
+        JOIN topics ON topics.id = study_resource_topics.topicId
+        WHERE study_resource_topics.id = :id
+        """
+    )
+    fun getById(id: Long): Flow<StudyResourceTopicWithTopic?>
+
+    @Query(
+        """
         SELECT study_resource_topics.*, study_resources.name AS studyResourceName, study_resources.publisher AS studyResourcePublisher
         FROM study_resource_topics
         JOIN study_resources ON study_resources.id = study_resource_topics.studyResourceId

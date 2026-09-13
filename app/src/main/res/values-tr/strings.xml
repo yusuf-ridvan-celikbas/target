@@ -232,6 +232,27 @@
     <string name="topicdetail_delete_message">Bu, \"%1$s\" öğesini ve onu kapsayan her çalışma kaynağındaki sayılarını kaldırır.</string>
     <string name="contribution_row_title">%1$s — %2$s</string>
 
+    <!-- Topic progress (ui/topicprogress/TopicProgressScreen.kt) -->
+    <string name="label_target_counts">Hedef: %1$d test · %2$d soru</string>
+    <string name="progress_aggregate">%1$d test · %2$d doğru · %3$d yanlış · Net %4$s · Toplam %5$s</string>
+    <string name="duration_format">%1$dsa %2$ddk</string>
+    <string name="action_log_session">+ Oturum Ekle</string>
+    <string name="dialog_log_session_title">Oturum ekle</string>
+    <string name="dialog_edit_session_title">Oturumu düzenle</string>
+    <string name="label_tests_solved">Çözülen test</string>
+    <string name="label_solved_count">Doğru</string>
+    <string name="label_unsolved_count">Yanlış</string>
+    <string name="label_hours">Saat</string>
+    <string name="label_minutes">Dakika</string>
+    <string name="action_delete_session">Bu oturumu sil</string>
+    <string name="progress_no_sessions">Henüz oturum kaydedilmedi. Eklemek için + Oturum Ekle\'ye dokunun.</string>
+    <string name="session_row_summary">%1$d test · %2$d✓ / %3$d✗ · %4$s</string>
+    <string name="cd_edit_target_counts">Hedef sayıları düzenle</string>
+    <string name="cd_detach_topic">Konuyu kaynaktan kaldır</string>
+    <string name="dialog_edit_target_counts_title">Hedef sayıları düzenle</string>
+    <string name="topicprogress_detach_title">Bu konu kaldırılsın mı?</string>
+    <string name="topicprogress_detach_message">Bu, konuyu bu kaynaktan kaldırır ve burada kayıtlı %1$d oturumu siler.</string>
+
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Dersi düzenle</string>
     <string name="cd_export_course_csv">Soru Bankası verilerini dışa aktar</string>

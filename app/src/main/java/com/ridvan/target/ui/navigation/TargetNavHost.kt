@@ -30,6 +30,7 @@ import com.ridvan.target.ui.studyresource.StudyResourceHomeScreen
 import com.ridvan.target.ui.studyresourcedetail.StudyResourceDetailScreen
 import com.ridvan.target.ui.switchaccount.SwitchAccountScreen
 import com.ridvan.target.ui.topicdetail.TopicDetailScreen
+import com.ridvan.target.ui.topicprogress.TopicProgressScreen
 import com.ridvan.target.ui.topiclist.TopicHomeScreen
 import com.ridvan.target.ui.topiclist.TopicListScreen
 import com.ridvan.target.ui.user.UserEditScreen
@@ -209,6 +210,12 @@ fun TargetNavHost() {
             StudyResourceDetailScreen(
                 onBack = { navController.popBackStack() },
                 onDuplicated = { newStudyResourceId -> navController.navigate(StudyResourceDetailRoute(newStudyResourceId)) },
+                onOpenTopicProgress = { studyResourceTopicId -> navController.navigate(TopicProgressRoute(studyResourceTopicId)) },
+            )
+        }
+        composable<TopicProgressRoute> {
+            TopicProgressScreen(
+                onBack = { navController.popBackStack() },
             )
         }
         composable<UserEditRoute> {
