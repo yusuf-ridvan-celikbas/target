@@ -240,6 +240,7 @@
     <string name="topic_breakdown_section_title">Topic Breakdown</string>
     <string name="action_add_topic_breakdown">+ Add Topic</string>
     <string name="topic_result_row_summary">%1$d questions · %2$d✓ / %3$d✗</string>
+    <string name="topic_result_correct_wrong_remaining_hint">Correct up to %1$d · Wrong up to %2$d</string>
     <string name="action_remove_topic_result">Remove from this exam</string>
     <string name="topic_breakdown_empty">No topic breakdown yet.</string>
     <string name="topic_breakdown_no_more_topics">All course topics have already been added.</string>

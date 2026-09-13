@@ -165,8 +165,15 @@ fun PracticeExamEntryDetailScreen(
     }
 
     editingTopicResult?.let { editing ->
+        val otherTopicResults = topicResults.filter { it.topicResult.id != editing.topicResult.id }
+        val remainingQuestionCount = ((entry?.questionCount ?: 0) - otherTopicResults.sumOf { it.topicResult.questionCount }).coerceAtLeast(0)
+        val remainingCorrect = ((entry?.correctCount ?: 0) - otherTopicResults.sumOf { it.topicResult.correctCount }).coerceAtLeast(0)
+        val remainingWrong = ((entry?.wrongCount ?: 0) - otherTopicResults.sumOf { it.topicResult.wrongCount }).coerceAtLeast(0)
         EditTopicResultDialog(
             topicResultWithTopic = editing,
+            maxQuestionCount = remainingQuestionCount,
+            maxCorrectCount = remainingCorrect,
+            maxWrongCount = remainingWrong,
             onSave = { questionCount, correctCount, wrongCount ->
                 viewModel.updateTopicResult(editing.topicResult, questionCount, correctCount, wrongCount)
                 editingTopicResult = null
@@ -327,6 +334,9 @@ private fun AddTopicResultDialog(
 @Composable
 private fun EditTopicResultDialog(
     topicResultWithTopic: PracticeExamEntryTopicResultWithTopic,
+    maxQuestionCount: Int,
+    maxCorrectCount: Int,
+    maxWrongCount: Int,
     onSave: (questionCount: Int, correctCount: Int, wrongCount: Int) -> Unit,
     onRemove: () -> Unit,
     onDismiss: () -> Unit,
@@ -343,25 +353,31 @@ private fun EditTopicResultDialog(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = questionCountText,
-                    onValueChange = { input -> if (input.all(Char::isDigit)) questionCountText = input },
+                    onValueChange = { input ->
+                        if (input.all(Char::isDigit)) {
+                            val n = input.toIntOrNull() ?: 0
+                            questionCountText = if (n > maxQuestionCount) maxQuestionCount.toString() else input
+                        }
+                    },
                     label = { Text(stringResource(R.string.label_question_count)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    stringResource(R.string.label_tests_remaining_hint, maxQuestionCount),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
                 OutlinedTextField(
                     value = correctText,
                     onValueChange = { input ->
                         if (input.all(Char::isDigit)) {
                             val n = input.toIntOrNull() ?: 0
-                            val cap = questionCountText.toIntOrNull()
-                            if (cap == null) {
-                                correctText = input
-                            } else {
-                                val wrong = wrongText.toIntOrNull() ?: 0
-                                val allowed = (cap - wrong).coerceAtLeast(0)
-                                correctText = if (n > allowed) allowed.toString() else input
-                            }
+                            val rowQuestionCount = questionCountText.toIntOrNull() ?: 0
+                            val wrong = wrongText.toIntOrNull() ?: 0
+                            val allowed = minOf(maxCorrectCount, rowQuestionCount - wrong).coerceAtLeast(0)
+                            correctText = if (n > allowed) allowed.toString() else input
                         }
                     },
                     label = { Text(stringResource(R.string.label_correct_count)) },
@@ -374,20 +390,21 @@ private fun EditTopicResultDialog(
                     onValueChange = { input ->
                         if (input.all(Char::isDigit)) {
                             val n = input.toIntOrNull() ?: 0
-                            val cap = questionCountText.toIntOrNull()
-                            if (cap == null) {
-                                wrongText = input
-                            } else {
-                                val correct = correctText.toIntOrNull() ?: 0
-                                val allowed = (cap - correct).coerceAtLeast(0)
-                                wrongText = if (n > allowed) allowed.toString() else input
-                            }
+                            val rowQuestionCount = questionCountText.toIntOrNull() ?: 0
+                            val correct = correctText.toIntOrNull() ?: 0
+                            val allowed = minOf(maxWrongCount, rowQuestionCount - correct).coerceAtLeast(0)
+                            wrongText = if (n > allowed) allowed.toString() else input
                         }
                     },
                     label = { Text(stringResource(R.string.label_wrong_count)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                Text(
+                    stringResource(R.string.topic_result_correct_wrong_remaining_hint, maxCorrectCount, maxWrongCount),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
                 TextButton(onClick = onRemove, modifier = Modifier.padding(top = 8.dp)) {
                     Text(stringResource(R.string.action_remove_topic_result))

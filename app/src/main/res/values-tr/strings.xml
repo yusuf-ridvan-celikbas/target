@@ -240,6 +240,7 @@
     <string name="topic_breakdown_section_title">Konu Dağılımı</string>
     <string name="action_add_topic_breakdown">+ Konu Ekle</string>
     <string name="topic_result_row_summary">%1$d soru · %2$d✓ / %3$d✗</string>
+    <string name="topic_result_correct_wrong_remaining_hint">Doğru en fazla %1$d · Yanlış en fazla %2$d</string>
     <string name="action_remove_topic_result">Bu denemeden kaldır</string>
     <string name="topic_breakdown_empty">Henüz konu dağılımı yok.</string>
     <string name="topic_breakdown_no_more_topics">Dersin tüm konuları zaten eklendi.</string>
