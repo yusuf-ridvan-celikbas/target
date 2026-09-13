@@ -222,7 +222,14 @@
 
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Edit course</string>
+    <string name="cd_export_course_csv">Export Question Bank data</string>
     <string name="cd_delete_course">Delete course</string>
+    <string name="export_csv_chooser_title">Export course data</string>
+    <string name="csv_header_resource">Resource Name</string>
+    <string name="csv_header_publisher">Publisher</string>
+    <string name="csv_header_topic">Topic</string>
+    <string name="csv_header_test_count">Test Count</string>
+    <string name="csv_header_question_count">Question Count</string>
     <string name="coursedetail_exam_type">Exam type: %1$s</string>
     <string name="coursedetail_category">Category: %1$s</string>
     <string name="coursedetail_delete_title">Delete course?</string>

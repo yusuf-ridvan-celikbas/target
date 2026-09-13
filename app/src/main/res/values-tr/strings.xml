@@ -222,7 +222,14 @@
 
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Dersi düzenle</string>
+    <string name="cd_export_course_csv">Soru Bankası verilerini dışa aktar</string>
     <string name="cd_delete_course">Dersi sil</string>
+    <string name="export_csv_chooser_title">Ders verilerini dışa aktar</string>
+    <string name="csv_header_resource">Kaynak Adı</string>
+    <string name="csv_header_publisher">Yayıncı</string>
+    <string name="csv_header_topic">Konu</string>
+    <string name="csv_header_test_count">Test Sayısı</string>
+    <string name="csv_header_question_count">Soru Sayısı</string>
     <string name="coursedetail_exam_type">Sınav türü: %1$s</string>
     <string name="coursedetail_category">Kategori: %1$s</string>
     <string name="coursedetail_delete_title">Ders silinsin mi?</string>

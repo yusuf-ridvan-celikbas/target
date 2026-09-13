@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -31,12 +32,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.data.export.CourseQuestionBankCsvExporter
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.ExamType
@@ -44,6 +47,7 @@ import com.ridvan.target.ui.common.CourseIconPicker
 import com.ridvan.target.ui.common.courseCategoryValueLabel
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
+import com.ridvan.target.ui.common.shareCsvFile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +61,15 @@ fun CourseDetailScreen(
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val exportHeaders = listOf(
+        stringResource(R.string.csv_header_resource),
+        stringResource(R.string.csv_header_publisher),
+        stringResource(R.string.csv_header_topic),
+        stringResource(R.string.csv_header_test_count),
+        stringResource(R.string.csv_header_question_count),
+    )
+    val exportChooserTitle = stringResource(R.string.export_csv_chooser_title)
 
     Scaffold(
         topBar = {
@@ -70,6 +83,16 @@ fun CourseDetailScreen(
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_edit_course))
+                    }
+                    IconButton(onClick = {
+                        viewModel.fetchQuestionBankExportRows { rows ->
+                            val file = CourseQuestionBankCsvExporter.writeCourseQuestionBankCsv(
+                                context, course?.name.orEmpty(), exportHeaders, rows,
+                            )
+                            shareCsvFile(context, file, exportChooserTitle)
+                        }
+                    }) {
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.cd_export_course_csv))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_course))
