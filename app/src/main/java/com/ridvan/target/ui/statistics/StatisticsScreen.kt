@@ -37,6 +37,7 @@ import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.courseDisplayName
+import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellNavigation
 
@@ -46,16 +47,20 @@ fun StatisticsScreen(
     onTopicClick: (Long) -> Unit,
     viewModel: StatisticsViewModel = viewModel(),
 ) {
-    val exams by viewModel.exams.collectAsStateWithLifecycle()
+    val examGroups by viewModel.examGroups.collectAsStateWithLifecycle()
     val courses by viewModel.coursesForFilter.collectAsStateWithLifecycle()
     val topics by viewModel.topicsForFilter.collectAsStateWithLifecycle()
     val selectedExamId by viewModel.selectedExamId.collectAsStateWithLifecycle()
     val selectedCourseId by viewModel.selectedCourseId.collectAsStateWithLifecycle()
     val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
     val period by viewModel.period.collectAsStateWithLifecycle()
+    val source by viewModel.source.collectAsStateWithLifecycle()
     val summary by viewModel.summary.collectAsStateWithLifecycle()
     val chartBuckets by viewModel.chartBuckets.collectAsStateWithLifecycle()
     val breakdown by viewModel.breakdown.collectAsStateWithLifecycle()
+    val examSummary by viewModel.examSummary.collectAsStateWithLifecycle()
+    val examChartBuckets by viewModel.examChartBuckets.collectAsStateWithLifecycle()
+    val weakTopics by viewModel.weakTopics.collectAsStateWithLifecycle()
 
     AppShell(navigation = shellNavigation, title = stringResource(R.string.statistics_title)) { innerPadding ->
         Column(
@@ -65,60 +70,140 @@ fun StatisticsScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            ExamFilterField(exams, selectedExamId, onSelect = viewModel::setExam)
+            SourceToggle(source = source, onSelect = viewModel::setSource)
+
+            ExamFilterField(examGroups, selectedExamId, onSelect = viewModel::setExam)
             CourseFilterField(courses, selectedCourseId, onSelect = viewModel::setCourse)
-            TopicFilterField(topics, selectedTopicId, enabled = selectedCourseId != null, onSelect = viewModel::setTopic)
+            if (source == StatsSource.PRACTICE_SESSIONS) {
+                TopicFilterField(topics, selectedTopicId, enabled = selectedCourseId != null, onSelect = viewModel::setTopic)
+            }
 
             PeriodToggle(period = period, onSelect = viewModel::setPeriod, modifier = Modifier.padding(top = 16.dp))
 
-            if (summary.tests == 0 && summary.totalQuestions == 0) {
-                Text(stringResource(R.string.statistics_empty), modifier = Modifier.padding(top = 16.dp))
-            } else {
-                val durationText = stringResource(R.string.duration_format, summary.durationMinutes / 60, summary.durationMinutes % 60)
-                Text(
-                    stringResource(
-                        R.string.progress_aggregate,
-                        summary.tests,
-                        summary.solved,
-                        summary.unsolved,
-                        "%.2f".format(summary.net),
-                        durationText,
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 16.dp),
-                )
-                Text(
-                    stringResource(R.string.stat_accuracy_label, summary.accuracyPercent),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-                Text(
-                    stringResource(
-                        R.string.stat_pace_label,
-                        "%.1f".format(summary.minutesPerQuestion),
-                        "%.1f".format(summary.minutesPerTest),
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-
-                TrendBarChart(buckets = chartBuckets, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
-
-                if (breakdown.isNotEmpty()) {
+            if (source == StatsSource.PRACTICE_SESSIONS) {
+                if (summary.tests == 0 && summary.totalQuestions == 0) {
+                    Text(stringResource(R.string.statistics_empty), modifier = Modifier.padding(top = 16.dp))
+                } else {
+                    val durationText = stringResource(R.string.duration_format, summary.durationMinutes / 60, summary.durationMinutes % 60)
                     Text(
-                        stringResource(R.string.label_breakdown),
+                        stringResource(
+                            R.string.progress_aggregate,
+                            summary.tests,
+                            summary.solved,
+                            summary.unsolved,
+                            "%.2f".format(summary.net),
+                            durationText,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 16.dp),
+                    )
+                    Text(
+                        stringResource(R.string.stat_accuracy_label, summary.accuracyPercent),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                    Text(
+                        stringResource(
+                            R.string.stat_pace_label,
+                            "%.1f".format(summary.minutesPerQuestion),
+                            "%.1f".format(summary.minutesPerTest),
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+
+                    TrendBarChart(buckets = chartBuckets, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
+
+                    if (breakdown.isNotEmpty()) {
+                        Text(
+                            stringResource(R.string.label_breakdown),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(top = 16.dp),
+                        )
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            breakdown.forEach { entry ->
+                                BreakdownRow(entry, onClick = { onTopicClick(entry.topicId) })
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (examSummary.tests == 0) {
+                    Text(stringResource(R.string.statistics_exams_empty), modifier = Modifier.padding(top = 16.dp))
+                } else {
+                    val durationText = stringResource(
+                        R.string.duration_format,
+                        examSummary.durationMinutes / 60,
+                        examSummary.durationMinutes % 60,
+                    )
+                    Text(
+                        stringResource(
+                            R.string.practice_exam_entries_summary,
+                            examSummary.tests,
+                            examSummary.solved,
+                            examSummary.unsolved,
+                            examSummary.accuracyPercent,
+                            durationText,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 16.dp),
+                    )
+                    Text(
+                        stringResource(
+                            R.string.stat_pace_label,
+                            "%.1f".format(examSummary.minutesPerQuestion),
+                            "%.1f".format(examSummary.minutesPerTest),
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+
+                    TrendBarChart(buckets = examChartBuckets, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
+                }
+
+                if (weakTopics.isNotEmpty()) {
+                    Text(
+                        stringResource(R.string.stats_weak_topics_title),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(top = 16.dp),
                     )
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        breakdown.forEach { entry ->
-                            BreakdownRow(entry, onClick = { onTopicClick(entry.topicId) })
+                        weakTopics.forEach { entry ->
+                            WeakTopicRow(entry, onClick = { onTopicClick(entry.topicId) })
                             HorizontalDivider()
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun WeakTopicRow(entry: WeakTopicEntry, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, courseDisplayName(entry.courseName))) },
+        supportingContent = { Text(stringResource(R.string.stats_weak_topic_row, entry.correctCount, entry.wrongCount, entry.accuracyPercent)) },
+        modifier = Modifier.clickable(onClick = onClick),
+    )
+}
+
+@Composable
+private fun SourceToggle(source: StatsSource, onSelect: (StatsSource) -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier = modifier.fillMaxWidth()) {
+        PeriodSegment(
+            stringResource(R.string.stats_source_practice_sessions),
+            source == StatsSource.PRACTICE_SESSIONS,
+            { onSelect(StatsSource.PRACTICE_SESSIONS) },
+            Modifier.weight(1f),
+        )
+        PeriodSegment(
+            stringResource(R.string.stats_source_practice_exams),
+            source == StatsSource.PRACTICE_EXAMS,
+            { onSelect(StatsSource.PRACTICE_EXAMS) },
+            Modifier.weight(1f).padding(start = 4.dp),
+        )
     }
 }
 
@@ -172,18 +257,26 @@ private fun PeriodSegment(text: String, selected: Boolean, onClick: () -> Unit, 
 }
 
 @Composable
-private fun ExamFilterField(exams: List<Exam>, selectedId: Long?, onSelect: (Long?) -> Unit) {
+private fun ExamFilterField(examGroups: List<Pair<String, List<Exam>>>, selectedId: Long?, onSelect: (Long?) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val allLabel = stringResource(R.string.filter_all_exams)
+    val selectedExam = examGroups.firstNotNullOfOrNull { (_, exams) -> exams.firstOrNull { it.id == selectedId } }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
             Text(stringResource(R.string.label_exam), style = MaterialTheme.typography.labelSmall)
-            Text(exams.firstOrNull { it.id == selectedId }?.name ?: allLabel, style = MaterialTheme.typography.bodyLarge)
+            Text(selectedExam?.name ?: allLabel, style = MaterialTheme.typography.bodyLarge)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); expanded = false })
-            exams.forEach { exam ->
-                DropdownMenuItem(text = { Text(exam.name) }, onClick = { onSelect(exam.id); expanded = false })
+            examGroups.forEach { (typeName, exams) ->
+                Text(
+                    examTypeDisplayName(typeName),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+                exams.forEach { exam ->
+                    DropdownMenuItem(text = { Text(exam.name) }, onClick = { onSelect(exam.id); expanded = false })
+                }
             }
         }
     }

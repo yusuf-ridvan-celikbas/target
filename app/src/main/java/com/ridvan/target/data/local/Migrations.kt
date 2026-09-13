@@ -193,3 +193,114 @@ val MIGRATION_11_12 = object : Migration(11, 12) {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_logs_studyResourceTopicId ON practice_logs(studyResourceTopicId)")
     }
 }
+
+val MIGRATION_12_13 = object : Migration(12, 13) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE study_resources ADD COLUMN questionCount INTEGER")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS practice_exam_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                studyResourceId INTEGER NOT NULL REFERENCES study_resources(id) ON DELETE CASCADE,
+                correctCount INTEGER NOT NULL,
+                wrongCount INTEGER NOT NULL,
+                durationMinutes INTEGER NOT NULL,
+                loggedAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_exam_attempts_studyResourceId ON practice_exam_attempts(studyResourceId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS practice_exam_topic_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                practiceExamAttemptId INTEGER NOT NULL REFERENCES practice_exam_attempts(id) ON DELETE CASCADE,
+                topicId INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+                questionCount INTEGER NOT NULL,
+                correctCount INTEGER NOT NULL,
+                wrongCount INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_exam_topic_results_practiceExamAttemptId ON practice_exam_topic_results(practiceExamAttemptId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_exam_topic_results_topicId ON practice_exam_topic_results(topicId)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_practice_exam_topic_results_practiceExamAttemptId_topicId " +
+                "ON practice_exam_topic_results(practiceExamAttemptId, topicId)"
+        )
+    }
+}
+
+val MIGRATION_13_14 = object : Migration(13, 14) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // MIGRATION_12_13 wrongly put a single questionCount on the StudyResource itself and modeled
+        // practice exams as many dated "attempts." The real shape (confirmed after testing on-device):
+        // a Practice Exam StudyResource is a container of many independently-named exams ("Deneme 1",
+        // "Deneme 2", ...), each with its own question count. Undo the wrong column without touching
+        // any real study_resources data, via the standard SQLite drop-column-via-recreate pattern.
+        db.execSQL(
+            """
+            CREATE TABLE study_resources_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                courseId INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+                languageId INTEGER REFERENCES languages(id) ON DELETE CASCADE,
+                type TEXT,
+                publisher TEXT,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            INSERT INTO study_resources_new (id, name, courseId, languageId, type, publisher, createdAt)
+            SELECT id, name, courseId, languageId, type, publisher, createdAt FROM study_resources
+            """.trimIndent()
+        )
+        db.execSQL("DROP TABLE study_resources")
+        db.execSQL("ALTER TABLE study_resources_new RENAME TO study_resources")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_study_resources_courseId ON study_resources(courseId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_study_resources_languageId ON study_resources(languageId)")
+
+        // The wrong-shaped attempt tables held only this session's own test data, not real study data.
+        db.execSQL("DROP TABLE IF EXISTS practice_exam_topic_results")
+        db.execSQL("DROP TABLE IF EXISTS practice_exam_attempts")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS practice_exam_entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                studyResourceId INTEGER NOT NULL REFERENCES study_resources(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                questionCount INTEGER NOT NULL,
+                correctCount INTEGER NOT NULL,
+                wrongCount INTEGER NOT NULL,
+                durationMinutes INTEGER NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_exam_entries_studyResourceId ON practice_exam_entries(studyResourceId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS practice_exam_entry_topic_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                practiceExamEntryId INTEGER NOT NULL REFERENCES practice_exam_entries(id) ON DELETE CASCADE,
+                topicId INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+                questionCount INTEGER NOT NULL,
+                correctCount INTEGER NOT NULL,
+                wrongCount INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_exam_entry_topic_results_practiceExamEntryId ON practice_exam_entry_topic_results(practiceExamEntryId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_practice_exam_entry_topic_results_topicId ON practice_exam_entry_topic_results(topicId)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_practice_exam_entry_topic_results_practiceExamEntryId_topicId " +
+                "ON practice_exam_entry_topic_results(practiceExamEntryId, topicId)"
+        )
+    }
+}

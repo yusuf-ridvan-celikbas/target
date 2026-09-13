@@ -219,6 +219,30 @@
     <string name="label_question_count">Question count</string>
     <string name="action_remove_topic_from_resource">Remove topic from this resource</string>
     <string name="srdetail_delete_title">Delete study resource?</string>
+    <string name="practice_exam_entries_button">Practice Exams</string>
+
+    <!-- Practice Exam Entries (ui/practiceexam/*) -->
+    <string name="action_add_entry">+ Add Exam</string>
+    <string name="dialog_add_entry_title">Add exam</string>
+    <string name="dialog_edit_entry_result_title">Edit result</string>
+    <string name="label_entry_name">Exam name</string>
+    <string name="label_correct_count">Correct</string>
+    <string name="label_wrong_count">Wrong</string>
+    <string name="label_blank_count">Blank: %1$d</string>
+    <string name="entry_question_count">Questions: %1$d</string>
+    <string name="entry_row_summary">%1$d✓ / %2$d✗ / %3$d blank</string>
+    <string name="entry_result_summary">%1$d✓ / %2$d✗ / %3$d blank · %4$s</string>
+    <string name="practice_exam_no_entries">No exams added yet. Tap + Add Exam to add one.</string>
+    <string name="practice_exam_entries_summary">%1$d exams · %2$d✓ / %3$d✗ · Accuracy %4$d%% · %5$s total</string>
+    <string name="action_delete_entry">Delete exam</string>
+    <string name="dialog_delete_entry_title">Delete this exam?</string>
+    <string name="dialog_delete_entry_message">This also deletes its topic breakdown, if any.</string>
+    <string name="topic_breakdown_section_title">Topic Breakdown</string>
+    <string name="action_add_topic_breakdown">+ Add Topic</string>
+    <string name="topic_result_row_summary">%1$d questions · %2$d✓ / %3$d✗</string>
+    <string name="action_remove_topic_result">Remove from this exam</string>
+    <string name="topic_breakdown_empty">No topic breakdown yet.</string>
+    <string name="topic_breakdown_no_more_topics">All course topics have already been added.</string>
 
     <!-- Topics (ui/topiclist/*, ui/topicdetail/*) -->
     <string name="label_topics">Topics</string>
@@ -275,6 +299,11 @@
     <string name="topic_with_course_title">%1$s (%2$s)</string>
     <string name="statistics_empty">No sessions logged yet for this selection.</string>
     <string name="label_breakdown">Breakdown</string>
+    <string name="stats_source_practice_sessions">Practice Sessions</string>
+    <string name="stats_source_practice_exams">Practice Exams</string>
+    <string name="statistics_exams_empty">No practice exam attempts logged yet for this selection.</string>
+    <string name="stats_weak_topics_title">Topics to Work On</string>
+    <string name="stats_weak_topic_row">%1$d✓ / %2$d✗ · %3$d%% accuracy</string>
 
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Edit course</string>

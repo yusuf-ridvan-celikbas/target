@@ -21,6 +21,7 @@ import com.ridvan.target.ui.home.HomeScreen
 import com.ridvan.target.ui.languagedetail.LanguageDetailScreen
 import com.ridvan.target.ui.languagelist.LanguageExamCoursesScreen
 import com.ridvan.target.ui.languagelist.LanguageListScreen
+import com.ridvan.target.ui.practiceexam.PracticeExamEntryDetailScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.shell.ShellNavigation
@@ -213,10 +214,16 @@ fun TargetNavHost() {
                 onBack = { navController.popBackStack() },
                 onDuplicated = { newStudyResourceId -> navController.navigate(StudyResourceDetailRoute(newStudyResourceId)) },
                 onOpenTopicProgress = { studyResourceTopicId -> navController.navigate(TopicProgressRoute(studyResourceTopicId)) },
+                onOpenPracticeExamEntry = { entryId -> navController.navigate(PracticeExamEntryDetailRoute(entryId)) },
             )
         }
         composable<TopicProgressRoute> {
             TopicProgressScreen(
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<PracticeExamEntryDetailRoute> {
+            PracticeExamEntryDetailScreen(
                 onBack = { navController.popBackStack() },
             )
         }

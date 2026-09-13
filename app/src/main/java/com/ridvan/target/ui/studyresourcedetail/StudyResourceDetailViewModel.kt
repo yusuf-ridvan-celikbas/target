@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.StudyResourceTopicWithProgress
+import com.ridvan.target.data.local.entity.PracticeExamEntry
 import com.ridvan.target.data.local.entity.StudyResource
 import com.ridvan.target.data.local.entity.StudyResourceTopic
 import com.ridvan.target.data.local.entity.StudyResourceType
@@ -37,6 +38,7 @@ class StudyResourceDetailViewModel(
     private val languageDao = database.languageDao()
     private val topicDao = database.topicDao()
     private val studyResourceTopicDao = database.studyResourceTopicDao()
+    private val practiceExamEntryDao = database.practiceExamEntryDao()
 
     val studyResource: StateFlow<StudyResource?> = studyResourceDao.getById(studyResourceId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -136,4 +138,16 @@ class StudyResourceDetailViewModel(
         }
     }
 
+    val practiceExamEntries: StateFlow<List<PracticeExamEntry>> = practiceExamEntryDao.getByStudyResourceId(studyResourceId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun addPracticeExamEntry(name: String, questionCount: Int) {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty() || questionCount <= 0) return
+        viewModelScope.launch {
+            practiceExamEntryDao.insert(
+                PracticeExamEntry(studyResourceId = studyResourceId, name = trimmed, questionCount = questionCount)
+            )
+        }
+    }
 }

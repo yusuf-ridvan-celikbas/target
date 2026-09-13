@@ -4,6 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ridvan.target.TargetApplication
+import com.ridvan.target.data.local.dao.ExamWithType
+import com.ridvan.target.data.local.dao.PracticeExamEntryWithContext
+import com.ridvan.target.data.local.dao.PracticeExamTopicAggregate
 import com.ridvan.target.data.local.dao.PracticeLogWithTopicContext
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
@@ -24,6 +27,8 @@ import java.util.Date
 import java.util.Locale
 
 enum class StatsPeriod { DAILY, WEEKLY, MONTHLY, ALL_TIME }
+
+enum class StatsSource { PRACTICE_SESSIONS, PRACTICE_EXAMS }
 
 data class ChartBucket(val label: String, val solved: Int, val unsolved: Int)
 
@@ -50,23 +55,54 @@ data class TopicBreakdownEntry(
     val durationMinutes: Int,
 )
 
+data class WeakTopicEntry(
+    val topicId: Long,
+    val topicName: String,
+    val courseName: String,
+    val correctCount: Int,
+    val wrongCount: Int,
+) {
+    val total: Int get() = correctCount + wrongCount
+    val accuracyPercent: Int get() = if (total == 0) 0 else correctCount * 100 / total
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class StatisticsViewModel(application: Application) : AndroidViewModel(application) {
     private val targetApplication = application as TargetApplication
     private val userId = targetApplication.preferences.currentUserId
     private val examDao = targetApplication.database.examDao()
+    private val examTypeDao = targetApplication.database.examTypeDao()
     private val courseDao = targetApplication.database.courseDao()
     private val examCourseDao = targetApplication.database.examCourseDao()
     private val topicDao = targetApplication.database.topicDao()
     private val practiceLogDao = targetApplication.database.practiceLogDao()
+    private val practiceExamEntryDao = targetApplication.database.practiceExamEntryDao()
+    private val practiceExamEntryTopicResultDao = targetApplication.database.practiceExamEntryTopicResultDao()
 
     private val allLogs: StateFlow<List<PracticeLogWithTopicContext>> =
         (userId?.let { practiceLogDao.getAllForUser(it) } ?: flowOf(emptyList()))
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val exams: StateFlow<List<Exam>> = (userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()))
-        .map { list -> list.map { it.exam } }
+    private val allExamEntries: StateFlow<List<PracticeExamEntryWithContext>> =
+        (userId?.let { practiceExamEntryDao.getAllForUser(it) } ?: flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val allWeakTopics: StateFlow<List<PracticeExamTopicAggregate>> =
+        (userId?.let { practiceExamEntryTopicResultDao.getTopicAggregatesForUser(it) } ?: flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val examsWithType: StateFlow<List<ExamWithType>> =
+        (userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val examTypeOrder: StateFlow<List<String>> = examTypeDao.getAll()
+        .map { list -> list.map { it.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val examGroups: StateFlow<List<Pair<String, List<Exam>>>> = combine(examsWithType, examTypeOrder) { withType, order ->
+        val byType = withType.groupBy({ it.examTypeName }, { it.exam })
+        order.mapNotNull { typeName -> byType[typeName]?.let { typeName to it } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val allCourses: StateFlow<List<Course>> = (userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -82,6 +118,9 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _period = MutableStateFlow(StatsPeriod.ALL_TIME)
     val period: StateFlow<StatsPeriod> = _period.asStateFlow()
+
+    private val _source = MutableStateFlow(StatsSource.PRACTICE_SESSIONS)
+    val source: StateFlow<StatsSource> = _source.asStateFlow()
 
     private val examCourseIds: StateFlow<Set<Long>?> = _selectedExamId.flatMapLatest { examId ->
         if (examId == null) flowOf(null) else examCourseDao.getByExamId(examId).map { list -> list.map { it.examCourse.courseId }.toSet() }
@@ -106,16 +145,28 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val summary: StateFlow<StatsSummary> = combine(filteredLogs, _period) { logs, period ->
-        summarize(windowForPeriod(logs, period))
+        val windowed = windowForPeriod(logs, period) { it.practiceLog.loggedAt }
+        StatsSummary(
+            tests = windowed.sumOf { it.practiceLog.testsSolved },
+            solved = windowed.sumOf { it.practiceLog.solvedCount },
+            unsolved = windowed.sumOf { it.practiceLog.unsolvedCount },
+            durationMinutes = windowed.sumOf { it.practiceLog.durationMinutes },
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsSummary(0, 0, 0, 0))
 
     val chartBuckets: StateFlow<List<ChartBucket>> = combine(filteredLogs, _period) { logs, period ->
-        buildBuckets(logs, period)
+        buildBuckets(
+            rows = logs,
+            period = period,
+            timeOf = { it.practiceLog.loggedAt },
+            solvedOf = { it.practiceLog.solvedCount },
+            unsolvedOf = { it.practiceLog.unsolvedCount },
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val breakdown: StateFlow<List<TopicBreakdownEntry>> = combine(filteredLogs, _period, allCourses) { logs, period, courses ->
         val courseNames = courses.associateBy({ it.id }, { it.name })
-        windowForPeriod(logs, period).groupBy { it.topicId }.map { (topicId, rows) ->
+        windowForPeriod(logs, period) { it.practiceLog.loggedAt }.groupBy { it.topicId }.map { (topicId, rows) ->
             TopicBreakdownEntry(
                 topicId = topicId,
                 topicName = rows.first().topicName,
@@ -126,6 +177,55 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 durationMinutes = rows.sumOf { it.practiceLog.durationMinutes },
             )
         }.sortedByDescending { it.solved + it.unsolved }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val filteredExamEntries: StateFlow<List<PracticeExamEntryWithContext>> = combine(
+        allExamEntries, _selectedExamId, _selectedCourseId, examCourseIds,
+    ) { entries, examId, courseId, examIds ->
+        entries.filter { row ->
+            (examId == null || (examIds != null && row.courseId in examIds)) &&
+                (courseId == null || row.courseId == courseId)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val examSummary: StateFlow<StatsSummary> = combine(filteredExamEntries, _period) { entries, period ->
+        val windowed = windowForPeriod(entries, period) { it.entry.createdAt }
+        StatsSummary(
+            tests = windowed.size,
+            solved = windowed.sumOf { it.entry.correctCount },
+            unsolved = windowed.sumOf { it.entry.wrongCount },
+            durationMinutes = windowed.sumOf { it.entry.durationMinutes },
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsSummary(0, 0, 0, 0))
+
+    val examChartBuckets: StateFlow<List<ChartBucket>> = combine(filteredExamEntries, _period) { entries, period ->
+        buildBuckets(
+            rows = entries,
+            period = period,
+            timeOf = { it.entry.createdAt },
+            solvedOf = { it.entry.correctCount },
+            unsolvedOf = { it.entry.wrongCount },
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val weakTopics: StateFlow<List<WeakTopicEntry>> = combine(
+        allWeakTopics, _selectedExamId, _selectedCourseId, examCourseIds,
+    ) { aggregates, examId, courseId, examIds ->
+        aggregates
+            .filter { row ->
+                (examId == null || (examIds != null && row.courseId in examIds)) &&
+                    (courseId == null || row.courseId == courseId)
+            }
+            .map {
+                WeakTopicEntry(
+                    topicId = it.topicId,
+                    topicName = it.topicName,
+                    courseName = it.courseName,
+                    correctCount = it.totalCorrectCount,
+                    wrongCount = it.totalWrongCount,
+                )
+            }
+            .sortedBy { it.accuracyPercent }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun setExam(id: Long?) {
@@ -147,12 +247,9 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         _period.value = newPeriod
     }
 
-    private fun summarize(rows: List<PracticeLogWithTopicContext>): StatsSummary = StatsSummary(
-        tests = rows.sumOf { it.practiceLog.testsSolved },
-        solved = rows.sumOf { it.practiceLog.solvedCount },
-        unsolved = rows.sumOf { it.practiceLog.unsolvedCount },
-        durationMinutes = rows.sumOf { it.practiceLog.durationMinutes },
-    )
+    fun setSource(newSource: StatsSource) {
+        _source.value = newSource
+    }
 
     private fun startOf(calendar: Calendar, period: StatsPeriod): Calendar {
         val c = calendar.clone() as Calendar
@@ -180,22 +277,28 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         return start.timeInMillis
     }
 
-    private fun windowForPeriod(logs: List<PracticeLogWithTopicContext>, period: StatsPeriod): List<PracticeLogWithTopicContext> {
-        if (period == StatsPeriod.ALL_TIME) return logs
+    private fun <T> windowForPeriod(rows: List<T>, period: StatsPeriod, timeOf: (T) -> Long): List<T> {
+        if (period == StatsPeriod.ALL_TIME) return rows
         val startMillis = windowStartMillis(period)
-        return logs.filter { it.practiceLog.loggedAt >= startMillis }
+        return rows.filter { timeOf(it) >= startMillis }
     }
 
-    private fun buildBuckets(logs: List<PracticeLogWithTopicContext>, period: StatsPeriod): List<ChartBucket> {
-        val windowed = windowForPeriod(logs, period)
+    private fun <T> buildBuckets(
+        rows: List<T>,
+        period: StatsPeriod,
+        timeOf: (T) -> Long,
+        solvedOf: (T) -> Int,
+        unsolvedOf: (T) -> Int,
+    ): List<ChartBucket> {
+        val windowed = windowForPeriod(rows, period, timeOf)
         val cal = Calendar.getInstance()
         val grouped = windowed.groupBy { row ->
-            cal.timeInMillis = row.practiceLog.loggedAt
+            cal.timeInMillis = timeOf(row)
             startOf(cal, period).timeInMillis
         }
 
         val cursor = if (period == StatsPeriod.ALL_TIME) {
-            val earliest = windowed.minOfOrNull { it.practiceLog.loggedAt } ?: System.currentTimeMillis()
+            val earliest = windowed.minOfOrNull { timeOf(it) } ?: System.currentTimeMillis()
             val c = Calendar.getInstance()
             c.timeInMillis = earliest
             startOf(c, period)
@@ -218,11 +321,11 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         val cappedKeys = if (period == StatsPeriod.ALL_TIME) keys.takeLast(24) else keys
 
         return cappedKeys.map { key ->
-            val rows = grouped[key].orEmpty()
+            val rowsInBucket = grouped[key].orEmpty()
             ChartBucket(
                 label = bucketLabel(key, period),
-                solved = rows.sumOf { it.practiceLog.solvedCount },
-                unsolved = rows.sumOf { it.practiceLog.unsolvedCount },
+                solved = rowsInBucket.sumOf(solvedOf),
+                unsolved = rowsInBucket.sumOf(unsolvedOf),
             )
         }
     }

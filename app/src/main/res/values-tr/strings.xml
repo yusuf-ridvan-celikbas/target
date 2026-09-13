@@ -219,6 +219,30 @@
     <string name="label_question_count">Soru sayısı</string>
     <string name="action_remove_topic_from_resource">Konuyu bu kaynaktan kaldır</string>
     <string name="srdetail_delete_title">Çalışma kaynağı silinsin mi?</string>
+    <string name="practice_exam_entries_button">Denemeler</string>
+
+    <!-- Practice Exam Entries (ui/practiceexam/*) -->
+    <string name="action_add_entry">+ Deneme Ekle</string>
+    <string name="dialog_add_entry_title">Deneme ekle</string>
+    <string name="dialog_edit_entry_result_title">Sonucu düzenle</string>
+    <string name="label_entry_name">Deneme adı</string>
+    <string name="label_correct_count">Doğru</string>
+    <string name="label_wrong_count">Yanlış</string>
+    <string name="label_blank_count">Boş: %1$d</string>
+    <string name="entry_question_count">Soru sayısı: %1$d</string>
+    <string name="entry_row_summary">%1$d✓ / %2$d✗ / %3$d boş</string>
+    <string name="entry_result_summary">%1$d✓ / %2$d✗ / %3$d boş · %4$s</string>
+    <string name="practice_exam_no_entries">Henüz deneme eklenmedi. Eklemek için + Deneme Ekle\'ye dokunun.</string>
+    <string name="practice_exam_entries_summary">%1$d deneme · %2$d✓ / %3$d✗ · Doğruluk %%%4$d · Toplam %5$s</string>
+    <string name="action_delete_entry">Denemeyi sil</string>
+    <string name="dialog_delete_entry_title">Bu deneme silinsin mi?</string>
+    <string name="dialog_delete_entry_message">Bu, varsa konu dağılımını da siler.</string>
+    <string name="topic_breakdown_section_title">Konu Dağılımı</string>
+    <string name="action_add_topic_breakdown">+ Konu Ekle</string>
+    <string name="topic_result_row_summary">%1$d soru · %2$d✓ / %3$d✗</string>
+    <string name="action_remove_topic_result">Bu denemeden kaldır</string>
+    <string name="topic_breakdown_empty">Henüz konu dağılımı yok.</string>
+    <string name="topic_breakdown_no_more_topics">Dersin tüm konuları zaten eklendi.</string>
 
     <!-- Topics (ui/topiclist/*, ui/topicdetail/*) -->
     <string name="label_topics">Konular</string>
@@ -275,6 +299,11 @@
     <string name="topic_with_course_title">%1$s (%2$s)</string>
     <string name="statistics_empty">Bu seçim için henüz oturum kaydedilmedi.</string>
     <string name="label_breakdown">Dağılım</string>
+    <string name="stats_source_practice_sessions">Çalışma Oturumları</string>
+    <string name="stats_source_practice_exams">Deneme Sınavları</string>
+    <string name="statistics_exams_empty">Bu seçim için henüz deneme sonucu kaydedilmedi.</string>
+    <string name="stats_weak_topics_title">Çalışılması Gereken Konular</string>
+    <string name="stats_weak_topic_row">%1$d✓ / %2$d✗ · %%%3$d doğruluk</string>
 
     <!-- Course detail (ui/coursedetail/CourseDetailScreen.kt) -->
     <string name="cd_edit_course">Dersi düzenle</string>

@@ -50,8 +50,11 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.withTimeoutOrNull
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.StudyResourceTopicWithProgress
+import com.ridvan.target.data.local.entity.PracticeExamEntry
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.courseDisplayName
@@ -64,6 +67,7 @@ fun StudyResourceDetailScreen(
     onBack: () -> Unit,
     onDuplicated: (newStudyResourceId: Long) -> Unit,
     onOpenTopicProgress: (studyResourceTopicId: Long) -> Unit,
+    onOpenPracticeExamEntry: (entryId: Long) -> Unit,
     viewModel: StudyResourceDetailViewModel = viewModel(),
 ) {
     val studyResource by viewModel.studyResource.collectAsStateWithLifecycle()
@@ -71,10 +75,12 @@ fun StudyResourceDetailScreen(
     val displaySubjectName = if (studyResource?.courseId != null) courseDisplayName(subjectName) else subjectName
     val attachedTopics by viewModel.attachedTopics.collectAsStateWithLifecycle()
     val availableTopicsToAdd by viewModel.availableTopicsToAdd.collectAsStateWithLifecycle()
+    val practiceExamEntries by viewModel.practiceExamEntries.collectAsStateWithLifecycle()
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showAddTopicDialog by remember { mutableStateOf(false) }
+    var showAddEntryDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -111,6 +117,13 @@ fun StudyResourceDetailScreen(
             Text(stringResource(R.string.srdetail_type, studyResourceTypeLabel(studyResource?.type)))
             studyResource?.publisher?.let { publisher ->
                 Text(stringResource(R.string.srdetail_publisher, publisher))
+            }
+            if (studyResource?.type == StudyResourceType.PRACTICE_EXAM) {
+                PracticeExamEntriesSection(
+                    entries = practiceExamEntries,
+                    onAddClick = { showAddEntryDialog = true },
+                    onEntryClick = { onOpenPracticeExamEntry(it.id) },
+                )
             }
 
             if (studyResource?.type == StudyResourceType.QUESTION_BANK && studyResource?.courseId != null) {
@@ -173,6 +186,103 @@ fun StudyResourceDetailScreen(
             onDismiss = { showAddTopicDialog = false },
         )
     }
+
+    if (showAddEntryDialog) {
+        AddEntryDialog(
+            onConfirm = { name, questionCount ->
+                viewModel.addPracticeExamEntry(name, questionCount)
+                showAddEntryDialog = false
+            },
+            onDismiss = { showAddEntryDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun PracticeExamEntriesSection(
+    entries: List<PracticeExamEntry>,
+    onAddClick: () -> Unit,
+    onEntryClick: (PracticeExamEntry) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(R.string.practice_exam_entries_button), modifier = Modifier.weight(1f))
+        TextButton(onClick = onAddClick) { Text(stringResource(R.string.action_add_entry)) }
+    }
+    if (entries.isEmpty()) {
+        Text(stringResource(R.string.practice_exam_no_entries), modifier = Modifier.padding(top = 4.dp))
+    } else {
+        val totalCorrect = entries.sumOf { it.correctCount }
+        val totalWrong = entries.sumOf { it.wrongCount }
+        val totalQuestions = totalCorrect + totalWrong
+        val accuracy = if (totalQuestions == 0) 0 else totalCorrect * 100 / totalQuestions
+        val totalMinutes = entries.sumOf { it.durationMinutes }
+        val durationText = stringResource(R.string.duration_format, totalMinutes / 60, totalMinutes % 60)
+        Text(
+            stringResource(R.string.practice_exam_entries_summary, entries.size, totalCorrect, totalWrong, accuracy, durationText),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+        Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            entries.forEach { entry ->
+                EntryRow(entry = entry, onClick = { onEntryClick(entry) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun EntryRow(entry: PracticeExamEntry, onClick: () -> Unit) {
+    val blank = (entry.questionCount - entry.correctCount - entry.wrongCount).coerceAtLeast(0)
+    ListItem(
+        headlineContent = { Text(entry.name) },
+        supportingContent = { Text(stringResource(R.string.entry_row_summary, entry.correctCount, entry.wrongCount, blank)) },
+        modifier = Modifier.clickable(onClick = onClick),
+    )
+}
+
+@Composable
+private fun AddEntryDialog(
+    onConfirm: (name: String, questionCount: Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var questionCountText by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.dialog_add_entry_title)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.label_entry_name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = questionCountText,
+                    onValueChange = { input -> if (input.all(Char::isDigit)) questionCountText = input },
+                    label = { Text(stringResource(R.string.label_question_count)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(name, questionCountText.toIntOrNull() ?: 0) },
+                enabled = name.isNotBlank() && (questionCountText.toIntOrNull() ?: 0) > 0,
+            ) { Text(stringResource(R.string.common_add)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
+        },
+    )
 }
 
 @Composable

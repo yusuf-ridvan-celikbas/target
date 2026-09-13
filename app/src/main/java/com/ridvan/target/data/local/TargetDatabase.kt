@@ -9,6 +9,8 @@ import com.ridvan.target.data.local.dao.ExamCourseDao
 import com.ridvan.target.data.local.dao.ExamDao
 import com.ridvan.target.data.local.dao.ExamTypeDao
 import com.ridvan.target.data.local.dao.LanguageDao
+import com.ridvan.target.data.local.dao.PracticeExamEntryDao
+import com.ridvan.target.data.local.dao.PracticeExamEntryTopicResultDao
 import com.ridvan.target.data.local.dao.PracticeLogDao
 import com.ridvan.target.data.local.dao.SectionCourseDao
 import com.ridvan.target.data.local.dao.SectionDao
@@ -21,6 +23,8 @@ import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.ExamCourse
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.data.local.entity.Language
+import com.ridvan.target.data.local.entity.PracticeExamEntry
+import com.ridvan.target.data.local.entity.PracticeExamEntryTopicResult
 import com.ridvan.target.data.local.entity.PracticeLog
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.data.local.entity.SectionCourse
@@ -43,8 +47,10 @@ import com.ridvan.target.data.local.entity.User
         Topic::class,
         StudyResourceTopic::class,
         PracticeLog::class,
+        PracticeExamEntry::class,
+        PracticeExamEntryTopicResult::class,
     ],
-    version = 12,
+    version = 14,
     exportSchema = false,
 )
 abstract class TargetDatabase : RoomDatabase() {
@@ -60,6 +66,8 @@ abstract class TargetDatabase : RoomDatabase() {
     abstract fun topicDao(): TopicDao
     abstract fun studyResourceTopicDao(): StudyResourceTopicDao
     abstract fun practiceLogDao(): PracticeLogDao
+    abstract fun practiceExamEntryDao(): PracticeExamEntryDao
+    abstract fun practiceExamEntryTopicResultDao(): PracticeExamEntryTopicResultDao
 
     companion object {
         @Volatile
@@ -71,7 +79,7 @@ abstract class TargetDatabase : RoomDatabase() {
                     context.applicationContext,
                     TargetDatabase::class.java,
                     "target.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14).build().also { INSTANCE = it }
             }
     }
 }

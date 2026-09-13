@@ -85,3 +85,6 @@ data class TopicProgressRoute(val studyResourceTopicId: Long)
 
 @Serializable
 object StatisticsRoute
+
+@Serializable
+data class PracticeExamEntryDetailRoute(val entryId: Long)
