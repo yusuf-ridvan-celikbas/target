@@ -50,6 +50,7 @@ import com.ridvan.target.ui.common.CourseIconPicker
 import com.ridvan.target.ui.common.courseCategoryValueLabel
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
+import com.ridvan.target.ui.common.readTextFromUri
 import com.ridvan.target.ui.common.shareCsvFile
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +79,7 @@ fun CourseDetailScreen(
 
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
-        val content = context.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
+        val content = readTextFromUri(context, uri)
         if (content == null) {
             importReadFailed = true
         } else {
