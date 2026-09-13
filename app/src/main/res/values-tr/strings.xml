@@ -230,6 +230,11 @@
     <string name="csv_header_topic">Konu</string>
     <string name="csv_header_test_count">Test Sayısı</string>
     <string name="csv_header_question_count">Soru Sayısı</string>
+    <string name="cd_import_course_csv">Soru Bankası verilerini içe aktar</string>
+    <string name="import_result_title">İçe Aktarma</string>
+    <string name="import_result_summary">%1$d satır işlendi — %2$d yeni kaynak, %3$d yeni konu, %4$d yeni konu eklemesi, %5$d güncellendi.</string>
+    <string name="import_result_invalid">O dosyada geçerli satır bulunamadı. Bu uygulamadan dışa aktarılmış bir CSV olduğundan emin ol.</string>
+    <string name="import_result_unreadable">O dosya okunamadı.</string>
     <string name="coursedetail_exam_type">Sınav türü: %1$s</string>
     <string name="coursedetail_category">Kategori: %1$s</string>
     <string name="coursedetail_delete_title">Ders silinsin mi?</string>

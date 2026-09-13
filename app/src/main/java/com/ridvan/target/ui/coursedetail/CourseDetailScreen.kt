@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.coursedetail
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -70,6 +73,18 @@ fun CourseDetailScreen(
         stringResource(R.string.csv_header_question_count),
     )
     val exportChooserTitle = stringResource(R.string.export_csv_chooser_title)
+    var importOutcome by remember { mutableStateOf<QuestionBankImportOutcome?>(null) }
+    var importReadFailed by remember { mutableStateOf(false) }
+
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val content = context.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
+        if (content == null) {
+            importReadFailed = true
+        } else {
+            viewModel.importQuestionBankCsv(content) { outcome -> importOutcome = outcome }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -93,6 +108,9 @@ fun CourseDetailScreen(
                         }
                     }) {
                         Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.cd_export_course_csv))
+                    }
+                    IconButton(onClick = { importLauncher.launch(arrayOf("*/*")) }) {
+                        Icon(Icons.Filled.FileOpen, contentDescription = stringResource(R.string.cd_import_course_csv))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_course))
@@ -150,6 +168,42 @@ fun CourseDetailScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
+            },
+        )
+    }
+
+    if (importReadFailed) {
+        AlertDialog(
+            onDismissRequest = { importReadFailed = false },
+            title = { Text(stringResource(R.string.import_result_title)) },
+            text = { Text(stringResource(R.string.import_result_unreadable)) },
+            confirmButton = {
+                TextButton(onClick = { importReadFailed = false }) { Text(stringResource(R.string.common_ok)) }
+            },
+        )
+    }
+
+    importOutcome?.let { outcome ->
+        AlertDialog(
+            onDismissRequest = { importOutcome = null },
+            title = { Text(stringResource(R.string.import_result_title)) },
+            text = {
+                Text(
+                    when (outcome) {
+                        is QuestionBankImportOutcome.Imported -> stringResource(
+                            R.string.import_result_summary,
+                            outcome.result.rowsProcessed,
+                            outcome.result.resourcesCreated,
+                            outcome.result.topicsCreated,
+                            outcome.result.attachmentsCreated,
+                            outcome.result.attachmentsUpdated,
+                        )
+                        QuestionBankImportOutcome.EmptyOrInvalid -> stringResource(R.string.import_result_invalid)
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { importOutcome = null }) { Text(stringResource(R.string.common_ok)) }
             },
         )
     }

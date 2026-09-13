@@ -230,6 +230,11 @@
     <string name="csv_header_topic">Topic</string>
     <string name="csv_header_test_count">Test Count</string>
     <string name="csv_header_question_count">Question Count</string>
+    <string name="cd_import_course_csv">Import Question Bank data</string>
+    <string name="import_result_title">Import</string>
+    <string name="import_result_summary">Imported %1$d rows — %2$d new resources, %3$d new topics, %4$d new topic entries added, %5$d updated.</string>
+    <string name="import_result_invalid">No valid rows found in that file. Make sure it\'s a CSV exported from this app.</string>
+    <string name="import_result_unreadable">Couldn\'t read that file.</string>
     <string name="coursedetail_exam_type">Exam type: %1$s</string>
     <string name="coursedetail_category">Category: %1$s</string>
     <string name="coursedetail_delete_title">Delete course?</string>
