@@ -77,6 +77,15 @@
     <string name="settings_app_icon_preference">App Icon Preference</string>
     <string name="settings_icon_white">White</string>
     <string name="settings_icon_blue">Blue</string>
+    <string name="settings_app_color_preference">App Color Preference</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_dark_gray">Dark Gray</string>
+    <string name="color_green">Green</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_powder_pink">Powder Pink</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_red">Red</string>
+    <string name="color_yellow">Yellow</string>
     <string name="settings_language_preference">Language Preference</string>
     <string name="settings_language_english">English</string>
     <string name="settings_language_turkish">Turkish</string>

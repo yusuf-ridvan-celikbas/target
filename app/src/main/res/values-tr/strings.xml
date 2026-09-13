@@ -77,6 +77,15 @@
     <string name="settings_app_icon_preference">Uygulama Simgesi Tercihi</string>
     <string name="settings_icon_white">Beyaz</string>
     <string name="settings_icon_blue">Mavi</string>
+    <string name="settings_app_color_preference">Uygulama Renk Tercihi</string>
+    <string name="color_blue">Mavi</string>
+    <string name="color_dark_gray">Koyu Gri</string>
+    <string name="color_green">Yeşil</string>
+    <string name="color_pink">Pembe</string>
+    <string name="color_powder_pink">Pudra Pembe</string>
+    <string name="color_purple">Mor</string>
+    <string name="color_red">Kırmızı</string>
+    <string name="color_yellow">Sarı</string>
     <string name="settings_language_preference">Dil Tercihi</string>
     <string name="settings_language_english">İngilizce</string>
     <string name="settings_language_turkish">Türkçe</string>

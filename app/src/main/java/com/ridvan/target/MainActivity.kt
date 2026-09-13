@@ -26,9 +26,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val isDarkMode by (application as TargetApplication).preferences.isDarkMode
-                .collectAsStateWithLifecycle()
-            TargetTheme(darkTheme = isDarkMode) {
+            val preferences = (application as TargetApplication).preferences
+            val isDarkMode by preferences.isDarkMode.collectAsStateWithLifecycle()
+            val bannerColor by preferences.bannerColor.collectAsStateWithLifecycle()
+            TargetTheme(darkTheme = isDarkMode, bannerColor = bannerColor) {
                 TargetNavHost()
             }
         }

@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.data.local.AppPreferences
+import com.ridvan.target.data.local.BannerColor
 import kotlinx.coroutines.flow.StateFlow
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -44,5 +45,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun setAppLanguage(language: AppLanguage) {
         preferences.setAppLanguage(language)
+    }
+
+    val bannerColor: StateFlow<BannerColor> = preferences.bannerColor
+
+    fun setBannerColor(color: BannerColor) {
+        preferences.setBannerColor(color)
     }
 }
