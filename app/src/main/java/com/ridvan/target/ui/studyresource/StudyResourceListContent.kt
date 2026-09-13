@@ -110,9 +110,11 @@ internal fun StudyResourceListContent(
 
 @Composable
 private fun StudyResourceRow(resource: StudyResource, onClick: () -> Unit) {
+    val typeLabel = studyResourceTypeLabel(resource.type)
+    val subtitle = resource.publisher?.let { stringResource(R.string.sr_row_subtitle, typeLabel, it) } ?: typeLabel
     ListItem(
         headlineContent = { Text(resource.name) },
-        supportingContent = { Text(studyResourceTypeLabel(resource.type)) },
+        supportingContent = { Text(subtitle) },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }

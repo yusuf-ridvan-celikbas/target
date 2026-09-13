@@ -187,6 +187,7 @@
     <string name="sr_type_practice_exam">Practice Exam</string>
     <string name="sr_type_lecture_notes">Lecture Notes</string>
     <string name="sr_list_empty">No study resources yet. Tap + to add one.</string>
+    <string name="sr_row_subtitle">%1$s · %2$s</string>
     <string name="dialog_add_study_resource_title">Add study resource</string>
     <string name="label_subject">Subject</string>
     <string name="label_type">Type</string>
