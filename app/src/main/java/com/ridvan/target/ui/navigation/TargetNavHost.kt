@@ -28,6 +28,7 @@ import com.ridvan.target.ui.studyresource.StudyResourceHomeScreen
 import com.ridvan.target.ui.studyresourcedetail.StudyResourceDetailScreen
 import com.ridvan.target.ui.switchaccount.SwitchAccountScreen
 import com.ridvan.target.ui.topicdetail.TopicDetailScreen
+import com.ridvan.target.ui.topiclist.TopicHomeScreen
 import com.ridvan.target.ui.topiclist.TopicListScreen
 import com.ridvan.target.ui.user.UserEditScreen
 
@@ -55,6 +56,7 @@ fun TargetNavHost() {
         onNavigateExams = { navController.navigateToShellDestination(ExamListRoute) },
         onNavigateCourses = { navController.navigateToShellDestination(CourseListRoute) },
         onNavigateStudyResources = { navController.navigateToShellDestination(StudyResourceHomeRoute) },
+        onNavigateTopics = { navController.navigateToShellDestination(TopicHomeRoute) },
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsRoute) },
@@ -133,6 +135,18 @@ fun TargetNavHost() {
         composable<StudyResourceLanguageExamCoursesRoute> {
             LanguageExamCoursesScreen(
                 onLanguageClick = { languageId -> navController.navigate(LanguageStudyResourceRoute(languageId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<TopicHomeRoute> {
+            TopicHomeScreen(
+                shellNavigation = shellNavigation,
+                onCourseTypeClick = { examType -> navController.navigate(TopicCourseListByTypeRoute(examType.id)) },
+            )
+        }
+        composable<TopicCourseListByTypeRoute> {
+            CourseListByTypeScreen(
+                onCourseClick = { courseId -> navController.navigate(TopicListRoute(courseId)) },
                 onBack = { navController.popBackStack() },
             )
         }

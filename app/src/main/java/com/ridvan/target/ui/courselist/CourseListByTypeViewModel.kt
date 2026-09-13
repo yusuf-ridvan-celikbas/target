@@ -18,8 +18,9 @@ class CourseListByTypeViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
     // Read by argument name rather than androidx.navigation.toRoute<CourseListByTypeRoute>() —
-    // this ViewModel backs both CourseListByTypeRoute (Courses flow) and
-    // StudyResourceCourseListByTypeRoute (Study Resources flow), which share the "examTypeId" arg name.
+    // this ViewModel backs CourseListByTypeRoute (Courses flow), StudyResourceCourseListByTypeRoute
+    // (Study Resources flow), and TopicCourseListByTypeRoute (Topics flow), which all share the
+    // "examTypeId" arg name.
     private val examTypeId: Long = checkNotNull(savedStateHandle.get<Long>("examTypeId"))
     private val targetApplication = application as TargetApplication
     private val courseDao = targetApplication.database.courseDao()

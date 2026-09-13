@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SwitchAccount
+import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
@@ -52,6 +53,7 @@ data class ShellNavigation(
     val onNavigateExams: () -> Unit,
     val onNavigateCourses: () -> Unit,
     val onNavigateStudyResources: () -> Unit,
+    val onNavigateTopics: () -> Unit,
     val onNavigateLanguages: () -> Unit,
     val onNavigateUser: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -121,6 +123,17 @@ fun AppShell(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateStudyResources()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                NavigationDrawerItem(
+                    label = { Text(stringResource(R.string.label_topics)) },
+                    icon = { Icon(Icons.Filled.Topic, contentDescription = null) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigateTopics()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )
