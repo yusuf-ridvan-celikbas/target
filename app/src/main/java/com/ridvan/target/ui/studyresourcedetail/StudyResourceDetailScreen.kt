@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
@@ -64,6 +65,7 @@ import com.ridvan.target.ui.studyresource.studyResourceTypeLabel
 @Composable
 fun StudyResourceDetailScreen(
     onBack: () -> Unit,
+    onDuplicated: (newStudyResourceId: Long) -> Unit,
     viewModel: StudyResourceDetailViewModel = viewModel(),
 ) {
     val studyResource by viewModel.studyResource.collectAsStateWithLifecycle()
@@ -89,6 +91,10 @@ fun StudyResourceDetailScreen(
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.dialog_edit_study_resource_title))
+                    }
+                    val copySuffix = stringResource(R.string.sr_copy_suffix)
+                    IconButton(onClick = { viewModel.duplicateStudyResource(copySuffix, onDuplicated) }) {
+                        Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.cd_duplicate_study_resource))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_study_resource))

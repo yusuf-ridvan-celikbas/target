@@ -182,7 +182,10 @@ fun TargetNavHost() {
             )
         }
         composable<StudyResourceDetailRoute> {
-            StudyResourceDetailScreen(onBack = { navController.popBackStack() })
+            StudyResourceDetailScreen(
+                onBack = { navController.popBackStack() },
+                onDuplicated = { newStudyResourceId -> navController.navigate(StudyResourceDetailRoute(newStudyResourceId)) },
+            )
         }
         composable<UserEditRoute> {
             UserEditScreen(

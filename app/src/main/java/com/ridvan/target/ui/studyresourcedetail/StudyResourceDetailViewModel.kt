@@ -80,6 +80,18 @@ class StudyResourceDetailViewModel(
         }
     }
 
+    fun duplicateStudyResource(copySuffix: String, onCreated: (newStudyResourceId: Long) -> Unit) {
+        val current = studyResource.value ?: return
+        val topicsToCopy = attachedTopics.value
+        viewModelScope.launch {
+            val newId = studyResourceDao.insert(current.copy(id = 0, name = current.name + copySuffix))
+            topicsToCopy.forEach { attached ->
+                studyResourceTopicDao.insert(attached.studyResourceTopic.copy(id = 0, studyResourceId = newId))
+            }
+            onCreated(newId)
+        }
+    }
+
     fun addTopic(name: String) {
         val trimmed = name.trim()
         val courseId = studyResource.value?.courseId

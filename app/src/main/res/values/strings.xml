@@ -194,6 +194,8 @@
     <string name="label_publisher_optional">Publisher (optional)</string>
     <string name="dialog_edit_study_resource_title">Edit study resource</string>
     <string name="cd_delete_study_resource">Delete study resource</string>
+    <string name="cd_duplicate_study_resource">Duplicate study resource</string>
+    <string name="sr_copy_suffix">" (Copy)"</string>
     <string name="srdetail_subject">Subject: %1$s</string>
     <string name="srdetail_type">Type: %1$s</string>
     <string name="srdetail_publisher">Publisher: %1$s</string>

@@ -194,6 +194,8 @@
     <string name="label_publisher_optional">Yayıncı (isteğe bağlı)</string>
     <string name="dialog_edit_study_resource_title">Çalışma kaynağını düzenle</string>
     <string name="cd_delete_study_resource">Çalışma kaynağını sil</string>
+    <string name="cd_duplicate_study_resource">Çalışma kaynağını çoğalt</string>
+    <string name="sr_copy_suffix">" (Kopya)"</string>
     <string name="srdetail_subject">Konu: %1$s</string>
     <string name="srdetail_type">Tür: %1$s</string>
     <string name="srdetail_publisher">Yayıncı: %1$s</string>
