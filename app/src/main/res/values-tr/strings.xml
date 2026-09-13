@@ -18,6 +18,7 @@
     <string name="label_date">Tarih</string>
     <string name="label_language">Dil</string>
     <string name="counts_tests_questions">%1$d test · %2$d soru</string>
+    <string name="counts_remaining_of_target">%1$d/%2$d test · %3$d/%4$d soru</string>
     <string name="delete_confirm_generic">Bu, \"%1$s\" öğesini kaldırır.</string>
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->

@@ -50,4 +50,28 @@ interface StudyResourceTopicDao {
         """
     )
     fun getByTopicId(topicId: Long): Flow<List<StudyResourceTopicWithStudyResource>>
+
+    @Query(
+        """
+        SELECT study_resource_topics.*, topics.name AS topicName,
+               COALESCE(SUM(practice_logs.testsSolved), 0) AS loggedTests,
+               COALESCE(SUM(practice_logs.solvedCount + practice_logs.unsolvedCount), 0) AS loggedQuestions
+        FROM study_resource_topics
+        JOIN topics ON topics.id = study_resource_topics.topicId
+        LEFT JOIN practice_logs ON practice_logs.studyResourceTopicId = study_resource_topics.id
+        WHERE study_resource_topics.studyResourceId = :studyResourceId
+        GROUP BY study_resource_topics.id
+        ORDER BY study_resource_topics.orderIndex ASC
+        """
+    )
+    fun getByStudyResourceIdWithProgress(studyResourceId: Long): Flow<List<StudyResourceTopicWithProgress>>
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(testCount), 0) AS totalTestCount, COALESCE(SUM(questionCount), 0) AS totalQuestionCount
+        FROM study_resource_topics
+        WHERE studyResourceId IN (:studyResourceIds)
+        """
+    )
+    fun getTargetTotals(studyResourceIds: List<Long>): Flow<StudyResourceTargetTotals>
 }

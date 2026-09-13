@@ -18,6 +18,7 @@
     <string name="label_date">Date</string>
     <string name="label_language">Language</string>
     <string name="counts_tests_questions">%1$d tests · %2$d questions</string>
+    <string name="counts_remaining_of_target">%1$d/%2$d tests · %3$d/%4$d questions</string>
     <string name="delete_confirm_generic">This removes \"%1$s\".</string>
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->

@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
-import com.ridvan.target.data.local.dao.StudyResourceTopicWithTopic
+import com.ridvan.target.data.local.dao.StudyResourceTopicWithProgress
 import com.ridvan.target.data.local.entity.StudyResource
 import com.ridvan.target.data.local.entity.StudyResourceTopic
 import com.ridvan.target.data.local.entity.StudyResourceType
@@ -49,8 +49,8 @@ class StudyResourceDetailViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
-    val attachedTopics: StateFlow<List<StudyResourceTopicWithTopic>> =
-        studyResourceTopicDao.getByStudyResourceId(studyResourceId)
+    val attachedTopics: StateFlow<List<StudyResourceTopicWithProgress>> =
+        studyResourceTopicDao.getByStudyResourceIdWithProgress(studyResourceId)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val topicsForCourse: Flow<List<Topic>> = studyResource.filterNotNull().flatMapLatest { resource ->

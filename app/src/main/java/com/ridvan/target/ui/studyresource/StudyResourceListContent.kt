@@ -55,6 +55,7 @@ internal fun StudyResourceListContent(
     onAdd: (name: String, type: StudyResourceType, publisher: String?) -> Unit,
     onResourceClick: (Long) -> Unit,
     onBack: () -> Unit,
+    summary: (@Composable () -> Unit)? = null,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -75,18 +76,23 @@ internal fun StudyResourceListContent(
             }
         },
     ) { innerPadding ->
-        if (studyResources.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(stringResource(R.string.sr_list_empty))
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            summary?.let { content ->
+                Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) { content() }
             }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                items(studyResources, key = { it.id }) { resource ->
-                    StudyResourceRow(resource = resource, onClick = { onResourceClick(resource.id) })
-                    HorizontalDivider()
+            if (studyResources.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f).padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(stringResource(R.string.sr_list_empty))
+                }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    items(studyResources, key = { it.id }) { resource ->
+                        StudyResourceRow(resource = resource, onClick = { onResourceClick(resource.id) })
+                        HorizontalDivider()
+                    }
                 }
             }
         }

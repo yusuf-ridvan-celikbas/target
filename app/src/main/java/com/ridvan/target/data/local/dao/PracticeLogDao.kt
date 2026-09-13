@@ -21,4 +21,17 @@ interface PracticeLogDao {
 
     @Query("SELECT * FROM practice_logs WHERE studyResourceTopicId = :studyResourceTopicId ORDER BY loggedAt DESC")
     fun getByStudyResourceTopicId(studyResourceTopicId: Long): Flow<List<PracticeLog>>
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(practice_logs.testsSolved), 0) AS totalTestsSolved,
+               COALESCE(SUM(practice_logs.solvedCount), 0) AS totalSolved,
+               COALESCE(SUM(practice_logs.unsolvedCount), 0) AS totalUnsolved,
+               COALESCE(SUM(practice_logs.durationMinutes), 0) AS totalDurationMinutes
+        FROM practice_logs
+        JOIN study_resource_topics ON study_resource_topics.id = practice_logs.studyResourceTopicId
+        WHERE study_resource_topics.studyResourceId IN (:studyResourceIds)
+        """
+    )
+    fun getProgressTotals(studyResourceIds: List<Long>): Flow<PracticeLogTotals>
 }

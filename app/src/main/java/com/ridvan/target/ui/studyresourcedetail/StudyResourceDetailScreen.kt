@@ -51,7 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.withTimeoutOrNull
 import com.ridvan.target.R
-import com.ridvan.target.data.local.dao.StudyResourceTopicWithTopic
+import com.ridvan.target.data.local.dao.StudyResourceTopicWithProgress
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.courseDisplayName
@@ -188,8 +188,8 @@ private fun TopicsSectionHeader(onAddClick: () -> Unit) {
 
 @Composable
 private fun ReorderableTopicsList(
-    attachedTopics: List<StudyResourceTopicWithTopic>,
-    onRowClick: (StudyResourceTopicWithTopic) -> Unit,
+    attachedTopics: List<StudyResourceTopicWithProgress>,
+    onRowClick: (StudyResourceTopicWithProgress) -> Unit,
     onReorder: (orderedStudyResourceTopicIds: List<Long>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -304,15 +304,25 @@ private suspend fun PointerInputScope.detectDragHandleGesture(
 
 @Composable
 private fun TopicRow(
-    attached: StudyResourceTopicWithTopic,
+    attached: StudyResourceTopicWithProgress,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     dragHandleModifier: Modifier = Modifier,
 ) {
+    val remainingTests = (attached.studyResourceTopic.testCount - attached.loggedTests).coerceAtLeast(0)
+    val remainingQuestions = (attached.studyResourceTopic.questionCount - attached.loggedQuestions).coerceAtLeast(0)
     ListItem(
         headlineContent = { Text(attached.topicName) },
         supportingContent = {
-            Text(stringResource(R.string.counts_tests_questions, attached.studyResourceTopic.testCount, attached.studyResourceTopic.questionCount))
+            Text(
+                stringResource(
+                    R.string.counts_remaining_of_target,
+                    remainingTests,
+                    attached.studyResourceTopic.testCount,
+                    remainingQuestions,
+                    attached.studyResourceTopic.questionCount,
+                )
+            )
         },
         trailingContent = {
             Icon(
