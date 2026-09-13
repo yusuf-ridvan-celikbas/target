@@ -159,6 +159,7 @@
     <string name="label_section_name">Section name</string>
     <string name="cd_collapse_x">Collapse %1$s</string>
     <string name="cd_expand_x">Expand %1$s</string>
+    <string name="bucket_expand_empty_hint">Nothing here yet — tap above to add one.</string>
 
     <!-- Course list menu (ui/courselist/CourseListScreen.kt) -->
     <string name="course_list_title">Courses</string>

@@ -106,6 +106,8 @@ fun TargetNavHost() {
                 shellNavigation = shellNavigation,
                 onCourseTypeClick = { examType -> navController.navigate(CourseListByTypeRoute(examType.id)) },
                 onLanguageTypeClick = { navController.navigate(LanguageExamCoursesRoute) },
+                onCourseShortcutClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onLanguageShortcutClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
             )
         }
         composable<StudyResourceHomeRoute> {
@@ -113,6 +115,8 @@ fun TargetNavHost() {
                 shellNavigation = shellNavigation,
                 onCourseTypeClick = { examType -> navController.navigate(StudyResourceCourseListByTypeRoute(examType.id)) },
                 onLanguageTypeClick = { navController.navigate(StudyResourceLanguageExamCoursesRoute) },
+                onCourseShortcutClick = { courseId -> navController.navigate(CourseStudyResourceRoute(courseId)) },
+                onLanguageShortcutClick = { languageId -> navController.navigate(LanguageStudyResourceRoute(languageId)) },
             )
         }
         composable<CourseListByTypeRoute> {
@@ -145,6 +149,7 @@ fun TargetNavHost() {
             TopicHomeScreen(
                 shellNavigation = shellNavigation,
                 onCourseTypeClick = { examType -> navController.navigate(TopicCourseListByTypeRoute(examType.id)) },
+                onCourseShortcutClick = { courseId -> navController.navigate(TopicListRoute(courseId)) },
             )
         }
         composable<TopicCourseListByTypeRoute> {

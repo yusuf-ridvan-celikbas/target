@@ -159,6 +159,7 @@
     <string name="label_section_name">Bölüm adı</string>
     <string name="cd_collapse_x">%1$s bölümünü daralt</string>
     <string name="cd_expand_x">%1$s bölümünü genişlet</string>
+    <string name="bucket_expand_empty_hint">Henüz bir şey yok — eklemek için yukarıya dokun.</string>
 
     <!-- Course list menu (ui/courselist/CourseListScreen.kt) -->
     <string name="course_list_title">Dersler</string>
