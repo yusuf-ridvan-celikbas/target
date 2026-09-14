@@ -154,6 +154,7 @@
     <string name="examdetail_study_start">Study start: %1$s</string>
     <string name="examdetail_language_prefix">"Language: "</string>
     <string name="cd_edit_exam">Edit exam</string>
+    <string name="cd_export_progress_csv">Export progress data</string>
     <string name="cd_delete_exam">Delete exam</string>
     <string name="action_add_prefixed">+ Add</string>
     <string name="cd_collapse_courses">Collapse courses</string>
@@ -317,6 +318,17 @@
     <string name="csv_header_topic">Topic</string>
     <string name="csv_header_test_count">Test Count</string>
     <string name="csv_header_question_count">Question Count</string>
+    <string name="csv_header_course">Course</string>
+    <string name="csv_header_target_tests">Target Tests</string>
+    <string name="csv_header_target_questions">Target Questions</string>
+    <string name="csv_header_tests_solved">Tests Solved</string>
+    <string name="csv_header_correct">Correct</string>
+    <string name="csv_header_wrong">Wrong</string>
+    <string name="csv_header_remaining_tests">Remaining Tests</string>
+    <string name="csv_header_remaining_questions">Remaining Questions</string>
+    <string name="csv_header_net">Net</string>
+    <string name="csv_header_accuracy">Accuracy %</string>
+    <string name="csv_header_duration_minutes">Duration (minutes)</string>
     <string name="cd_import_course_csv">Import Question Bank data</string>
     <string name="import_result_title">Import</string>
     <string name="import_result_summary">Imported %1$d rows — %2$d new resources, %3$d new topics, %4$d new topic entries added, %5$d updated.</string>

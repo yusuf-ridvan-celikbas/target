@@ -154,6 +154,7 @@
     <string name="examdetail_study_start">Çalışmaya başlama: %1$s</string>
     <string name="examdetail_language_prefix">"Dil: "</string>
     <string name="cd_edit_exam">Sınavı düzenle</string>
+    <string name="cd_export_progress_csv">İlerleme verilerini dışa aktar</string>
     <string name="cd_delete_exam">Sınavı sil</string>
     <string name="action_add_prefixed">+ Ekle</string>
     <string name="cd_collapse_courses">Dersleri daralt</string>
@@ -317,6 +318,17 @@
     <string name="csv_header_topic">Konu</string>
     <string name="csv_header_test_count">Test Sayısı</string>
     <string name="csv_header_question_count">Soru Sayısı</string>
+    <string name="csv_header_course">Ders</string>
+    <string name="csv_header_target_tests">Hedef Test</string>
+    <string name="csv_header_target_questions">Hedef Soru</string>
+    <string name="csv_header_tests_solved">Çözülen Test</string>
+    <string name="csv_header_correct">Doğru</string>
+    <string name="csv_header_wrong">Yanlış</string>
+    <string name="csv_header_remaining_tests">Kalan Test</string>
+    <string name="csv_header_remaining_questions">Kalan Soru</string>
+    <string name="csv_header_net">Net</string>
+    <string name="csv_header_accuracy">Doğruluk %</string>
+    <string name="csv_header_duration_minutes">Süre (dakika)</string>
     <string name="cd_import_course_csv">Soru Bankası verilerini içe aktar</string>
     <string name="import_result_title">İçe Aktarma</string>
     <string name="import_result_summary">%1$d satır işlendi — %2$d yeni kaynak, %3$d yeni konu, %4$d yeni konu eklemesi, %5$d güncellendi.</string>

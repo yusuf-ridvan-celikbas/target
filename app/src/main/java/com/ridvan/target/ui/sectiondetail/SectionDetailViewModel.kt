@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
+import com.ridvan.target.data.export.buildProgressExportRows
 import com.ridvan.target.data.local.dao.ExamCourseDao
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.SectionCourseDao
@@ -34,6 +35,8 @@ class SectionDetailViewModel(
     private val sectionDao: SectionDao = database.sectionDao()
     private val examCourseDao: ExamCourseDao = database.examCourseDao()
     private val sectionCourseDao: SectionCourseDao = database.sectionCourseDao()
+    private val topicDao = database.topicDao()
+    private val practiceLogDao = database.practiceLogDao()
 
     val section: StateFlow<Section?> = sectionDao.getById(sectionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -78,6 +81,13 @@ class SectionDetailViewModel(
     fun deleteSection() {
         viewModelScope.launch {
             section.value?.let { sectionDao.delete(it) }
+        }
+    }
+
+    fun fetchProgressExportRows(onResult: (List<List<String>>) -> Unit) {
+        viewModelScope.launch {
+            val courses = assignedCourses.value.map { it.sectionCourse.courseId to it.courseName }
+            onResult(buildProgressExportRows(courses, topicDao, practiceLogDao))
         }
     }
 }

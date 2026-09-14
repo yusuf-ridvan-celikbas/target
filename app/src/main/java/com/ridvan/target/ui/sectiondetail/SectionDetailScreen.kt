@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -41,11 +42,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.data.export.ProgressCsvExporter
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.SectionCourseWithCourse
 import com.ridvan.target.data.local.entity.CourseCategory
@@ -53,6 +56,7 @@ import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
+import com.ridvan.target.ui.common.shareCsvFile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +68,22 @@ fun SectionDetailScreen(
     val section by viewModel.section.collectAsStateWithLifecycle()
     val assignedCourses by viewModel.assignedCourses.collectAsStateWithLifecycle()
     val availableCourses by viewModel.availableCourses.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val exportHeaders = listOf(
+        stringResource(R.string.csv_header_course),
+        stringResource(R.string.csv_header_topic),
+        stringResource(R.string.csv_header_target_tests),
+        stringResource(R.string.csv_header_target_questions),
+        stringResource(R.string.csv_header_tests_solved),
+        stringResource(R.string.csv_header_correct),
+        stringResource(R.string.csv_header_wrong),
+        stringResource(R.string.csv_header_remaining_tests),
+        stringResource(R.string.csv_header_remaining_questions),
+        stringResource(R.string.csv_header_net),
+        stringResource(R.string.csv_header_accuracy),
+        stringResource(R.string.csv_header_duration_minutes),
+    )
+    val exportChooserTitle = stringResource(R.string.export_csv_chooser_title)
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -81,6 +101,16 @@ fun SectionDetailScreen(
                 actions = {
                     IconButton(onClick = { showEditDialog = true }) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_edit_section))
+                    }
+                    IconButton(onClick = {
+                        viewModel.fetchProgressExportRows { rows ->
+                            val file = ProgressCsvExporter.writeProgressCsv(
+                                context, section?.name.orEmpty(), exportHeaders, rows,
+                            )
+                            shareCsvFile(context, file, exportChooserTitle)
+                        }
+                    }) {
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.cd_export_progress_csv))
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_section))
