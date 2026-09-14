@@ -55,15 +55,21 @@ fun TopicProgressScreen(
     val totalSolved = sessions.sumOf { it.solvedCount }
     val totalUnsolved = sessions.sumOf { it.unsolvedCount }
     val totalMinutes = sessions.sumOf { it.durationMinutes }
+    val totalQuestionsLogged = sessions.sumOf { it.questionCount ?: (it.solvedCount + it.unsolvedCount) }
+    val totalBlank = sessions.sumOf { session ->
+        val qc = session.questionCount
+        if (qc != null) (qc - session.solvedCount - session.unsolvedCount).coerceAtLeast(0) else 0
+    }
     val netScore = totalSolved - totalUnsolved / 4.0
     val durationText = stringResource(R.string.duration_format, totalMinutes / 60, totalMinutes % 60)
 
     val otherSessionsTests = sessions.filter { it.id != editingSession?.id }.sumOf { it.testsSolved }
-    val otherSessionsQuestions = sessions.filter { it.id != editingSession?.id }.sumOf { it.solvedCount + it.unsolvedCount }
+    val otherSessionsQuestions = sessions.filter { it.id != editingSession?.id }
+        .sumOf { it.questionCount ?: (it.solvedCount + it.unsolvedCount) }
     val maxTestsForDialog = ((attached?.studyResourceTopic?.testCount ?: 0) - otherSessionsTests).coerceAtLeast(0)
     val maxQuestionsForDialog = ((attached?.studyResourceTopic?.questionCount ?: 0) - otherSessionsQuestions).coerceAtLeast(0)
     val remainingTests = ((attached?.studyResourceTopic?.testCount ?: 0) - totalTests).coerceAtLeast(0)
-    val remainingQuestions = ((attached?.studyResourceTopic?.questionCount ?: 0) - (totalSolved + totalUnsolved)).coerceAtLeast(0)
+    val remainingQuestions = ((attached?.studyResourceTopic?.questionCount ?: 0) - totalQuestionsLogged).coerceAtLeast(0)
 
     Scaffold(
         topBar = {
@@ -103,7 +109,7 @@ fun TopicProgressScreen(
                 )
             }
             Text(
-                stringResource(R.string.progress_aggregate, totalTests, totalSolved, totalUnsolved, "%.2f".format(netScore), durationText),
+                stringResource(R.string.progress_aggregate, totalTests, totalSolved, totalUnsolved, totalBlank, "%.2f".format(netScore), durationText),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
             )
@@ -159,12 +165,12 @@ fun TopicProgressScreen(
             initial = editingSession,
             maxTests = maxTestsForDialog,
             maxQuestions = maxQuestionsForDialog,
-            onSave = { testsSolved, solvedCount, unsolvedCount, durationMinutes ->
+            onSave = { testsSolved, questionCount, solvedCount, unsolvedCount, durationMinutes ->
                 val current = editingSession
                 if (current == null) {
-                    viewModel.logSession(testsSolved, solvedCount, unsolvedCount, durationMinutes)
+                    viewModel.logSession(testsSolved, questionCount, solvedCount, unsolvedCount, durationMinutes)
                 } else {
-                    viewModel.updateSession(current, testsSolved, solvedCount, unsolvedCount, durationMinutes)
+                    viewModel.updateSession(current, testsSolved, questionCount, solvedCount, unsolvedCount, durationMinutes)
                 }
                 showLogDialog = false
                 editingSession = null
@@ -187,7 +193,8 @@ private fun SessionRow(session: PracticeLog, onClick: () -> Unit) {
         headlineContent = { Text(formatDate(session.loggedAt)) },
         supportingContent = {
             val durationText = stringResource(R.string.duration_format, session.durationMinutes / 60, session.durationMinutes % 60)
-            Text(stringResource(R.string.session_row_summary, session.testsSolved, session.solvedCount, session.unsolvedCount, durationText))
+            val blank = session.questionCount?.let { (it - session.solvedCount - session.unsolvedCount).coerceAtLeast(0) } ?: 0
+            Text(stringResource(R.string.session_row_summary, session.testsSolved, session.solvedCount, session.unsolvedCount, blank, durationText))
         },
         modifier = Modifier.clickable(onClick = onClick),
     )
@@ -242,15 +249,22 @@ private fun LogSessionDialog(
     initial: PracticeLog?,
     maxTests: Int,
     maxQuestions: Int,
-    onSave: (testsSolved: Int, solvedCount: Int, unsolvedCount: Int, durationMinutes: Int) -> Unit,
+    onSave: (testsSolved: Int, questionCount: Int, solvedCount: Int, unsolvedCount: Int, durationMinutes: Int) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
     var testsSolvedText by remember { mutableStateOf(initial?.testsSolved?.toString() ?: "") }
+    var questionCountText by remember {
+        mutableStateOf(initial?.questionCount?.toString() ?: initial?.let { (it.solvedCount + it.unsolvedCount).toString() } ?: "")
+    }
     var solvedText by remember { mutableStateOf(initial?.solvedCount?.toString() ?: "") }
     var unsolvedText by remember { mutableStateOf(initial?.unsolvedCount?.toString() ?: "") }
     var hoursText by remember { mutableStateOf(initial?.let { (it.durationMinutes / 60).toString() } ?: "") }
     var minutesText by remember { mutableStateOf(initial?.let { (it.durationMinutes % 60).toString() } ?: "") }
+
+    val sessionQuestionCount = questionCountText.toIntOrNull() ?: 0
+    val blank = (sessionQuestionCount - (solvedText.toIntOrNull() ?: 0) - (unsolvedText.toIntOrNull() ?: 0)).coerceAtLeast(0)
+    val canSave = sessionQuestionCount > 0
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -276,12 +290,30 @@ private fun LogSessionDialog(
                     modifier = Modifier.padding(top = 4.dp),
                 )
                 OutlinedTextField(
+                    value = questionCountText,
+                    onValueChange = { input ->
+                        if (input.all(Char::isDigit)) {
+                            val n = input.toIntOrNull() ?: 0
+                            questionCountText = if (n > maxQuestions) maxQuestions.toString() else input
+                        }
+                    },
+                    label = { Text(stringResource(R.string.label_question_count)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                Text(
+                    stringResource(R.string.label_tests_remaining_hint, maxQuestions),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+                OutlinedTextField(
                     value = solvedText,
                     onValueChange = { input ->
                         if (input.all(Char::isDigit)) {
                             val n = input.toIntOrNull() ?: 0
                             val unsolved = unsolvedText.toIntOrNull() ?: 0
-                            val allowed = (maxQuestions - unsolved).coerceAtLeast(0)
+                            val allowed = (sessionQuestionCount - unsolved).coerceAtLeast(0)
                             solvedText = if (n > allowed) allowed.toString() else input
                         }
                     },
@@ -296,7 +328,7 @@ private fun LogSessionDialog(
                         if (input.all(Char::isDigit)) {
                             val n = input.toIntOrNull() ?: 0
                             val solved = solvedText.toIntOrNull() ?: 0
-                            val allowed = (maxQuestions - solved).coerceAtLeast(0)
+                            val allowed = (sessionQuestionCount - solved).coerceAtLeast(0)
                             unsolvedText = if (n > allowed) allowed.toString() else input
                         }
                     },
@@ -306,7 +338,7 @@ private fun LogSessionDialog(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
                 Text(
-                    stringResource(R.string.label_questions_remaining_hint, maxQuestions),
+                    stringResource(R.string.label_blank_count, blank),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(top = 4.dp),
                 )
@@ -334,16 +366,20 @@ private fun LogSessionDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                val hours = hoursText.toIntOrNull() ?: 0
-                val minutes = minutesText.toIntOrNull() ?: 0
-                onSave(
-                    testsSolvedText.toIntOrNull() ?: 0,
-                    solvedText.toIntOrNull() ?: 0,
-                    unsolvedText.toIntOrNull() ?: 0,
-                    hours * 60 + minutes,
-                )
-            }) { Text(stringResource(R.string.common_save)) }
+            TextButton(
+                enabled = canSave,
+                onClick = {
+                    val hours = hoursText.toIntOrNull() ?: 0
+                    val minutes = minutesText.toIntOrNull() ?: 0
+                    onSave(
+                        testsSolvedText.toIntOrNull() ?: 0,
+                        sessionQuestionCount,
+                        solvedText.toIntOrNull() ?: 0,
+                        unsolvedText.toIntOrNull() ?: 0,
+                        hours * 60 + minutes,
+                    )
+                },
+            ) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }

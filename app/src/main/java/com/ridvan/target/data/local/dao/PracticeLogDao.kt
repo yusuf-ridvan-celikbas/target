@@ -27,7 +27,8 @@ interface PracticeLogDao {
         SELECT COALESCE(SUM(practice_logs.testsSolved), 0) AS totalTestsSolved,
                COALESCE(SUM(practice_logs.solvedCount), 0) AS totalSolved,
                COALESCE(SUM(practice_logs.unsolvedCount), 0) AS totalUnsolved,
-               COALESCE(SUM(practice_logs.durationMinutes), 0) AS totalDurationMinutes
+               COALESCE(SUM(practice_logs.durationMinutes), 0) AS totalDurationMinutes,
+               COALESCE(SUM(COALESCE(practice_logs.questionCount, practice_logs.solvedCount + practice_logs.unsolvedCount)), 0) AS totalQuestionsLogged
         FROM practice_logs
         JOIN study_resource_topics ON study_resource_topics.id = practice_logs.studyResourceTopicId
         WHERE study_resource_topics.studyResourceId IN (:studyResourceIds)
@@ -41,7 +42,8 @@ interface PracticeLogDao {
                COALESCE(SUM(practice_logs.testsSolved), 0) AS totalTestsSolved,
                COALESCE(SUM(practice_logs.solvedCount), 0) AS totalSolved,
                COALESCE(SUM(practice_logs.unsolvedCount), 0) AS totalUnsolved,
-               COALESCE(SUM(practice_logs.durationMinutes), 0) AS totalDurationMinutes
+               COALESCE(SUM(practice_logs.durationMinutes), 0) AS totalDurationMinutes,
+               COALESCE(SUM(COALESCE(practice_logs.questionCount, practice_logs.solvedCount + practice_logs.unsolvedCount)), 0) AS totalQuestionsLogged
         FROM topics
         LEFT JOIN study_resource_topics ON study_resource_topics.topicId = topics.id
         LEFT JOIN practice_logs ON practice_logs.studyResourceTopicId = study_resource_topics.id

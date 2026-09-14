@@ -264,8 +264,7 @@
     <string name="label_target_counts">Target: %1$d tests · %2$d questions</string>
     <string name="label_remaining_counts">Remaining: %1$d tests · %2$d questions</string>
     <string name="label_tests_remaining_hint">Up to %1$d</string>
-    <string name="label_questions_remaining_hint">Solved + unsolved up to %1$d</string>
-    <string name="progress_aggregate">%1$d tests · %2$d solved · %3$d unsolved · Net %4$s · %5$s total</string>
+    <string name="progress_aggregate">%1$d tests · %2$d solved · %3$d unsolved · %4$d blank · Net %5$s · %6$s total</string>
     <string name="duration_format">%1$dh %2$dm</string>
     <string name="action_log_session">+ Log Session</string>
     <string name="dialog_log_session_title">Log session</string>
@@ -277,7 +276,7 @@
     <string name="label_minutes">Minutes</string>
     <string name="action_delete_session">Delete this session</string>
     <string name="progress_no_sessions">No sessions logged yet. Tap + Log Session to add one.</string>
-    <string name="session_row_summary">%1$d tests · %2$d✓ / %3$d✗ · %4$s</string>
+    <string name="session_row_summary">%1$d tests · %2$d✓ / %3$d✗ / %4$d blank · %5$s</string>
     <string name="cd_edit_target_counts">Edit target counts</string>
     <string name="cd_detach_topic">Remove topic from resource</string>
     <string name="dialog_edit_target_counts_title">Edit target counts</string>

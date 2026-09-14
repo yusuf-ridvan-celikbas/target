@@ -62,7 +62,8 @@ fun CourseStudyResourceScreen(
             StudyResourceType.QUESTION_BANK, null -> {
                 {
                     val remainingTests = (targetTotals.totalTestCount - progressTotals.totalTestsSolved).coerceAtLeast(0)
-                    val remainingQuestions = (targetTotals.totalQuestionCount - (progressTotals.totalSolved + progressTotals.totalUnsolved)).coerceAtLeast(0)
+                    val remainingQuestions = (targetTotals.totalQuestionCount - progressTotals.totalQuestionsLogged).coerceAtLeast(0)
+                    val totalBlank = (progressTotals.totalQuestionsLogged - progressTotals.totalSolved - progressTotals.totalUnsolved).coerceAtLeast(0)
                     val netScore = progressTotals.totalSolved - progressTotals.totalUnsolved / 4.0
                     val durationText = stringResource(
                         R.string.duration_format,
@@ -84,6 +85,7 @@ fun CourseStudyResourceScreen(
                                 progressTotals.totalTestsSolved,
                                 progressTotals.totalSolved,
                                 progressTotals.totalUnsolved,
+                                totalBlank,
                                 "%.2f".format(netScore),
                                 durationText,
                             ),

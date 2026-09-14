@@ -21,6 +21,7 @@ data class PracticeLog(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val studyResourceTopicId: Long,
     val testsSolved: Int,
+    val questionCount: Int? = null,
     val solvedCount: Int,
     val unsolvedCount: Int,
     val durationMinutes: Int,

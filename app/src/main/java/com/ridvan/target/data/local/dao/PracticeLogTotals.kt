@@ -5,4 +5,5 @@ data class PracticeLogTotals(
     val totalSolved: Int,
     val totalUnsolved: Int,
     val totalDurationMinutes: Int,
+    val totalQuestionsLogged: Int,
 )

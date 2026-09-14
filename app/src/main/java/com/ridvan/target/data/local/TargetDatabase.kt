@@ -50,7 +50,7 @@ import com.ridvan.target.data.local.entity.User
         PracticeExamEntry::class,
         PracticeExamEntryTopicResult::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = false,
 )
 abstract class TargetDatabase : RoomDatabase() {
@@ -79,7 +79,7 @@ abstract class TargetDatabase : RoomDatabase() {
                     context.applicationContext,
                     TargetDatabase::class.java,
                     "target.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15).build().also { INSTANCE = it }
             }
     }
 }

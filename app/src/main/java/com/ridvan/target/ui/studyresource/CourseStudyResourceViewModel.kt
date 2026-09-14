@@ -65,7 +65,7 @@ class CourseStudyResourceViewModel(
 
     val progressTotals: StateFlow<PracticeLogTotals> = questionBankResourceIds.flatMapLatest { ids ->
         practiceLogDao.getProgressTotals(ids)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PracticeLogTotals(0, 0, 0, 0))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PracticeLogTotals(0, 0, 0, 0, 0))
 
     private val practiceExamResourceIds: Flow<List<Long>> = studyResources.map { list ->
         list.filter { it.type == StudyResourceType.PRACTICE_EXAM }.map { it.id }

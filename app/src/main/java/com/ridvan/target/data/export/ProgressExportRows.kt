@@ -29,8 +29,9 @@ suspend fun buildProgressExportRows(
             val testsSolved = progress?.totalTestsSolved ?: 0
             val durationMinutes = progress?.totalDurationMinutes ?: 0
             val totalQuestions = solved + unsolved
+            val totalQuestionsLogged = progress?.totalQuestionsLogged ?: 0
             val remainingTests = (topicWithTotals.totalTestCount - testsSolved).coerceAtLeast(0)
-            val remainingQuestions = (topicWithTotals.totalQuestionCount - totalQuestions).coerceAtLeast(0)
+            val remainingQuestions = (topicWithTotals.totalQuestionCount - totalQuestionsLogged).coerceAtLeast(0)
             val net = solved - unsolved / 4.0
             val accuracy = if (totalQuestions == 0) 0 else solved * 100 / totalQuestions
             listOf(

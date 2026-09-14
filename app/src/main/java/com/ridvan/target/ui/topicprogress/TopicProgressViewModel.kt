@@ -43,12 +43,13 @@ class TopicProgressViewModel(
         }
     }
 
-    fun logSession(testsSolved: Int, solvedCount: Int, unsolvedCount: Int, durationMinutes: Int) {
+    fun logSession(testsSolved: Int, questionCount: Int, solvedCount: Int, unsolvedCount: Int, durationMinutes: Int) {
         viewModelScope.launch {
             practiceLogDao.insert(
                 PracticeLog(
                     studyResourceTopicId = studyResourceTopicId,
                     testsSolved = testsSolved,
+                    questionCount = questionCount,
                     solvedCount = solvedCount,
                     unsolvedCount = unsolvedCount,
                     durationMinutes = durationMinutes,
@@ -57,11 +58,12 @@ class TopicProgressViewModel(
         }
     }
 
-    fun updateSession(log: PracticeLog, testsSolved: Int, solvedCount: Int, unsolvedCount: Int, durationMinutes: Int) {
+    fun updateSession(log: PracticeLog, testsSolved: Int, questionCount: Int, solvedCount: Int, unsolvedCount: Int, durationMinutes: Int) {
         viewModelScope.launch {
             practiceLogDao.update(
                 log.copy(
                     testsSolved = testsSolved,
+                    questionCount = questionCount,
                     solvedCount = solvedCount,
                     unsolvedCount = unsolvedCount,
                     durationMinutes = durationMinutes,

@@ -264,8 +264,7 @@
     <string name="label_target_counts">Hedef: %1$d test · %2$d soru</string>
     <string name="label_remaining_counts">Kalan: %1$d test · %2$d soru</string>
     <string name="label_tests_remaining_hint">En fazla %1$d</string>
-    <string name="label_questions_remaining_hint">Doğru + yanlış en fazla %1$d</string>
-    <string name="progress_aggregate">%1$d test · %2$d doğru · %3$d yanlış · Net %4$s · Toplam %5$s</string>
+    <string name="progress_aggregate">%1$d test · %2$d doğru · %3$d yanlış · %4$d boş · Net %5$s · Toplam %6$s</string>
     <string name="duration_format">%1$dsa %2$ddk</string>
     <string name="action_log_session">+ Oturum Ekle</string>
     <string name="dialog_log_session_title">Oturum ekle</string>
@@ -277,7 +276,7 @@
     <string name="label_minutes">Dakika</string>
     <string name="action_delete_session">Bu oturumu sil</string>
     <string name="progress_no_sessions">Henüz oturum kaydedilmedi. Eklemek için + Oturum Ekle\'ye dokunun.</string>
-    <string name="session_row_summary">%1$d test · %2$d✓ / %3$d✗ · %4$s</string>
+    <string name="session_row_summary">%1$d test · %2$d✓ / %3$d✗ / %4$d boş · %5$s</string>
     <string name="cd_edit_target_counts">Hedef sayıları düzenle</string>
     <string name="cd_detach_topic">Konuyu kaynaktan kaldır</string>
     <string name="dialog_edit_target_counts_title">Hedef sayıları düzenle</string>

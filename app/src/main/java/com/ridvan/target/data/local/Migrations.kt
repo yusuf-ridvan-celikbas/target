@@ -304,3 +304,14 @@ val MIGRATION_13_14 = object : Migration(13, 14) {
         )
     }
 }
+
+val MIGRATION_14_15 = object : Migration(14, 15) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Nullable: existing sessions have no recorded question count and can't be backfilled
+        // (the same "orphaned rather than destroyed" precedent as every other added column with
+        // no inferable source, e.g. MIGRATION_12_13's study_resources.questionCount). Lets a
+        // logged session's blank/unanswered count be derived (questionCount - solved - unsolved)
+        // instead of assuming solved+unsolved was the whole test.
+        db.execSQL("ALTER TABLE practice_logs ADD COLUMN questionCount INTEGER")
+    }
+}

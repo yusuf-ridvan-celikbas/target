@@ -55,7 +55,7 @@ interface StudyResourceTopicDao {
         """
         SELECT study_resource_topics.*, topics.name AS topicName,
                COALESCE(SUM(practice_logs.testsSolved), 0) AS loggedTests,
-               COALESCE(SUM(practice_logs.solvedCount + practice_logs.unsolvedCount), 0) AS loggedQuestions
+               COALESCE(SUM(COALESCE(practice_logs.questionCount, practice_logs.solvedCount + practice_logs.unsolvedCount)), 0) AS loggedQuestions
         FROM study_resource_topics
         JOIN topics ON topics.id = study_resource_topics.topicId
         LEFT JOIN practice_logs ON practice_logs.studyResourceTopicId = study_resource_topics.id
