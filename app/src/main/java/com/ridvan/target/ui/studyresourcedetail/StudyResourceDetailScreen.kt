@@ -57,6 +57,7 @@ import com.ridvan.target.data.local.dao.StudyResourceTopicWithProgress
 import com.ridvan.target.data.local.entity.PracticeExamEntry
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.data.local.entity.Topic
+import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.studyresource.StudyResourceFormDialog
 import com.ridvan.target.ui.studyresource.studyResourceTypeLabel
@@ -127,16 +128,21 @@ fun StudyResourceDetailScreen(
             }
 
             if (studyResource?.type == StudyResourceType.QUESTION_BANK && studyResource?.courseId != null) {
-                TopicsSectionHeader(onAddClick = { showAddTopicDialog = true })
-                if (attachedTopics.isEmpty()) {
-                    Text(stringResource(R.string.srdetail_no_topics), modifier = Modifier.padding(top = 4.dp))
-                } else {
-                    ReorderableTopicsList(
-                        attachedTopics = attachedTopics,
-                        onRowClick = { onOpenTopicProgress(it.studyResourceTopic.id) },
-                        onReorder = { orderedIds -> viewModel.reorderTopics(orderedIds) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    )
+                GroupedCard(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+                    TopicsSectionHeader(onAddClick = { showAddTopicDialog = true })
+                    if (attachedTopics.isEmpty()) {
+                        Text(
+                            stringResource(R.string.srdetail_no_topics),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    } else {
+                        ReorderableTopicsList(
+                            attachedTopics = attachedTopics,
+                            onRowClick = { onOpenTopicProgress(it.studyResourceTopic.id) },
+                            onReorder = { orderedIds -> viewModel.reorderTopics(orderedIds) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }
@@ -288,7 +294,7 @@ private fun AddEntryDialog(
 @Composable
 private fun TopicsSectionHeader(onAddClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(stringResource(R.string.label_topics), modifier = Modifier.weight(1f))
