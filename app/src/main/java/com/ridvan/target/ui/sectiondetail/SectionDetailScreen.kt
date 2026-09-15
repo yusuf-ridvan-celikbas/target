@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,6 +25,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import com.ridvan.target.data.local.dao.SectionCourseWithCourse
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.CourseIconAvatar
+import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
@@ -135,20 +137,22 @@ fun SectionDetailScreen(
                     sectionCourseGroups(assignedCourses).forEach { (category, groupCourses) ->
                         val expanded = expandedGroups[category] ?: false
                         item {
-                            SectionCourseGroupHeader(
-                                category,
-                                expanded = expanded,
-                                onToggleExpand = { expandedGroups[category] = !expanded },
-                            )
-                        }
-                        if (expanded) {
-                            items(groupCourses, key = { it.sectionCourse.id }) { course ->
-                                AssignedCourseRow(
-                                    course,
-                                    onClick = { onCourseClick(course.sectionCourse.courseId) },
-                                    onRemove = { viewModel.removeCourse(course.sectionCourse) },
+                            GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                                SectionCourseGroupHeader(
+                                    category,
+                                    expanded = expanded,
+                                    onToggleExpand = { expandedGroups[category] = !expanded },
                                 )
-                                HorizontalDivider()
+                                if (expanded) {
+                                    groupCourses.forEach { course ->
+                                        AssignedCourseRow(
+                                            course,
+                                            onClick = { onCourseClick(course.sectionCourse.courseId) },
+                                            onRemove = { viewModel.removeCourse(course.sectionCourse) },
+                                        )
+                                        HorizontalDivider()
+                                    }
+                                }
                             }
                         }
                     }
@@ -235,6 +239,7 @@ private fun AssignedCourseRow(course: SectionCourseWithCourse, onClick: () -> Un
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_course))
             }
         },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(onClick = onClick),
     )
 }

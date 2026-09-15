@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.common
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,10 @@ import androidx.compose.ui.Modifier
  * A subtle rounded/tonal container for grouping a logical section of content
  * (a list of rows, a settings section, a group of courses) — used instead of
  * bare Column/Row content sitting directly on the screen background.
+ *
+ * The inner Column animates its own size, so any caller whose content
+ * expands/collapses (a chevron-toggled group, an empty-state hint appearing)
+ * gets a smooth height transition for free rather than a hard snap.
  */
 @Composable
 fun GroupedCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
@@ -21,6 +26,6 @@ fun GroupedCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         modifier = modifier.fillMaxWidth(),
     ) {
-        Column(content = content)
+        Column(modifier = Modifier.animateContentSize(), content = content)
     }
 }

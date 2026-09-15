@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -58,6 +59,7 @@ import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.CourseIconAvatar
+import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
@@ -158,34 +160,34 @@ fun ExamDetailScreen(
             if (!isLanguageExam) {
                 val hasSections = currentExam?.hasSections == true
                 item {
-                    SectionHeader(
-                        stringResource(R.string.label_courses),
-                        onAddClick = { showAddCourseDialog = true },
-                        expanded = if (hasSections) null else coursesExpanded,
-                        onToggleExpand = if (hasSections) null else ({ coursesExpanded = !coursesExpanded }),
-                    )
-                }
-                if (!hasSections && coursesExpanded) {
-                    if (courses.isEmpty()) {
-                        item { EmptyHint(stringResource(R.string.examdetail_no_courses)) }
-                    } else {
-                        examCourseGroups(courses).forEach { (category, groupCourses) ->
-                            val groupExpanded = expandedCourseGroups[category] ?: false
-                            item {
-                                CourseGroupHeader(
-                                    category,
-                                    expanded = groupExpanded,
-                                    onToggleExpand = { expandedCourseGroups[category] = !groupExpanded },
-                                )
-                            }
-                            if (groupExpanded) {
-                                items(groupCourses, key = { "course-${it.examCourse.id}" }) { course ->
-                                    CourseRow(
-                                        course,
-                                        onClick = { onCourseClick(course.examCourse.courseId) },
-                                        onRemove = { viewModel.removeCourse(course.examCourse) },
+                    GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                        SectionHeader(
+                            stringResource(R.string.label_courses),
+                            onAddClick = { showAddCourseDialog = true },
+                            expanded = if (hasSections) null else coursesExpanded,
+                            onToggleExpand = if (hasSections) null else ({ coursesExpanded = !coursesExpanded }),
+                        )
+                        if (!hasSections && coursesExpanded) {
+                            if (courses.isEmpty()) {
+                                EmptyHint(stringResource(R.string.examdetail_no_courses))
+                            } else {
+                                examCourseGroups(courses).forEach { (category, groupCourses) ->
+                                    val groupExpanded = expandedCourseGroups[category] ?: false
+                                    CourseGroupHeader(
+                                        category,
+                                        expanded = groupExpanded,
+                                        onToggleExpand = { expandedCourseGroups[category] = !groupExpanded },
                                     )
-                                    HorizontalDivider()
+                                    if (groupExpanded) {
+                                        groupCourses.forEach { course ->
+                                            CourseRow(
+                                                course,
+                                                onClick = { onCourseClick(course.examCourse.courseId) },
+                                                onRemove = { viewModel.removeCourse(course.examCourse) },
+                                            )
+                                            HorizontalDivider()
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -195,20 +197,22 @@ fun ExamDetailScreen(
 
             if (exam?.hasSections == true) {
                 item {
-                    SectionHeader(
-                        stringResource(R.string.label_sections),
-                        onAddClick = { showAddSectionDialog = true },
-                        expanded = sectionsExpanded,
-                        onToggleExpand = { sectionsExpanded = !sectionsExpanded },
-                    )
-                }
-                if (sectionsExpanded) {
-                    if (sections.isEmpty()) {
-                        item { EmptyHint(stringResource(R.string.examdetail_no_sections)) }
-                    } else {
-                        items(sections, key = { "section-${it.id}" }) { section ->
-                            SectionRow(section, onClick = { onSectionClick(section.id) })
-                            HorizontalDivider()
+                    GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                        SectionHeader(
+                            stringResource(R.string.label_sections),
+                            onAddClick = { showAddSectionDialog = true },
+                            expanded = sectionsExpanded,
+                            onToggleExpand = { sectionsExpanded = !sectionsExpanded },
+                        )
+                        if (sectionsExpanded) {
+                            if (sections.isEmpty()) {
+                                EmptyHint(stringResource(R.string.examdetail_no_sections))
+                            } else {
+                                sections.forEach { section ->
+                                    SectionRow(section, onClick = { onSectionClick(section.id) })
+                                    HorizontalDivider()
+                                }
+                            }
                         }
                     }
                 }
@@ -375,6 +379,7 @@ private fun CourseRow(course: ExamCourseWithCourse, onClick: () -> Unit, onRemov
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_course))
             }
         },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(onClick = onClick),
     )
 }
@@ -384,6 +389,7 @@ private fun SectionRow(section: Section, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(section.name) },
         supportingContent = { Text(section.date?.let { formatDate(it) } ?: stringResource(R.string.common_not_set)) },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(onClick = onClick),
     )
 }
