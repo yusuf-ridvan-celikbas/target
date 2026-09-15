@@ -19,6 +19,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,6 +44,7 @@ import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.CourseIconAvatar
+import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.CourseIconPicker
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
@@ -87,16 +90,18 @@ fun CourseListByTypeScreen(
                 courseGroups(courses).forEach { (category, groupCourses) ->
                     val expanded = expandedGroups[category] ?: false
                     item {
-                        CourseGroupHeader(
-                            category,
-                            expanded = expanded,
-                            onToggleExpand = { expandedGroups[category] = !expanded },
-                        )
-                    }
-                    if (expanded) {
-                        items(groupCourses, key = { it.id }) { course ->
-                            CourseRow(course = course, onClick = { onCourseClick(course.id) })
-                            HorizontalDivider()
+                        GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                            CourseGroupHeader(
+                                category,
+                                expanded = expanded,
+                                onToggleExpand = { expandedGroups[category] = !expanded },
+                            )
+                            if (expanded) {
+                                groupCourses.forEach { course ->
+                                    CourseRow(course = course, onClick = { onCourseClick(course.id) })
+                                    HorizontalDivider()
+                                }
+                            }
                         }
                     }
                 }
@@ -149,6 +154,7 @@ private fun CourseRow(course: Course, onClick: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.icon) },
         headlineContent = { Text(courseDisplayName(course.name)) },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(onClick = onClick),
     )
 }
