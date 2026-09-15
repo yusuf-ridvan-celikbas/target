@@ -2,6 +2,7 @@ package com.ridvan.target.ui.statistics
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,6 +36,7 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.Topic
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.courseDisplayName
@@ -197,19 +199,24 @@ private fun WeakTopicRow(entry: WeakTopicEntry, onClick: () -> Unit) {
 
 @Composable
 private fun SourceToggle(source: StatsSource, onSelect: (StatsSource) -> Unit, modifier: Modifier = Modifier) {
-    SegmentedToggle(
-        options = listOf(
-            SegmentedToggleOption(StatsSource.PRACTICE_SESSIONS, stringResource(R.string.stats_source_practice_sessions)),
-            SegmentedToggleOption(StatsSource.PRACTICE_EXAMS, stringResource(R.string.stats_source_practice_exams)),
-        ),
-        selected = source,
-        onSelect = onSelect,
-        textStyle = MaterialTheme.typography.labelSmall,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        segmentContentPadding = PaddingValues(vertical = 8.dp, horizontal = 2.dp),
-        modifier = modifier.fillMaxWidth(),
-    )
+    Column(modifier = modifier) {
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            HelpTooltip(R.string.help_tooltip_stats_source, R.string.cd_help_stats_source)
+        }
+        SegmentedToggle(
+            options = listOf(
+                SegmentedToggleOption(StatsSource.PRACTICE_SESSIONS, stringResource(R.string.stats_source_practice_sessions)),
+                SegmentedToggleOption(StatsSource.PRACTICE_EXAMS, stringResource(R.string.stats_source_practice_exams)),
+            ),
+            selected = source,
+            onSelect = onSelect,
+            textStyle = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            segmentContentPadding = PaddingValues(vertical = 8.dp, horizontal = 2.dp),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable
@@ -226,21 +233,26 @@ private fun BreakdownRow(entry: TopicBreakdownEntry, onClick: () -> Unit) {
 
 @Composable
 private fun PeriodToggle(period: StatsPeriod, onSelect: (StatsPeriod) -> Unit, modifier: Modifier = Modifier) {
-    SegmentedToggle(
-        options = listOf(
-            SegmentedToggleOption(StatsPeriod.DAILY, stringResource(R.string.period_daily)),
-            SegmentedToggleOption(StatsPeriod.WEEKLY, stringResource(R.string.period_weekly)),
-            SegmentedToggleOption(StatsPeriod.MONTHLY, stringResource(R.string.period_monthly)),
-            SegmentedToggleOption(StatsPeriod.ALL_TIME, stringResource(R.string.period_all_time)),
-        ),
-        selected = period,
-        onSelect = onSelect,
-        textStyle = MaterialTheme.typography.labelSmall,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        segmentContentPadding = PaddingValues(vertical = 8.dp, horizontal = 2.dp),
-        modifier = modifier.fillMaxWidth(),
-    )
+    Column(modifier = modifier) {
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            HelpTooltip(R.string.help_tooltip_stats_period, R.string.cd_help_stats_period)
+        }
+        SegmentedToggle(
+            options = listOf(
+                SegmentedToggleOption(StatsPeriod.DAILY, stringResource(R.string.period_daily)),
+                SegmentedToggleOption(StatsPeriod.WEEKLY, stringResource(R.string.period_weekly)),
+                SegmentedToggleOption(StatsPeriod.MONTHLY, stringResource(R.string.period_monthly)),
+                SegmentedToggleOption(StatsPeriod.ALL_TIME, stringResource(R.string.period_all_time)),
+            ),
+            selected = period,
+            onSelect = onSelect,
+            textStyle = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            segmentContentPadding = PaddingValues(vertical = 8.dp, horizontal = 2.dp),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable

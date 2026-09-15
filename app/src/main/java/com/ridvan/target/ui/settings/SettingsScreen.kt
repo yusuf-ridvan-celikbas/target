@@ -35,6 +35,7 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.data.local.BannerColor
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.findActivity
@@ -82,7 +83,10 @@ fun SettingsScreen(
             }
             GroupedCard {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(stringResource(R.string.settings_app_color_preference))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.settings_app_color_preference))
+                        HelpTooltip(R.string.help_tooltip_app_color_preference, R.string.cd_help_app_color_preference)
+                    }
                     BannerColor.entries.chunked(4).forEach { row ->
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),

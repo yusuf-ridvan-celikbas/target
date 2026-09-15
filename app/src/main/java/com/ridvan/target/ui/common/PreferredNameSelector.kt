@@ -28,7 +28,10 @@ fun PreferredNameSelector(
     val toggleActive = source == PreferredNameSource.FIRST || source == PreferredNameSource.MIDDLE
 
     Column(modifier = modifier) {
-        Text(stringResource(R.string.preferred_name_label), style = MaterialTheme.typography.labelSmall)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.preferred_name_label), style = MaterialTheme.typography.labelSmall)
+            HelpTooltip(R.string.help_tooltip_preferred_name, R.string.cd_help_preferred_name)
+        }
         SegmentedToggle(
             options = listOf(
                 SegmentedToggleOption(PreferredNameSource.FIRST, stringResource(R.string.preferred_name_first), dimmed = !toggleActive),
