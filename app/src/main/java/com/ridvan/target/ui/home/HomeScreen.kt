@@ -17,6 +17,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
@@ -26,7 +27,7 @@ fun HomeScreen(
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
 
-    AppShell(navigation = shellNavigation) { innerPadding ->
+    AppShell(navigation = shellNavigation, currentDestination = ShellDestination.HOME) { innerPadding ->
         Box(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentAlignment = Alignment.Center,

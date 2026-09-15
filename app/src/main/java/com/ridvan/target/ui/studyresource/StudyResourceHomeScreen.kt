@@ -34,6 +34,7 @@ import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.courselist.CourseListViewModel
 import com.ridvan.target.ui.languagelist.LanguageListViewModel
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
@@ -51,7 +52,11 @@ fun StudyResourceHomeScreen(
     val languages by languageListViewModel.languages.collectAsStateWithLifecycle()
     val expandedTypes = remember { mutableStateMapOf<Long, Boolean>() }
 
-    AppShell(navigation = shellNavigation, title = stringResource(R.string.label_study_resources)) { innerPadding ->
+    AppShell(
+        navigation = shellNavigation,
+        currentDestination = ShellDestination.STUDY_RESOURCES,
+        title = stringResource(R.string.label_study_resources),
+    ) { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             examTypes.forEach { examType ->
                 val isLanguageType = examType.name == LANGUAGE_EXAM_TYPE_NAME

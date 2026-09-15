@@ -68,10 +68,15 @@ data class ShellNavigation(
     val onSwitchAccount: () -> Unit,
 )
 
+enum class ShellDestination {
+    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, HELP, OTHER
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppShell(
     navigation: ShellNavigation,
+    currentDestination: ShellDestination = ShellDestination.OTHER,
     title: String = "",
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -106,7 +111,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_exams)) },
                     icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.EXAMS,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateExams()
@@ -117,7 +122,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_courses)) },
                     icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.COURSES,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateCourses()
@@ -128,7 +133,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_study_resources)) },
                     icon = { Icon(Icons.Filled.Bookmark, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.STUDY_RESOURCES,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateStudyResources()
@@ -139,7 +144,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_topics)) },
                     icon = { Icon(Icons.Filled.Topic, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.TOPICS,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateTopics()
@@ -150,7 +155,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_statistics)) },
                     icon = { Icon(Icons.Filled.BarChart, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.STATISTICS,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateStatistics()
@@ -161,7 +166,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_languages)) },
                     icon = { Icon(Icons.Filled.Translate, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.LANGUAGES,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateLanguages()
@@ -172,7 +177,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_help)) },
                     icon = { Icon(Icons.AutoMirrored.Filled.Help, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.HELP,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateHelp()
@@ -183,7 +188,7 @@ fun AppShell(
                 NavigationDrawerItem(
                     label = { Text(stringResource(R.string.label_home)) },
                     icon = { Icon(Icons.Filled.Home, contentDescription = null) },
-                    selected = false,
+                    selected = currentDestination == ShellDestination.HOME,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigateHome()

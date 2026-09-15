@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -23,10 +22,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
+import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
@@ -42,11 +43,10 @@ fun ExamListScreen(
 
     AppShell(
         navigation = shellNavigation,
+        currentDestination = ShellDestination.EXAMS,
         title = stringResource(R.string.exam_list_title),
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
-                Text("+")
-            }
+            AddFab(onClick = { showAddDialog = true })
         },
     ) { innerPadding ->
         if (exams.isEmpty()) {

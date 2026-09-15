@@ -32,6 +32,7 @@ import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.courselist.CourseListViewModel
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 /**
@@ -51,7 +52,11 @@ fun TopicHomeScreen(
     val allCourses by viewModel.courses.collectAsStateWithLifecycle()
     val expandedTypes = remember { mutableStateMapOf<Long, Boolean>() }
 
-    AppShell(navigation = shellNavigation, title = stringResource(R.string.label_topics)) { innerPadding ->
+    AppShell(
+        navigation = shellNavigation,
+        currentDestination = ShellDestination.TOPICS,
+        title = stringResource(R.string.label_topics),
+    ) { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             courseExamTypes.forEach { examType ->
                 val expanded = expandedTypes[examType.id] ?: false

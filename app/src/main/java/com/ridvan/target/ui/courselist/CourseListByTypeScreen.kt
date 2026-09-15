@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.CourseCategory
+import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.CourseIconPicker
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
@@ -71,9 +71,7 @@ fun CourseListByTypeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
-                Text("+")
-            }
+            AddFab(onClick = { showAddDialog = true })
         },
     ) { innerPadding ->
         if (courses.isEmpty()) {

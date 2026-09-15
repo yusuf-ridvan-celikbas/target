@@ -2,7 +2,6 @@ package com.ridvan.target.ui.coursedetail
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -37,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -47,6 +44,8 @@ import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.ui.common.CourseIconPicker
+import com.ridvan.target.ui.common.SegmentedToggle
+import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.courseCategoryValueLabel
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
@@ -274,55 +273,16 @@ private fun CourseEditDialog(
 private fun CourseCategoryField(selected: CourseCategory?, onSelect: (CourseCategory?) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Text(stringResource(R.string.label_category), style = MaterialTheme.typography.labelSmall)
-        Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-            CategoryToggleSegment(
-                text = stringResource(R.string.category_unset),
-                selected = selected == null,
-                onClick = { onSelect(null) },
-                modifier = Modifier.weight(1f),
-            )
-            CategoryToggleSegment(
-                text = stringResource(R.string.category_quantitative),
-                selected = selected == CourseCategory.QUANTITATIVE,
-                onClick = { onSelect(CourseCategory.QUANTITATIVE) },
-                modifier = Modifier.weight(1f).padding(start = 4.dp),
-            )
-            CategoryToggleSegment(
-                text = stringResource(R.string.category_verbal),
-                selected = selected == CourseCategory.VERBAL,
-                onClick = { onSelect(CourseCategory.VERBAL) },
-                modifier = Modifier.weight(1f).padding(start = 4.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun CategoryToggleSegment(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val containerColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        label = "categoryToggleContainerColor",
-    )
-    val contentColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        label = "categoryToggleContentColor",
-    )
-    Surface(
-        color = containerColor,
-        contentColor = contentColor,
-        shape = MaterialTheme.shapes.small,
-        modifier = modifier.clickable(onClick = onClick),
-    ) {
-        Text(
-            text,
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+        SegmentedToggle(
+            options = listOf(
+                SegmentedToggleOption<CourseCategory?>(null, stringResource(R.string.category_unset)),
+                SegmentedToggleOption(CourseCategory.QUANTITATIVE, stringResource(R.string.category_quantitative)),
+                SegmentedToggleOption(CourseCategory.VERBAL, stringResource(R.string.category_verbal)),
+            ),
+            selected = selected,
+            onSelect = onSelect,
+            textStyle = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
         )
     }
 }

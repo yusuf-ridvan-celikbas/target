@@ -30,6 +30,7 @@
     <string name="label_home">Ana Sayfa</string>
     <string name="cd_menu">Menü</string>
     <string name="cd_more">Diğer</string>
+    <string name="cd_add">Ekle</string>
     <string name="menu_user_settings">Kullanıcı Ayarları</string>
     <string name="menu_app_settings">Uygulama Ayarları</string>
     <string name="menu_account">Hesap</string>

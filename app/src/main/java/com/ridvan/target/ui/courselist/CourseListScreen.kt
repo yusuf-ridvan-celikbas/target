@@ -33,6 +33,7 @@ import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.languagelist.LanguageListViewModel
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
@@ -50,7 +51,11 @@ fun CourseListScreen(
     val languages by languageListViewModel.languages.collectAsStateWithLifecycle()
     val expandedTypes = remember { mutableStateMapOf<Long, Boolean>() }
 
-    AppShell(navigation = shellNavigation, title = stringResource(R.string.course_list_title)) { innerPadding ->
+    AppShell(
+        navigation = shellNavigation,
+        currentDestination = ShellDestination.COURSES,
+        title = stringResource(R.string.course_list_title),
+    ) { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             examTypes.forEach { examType ->
                 val isLanguageType = examType.name == LANGUAGE_EXAM_TYPE_NAME

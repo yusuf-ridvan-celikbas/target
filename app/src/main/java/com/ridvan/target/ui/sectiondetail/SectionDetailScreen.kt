@@ -22,7 +22,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,6 +51,7 @@ import com.ridvan.target.data.export.ProgressCsvExporter
 import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.data.local.dao.SectionCourseWithCourse
 import com.ridvan.target.data.local.entity.CourseCategory
+import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
@@ -119,9 +119,7 @@ fun SectionDetailScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddCoursesDialog = true }) {
-                Text("+")
-            }
+            AddFab(onClick = { showAddCoursesDialog = true })
         },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {

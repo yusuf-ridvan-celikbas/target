@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
@@ -25,7 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Language
+import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
@@ -39,11 +40,10 @@ fun LanguageListScreen(
 
     AppShell(
         navigation = shellNavigation,
+        currentDestination = ShellDestination.LANGUAGES,
         title = stringResource(R.string.label_languages),
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
-                Text("+")
-            }
+            AddFab(onClick = { showAddDialog = true })
         },
     ) { innerPadding ->
         if (languages.isEmpty()) {

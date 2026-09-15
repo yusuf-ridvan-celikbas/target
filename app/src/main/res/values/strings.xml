@@ -30,6 +30,7 @@
     <string name="label_home">Home</string>
     <string name="cd_menu">Menu</string>
     <string name="cd_more">More</string>
+    <string name="cd_add">Add</string>
     <string name="menu_user_settings">User Settings</string>
     <string name="menu_app_settings">App Settings</string>
     <string name="menu_account">Account</string>

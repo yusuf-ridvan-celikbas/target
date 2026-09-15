@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.TopicWithTotals
+import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.courseDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,9 +59,7 @@ fun TopicListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
-                Text("+")
-            }
+            AddFab(onClick = { showAddDialog = true })
         },
     ) { innerPadding ->
         if (topics.isEmpty()) {

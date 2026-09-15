@@ -14,11 +14,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
 fun HelpScreen(shellNavigation: ShellNavigation) {
-    AppShell(navigation = shellNavigation, title = stringResource(R.string.label_help)) { innerPadding ->
+    AppShell(
+        navigation = shellNavigation,
+        currentDestination = ShellDestination.HELP,
+        title = stringResource(R.string.label_help),
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

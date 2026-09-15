@@ -1,10 +1,10 @@
 package com.ridvan.target.ui.statistics
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,7 +16,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,9 +35,12 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.Topic
+import com.ridvan.target.ui.common.SegmentedToggle
+import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
@@ -62,7 +64,11 @@ fun StatisticsScreen(
     val examChartBuckets by viewModel.examChartBuckets.collectAsStateWithLifecycle()
     val weakTopics by viewModel.weakTopics.collectAsStateWithLifecycle()
 
-    AppShell(navigation = shellNavigation, title = stringResource(R.string.statistics_title)) { innerPadding ->
+    AppShell(
+        navigation = shellNavigation,
+        currentDestination = ShellDestination.STATISTICS,
+        title = stringResource(R.string.statistics_title),
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -191,20 +197,19 @@ private fun WeakTopicRow(entry: WeakTopicEntry, onClick: () -> Unit) {
 
 @Composable
 private fun SourceToggle(source: StatsSource, onSelect: (StatsSource) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth()) {
-        PeriodSegment(
-            stringResource(R.string.stats_source_practice_sessions),
-            source == StatsSource.PRACTICE_SESSIONS,
-            { onSelect(StatsSource.PRACTICE_SESSIONS) },
-            Modifier.weight(1f),
-        )
-        PeriodSegment(
-            stringResource(R.string.stats_source_practice_exams),
-            source == StatsSource.PRACTICE_EXAMS,
-            { onSelect(StatsSource.PRACTICE_EXAMS) },
-            Modifier.weight(1f).padding(start = 4.dp),
-        )
-    }
+    SegmentedToggle(
+        options = listOf(
+            SegmentedToggleOption(StatsSource.PRACTICE_SESSIONS, stringResource(R.string.stats_source_practice_sessions)),
+            SegmentedToggleOption(StatsSource.PRACTICE_EXAMS, stringResource(R.string.stats_source_practice_exams)),
+        ),
+        selected = source,
+        onSelect = onSelect,
+        textStyle = MaterialTheme.typography.labelSmall,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        segmentContentPadding = PaddingValues(vertical = 8.dp, horizontal = 2.dp),
+        modifier = modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -221,39 +226,21 @@ private fun BreakdownRow(entry: TopicBreakdownEntry, onClick: () -> Unit) {
 
 @Composable
 private fun PeriodToggle(period: StatsPeriod, onSelect: (StatsPeriod) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth()) {
-        PeriodSegment(stringResource(R.string.period_daily), period == StatsPeriod.DAILY, { onSelect(StatsPeriod.DAILY) }, Modifier.weight(1f))
-        PeriodSegment(stringResource(R.string.period_weekly), period == StatsPeriod.WEEKLY, { onSelect(StatsPeriod.WEEKLY) }, Modifier.weight(1f).padding(start = 4.dp))
-        PeriodSegment(stringResource(R.string.period_monthly), period == StatsPeriod.MONTHLY, { onSelect(StatsPeriod.MONTHLY) }, Modifier.weight(1f).padding(start = 4.dp))
-        PeriodSegment(stringResource(R.string.period_all_time), period == StatsPeriod.ALL_TIME, { onSelect(StatsPeriod.ALL_TIME) }, Modifier.weight(1f).padding(start = 4.dp))
-    }
-}
-
-@Composable
-private fun PeriodSegment(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val containerColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        label = "periodToggleContainerColor",
+    SegmentedToggle(
+        options = listOf(
+            SegmentedToggleOption(StatsPeriod.DAILY, stringResource(R.string.period_daily)),
+            SegmentedToggleOption(StatsPeriod.WEEKLY, stringResource(R.string.period_weekly)),
+            SegmentedToggleOption(StatsPeriod.MONTHLY, stringResource(R.string.period_monthly)),
+            SegmentedToggleOption(StatsPeriod.ALL_TIME, stringResource(R.string.period_all_time)),
+        ),
+        selected = period,
+        onSelect = onSelect,
+        textStyle = MaterialTheme.typography.labelSmall,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        segmentContentPadding = PaddingValues(vertical = 8.dp, horizontal = 2.dp),
+        modifier = modifier.fillMaxWidth(),
     )
-    val contentColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        label = "periodToggleContentColor",
-    )
-    Surface(
-        color = containerColor,
-        contentColor = contentColor,
-        shape = MaterialTheme.shapes.small,
-        modifier = modifier.clickable(onClick = onClick),
-    ) {
-        Text(
-            text,
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.labelSmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 2.dp),
-        )
-    }
 }
 
 @Composable
