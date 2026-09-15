@@ -99,6 +99,7 @@ fun StatisticsScreen(
                             summary.tests,
                             summary.solved,
                             summary.unsolved,
+                            summary.blank,
                             "%.2f".format(summary.net),
                             durationText,
                         ),
@@ -225,7 +226,7 @@ private fun BreakdownRow(entry: TopicBreakdownEntry, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, courseDisplayName(entry.courseName))) },
         supportingContent = {
-            Text(stringResource(R.string.session_row_summary, entry.tests, entry.solved, entry.unsolved, durationText))
+            Text(stringResource(R.string.session_row_summary, entry.tests, entry.solved, entry.unsolved, entry.blank, durationText))
         },
         modifier = Modifier.clickable(onClick = onClick),
     )

@@ -36,6 +36,7 @@ data class StatsSummary(
     val tests: Int,
     val solved: Int,
     val unsolved: Int,
+    val blank: Int,
     val durationMinutes: Int,
 ) {
     val totalQuestions: Int get() = solved + unsolved
@@ -52,6 +53,7 @@ data class TopicBreakdownEntry(
     val tests: Int,
     val solved: Int,
     val unsolved: Int,
+    val blank: Int,
     val durationMinutes: Int,
 )
 
@@ -150,9 +152,13 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
             tests = windowed.sumOf { it.practiceLog.testsSolved },
             solved = windowed.sumOf { it.practiceLog.solvedCount },
             unsolved = windowed.sumOf { it.practiceLog.unsolvedCount },
+            blank = windowed.sumOf { row ->
+                val qc = row.practiceLog.questionCount
+                if (qc != null) (qc - row.practiceLog.solvedCount - row.practiceLog.unsolvedCount).coerceAtLeast(0) else 0
+            },
             durationMinutes = windowed.sumOf { it.practiceLog.durationMinutes },
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsSummary(0, 0, 0, 0))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsSummary(0, 0, 0, 0, 0))
 
     val chartBuckets: StateFlow<List<ChartBucket>> = combine(filteredLogs, _period) { logs, period ->
         buildBuckets(
@@ -174,6 +180,10 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 tests = rows.sumOf { it.practiceLog.testsSolved },
                 solved = rows.sumOf { it.practiceLog.solvedCount },
                 unsolved = rows.sumOf { it.practiceLog.unsolvedCount },
+                blank = rows.sumOf { row ->
+                    val qc = row.practiceLog.questionCount
+                    if (qc != null) (qc - row.practiceLog.solvedCount - row.practiceLog.unsolvedCount).coerceAtLeast(0) else 0
+                },
                 durationMinutes = rows.sumOf { it.practiceLog.durationMinutes },
             )
         }.sortedByDescending { it.solved + it.unsolved }
@@ -194,9 +204,10 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
             tests = windowed.size,
             solved = windowed.sumOf { it.entry.correctCount },
             unsolved = windowed.sumOf { it.entry.wrongCount },
+            blank = windowed.sumOf { (it.entry.questionCount - it.entry.correctCount - it.entry.wrongCount).coerceAtLeast(0) },
             durationMinutes = windowed.sumOf { it.entry.durationMinutes },
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsSummary(0, 0, 0, 0))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsSummary(0, 0, 0, 0, 0))
 
     val examChartBuckets: StateFlow<List<ChartBucket>> = combine(filteredExamEntries, _period) { entries, period ->
         buildBuckets(
