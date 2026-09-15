@@ -2,6 +2,7 @@ package com.ridvan.target.ui.topicprogress
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.PracticeLog
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,16 +106,24 @@ fun TopicProgressScreen(
                     stringResource(R.string.label_target_counts, current.studyResourceTopic.testCount, current.studyResourceTopic.questionCount),
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.label_remaining_counts, remainingTests, remainingQuestions),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    HelpTooltip(R.string.help_tooltip_remaining_counts, R.string.cd_help_remaining_counts)
+                }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+            ) {
                 Text(
-                    stringResource(R.string.label_remaining_counts, remainingTests, remainingQuestions),
+                    stringResource(R.string.progress_aggregate, totalTests, totalSolved, totalUnsolved, totalBlank, "%.2f".format(netScore), durationText),
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                HelpTooltip(R.string.help_tooltip_net_score, R.string.cd_help_net_score)
             }
-            Text(
-                stringResource(R.string.progress_aggregate, totalTests, totalSolved, totalUnsolved, totalBlank, "%.2f".format(netScore), durationText),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
-            )
             TextButton(onClick = { editingSession = null; showLogDialog = true }) {
                 Text(stringResource(R.string.action_log_session))
             }

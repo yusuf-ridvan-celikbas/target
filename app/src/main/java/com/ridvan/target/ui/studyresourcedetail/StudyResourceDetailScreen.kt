@@ -58,6 +58,7 @@ import com.ridvan.target.data.local.entity.PracticeExamEntry
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.studyresource.StudyResourceFormDialog
 import com.ridvan.target.ui.studyresource.studyResourceTypeLabel
@@ -297,7 +298,8 @@ private fun TopicsSectionHeader(onAddClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(stringResource(R.string.label_topics), modifier = Modifier.weight(1f))
+        Text(stringResource(R.string.label_topics))
+        HelpTooltip(R.string.help_tooltip_topics_practice, R.string.cd_help_topics_practice, modifier = Modifier.weight(1f))
         TextButton(onClick = onAddClick) { Text(stringResource(R.string.action_add_prefixed)) }
     }
 }

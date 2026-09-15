@@ -3,6 +3,7 @@ package com.ridvan.target.ui.studyresource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,6 +38,7 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.StudyResource
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.ui.common.AddFab
+import com.ridvan.target.ui.common.HelpTooltip
 
 @Composable
 internal fun studyResourceTypeLabel(type: StudyResourceType?): String = when (type) {
@@ -210,7 +212,10 @@ internal fun StudyResourceTypeField(selectedType: StudyResourceType?, onSelect: 
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.label_type), style = MaterialTheme.typography.labelSmall)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.label_type), style = MaterialTheme.typography.labelSmall)
+                HelpTooltip(R.string.help_tooltip_study_resource_type, R.string.cd_help_study_resource_type)
+            }
             Text(studyResourceTypeLabel(selectedType), style = MaterialTheme.typography.bodyLarge)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
