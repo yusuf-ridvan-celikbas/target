@@ -3,6 +3,7 @@ package com.ridvan.target.ui.coursedetail
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -44,6 +46,7 @@ import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.ui.common.CourseIconPicker
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.courseCategoryValueLabel
@@ -109,9 +112,11 @@ fun CourseDetailScreen(
                     }) {
                         Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.cd_export_course_csv))
                     }
+                    HelpTooltip(R.string.help_tooltip_course_export, R.string.cd_help_course_export)
                     IconButton(onClick = { importLauncher.launch(arrayOf("*/*")) }) {
                         Icon(Icons.Filled.FileOpen, contentDescription = stringResource(R.string.cd_import_course_csv))
                     }
+                    HelpTooltip(R.string.help_tooltip_course_import, R.string.cd_help_course_import)
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_course))
                     }
@@ -124,9 +129,15 @@ fun CourseDetailScreen(
                 ?: stringResource(R.string.common_not_set)
             Text(stringResource(R.string.coursedetail_exam_type, examTypeName))
             Text(stringResource(R.string.coursedetail_category, courseCategoryValueLabel(course?.category)))
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                HelpTooltip(R.string.help_tooltip_course_topics_vs_resources, R.string.cd_help_course_topics_vs_resources)
+            }
             Button(
                 onClick = onStudyResourcesClick,
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(R.string.label_study_resources))
             }
@@ -272,7 +283,10 @@ private fun CourseEditDialog(
 @Composable
 private fun CourseCategoryField(selected: CourseCategory?, onSelect: (CourseCategory?) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Text(stringResource(R.string.label_category), style = MaterialTheme.typography.labelSmall)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.label_category), style = MaterialTheme.typography.labelSmall)
+            HelpTooltip(R.string.help_tooltip_course_category, R.string.cd_help_course_category)
+        }
         SegmentedToggle(
             options = listOf(
                 SegmentedToggleOption<CourseCategory?>(null, stringResource(R.string.category_unset)),
@@ -292,7 +306,10 @@ private fun CourseExamTypeField(examTypes: List<ExamType>, selectedId: Long?, on
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.exam_field_type_label), style = MaterialTheme.typography.labelSmall)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.exam_field_type_label), style = MaterialTheme.typography.labelSmall)
+                HelpTooltip(R.string.help_tooltip_course_exam_type, R.string.cd_help_course_exam_type)
+            }
             Text(
                 examTypes.firstOrNull { it.id == selectedId }?.name?.let { examTypeDisplayName(it) } ?: stringResource(R.string.common_select),
                 style = MaterialTheme.typography.bodyLarge,

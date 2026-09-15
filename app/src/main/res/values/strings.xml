@@ -395,4 +395,35 @@
     <string name="help_backup_body">From a course\'s page, Export saves all its Question Bank topics and counts to a CSV file you can share or save anywhere. Import reads that same format back in — matching resources by name and publisher, updating counts for topics that already exist and adding anything new.</string>
     <string name="help_settings_title">Settings</string>
     <string name="help_settings_body">Change the app\'s theme, switch between the white and blue launcher icons, and pick English or Turkish from Settings, reached from the ⋮ menu.</string>
+
+    <string name="cd_help_has_sections">Has sections help</string>
+    <string name="help_tooltip_has_sections">Whether this exam has sections is decided now and can\'t be changed later.</string>
+    <string name="cd_help_course_category">Category help</string>
+    <string name="help_tooltip_course_category">Quantitative/Verbal groups this course in the Courses, Study Resources, and Topics lists.</string>
+    <string name="cd_help_study_resource_type">Resource type help</string>
+    <string name="help_tooltip_study_resource_type">Only Question Bank resources attached to a course get a Topics section.</string>
+    <string name="cd_help_topics_practice">Topics help</string>
+    <string name="help_tooltip_topics_practice">Practice Sessions track ongoing progress toward a topic\'s target. Practice Exams (in the section above) record one full mock exam\'s result instead.</string>
+    <string name="cd_help_net_score">Net score help</string>
+    <string name="help_tooltip_net_score">Net = doğru − yanlış ÷ 4, the standard Turkish exam scoring formula.</string>
+    <string name="cd_help_remaining_counts">Remaining help</string>
+    <string name="help_tooltip_remaining_counts">Target minus everything logged so far. New sessions can\'t push the total past target.</string>
+    <string name="cd_help_stats_period">Period help</string>
+    <string name="help_tooltip_stats_period">Narrows both the numbers and the chart to a recent window ending today.</string>
+    <string name="cd_help_stats_source">Source help</string>
+    <string name="help_tooltip_stats_source">Switches the data source between logged Practice Sessions and completed Practice Exams.</string>
+    <string name="cd_help_course_export">Export help</string>
+    <string name="help_tooltip_course_export">Exports only this course\'s Question Bank resources and their topics as a CSV — one-way, nothing is read back in.</string>
+    <string name="cd_help_course_import">Import help</string>
+    <string name="help_tooltip_course_import">Matches existing resources by name + publisher and overwrites their topic counts. New resources or topics are added.</string>
+    <string name="cd_help_app_color_preference">App color help</string>
+    <string name="help_tooltip_app_color_preference">Blue uses your wallpaper\'s live colors (Material You). Any other color stays fixed regardless of wallpaper.</string>
+    <string name="cd_help_preferred_name">Preferred name help</string>
+    <string name="help_tooltip_preferred_name">Stays live — editing the source field later (e.g. First Name) updates your preferred name automatically.</string>
+    <string name="cd_help_course_exam_type">Exam type help</string>
+    <string name="help_tooltip_course_exam_type">Reassigning this moves the course to a different bucket everywhere it\'s listed.</string>
+    <string name="cd_help_exam_language">Language help</string>
+    <string name="help_tooltip_exam_language">Tap the language name to open its own page. A Language Exam has no course list — just this one field.</string>
+    <string name="cd_help_course_topics_vs_resources">Topics vs Study Resources help</string>
+    <string name="help_tooltip_course_topics_vs_resources">Topics track target vs. actual progress. Study Resources lists the materials themselves.</string>
 </resources>

@@ -60,6 +60,7 @@ import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
@@ -292,24 +293,27 @@ private fun ExamSummary(
             val languageModifier = if (languageName != null) Modifier.clickable(onClick = onLanguageClick) else Modifier
             val languagePrefix = stringResource(R.string.examdetail_language_prefix)
             val noLanguageSet = stringResource(R.string.common_no_language_set)
-            Text(
-                buildAnnotatedString {
-                    append(languagePrefix)
-                    if (languageName != null) {
-                        withStyle(
-                            SpanStyle(
-                                color = MaterialTheme.colorScheme.primary,
-                                textDecoration = TextDecoration.Underline,
-                            ),
-                        ) {
-                            append(languageName)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    buildAnnotatedString {
+                        append(languagePrefix)
+                        if (languageName != null) {
+                            withStyle(
+                                SpanStyle(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                            ) {
+                                append(languageName)
+                            }
+                        } else {
+                            append(noLanguageSet)
                         }
-                    } else {
-                        append(noLanguageSet)
-                    }
-                },
-                modifier = languageModifier,
-            )
+                    },
+                    modifier = languageModifier,
+                )
+                HelpTooltip(R.string.help_tooltip_exam_language, R.string.cd_help_exam_language)
+            }
         }
     }
 }

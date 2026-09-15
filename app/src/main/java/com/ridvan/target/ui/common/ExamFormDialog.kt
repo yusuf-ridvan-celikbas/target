@@ -88,6 +88,7 @@ fun AddOrEditExamDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(stringResource(R.string.exam_has_sections), modifier = Modifier.weight(1f))
+                    HelpTooltip(R.string.help_tooltip_has_sections, R.string.cd_help_has_sections)
                     Switch(
                         checked = hasSections,
                         onCheckedChange = { hasSections = it },

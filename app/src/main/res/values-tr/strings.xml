@@ -393,4 +393,35 @@
     <string name="help_backup_body">Bir dersin sayfasından Dışa Aktar, tüm Soru Bankası konularını ve sayılarını paylaşabileceğiniz ya da herhangi bir yere kaydedebileceğiniz bir CSV dosyasına kaydeder. İçe Aktar aynı formatı geri okur — kaynakları isim ve yayıncıya göre eşleştirir, var olan konuların sayılarını günceller ve yeni olanları ekler.</string>
     <string name="help_settings_title">Ayarlar</string>
     <string name="help_settings_body">⋮ menüsünden ulaşılan Ayarlar\'dan uygulamanın temasını değiştirebilir, beyaz ve mavi başlatıcı simgeleri arasında geçiş yapabilir ve İngilizce veya Türkçe seçebilirsiniz.</string>
+
+    <string name="cd_help_has_sections">Bölümlü mü yardımı</string>
+    <string name="help_tooltip_has_sections">Sınavın bölümlü olup olmadığı şimdi belirlenir ve sonradan değiştirilemez.</string>
+    <string name="cd_help_course_category">Kategori yardımı</string>
+    <string name="help_tooltip_course_category">Sayısal/Sözel, bu dersi Dersler, Çalışma Kaynakları ve Konular listelerinde gruplar.</string>
+    <string name="cd_help_study_resource_type">Kaynak türü yardımı</string>
+    <string name="help_tooltip_study_resource_type">Yalnızca bir derse bağlı Soru Bankası kaynakları Konular bölümüne sahip olur.</string>
+    <string name="cd_help_topics_practice">Konular yardımı</string>
+    <string name="help_tooltip_topics_practice">Pratik Oturumları bir konudaki hedefe doğru süregelen ilerlemeyi takip eder. Deneme Sınavları (yukarıdaki bölüm) ise tek bir denemenin sonucunu kaydeder.</string>
+    <string name="cd_help_net_score">Net puan yardımı</string>
+    <string name="help_tooltip_net_score">Net = doğru − yanlış ÷ 4, standart Türk sınav puanlama formülü.</string>
+    <string name="cd_help_remaining_counts">Kalan yardımı</string>
+    <string name="help_tooltip_remaining_counts">Hedeften, şimdiye kadar kaydedilen her şey çıkarılır. Yeni oturumlar toplamı hedefin üzerine çıkaramaz.</string>
+    <string name="cd_help_stats_period">Dönem yardımı</string>
+    <string name="help_tooltip_stats_period">Hem sayıları hem de grafiği bugüne kadar olan yakın bir zaman aralığına daraltır.</string>
+    <string name="cd_help_stats_source">Kaynak yardımı</string>
+    <string name="help_tooltip_stats_source">Veri kaynağını kaydedilen Pratik Oturumları ile tamamlanan Deneme Sınavları arasında değiştirir.</string>
+    <string name="cd_help_course_export">Dışa aktarma yardımı</string>
+    <string name="help_tooltip_course_export">Yalnızca bu dersin Soru Bankası kaynaklarını ve konularını CSV olarak dışa aktarır — tek yönlüdür, hiçbir şey geri okunmaz.</string>
+    <string name="cd_help_course_import">İçe aktarma yardımı</string>
+    <string name="help_tooltip_course_import">Mevcut kaynakları isim + yayınevine göre eşleştirir ve konu sayılarının üzerine yazar. Yeni kaynaklar veya konular eklenir.</string>
+    <string name="cd_help_app_color_preference">Uygulama rengi yardımı</string>
+    <string name="help_tooltip_app_color_preference">Mavi, duvar kağıdınızın canlı renklerini kullanır (Material You). Diğer renkler duvar kağıdından bağımsız, sabit kalır.</string>
+    <string name="cd_help_preferred_name">Tercih edilen isim yardımı</string>
+    <string name="help_tooltip_preferred_name">Canlı kalır — kaynak alan (ör. Ad) sonradan düzenlendiğinde tercih edilen isim otomatik güncellenir.</string>
+    <string name="cd_help_course_exam_type">Sınav türü yardımı</string>
+    <string name="help_tooltip_course_exam_type">Bunu değiştirmek, dersi listelendiği her yerde farklı bir gruba taşır.</string>
+    <string name="cd_help_exam_language">Dil yardımı</string>
+    <string name="help_tooltip_exam_language">Kendi sayfasını açmak için dil adına dokunun. Bir Dil Sınavının ders listesi yoktur — yalnızca bu tek alan.</string>
+    <string name="cd_help_course_topics_vs_resources">Konular ve Çalışma Kaynakları yardımı</string>
+    <string name="help_tooltip_course_topics_vs_resources">Konular, hedef ile gerçek ilerlemeyi takip eder. Çalışma Kaynakları ise materyallerin kendisini listeler.</string>
 </resources>
