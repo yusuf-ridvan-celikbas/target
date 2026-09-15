@@ -2,12 +2,14 @@ package com.ridvan.target.ui.examlist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,8 +24,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
+import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.AddOrEditExamDialog
+import com.ridvan.target.ui.common.daysUntilLabel
 import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.shell.AppShell
@@ -37,6 +41,7 @@ fun ExamListScreen(
     viewModel: ExamListViewModel = viewModel(),
 ) {
     val exams by viewModel.exams.collectAsStateWithLifecycle()
+    val examsWithSections by viewModel.examsWithSections.collectAsStateWithLifecycle()
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
     val languages by viewModel.languages.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
@@ -58,8 +63,8 @@ fun ExamListScreen(
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                items(exams, key = { it.exam.id }) { examWithType ->
-                    ExamRow(examWithType, onClick = { onExamClick(examWithType.exam.id) })
+                items(examsWithSections, key = { it.first.exam.id }) { (examWithType, sections) ->
+                    ExamRow(examWithType, sections, onClick = { onExamClick(examWithType.exam.id) })
                     HorizontalDivider()
                 }
             }
@@ -80,7 +85,7 @@ fun ExamListScreen(
 }
 
 @Composable
-private fun ExamRow(item: ExamWithType, onClick: () -> Unit) {
+private fun ExamRow(item: ExamWithType, sections: List<Section>, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(item.exam.name) },
         supportingContent = {
@@ -90,13 +95,34 @@ private fun ExamRow(item: ExamWithType, onClick: () -> Unit) {
             } else {
                 displayTypeName
             }
-            val secondary = if (item.exam.hasSections) {
-                "$typeText · ${stringResource(R.string.exam_row_sectioned)}"
-            } else {
-                val dateText = item.exam.examDate?.let { formatDate(it) } ?: stringResource(R.string.exam_row_no_date_set)
-                "$typeText · $dateText"
+            Column {
+                if (item.exam.hasSections) {
+                    val sectionNames = if (sections.isEmpty()) {
+                        stringResource(R.string.exam_row_no_sections)
+                    } else {
+                        sections.joinToString(", ") { it.name }
+                    }
+                    Text("$typeText · $sectionNames")
+                    val nearest = sections.filter { it.date != null }.minByOrNull { it.date!! }
+                    if (nearest != null) {
+                        Text(
+                            stringResource(R.string.exam_countdown_section, daysUntilLabel(nearest.date!!), nearest.name),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                } else {
+                    val dateText = item.exam.examDate?.let { formatDate(it) } ?: stringResource(R.string.exam_row_no_date_set)
+                    Text("$typeText · $dateText")
+                    item.exam.examDate?.let { date ->
+                        Text(
+                            daysUntilLabel(date),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
             }
-            Text(secondary)
         },
         modifier = Modifier.clickable(onClick = onClick),
     )

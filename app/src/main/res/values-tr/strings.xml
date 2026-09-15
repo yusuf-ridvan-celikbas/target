@@ -100,6 +100,7 @@
     <!-- Home (ui/home/HomeScreen.kt) -->
     <string name="home_welcome_prefix">"Target\'a hoş geldin, "</string>
     <string name="home_welcome_suffix">!</string>
+    <string name="home_upcoming_title">Yaklaşan</string>
 
     <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
          change the underlying English DB values these map from) -->
@@ -147,8 +148,13 @@
     <!-- Exam list (ui/examlist/ExamListScreen.kt) -->
     <string name="exam_list_title">Sınavlar</string>
     <string name="exam_list_empty">Henüz sınav yok. Eklemek için + tuşuna dokun.</string>
-    <string name="exam_row_sectioned">Bölümlü</string>
     <string name="exam_row_no_date_set">Tarih ayarlanmadı</string>
+    <string name="exam_row_no_sections">Henüz bölüm yok</string>
+    <string name="days_until_today">Bugün</string>
+    <string name="days_until_tomorrow">Yarın</string>
+    <string name="days_until_n">%1$d gün kaldı</string>
+    <string name="days_until_passed">Geçti</string>
+    <string name="exam_countdown_section">%1$s · %2$s</string>
 
     <!-- Exam detail (ui/examdetail/ExamDetailScreen.kt) -->
     <string name="examdetail_exam_date">Sınav tarihi: %1$s</string>

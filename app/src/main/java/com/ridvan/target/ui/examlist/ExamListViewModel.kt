@@ -8,11 +8,14 @@ import com.ridvan.target.data.local.dao.ExamDao
 import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.ExamTypeDao
 import com.ridvan.target.data.local.dao.LanguageDao
+import com.ridvan.target.data.local.dao.SectionDao
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.data.local.entity.Language
+import com.ridvan.target.data.local.entity.Section
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,11 +26,21 @@ class ExamListViewModel(application: Application) : AndroidViewModel(application
     private val examDao: ExamDao = database.examDao()
     private val examTypeDao: ExamTypeDao = database.examTypeDao()
     private val languageDao: LanguageDao = database.languageDao()
+    private val sectionDao: SectionDao = database.sectionDao()
     private val userId = targetApplication.preferences.currentUserId
 
     val exams: StateFlow<List<ExamWithType>> =
         (userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()))
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val allSections: StateFlow<List<Section>> =
+        (userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val examsWithSections: StateFlow<List<Pair<ExamWithType, List<Section>>>> = combine(exams, allSections) { examList, sections ->
+        val byExamId = sections.groupBy { it.examId }
+        examList.map { it to (byExamId[it.exam.id] ?: emptyList()) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val examTypes: StateFlow<List<ExamType>> = examTypeDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

@@ -24,4 +24,14 @@ interface SectionDao {
 
     @Query("SELECT * FROM sections WHERE id = :sectionId")
     fun getById(sectionId: Long): Flow<Section?>
+
+    @Query(
+        """
+        SELECT sections.* FROM sections
+        JOIN exams ON exams.id = sections.examId
+        WHERE exams.userId = :userId
+        ORDER BY sections.examId, sections.orderIndex ASC
+        """
+    )
+    fun getByUserId(userId: Long): Flow<List<Section>>
 }

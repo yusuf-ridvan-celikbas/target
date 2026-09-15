@@ -100,6 +100,7 @@
     <!-- Home (ui/home/HomeScreen.kt) -->
     <string name="home_welcome_prefix">"Welcome to Target, "</string>
     <string name="home_welcome_suffix">!</string>
+    <string name="home_upcoming_title">Upcoming</string>
 
     <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
          change the underlying English DB values these map from) -->
@@ -147,8 +148,13 @@
     <!-- Exam list (ui/examlist/ExamListScreen.kt) -->
     <string name="exam_list_title">Exams</string>
     <string name="exam_list_empty">No exams yet. Tap + to add one.</string>
-    <string name="exam_row_sectioned">Sectioned</string>
     <string name="exam_row_no_date_set">No date set</string>
+    <string name="exam_row_no_sections">No sections yet</string>
+    <string name="days_until_today">Today</string>
+    <string name="days_until_tomorrow">Tomorrow</string>
+    <string name="days_until_n">%1$d days left</string>
+    <string name="days_until_passed">Passed</string>
+    <string name="exam_countdown_section">%1$s · %2$s</string>
 
     <!-- Exam detail (ui/examdetail/ExamDetailScreen.kt) -->
     <string name="examdetail_exam_date">Exam date: %1$s</string>
