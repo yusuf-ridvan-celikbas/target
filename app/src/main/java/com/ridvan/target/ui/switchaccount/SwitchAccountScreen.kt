@@ -1,6 +1,7 @@
 package com.ridvan.target.ui.switchaccount
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,9 +38,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.User
 import com.ridvan.target.ui.common.ErrorMessage
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.text
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SwitchAccountScreen(
     onSwitched: () -> Unit,
@@ -49,6 +51,7 @@ fun SwitchAccountScreen(
     val otherUsers by viewModel.otherUsers.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     var selectedUser by remember { mutableStateOf<User?>(null) }
+    var pendingDeleteUser by remember { mutableStateOf<User?>(null) }
 
     Scaffold(
         topBar = {
@@ -58,6 +61,12 @@ fun SwitchAccountScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
+                },
+                actions = {
+                    HelpTooltip(
+                        bodyRes = R.string.help_tooltip_switch_account_delete,
+                        contentDescriptionRes = R.string.cd_help_switch_account_delete,
+                    )
                 },
             )
         },
@@ -75,7 +84,10 @@ fun SwitchAccountScreen(
                     ListItem(
                         headlineContent = { Text(user.preferredName) },
                         supportingContent = { Text(user.username) },
-                        modifier = Modifier.clickable { selectedUser = user },
+                        modifier = Modifier.combinedClickable(
+                            onClick = { selectedUser = user },
+                            onLongClick = { pendingDeleteUser = user },
+                        ),
                     )
                     HorizontalDivider()
                 }
@@ -94,6 +106,36 @@ fun SwitchAccountScreen(
             },
         )
     }
+
+    pendingDeleteUser?.let { user ->
+        DeleteAccountConfirmDialog(
+            user = user,
+            onConfirm = {
+                viewModel.deleteAccount(user)
+                pendingDeleteUser = null
+            },
+            onDismiss = { pendingDeleteUser = null },
+        )
+    }
+}
+
+@Composable
+private fun DeleteAccountConfirmDialog(
+    user: User,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.switch_account_delete_title)) },
+        text = { Text(stringResource(R.string.switch_account_delete_message, user.preferredName)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.common_delete)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
+        },
+    )
 }
 
 @Composable

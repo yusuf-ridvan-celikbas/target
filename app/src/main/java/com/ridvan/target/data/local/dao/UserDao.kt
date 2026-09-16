@@ -1,6 +1,7 @@
 package com.ridvan.target.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -14,6 +15,9 @@ interface UserDao {
 
     @Update
     suspend fun update(user: User)
+
+    @Delete
+    suspend fun delete(user: User)
 
     @Query("SELECT * FROM users WHERE id = :userId")
     fun getById(userId: Long): Flow<User?>

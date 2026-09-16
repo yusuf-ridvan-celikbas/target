@@ -96,6 +96,10 @@
     <string name="switch_account_empty">Bu cihazda başka hesap yok.</string>
     <string name="switch_account_login_as">%1$s olarak giriş yap</string>
     <string name="action_log_in_caps">Giriş Yap</string>
+    <string name="switch_account_delete_title">Hesap silinsin mi?</string>
+    <string name="switch_account_delete_message">Bu, \"%1$s\" hesabını ve tüm sınavlarını, derslerini, dillerini ve çalışma verilerini kalıcı olarak siler. Bu işlem geri alınamaz.</string>
+    <string name="help_tooltip_switch_account_delete">Bir hesabı silmek için basılı tutun.</string>
+    <string name="cd_help_switch_account_delete">Yardım: hesap silme</string>
 
     <!-- Home (ui/home/HomeScreen.kt) -->
     <string name="home_welcome_prefix">"Target\'a hoş geldin, "</string>

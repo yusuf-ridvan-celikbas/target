@@ -49,4 +49,10 @@ class SwitchAccountViewModel(application: Application) : AndroidViewModel(applic
     fun clearError() {
         _errorMessage.value = null
     }
+
+    fun deleteAccount(user: User) {
+        viewModelScope.launch {
+            userDao.delete(user)
+        }
+    }
 }

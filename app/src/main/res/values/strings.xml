@@ -96,6 +96,10 @@
     <string name="switch_account_empty">No other accounts on this device.</string>
     <string name="switch_account_login_as">Log in as %1$s</string>
     <string name="action_log_in_caps">Log In</string>
+    <string name="switch_account_delete_title">Delete account?</string>
+    <string name="switch_account_delete_message">This permanently deletes \"%1$s\"\'s account, including all of their exams, courses, languages, and study data. This can\'t be undone.</string>
+    <string name="help_tooltip_switch_account_delete">Press and hold an account to delete it.</string>
+    <string name="cd_help_switch_account_delete">Help: deleting an account</string>
 
     <!-- Home (ui/home/HomeScreen.kt) -->
     <string name="home_welcome_prefix">"Welcome to Target, "</string>
