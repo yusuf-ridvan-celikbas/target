@@ -1,6 +1,9 @@
 package com.ridvan.target.ui.home
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -112,21 +116,37 @@ private fun UpcomingEventsCard(events: List<UpcomingEvent>, onEventClick: (Upcom
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(stringResource(R.string.home_upcoming_title), style = MaterialTheme.typography.titleMedium)
             events.forEach { event ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onEventClick(event) }
-                        .padding(top = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(event.label, modifier = Modifier.weight(1f))
-                    Text(
-                        daysUntilLabel(event.date),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
+                UpcomingEventRow(event = event, onClick = { onEventClick(event) })
             }
         }
+    }
+}
+
+@Composable
+private fun UpcomingEventRow(event: UpcomingEvent, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val labelColor by animateColorAsState(
+        targetValue = if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        label = "upcomingEventLabelColor",
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .padding(top = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            event.label,
+            color = labelColor,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            daysUntilLabel(event.date),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
     }
 }
