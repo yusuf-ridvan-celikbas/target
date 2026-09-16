@@ -41,7 +41,7 @@ fun AddOrEditExamDialog(
     examTypes: List<ExamType>,
     languages: List<Language>,
     initial: Exam? = null,
-    onConfirm: (name: String, examTypeId: Long, hasSections: Boolean, examDate: Long?, studyStartDate: Long?, languageId: Long?) -> Unit,
+    onConfirm: (name: String, examTypeId: Long, hasSections: Boolean, examDate: Long?, studyStartDate: Long?, languageId: Long?, level: String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by remember { mutableStateOf(initial?.name ?: "") }
@@ -50,6 +50,7 @@ fun AddOrEditExamDialog(
     var examDate by remember { mutableStateOf(initial?.examDate) }
     var studyStartDate by remember { mutableStateOf(initial?.studyStartDate) }
     var selectedLanguageId by remember { mutableStateOf(initial?.languageId) }
+    var level by remember { mutableStateOf(initial?.level ?: "") }
 
     var showExamDatePicker by remember { mutableStateOf(false) }
     var showStudyStartDatePicker by remember { mutableStateOf(false) }
@@ -64,7 +65,7 @@ fun AddOrEditExamDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.exam_field_name)) },
+                    label = { Text(stringResource(if (isLanguageExam) R.string.exam_field_publisher else R.string.exam_field_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -80,6 +81,14 @@ fun AddOrEditExamDialog(
                         languages = languages,
                         selectedId = selectedLanguageId,
                         onSelect = { selectedLanguageId = it },
+                    )
+
+                    OutlinedTextField(
+                        value = level,
+                        onValueChange = { level = it },
+                        label = { Text(stringResource(R.string.exam_field_level)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     )
                 }
 
@@ -115,7 +124,15 @@ fun AddOrEditExamDialog(
             TextButton(
                 onClick = {
                     val typeId = selectedTypeId ?: return@TextButton
-                    onConfirm(name, typeId, hasSections, examDate, studyStartDate, selectedLanguageId.takeIf { isLanguageExam })
+                    onConfirm(
+                        name,
+                        typeId,
+                        hasSections,
+                        examDate,
+                        studyStartDate,
+                        selectedLanguageId.takeIf { isLanguageExam },
+                        level.trim().ifBlank { null }.takeIf { isLanguageExam },
+                    )
                 },
                 enabled = name.isNotBlank() && selectedTypeId != null,
             ) {

@@ -143,6 +143,8 @@
     <string name="exam_dialog_new_title">Yeni sınav</string>
     <string name="exam_dialog_edit_title">Sınavı düzenle</string>
     <string name="exam_field_name">Sınav adı</string>
+    <string name="exam_field_publisher">Yayıncı</string>
+    <string name="exam_field_level">Seviye (isteğe bağlı)</string>
     <string name="exam_field_type_label">Sınav türü</string>
     <string name="exam_no_languages_hint">Henüz dil yok — Diller ekranından biraz ekle</string>
     <string name="exam_has_sections">Birden fazla bölümü var</string>
@@ -164,6 +166,7 @@
     <string name="examdetail_exam_date">Sınav tarihi: %1$s</string>
     <string name="examdetail_study_start">Çalışmaya başlama: %1$s</string>
     <string name="examdetail_language_prefix">"Dil: "</string>
+    <string name="examdetail_level">Seviye: %1$s</string>
     <string name="cd_edit_exam">Sınavı düzenle</string>
     <string name="cd_export_progress_csv">İlerleme verilerini dışa aktar</string>
     <string name="cd_delete_exam">Sınavı sil</string>

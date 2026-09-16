@@ -63,6 +63,7 @@ import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
+import com.ridvan.target.ui.common.examDisplayLabel
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.common.shareCsvFile
 
@@ -109,7 +110,7 @@ fun ExamDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(exam?.name.orEmpty()) },
+                title = { Text(exam?.let { examDisplayLabel(it) }.orEmpty()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
@@ -153,6 +154,7 @@ fun ExamDetailScreen(
                         currentExam.hasSections,
                         isLanguageExam,
                         languageName,
+                        currentExam.level,
                         onLanguageClick = { languageId?.let(onLanguageClick) },
                     )
                 }
@@ -226,8 +228,8 @@ fun ExamDetailScreen(
             examTypes = examTypes,
             languages = languages,
             initial = exam,
-            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate, languageId ->
-                viewModel.updateExam(name, examTypeId, hasSections, examDate, studyStartDate, languageId)
+            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate, languageId, level ->
+                viewModel.updateExam(name, examTypeId, hasSections, examDate, studyStartDate, languageId, level)
                 showEditDialog = false
             },
             onDismiss = { showEditDialog = false },
@@ -282,6 +284,7 @@ private fun ExamSummary(
     hasSections: Boolean,
     isLanguageExam: Boolean,
     languageName: String?,
+    level: String?,
     onLanguageClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -314,6 +317,7 @@ private fun ExamSummary(
                 )
                 HelpTooltip(R.string.help_tooltip_exam_language, R.string.cd_help_exam_language)
             }
+            Text(stringResource(R.string.examdetail_level, level?.takeIf { it.isNotBlank() } ?: stringResource(R.string.common_not_set)))
         }
     }
 }

@@ -28,6 +28,7 @@ import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.daysUntilLabel
+import com.ridvan.target.ui.common.examDisplayLabel
 import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.shell.AppShell
@@ -75,8 +76,8 @@ fun ExamListScreen(
         AddOrEditExamDialog(
             examTypes = examTypes,
             languages = languages,
-            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate, languageId ->
-                viewModel.addExam(name, examTypeId, hasSections, examDate, studyStartDate, languageId)
+            onConfirm = { name, examTypeId, hasSections, examDate, studyStartDate, languageId, level ->
+                viewModel.addExam(name, examTypeId, hasSections, examDate, studyStartDate, languageId, level)
                 showAddDialog = false
             },
             onDismiss = { showAddDialog = false },
@@ -87,7 +88,7 @@ fun ExamListScreen(
 @Composable
 private fun ExamRow(item: ExamWithType, sections: List<Section>, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(item.exam.name) },
+        headlineContent = { Text(examDisplayLabel(item.exam)) },
         supportingContent = {
             val displayTypeName = examTypeDisplayName(item.examTypeName)
             val typeText = if (item.examTypeName == LANGUAGE_EXAM_TYPE_NAME) {

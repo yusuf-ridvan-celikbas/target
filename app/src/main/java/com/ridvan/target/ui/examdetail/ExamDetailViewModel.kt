@@ -86,6 +86,7 @@ class ExamDetailViewModel(
         examDate: Long?,
         studyStartDate: Long?,
         languageId: Long?,
+        level: String?,
     ) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
@@ -99,6 +100,7 @@ class ExamDetailViewModel(
                     examDate = if (hasSections) null else examDate,
                     studyStartDate = studyStartDate,
                     languageId = if (isLanguageExam) languageId else null,
+                    level = if (isLanguageExam) level else null,
                 ),
             )
         }

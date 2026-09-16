@@ -143,6 +143,8 @@
     <string name="exam_dialog_new_title">New exam</string>
     <string name="exam_dialog_edit_title">Edit exam</string>
     <string name="exam_field_name">Exam name</string>
+    <string name="exam_field_publisher">Publisher</string>
+    <string name="exam_field_level">Level (optional)</string>
     <string name="exam_field_type_label">Exam type</string>
     <string name="exam_no_languages_hint">No languages yet — add some from the Languages screen</string>
     <string name="exam_has_sections">Has multiple sections</string>
@@ -164,6 +166,7 @@
     <string name="examdetail_exam_date">Exam date: %1$s</string>
     <string name="examdetail_study_start">Study start: %1$s</string>
     <string name="examdetail_language_prefix">"Language: "</string>
+    <string name="examdetail_level">Level: %1$s</string>
     <string name="cd_edit_exam">Edit exam</string>
     <string name="cd_export_progress_csv">Export progress data</string>
     <string name="cd_delete_exam">Delete exam</string>

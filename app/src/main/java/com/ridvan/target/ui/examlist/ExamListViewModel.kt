@@ -55,6 +55,7 @@ class ExamListViewModel(application: Application) : AndroidViewModel(application
         examDate: Long?,
         studyStartDate: Long?,
         languageId: Long?,
+        level: String?,
     ) {
         val trimmed = name.trim()
         if (trimmed.isEmpty() || userId == null) return
@@ -68,6 +69,7 @@ class ExamListViewModel(application: Application) : AndroidViewModel(application
                     examDate = if (hasSections) null else examDate,
                     studyStartDate = studyStartDate,
                     languageId = languageId,
+                    level = level,
                 ),
             )
         }

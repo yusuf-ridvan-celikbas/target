@@ -315,3 +315,14 @@ val MIGRATION_14_15 = object : Migration(14, 15) {
         db.execSQL("ALTER TABLE practice_logs ADD COLUMN questionCount INTEGER")
     }
 }
+
+val MIGRATION_15_16 = object : Migration(15, 16) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Splits a Language Exam's proficiency level (e.g. "A2") out of the free-text exam
+        // name (which previously had to hold something like "Goethe A2" as one string) into
+        // its own nullable free-text column, same shape/no-backfill precedent as languageId
+        // and every other Language-Exam-only field — meaningless, and left null, for any
+        // other exam type.
+        db.execSQL("ALTER TABLE exams ADD COLUMN level TEXT")
+    }
+}

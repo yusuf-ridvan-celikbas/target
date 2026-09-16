@@ -38,5 +38,6 @@ data class Exam(
     val examDate: Long? = null,
     val studyStartDate: Long? = null,
     val languageId: Long? = null,
+    val level: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )
