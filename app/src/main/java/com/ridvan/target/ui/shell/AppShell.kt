@@ -15,15 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SwitchAccount
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.DrawerValue
@@ -70,14 +70,16 @@ data class ShellNavigation(
     val onNavigateStatistics: () -> Unit,
     val onNavigateLanguages: () -> Unit,
     val onNavigateHelp: () -> Unit,
-    val onNavigateUser: () -> Unit,
+    val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
+    val onNavigateProfile: () -> Unit,
+    val onNavigateAppSettings: () -> Unit,
     val onLogOut: () -> Unit,
     val onSwitchAccount: () -> Unit,
 )
 
 enum class ShellDestination {
-    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, HELP, OTHER
+    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,7 +94,6 @@ fun AppShell(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var overflowExpanded by remember { mutableStateOf(false) }
-    var accountMenuExpanded by remember { mutableStateOf(false) }
     val bannerColor by (LocalContext.current.applicationContext as TargetApplication).preferences.bannerColor
         .collectAsStateWithLifecycle()
 
@@ -172,6 +173,24 @@ fun AppShell(
                 )
                 Spacer(Modifier.weight(1f))
                 DrawerItem(
+                    label = stringResource(R.string.label_my_account),
+                    icon = Icons.Filled.AccountCircle,
+                    selected = currentDestination == ShellDestination.MY_ACCOUNT,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigateMyAccount()
+                    },
+                )
+                DrawerItem(
+                    label = stringResource(R.string.settings_title),
+                    icon = Icons.Filled.Settings,
+                    selected = currentDestination == ShellDestination.SETTINGS,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigateSettings()
+                    },
+                )
+                DrawerItem(
                     label = stringResource(R.string.label_help),
                     icon = Icons.AutoMirrored.Filled.Help,
                     selected = currentDestination == ShellDestination.HELP,
@@ -207,45 +226,20 @@ fun AppShell(
                         }
                         DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.menu_user_settings)) },
+                                text = { Text(stringResource(R.string.label_my_account)) },
+                                leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = null) },
                                 onClick = {
                                     overflowExpanded = false
-                                    navigation.onNavigateUser()
+                                    navigation.onNavigateMyAccount()
                                 },
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.menu_app_settings)) },
+                                text = { Text(stringResource(R.string.settings_title)) },
+                                leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
                                 onClick = {
                                     overflowExpanded = false
                                     navigation.onNavigateSettings()
-                                },
-                            )
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.menu_account)) },
-                                onClick = {
-                                    overflowExpanded = false
-                                    accountMenuExpanded = true
-                                },
-                            )
-                        }
-                        DropdownMenu(expanded = accountMenuExpanded, onDismissRequest = { accountMenuExpanded = false }) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.menu_log_out)) },
-                                leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
-                                onClick = {
-                                    accountMenuExpanded = false
-                                    navigation.onLogOut()
-                                },
-                            )
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.label_switch_account)) },
-                                leadingIcon = { Icon(Icons.Filled.SwitchAccount, contentDescription = null) },
-                                onClick = {
-                                    accountMenuExpanded = false
-                                    navigation.onSwitchAccount()
                                 },
                             )
                         }

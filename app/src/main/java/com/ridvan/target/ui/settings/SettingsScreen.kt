@@ -53,7 +53,7 @@ fun SettingsScreen(
     val bannerColor by viewModel.bannerColor.collectAsStateWithLifecycle()
     val activity = LocalContext.current.findActivity()
 
-    AppShell(navigation = shellNavigation, title = stringResource(R.string.settings_title)) { innerPadding ->
+    AppShell(navigation = shellNavigation, title = stringResource(R.string.menu_app_settings)) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxWidth().padding(innerPadding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),

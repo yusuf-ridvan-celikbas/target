@@ -21,8 +21,10 @@ import com.ridvan.target.ui.home.HomeScreen
 import com.ridvan.target.ui.languagedetail.LanguageDetailScreen
 import com.ridvan.target.ui.languagelist.LanguageExamCoursesScreen
 import com.ridvan.target.ui.languagelist.LanguageListScreen
+import com.ridvan.target.ui.myaccount.MyAccountScreen
 import com.ridvan.target.ui.practiceexam.PracticeExamEntryDetailScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
+import com.ridvan.target.ui.settings.SettingsHomeScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.shell.ShellNavigation
 import com.ridvan.target.ui.studyresource.CourseStudyResourceScreen
@@ -65,8 +67,10 @@ fun TargetNavHost() {
         onNavigateStatistics = { navController.navigateToShellDestination(StatisticsRoute) },
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
-        onNavigateUser = { navController.navigateToShellDestination(UserEditRoute) },
-        onNavigateSettings = { navController.navigateToShellDestination(SettingsRoute) },
+        onNavigateMyAccount = { navController.navigateToShellDestination(MyAccountRoute) },
+        onNavigateSettings = { navController.navigateToShellDestination(SettingsHomeRoute) },
+        onNavigateProfile = { navController.navigate(UserEditRoute) },
+        onNavigateAppSettings = { navController.navigate(SettingsRoute) },
         onLogOut = signOut,
         onSwitchAccount = { navController.navigate(SwitchAccountRoute) },
     )
@@ -241,6 +245,12 @@ fun TargetNavHost() {
         }
         composable<SettingsRoute> {
             SettingsScreen(shellNavigation = shellNavigation)
+        }
+        composable<MyAccountRoute> {
+            MyAccountScreen(shellNavigation = shellNavigation)
+        }
+        composable<SettingsHomeRoute> {
+            SettingsHomeScreen(shellNavigation = shellNavigation)
         }
         composable<HelpRoute> {
             HelpScreen(shellNavigation = shellNavigation)
