@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 
 data class UpcomingEvent(
     val examId: Long,
+    val sectionId: Long?,
     val label: String,
     val date: Long,
 )
@@ -37,13 +38,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         val today = startOfTodayMillis()
         val examEvents = exams
             .filter { !it.exam.hasSections && it.exam.examDate != null && it.exam.examDate >= today }
-            .map { UpcomingEvent(it.exam.id, it.exam.name, it.exam.examDate!!) }
+            .map { UpcomingEvent(it.exam.id, null, it.exam.name, it.exam.examDate!!) }
         val examNames = exams.associate { it.exam.id to it.exam.name }
         val sectionEvents = sections
             .filter { it.date != null && it.date >= today }
             .mapNotNull { section ->
                 examNames[section.examId]?.let { examName ->
-                    UpcomingEvent(section.examId, "$examName – ${section.name}", section.date!!)
+                    UpcomingEvent(section.examId, section.id, "$examName – ${section.name}", section.date!!)
                 }
             }
         (examEvents + sectionEvents).sortedBy { it.date }

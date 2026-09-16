@@ -89,7 +89,11 @@ fun TargetNavHost() {
             )
         }
         composable<HomeRoute> {
-            HomeScreen(shellNavigation = shellNavigation)
+            HomeScreen(
+                shellNavigation = shellNavigation,
+                onExamClick = { examId -> navController.navigate(ExamDetailRoute(examId)) },
+                onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
+            )
         }
         composable<ExamListRoute> {
             ExamListScreen(

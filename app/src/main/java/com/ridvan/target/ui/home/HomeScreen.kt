@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,6 +42,8 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     shellNavigation: ShellNavigation,
+    onExamClick: (Long) -> Unit,
+    onSectionClick: (Long) -> Unit,
     viewModel: HomeViewModel = viewModel(),
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
@@ -69,7 +72,12 @@ fun HomeScreen(
             ClockCard()
             if (upcomingEvents.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
-                UpcomingEventsCard(upcomingEvents)
+                UpcomingEventsCard(
+                    events = upcomingEvents,
+                    onEventClick = { event ->
+                        if (event.sectionId != null) onSectionClick(event.sectionId) else onExamClick(event.examId)
+                    },
+                )
             }
         }
     }
@@ -99,13 +107,16 @@ private fun ClockCard() {
 }
 
 @Composable
-private fun UpcomingEventsCard(events: List<UpcomingEvent>) {
+private fun UpcomingEventsCard(events: List<UpcomingEvent>, onEventClick: (UpcomingEvent) -> Unit) {
     GroupedCard {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(stringResource(R.string.home_upcoming_title), style = MaterialTheme.typography.titleMedium)
             events.forEach { event ->
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onEventClick(event) }
+                        .padding(top = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(event.label, modifier = Modifier.weight(1f))
