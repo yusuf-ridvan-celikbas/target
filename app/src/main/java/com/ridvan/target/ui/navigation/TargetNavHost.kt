@@ -22,6 +22,7 @@ import com.ridvan.target.ui.languagedetail.LanguageDetailScreen
 import com.ridvan.target.ui.languagelist.LanguageExamCoursesScreen
 import com.ridvan.target.ui.languagelist.LanguageListScreen
 import com.ridvan.target.ui.myaccount.MyAccountScreen
+import com.ridvan.target.ui.planner.PlannerHomeScreen
 import com.ridvan.target.ui.practiceexam.PracticeExamEntryDetailScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsHomeScreen
@@ -66,6 +67,7 @@ fun TargetNavHost() {
         onNavigateTopics = { navController.navigateToShellDestination(TopicHomeRoute) },
         onNavigateStatistics = { navController.navigateToShellDestination(StatisticsRoute) },
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
+        onNavigatePlanner = { navController.navigateToShellDestination(PlannerRoute) },
         onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
         onNavigateMyAccount = { navController.navigateToShellDestination(MyAccountRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsHomeRoute) },
@@ -263,6 +265,15 @@ fun TargetNavHost() {
             SwitchAccountScreen(
                 onSwitched = { navController.navigate(HomeRoute) { popUpTo(0) } },
                 onBack = { navController.popBackStack() },
+            )
+        }
+        composable<PlannerRoute> {
+            PlannerHomeScreen(
+                shellNavigation = shellNavigation,
+                onExamClick = { examId -> navController.navigate(ExamDetailRoute(examId)) },
+                onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
+                onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
             )
         }
     }

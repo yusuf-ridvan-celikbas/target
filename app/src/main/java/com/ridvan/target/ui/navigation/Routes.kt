@@ -94,3 +94,6 @@ object StatisticsRoute
 
 @Serializable
 data class PracticeExamEntryDetailRoute(val entryId: Long)
+
+@Serializable
+object PlannerRoute

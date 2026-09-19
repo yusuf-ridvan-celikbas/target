@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -72,6 +73,7 @@ data class ShellNavigation(
     val onNavigateTopics: () -> Unit,
     val onNavigateStatistics: () -> Unit,
     val onNavigateLanguages: () -> Unit,
+    val onNavigatePlanner: () -> Unit,
     val onNavigateHelp: () -> Unit,
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -82,7 +84,7 @@ data class ShellNavigation(
 )
 
 enum class ShellDestination {
-    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, HELP, MY_ACCOUNT, SETTINGS, OTHER
+    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -190,6 +192,15 @@ fun AppShell(
                         },
                     )
                 }
+                DrawerItem(
+                    label = stringResource(R.string.label_planner),
+                    icon = Icons.Filled.CalendarMonth,
+                    selected = currentDestination == ShellDestination.PLANNER,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigatePlanner()
+                    },
+                )
                 Spacer(Modifier.weight(1f))
                 DrawerItem(
                     label = stringResource(R.string.label_my_account),

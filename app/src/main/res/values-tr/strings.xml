@@ -23,6 +23,7 @@
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
     <string name="label_study_group">Çalışma</string>
+    <string name="label_planner">Planlayıcı</string>
     <string name="label_exams">Sınavlar</string>
     <string name="label_courses">Dersler</string>
     <string name="label_study_resources">Çalışma Kaynakları</string>
@@ -438,4 +439,39 @@
     <string name="help_tooltip_exam_language">Kendi sayfasını açmak için dil adına dokunun. Bir Dil Sınavının ders listesi yoktur — yalnızca bu tek alan.</string>
     <string name="cd_help_course_topics_vs_resources">Konular ve Çalışma Kaynakları yardımı</string>
     <string name="help_tooltip_course_topics_vs_resources">Konular, hedef ile gerçek ilerlemeyi takip eder. Çalışma Kaynakları ise materyallerin kendisini listeler.</string>
+
+    <!-- Planlayıcı -->
+    <string name="planner_view_week">Hafta</string>
+    <string name="planner_view_month">Ay</string>
+    <string name="planner_view_year">Yıl</string>
+    <string name="cd_previous_period">Önceki dönem</string>
+    <string name="cd_next_period">Sonraki dönem</string>
+    <string name="planner_day_empty">Planlanan bir şey yok</string>
+    <string name="planner_dialog_new_title">Planlayıcı Etkinliği Ekle</string>
+    <string name="planner_dialog_edit_title">Planlayıcı Etkinliğini Düzenle</string>
+    <string name="planner_field_title">Başlık</string>
+    <string name="planner_field_notes">Notlar</string>
+    <string name="planner_category_general">Genel</string>
+    <string name="planner_category_birthday">Doğum Günü</string>
+    <string name="planner_category_study">Çalışma</string>
+    <string name="planner_field_date">Tarih</string>
+    <string name="planner_field_birthday_date">Doğum Günü</string>
+    <string name="planner_field_set_time">Saat belirle</string>
+    <string name="planner_field_duration_minutes">Süre (dakika)</string>
+    <string name="planner_field_repeats">Tekrar</string>
+    <string name="planner_recurrence_none">Yok</string>
+    <string name="planner_recurrence_day">Gün</string>
+    <string name="planner_recurrence_week">Hafta</string>
+    <string name="planner_recurrence_month">Ay</string>
+    <string name="planner_recurrence_year">Yıl</string>
+    <string name="planner_field_interval">Aralık</string>
+    <string name="planner_field_weekdays">Bu günlerde</string>
+    <string name="planner_field_end_date">Bitiş tarihi (isteğe bağlı)</string>
+    <string name="cd_clear_end_date">Bitiş tarihini temizle</string>
+    <string name="planner_field_course">Ders</string>
+    <string name="planner_field_topic">Konu (isteğe bağlı)</string>
+    <string name="cd_recurring_event">Tekrarlanır</string>
+    <string name="planner_turns_age">%1$d yaşına giriyor</string>
+    <string name="planner_delete_event">Bu etkinliği sil</string>
+    <string name="planner_delete_series">Bu tekrar dizisini sil</string>
 </resources>

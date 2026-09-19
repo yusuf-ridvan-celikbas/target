@@ -326,3 +326,48 @@ val MIGRATION_15_16 = object : Migration(15, 16) {
         db.execSQL("ALTER TABLE exams ADD COLUMN level TEXT")
     }
 }
+
+val MIGRATION_16_17 = object : Migration(16, 17) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS planner_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                title TEXT NOT NULL,
+                notes TEXT,
+                category TEXT NOT NULL,
+                startDate INTEGER NOT NULL,
+                startMinuteOfDay INTEGER,
+                durationMinutes INTEGER,
+                recurrenceUnit TEXT,
+                recurrenceInterval INTEGER NOT NULL DEFAULT 1,
+                recurrenceWeekdays TEXT,
+                recurrenceEndDate INTEGER,
+                courseId INTEGER REFERENCES courses(id) ON DELETE SET NULL,
+                topicId INTEGER REFERENCES topics(id) ON DELETE SET NULL,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_planner_events_userId ON planner_events(userId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_planner_events_courseId ON planner_events(courseId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_planner_events_topicId ON planner_events(topicId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS planner_event_completions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                plannerEventId INTEGER NOT NULL REFERENCES planner_events(id) ON DELETE CASCADE,
+                occurrenceDate INTEGER NOT NULL,
+                completedAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_planner_event_completions_plannerEventId ON planner_event_completions(plannerEventId)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_planner_event_completions_plannerEventId_occurrenceDate " +
+                "ON planner_event_completions(plannerEventId, occurrenceDate)"
+        )
+    }
+}

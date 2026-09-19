@@ -23,6 +23,7 @@
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
     <string name="label_study_group">Study</string>
+    <string name="label_planner">Planner</string>
     <string name="label_exams">Exams</string>
     <string name="label_courses">Courses</string>
     <string name="label_study_resources">Study Resources</string>
@@ -440,4 +441,39 @@
     <string name="help_tooltip_exam_language">Tap the language name to open its own page. A Language Exam has no course list — just this one field.</string>
     <string name="cd_help_course_topics_vs_resources">Topics vs Study Resources help</string>
     <string name="help_tooltip_course_topics_vs_resources">Topics track target vs. actual progress. Study Resources lists the materials themselves.</string>
+
+    <!-- Planner -->
+    <string name="planner_view_week">Week</string>
+    <string name="planner_view_month">Month</string>
+    <string name="planner_view_year">Year</string>
+    <string name="cd_previous_period">Previous period</string>
+    <string name="cd_next_period">Next period</string>
+    <string name="planner_day_empty">Nothing planned</string>
+    <string name="planner_dialog_new_title">Add Planner Event</string>
+    <string name="planner_dialog_edit_title">Edit Planner Event</string>
+    <string name="planner_field_title">Title</string>
+    <string name="planner_field_notes">Notes</string>
+    <string name="planner_category_general">General</string>
+    <string name="planner_category_birthday">Birthday</string>
+    <string name="planner_category_study">Study</string>
+    <string name="planner_field_date">Date</string>
+    <string name="planner_field_birthday_date">Birthday</string>
+    <string name="planner_field_set_time">Set a time</string>
+    <string name="planner_field_duration_minutes">Duration (minutes)</string>
+    <string name="planner_field_repeats">Repeats</string>
+    <string name="planner_recurrence_none">None</string>
+    <string name="planner_recurrence_day">Day</string>
+    <string name="planner_recurrence_week">Week</string>
+    <string name="planner_recurrence_month">Month</string>
+    <string name="planner_recurrence_year">Year</string>
+    <string name="planner_field_interval">Interval</string>
+    <string name="planner_field_weekdays">On these days</string>
+    <string name="planner_field_end_date">End date (optional)</string>
+    <string name="cd_clear_end_date">Clear end date</string>
+    <string name="planner_field_course">Course</string>
+    <string name="planner_field_topic">Topic (optional)</string>
+    <string name="cd_recurring_event">Repeats</string>
+    <string name="planner_turns_age">Turns %1$d</string>
+    <string name="planner_delete_event">Delete this event</string>
+    <string name="planner_delete_series">Delete this series</string>
 </resources>
