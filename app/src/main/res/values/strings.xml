@@ -22,6 +22,7 @@
     <string name="delete_confirm_generic">This removes \"%1$s\".</string>
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
+    <string name="label_study_group">Study</string>
     <string name="label_exams">Exams</string>
     <string name="label_courses">Courses</string>
     <string name="label_study_resources">Study Resources</string>

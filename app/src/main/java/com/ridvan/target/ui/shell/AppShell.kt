@@ -21,8 +21,11 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material.icons.filled.Translate
@@ -94,6 +97,7 @@ fun AppShell(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var overflowExpanded by remember { mutableStateOf(false) }
+    var studyExpanded by remember { mutableStateOf(true) }
     val bannerColor by (LocalContext.current.applicationContext as TargetApplication).preferences.bannerColor
         .collectAsStateWithLifecycle()
 
@@ -117,60 +121,75 @@ fun AppShell(
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
-                DrawerItem(
-                    label = stringResource(R.string.label_exams),
-                    icon = Icons.AutoMirrored.Filled.Assignment,
-                    selected = currentDestination == ShellDestination.EXAMS,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateExams()
-                    },
+                val studyLabel = stringResource(R.string.label_study_group)
+                DrawerGroupHeader(
+                    label = studyLabel,
+                    icon = Icons.Filled.School,
+                    expanded = studyExpanded,
+                    onToggleExpand = { studyExpanded = !studyExpanded },
                 )
-                DrawerItem(
-                    label = stringResource(R.string.label_courses),
-                    icon = Icons.AutoMirrored.Filled.MenuBook,
-                    selected = currentDestination == ShellDestination.COURSES,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateCourses()
-                    },
-                )
-                DrawerItem(
-                    label = stringResource(R.string.label_study_resources),
-                    icon = Icons.Filled.Bookmark,
-                    selected = currentDestination == ShellDestination.STUDY_RESOURCES,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateStudyResources()
-                    },
-                )
-                DrawerItem(
-                    label = stringResource(R.string.label_topics),
-                    icon = Icons.Filled.Topic,
-                    selected = currentDestination == ShellDestination.TOPICS,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateTopics()
-                    },
-                )
-                DrawerItem(
-                    label = stringResource(R.string.label_statistics),
-                    icon = Icons.Filled.BarChart,
-                    selected = currentDestination == ShellDestination.STATISTICS,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateStatistics()
-                    },
-                )
-                DrawerItem(
-                    label = stringResource(R.string.label_languages),
-                    icon = Icons.Filled.Translate,
-                    selected = currentDestination == ShellDestination.LANGUAGES,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateLanguages()
-                    },
-                )
+                if (studyExpanded) {
+                    DrawerItem(
+                        label = stringResource(R.string.label_exams),
+                        icon = Icons.AutoMirrored.Filled.Assignment,
+                        selected = currentDestination == ShellDestination.EXAMS,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateExams()
+                        },
+                    )
+                    DrawerItem(
+                        label = stringResource(R.string.label_courses),
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        selected = currentDestination == ShellDestination.COURSES,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateCourses()
+                        },
+                    )
+                    DrawerItem(
+                        label = stringResource(R.string.label_study_resources),
+                        icon = Icons.Filled.Bookmark,
+                        selected = currentDestination == ShellDestination.STUDY_RESOURCES,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateStudyResources()
+                        },
+                    )
+                    DrawerItem(
+                        label = stringResource(R.string.label_topics),
+                        icon = Icons.Filled.Topic,
+                        selected = currentDestination == ShellDestination.TOPICS,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateTopics()
+                        },
+                    )
+                    DrawerItem(
+                        label = stringResource(R.string.label_statistics),
+                        icon = Icons.Filled.BarChart,
+                        selected = currentDestination == ShellDestination.STATISTICS,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateStatistics()
+                        },
+                    )
+                    DrawerItem(
+                        label = stringResource(R.string.label_languages),
+                        icon = Icons.Filled.Translate,
+                        selected = currentDestination == ShellDestination.LANGUAGES,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateLanguages()
+                        },
+                    )
+                }
                 Spacer(Modifier.weight(1f))
                 DrawerItem(
                     label = stringResource(R.string.label_my_account),
@@ -264,6 +283,7 @@ private fun DrawerItem(
     icon: ImageVector,
     selected: Boolean,
     onClick: () -> Unit,
+    indented: Boolean = false,
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
@@ -279,7 +299,7 @@ private fun DrawerItem(
         shape = MaterialTheme.shapes.small,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .padding(start = if (indented) 24.dp else 12.dp, end = 12.dp, top = 2.dp, bottom = 2.dp)
             .clickable(onClick = onClick),
     ) {
         Row(
@@ -289,6 +309,51 @@ private fun DrawerItem(
             Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(12.dp))
             Text(label, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+/**
+ * A collapsible drawer group header — introduced to group the exam-prep
+ * destinations (Exams/Courses/Study Resources/Topics/Statistics/Languages)
+ * under one "Study" label, by explicit request. Not persisted across drawer
+ * closes (defaults back to expanded), the same "collapses again on next
+ * visit" precedent already established for other collapsible sections in
+ * the app — except this one defaults open since it holds the drawer's
+ * primary navigation destinations.
+ */
+@Composable
+private fun DrawerGroupHeader(
+    label: String,
+    icon: ImageVector,
+    expanded: Boolean,
+    onToggleExpand: () -> Unit,
+) {
+    Surface(
+        color = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .clickable(onClick = onToggleExpand),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+        ) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(12.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
+            Icon(
+                if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = if (expanded) {
+                    stringResource(R.string.cd_collapse_x, label)
+                } else {
+                    stringResource(R.string.cd_expand_x, label)
+                },
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }

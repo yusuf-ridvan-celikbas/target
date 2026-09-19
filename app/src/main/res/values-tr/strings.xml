@@ -22,6 +22,7 @@
     <string name="delete_confirm_generic">Bu, \"%1$s\" öğesini kaldırır.</string>
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
+    <string name="label_study_group">Çalışma</string>
     <string name="label_exams">Sınavlar</string>
     <string name="label_courses">Dersler</string>
     <string name="label_study_resources">Çalışma Kaynakları</string>
