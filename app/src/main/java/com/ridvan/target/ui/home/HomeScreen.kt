@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.ui.common.daysUntil
 import com.ridvan.target.ui.common.daysUntilLabel
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.planner.PlannerPreviewOccurrence
@@ -163,6 +164,7 @@ private fun PlannerPreviewRow(occurrence: PlannerPreviewOccurrence, onToggleDone
                 .weight(1f)
                 .clickable(interactionSource = interactionSource, indication = null, onClick = onOpenPlanner),
         )
+        val days = daysUntil(occurrence.occurrenceDateMillis)
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 daysUntilLabel(occurrence.occurrenceDateMillis),
@@ -174,6 +176,13 @@ private fun PlannerPreviewRow(occurrence: PlannerPreviewOccurrence, onToggleDone
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if ((days == 0L || days == 1L) && occurrence.timeRangeLabel != null) {
+                Text(
+                    occurrence.timeRangeLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

@@ -173,7 +173,9 @@ private fun StudyLinkLine(
     )
 }
 
-private fun timeRangeLabel(event: PlannerEvent): String? {
+/** Not private — reused by PlannerHomePreview.kt's compact Home card so its "Today"/"Tomorrow"
+ *  rows can show a time too, without duplicating this formatting or leaking java.time past ui/planner. */
+internal fun timeRangeLabel(event: PlannerEvent): String? {
     val startMinute = event.startMinuteOfDay ?: return null
     val duration = (event.durationMinutes ?: 60).toLong()
     val formatter = DateTimeFormatter.ofPattern("HH:mm")

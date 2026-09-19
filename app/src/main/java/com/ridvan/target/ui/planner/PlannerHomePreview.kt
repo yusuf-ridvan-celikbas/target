@@ -15,6 +15,9 @@ data class PlannerPreviewOccurrence(
     val event: PlannerEvent,
     val occurrenceDateMillis: Long,
     val isCompleted: Boolean,
+    /** "HH:mm – HH:mm", null for an all-day event — resolved here (not left for ui/home to
+     *  compute from event.startMinuteOfDay) purely to keep java.time formatting inside ui/planner. */
+    val timeRangeLabel: String?,
 )
 
 /**
@@ -41,6 +44,7 @@ fun upcomingEventOccurrences(
                     event = event,
                     occurrenceDateMillis = millis,
                     isCompleted = (event.id to millis) in completedKeys,
+                    timeRangeLabel = timeRangeLabel(event),
                 )
             }
         }
