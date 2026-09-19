@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.daysUntilLabel
+import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.planner.PlannerPreviewOccurrence
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellDestination
@@ -162,11 +163,18 @@ private fun PlannerPreviewRow(occurrence: PlannerPreviewOccurrence, onToggleDone
                 .weight(1f)
                 .clickable(interactionSource = interactionSource, indication = null, onClick = onOpenPlanner),
         )
-        Text(
-            daysUntilLabel(occurrence.occurrenceDateMillis),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                daysUntilLabel(occurrence.occurrenceDateMillis),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                formatDate(occurrence.occurrenceDateMillis),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -226,10 +234,17 @@ private fun UpcomingEventRow(event: UpcomingEvent, onClick: () -> Unit) {
             textDecoration = TextDecoration.Underline,
             modifier = Modifier.weight(1f),
         )
-        Text(
-            daysUntilLabel(event.date),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                daysUntilLabel(event.date),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                formatDate(event.date),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
