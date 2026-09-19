@@ -29,6 +29,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -121,7 +122,6 @@ fun PlannerEventFormDialog(
     var category by remember { mutableStateOf(initial?.category ?: PlannerEventCategory.GENERAL) }
     var date by remember { mutableStateOf(initial?.startDate?.toLocalDate() ?: LocalDate.now()) }
     var hasTime by remember { mutableStateOf(initial?.startMinuteOfDay != null) }
-    var durationText by remember { mutableStateOf(initial?.durationMinutes?.toString() ?: "") }
     var recurrenceUnit by remember { mutableStateOf(initial?.recurrenceUnit?.takeIf { initial.category != PlannerEventCategory.BIRTHDAY }) }
     var intervalText by remember { mutableStateOf((initial?.recurrenceInterval ?: 1).toString()) }
     var weekdays by remember { mutableStateOf(parseRecurrenceWeekdays(initial?.recurrenceWeekdays) ?: emptySet()) }
@@ -136,6 +136,15 @@ fun PlannerEventFormDialog(
     val timePickerState = rememberTimePickerState(
         initialHour = initialMinuteOfDay / 60,
         initialMinute = initialMinuteOfDay % 60,
+        is24Hour = true,
+    )
+    // End time is a required, explicit selection — not a "Duration (minutes)" number that can be
+    // left blank or zero (a real 0-minute "17:00 - 17:00" event slipped in that way before this).
+    // Defaults to an hour after start, same as the old duration field's implicit fallback.
+    val initialEndMinuteOfDay = (initial?.let { (it.startMinuteOfDay ?: 0) + (it.durationMinutes ?: 60) } ?: (initialMinuteOfDay + 60)).mod(24 * 60)
+    val endTimePickerState = rememberTimePickerState(
+        initialHour = initialEndMinuteOfDay / 60,
+        initialMinute = initialEndMinuteOfDay % 60,
         is24Hour = true,
     )
 
@@ -193,15 +202,18 @@ fun PlannerEventFormDialog(
                     Switch(checked = hasTime, onCheckedChange = { hasTime = it })
                 }
                 if (hasTime) {
-                    TimeInput(state = timePickerState, modifier = Modifier.padding(top = 8.dp))
-                    OutlinedTextField(
-                        value = durationText,
-                        onValueChange = { if (it.all(Char::isDigit)) durationText = it },
-                        label = { Text(stringResource(R.string.planner_field_duration_minutes)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    Text(
+                        stringResource(R.string.planner_field_start_time),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(top = 8.dp),
                     )
+                    TimeInput(state = timePickerState)
+                    Text(
+                        stringResource(R.string.planner_field_end_time),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                    TimeInput(state = endTimePickerState)
                 }
 
                 if (category != PlannerEventCategory.BIRTHDAY) {
@@ -295,7 +307,7 @@ fun PlannerEventFormDialog(
                             category = category,
                             date = date,
                             startMinuteOfDay = if (hasTime) timePickerState.hour * 60 + timePickerState.minute else null,
-                            durationMinutes = durationText.toIntOrNull(),
+                            durationMinutes = if (hasTime) durationMinutesBetween(timePickerState, endTimePickerState) else null,
                             recurrenceUnit = recurrenceUnit,
                             recurrenceInterval = intervalText.toIntOrNull()?.coerceAtLeast(1) ?: 1,
                             recurrenceWeekdays = weekdays,
@@ -343,6 +355,16 @@ fun PlannerEventFormDialog(
             },
         ) { DatePicker(state = state) }
     }
+}
+
+/** End time before start time is treated as spanning past midnight (e.g. 23:00 - 01:00) rather
+ *  than rejected — a real, if unusual, event shape — so this is never zero or negative. */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun durationMinutesBetween(start: TimePickerState, end: TimePickerState): Int {
+    val startTotal = start.hour * 60 + start.minute
+    val endTotal = end.hour * 60 + end.minute
+    val diff = endTotal - startTotal
+    return if (diff <= 0) diff + 24 * 60 else diff
 }
 
 @Composable

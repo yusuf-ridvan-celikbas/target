@@ -461,7 +461,8 @@
     <string name="planner_field_date">Date</string>
     <string name="planner_field_birthday_date">Birthday</string>
     <string name="planner_field_set_time">Set a time</string>
-    <string name="planner_field_duration_minutes">Duration (minutes)</string>
+    <string name="planner_field_start_time">Start time</string>
+    <string name="planner_field_end_time">End time</string>
     <string name="planner_field_repeats">Repeats</string>
     <string name="planner_recurrence_none">None</string>
     <string name="planner_recurrence_day">Day</string>

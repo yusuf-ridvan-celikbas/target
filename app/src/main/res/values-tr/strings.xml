@@ -459,7 +459,8 @@
     <string name="planner_field_date">Tarih</string>
     <string name="planner_field_birthday_date">Doğum Günü</string>
     <string name="planner_field_set_time">Saat belirle</string>
-    <string name="planner_field_duration_minutes">Süre (dakika)</string>
+    <string name="planner_field_start_time">Başlangıç saati</string>
+    <string name="planner_field_end_time">Bitiş saati</string>
     <string name="planner_field_repeats">Tekrar</string>
     <string name="planner_recurrence_none">Yok</string>
     <string name="planner_recurrence_day">Gün</string>
