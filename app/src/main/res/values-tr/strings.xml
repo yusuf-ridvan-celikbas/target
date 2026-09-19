@@ -107,6 +107,8 @@
     <string name="home_welcome_prefix">"Target\'a hoş geldin, "</string>
     <string name="home_welcome_suffix">!</string>
     <string name="home_upcoming_title">Yaklaşan</string>
+    <string name="home_open_planner">Planlayıcıyı Aç</string>
+    <string name="home_planner_empty">Planlayıcıda şu anda bir şey yok</string>
 
     <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
          change the underlying English DB values these map from) -->

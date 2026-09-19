@@ -6,13 +6,17 @@ import androidx.lifecycle.viewModelScope
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
+import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import com.ridvan.target.data.local.entity.User
 import com.ridvan.target.ui.common.startOfTodayMillis
+import com.ridvan.target.ui.planner.PlannerPreviewOccurrence
+import com.ridvan.target.ui.planner.upcomingEventOccurrences
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class UpcomingEvent(
     val examId: Long,
@@ -21,11 +25,18 @@ data class UpcomingEvent(
     val date: Long,
 )
 
+/** How far ahead Home's Planner preview looks — enough to matter without turning into the
+ *  full Planner; a daily-recurring event could otherwise flood a wider window. */
+private const val HOME_PLANNER_WINDOW_DAYS = 13L
+private const val HOME_PLANNER_MAX_ITEMS = 6
+
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val targetApplication = application as TargetApplication
     private val userDao = targetApplication.database.userDao()
     private val examDao = targetApplication.database.examDao()
     private val sectionDao = targetApplication.database.sectionDao()
+    private val plannerEventDao = targetApplication.database.plannerEventDao()
+    private val plannerEventCompletionDao = targetApplication.database.plannerEventCompletionDao()
     private val preferences = targetApplication.preferences
     private val userId = preferences.currentUserId
 
@@ -51,6 +62,25 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             }
         (examEvents + sectionEvents).sortedBy { it.date }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val upcomingPlannerEvents: StateFlow<List<PlannerPreviewOccurrence>> = combine(
+        userId?.let { plannerEventDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { plannerEventCompletionDao.getAllByUserId(it) } ?: flowOf(emptyList()),
+    ) { events, completions ->
+        upcomingEventOccurrences(events, completions, HOME_PLANNER_WINDOW_DAYS, HOME_PLANNER_MAX_ITEMS)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun togglePlannerOccurrenceDone(occurrence: PlannerPreviewOccurrence) {
+        viewModelScope.launch {
+            if (occurrence.isCompleted) {
+                plannerEventCompletionDao.deleteByEventAndDate(occurrence.event.id, occurrence.occurrenceDateMillis)
+            } else {
+                plannerEventCompletionDao.insert(
+                    PlannerEventCompletion(plannerEventId = occurrence.event.id, occurrenceDate = occurrence.occurrenceDateMillis)
+                )
+            }
+        }
+    }
 }
 
 /**

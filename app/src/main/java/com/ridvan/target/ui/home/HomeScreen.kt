@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.daysUntilLabel
+import com.ridvan.target.ui.planner.PlannerPreviewOccurrence
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
@@ -52,6 +54,7 @@ fun HomeScreen(
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
     val upcomingEvents by viewModel.upcomingEvents.collectAsStateWithLifecycle()
+    val upcomingPlannerEvents by viewModel.upcomingPlannerEvents.collectAsStateWithLifecycle()
 
     AppShell(navigation = shellNavigation, currentDestination = ShellDestination.HOME) { innerPadding ->
         Column(
@@ -83,7 +86,87 @@ fun HomeScreen(
                     },
                 )
             }
+            Spacer(Modifier.height(12.dp))
+            PlannerPreviewCard(
+                occurrences = upcomingPlannerEvents,
+                onToggleDone = viewModel::togglePlannerOccurrenceDone,
+                onOpenPlanner = shellNavigation.onNavigatePlanner,
+            )
         }
+    }
+}
+
+/** A compact "what's in front of us" preview of the Planner — events only (Upcoming above
+ *  already covers exam/section dates on its own) — always shown, unlike Upcoming, so Home
+ *  also doubles as a quick entry point into the full Planner even with nothing logged yet. */
+@Composable
+private fun PlannerPreviewCard(
+    occurrences: List<PlannerPreviewOccurrence>,
+    onToggleDone: (PlannerPreviewOccurrence) -> Unit,
+    onOpenPlanner: () -> Unit,
+) {
+    GroupedCard {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    stringResource(R.string.label_planner),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    stringResource(R.string.home_open_planner),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable(onClick = onOpenPlanner),
+                )
+            }
+            if (occurrences.isEmpty()) {
+                Text(
+                    stringResource(R.string.home_planner_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 10.dp),
+                )
+            } else {
+                occurrences.forEach { occurrence ->
+                    PlannerPreviewRow(
+                        occurrence = occurrence,
+                        onToggleDone = { onToggleDone(occurrence) },
+                        onOpenPlanner = onOpenPlanner,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlannerPreviewRow(occurrence: PlannerPreviewOccurrence, onToggleDone: () -> Unit, onOpenPlanner: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val labelColor by animateColorAsState(
+        targetValue = if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        label = "plannerPreviewLabelColor",
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(checked = occurrence.isCompleted, onCheckedChange = { onToggleDone() })
+        Text(
+            occurrence.event.title,
+            color = labelColor,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier
+                .weight(1f)
+                .clickable(interactionSource = interactionSource, indication = null, onClick = onOpenPlanner),
+        )
+        Text(
+            daysUntilLabel(occurrence.occurrenceDateMillis),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
     }
 }
 
