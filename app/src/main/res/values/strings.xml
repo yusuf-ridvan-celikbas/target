@@ -489,6 +489,10 @@
     <string name="planner_turns_age">Turns %1$d</string>
     <string name="planner_delete_event">Delete this event</string>
     <string name="planner_delete_series">Delete this series</string>
+    <string name="planner_set_device_alarm">Set a device alarm</string>
+    <string name="planner_set_device_alarm_caption">Opens your clock app with an alarm for this time — it rings at the next occurrence of this time, not necessarily this event\'s date.</string>
+    <string name="planner_set_device_alarm_caption_weekly">Opens your clock app with an alarm for this time, repeating on the same days as this event.</string>
+    <string name="planner_set_device_alarm_not_found">No alarm app found on this device</string>
 
     <!-- Notifications (data/notifications/NotificationScheduler.kt) -->
     <string name="notif_channel_name">Reminders</string>

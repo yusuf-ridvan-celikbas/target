@@ -487,6 +487,10 @@
     <string name="planner_turns_age">%1$d yaşına giriyor</string>
     <string name="planner_delete_event">Bu etkinliği sil</string>
     <string name="planner_delete_series">Bu tekrar dizisini sil</string>
+    <string name="planner_set_device_alarm">Cihaz alarmı kur</string>
+    <string name="planner_set_device_alarm_caption">Saat uygulamanızı bu saat için bir alarmla açar — etkinliğin tarihinde değil, bu saatin bir sonraki gerçekleştiği anda çalar.</string>
+    <string name="planner_set_device_alarm_caption_weekly">Saat uygulamanızı bu saat için bir alarmla açar ve bu etkinlikle aynı günlerde tekrarlar.</string>
+    <string name="planner_set_device_alarm_not_found">Bu cihazda alarm uygulaması bulunamadı</string>
 
     <!-- Notifications (data/notifications/NotificationScheduler.kt) -->
     <string name="notif_channel_name">Hatırlatmalar</string>

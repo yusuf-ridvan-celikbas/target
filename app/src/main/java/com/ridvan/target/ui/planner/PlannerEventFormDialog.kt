@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.planner
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlarmAdd
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
@@ -39,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -129,6 +132,8 @@ fun PlannerEventFormDialog(
     var selectedCourseId by remember { mutableStateOf(initial?.courseId) }
     var selectedTopicId by remember { mutableStateOf(initial?.topicId) }
 
+    val context = LocalContext.current
+
     var showDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
@@ -214,6 +219,43 @@ fun PlannerEventFormDialog(
                         modifier = Modifier.padding(top = 8.dp),
                     )
                     TimeInput(state = endTimePickerState)
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp).clickable {
+                            val opened = launchSetDeviceAlarmIntent(
+                                context = context,
+                                title = title,
+                                minuteOfDay = timePickerState.hour * 60 + timePickerState.minute,
+                                recurrenceUnit = recurrenceUnit,
+                                weekdays = weekdays,
+                            )
+                            if (!opened) {
+                                Toast.makeText(context, context.getString(R.string.planner_set_device_alarm_not_found), Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Filled.AlarmAdd,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(end = 8.dp),
+                        )
+                        Text(
+                            stringResource(R.string.planner_set_device_alarm),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    Text(
+                        stringResource(
+                            if (recurrenceUnit == RecurrenceUnit.WEEK) R.string.planner_set_device_alarm_caption_weekly
+                            else R.string.planner_set_device_alarm_caption
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
                 }
 
                 if (category != PlannerEventCategory.BIRTHDAY) {
