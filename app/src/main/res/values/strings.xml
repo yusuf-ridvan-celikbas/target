@@ -93,6 +93,16 @@
     <string name="settings_language_preference">Language Preference</string>
     <string name="settings_language_english">English</string>
     <string name="settings_language_turkish">Turkish</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="help_tooltip_notifications">Timed Planner events use the lead time below. All-day events and exam/section dates always remind at 9:00 AM.</string>
+    <string name="cd_help_notifications">Help: notifications</string>
+    <string name="settings_notification_lead_time">Remind me</string>
+    <string name="notification_lead_at_time">At start time</string>
+    <string name="notification_lead_15">15 min before</string>
+    <string name="notification_lead_30">30 min before</string>
+    <string name="notification_lead_60">1 hour before</string>
+    <string name="settings_notifications_all_day_hint">All-day events and exam/section dates are reminded at 9:00 AM.</string>
+    <string name="settings_notifications_grant_exact_alarm">Exact alarms aren\'t allowed yet — tap to grant permission.</string>
 
     <!-- Switch Account (ui/switchaccount/SwitchAccountScreen.kt) -->
     <string name="switch_account_empty">No other accounts on this device.</string>
@@ -411,7 +421,7 @@
     <string name="help_backup_title">Backing Up a Course\'s Question Banks</string>
     <string name="help_backup_body">From a course\'s page, Export saves all its Question Bank topics and counts to a CSV file you can share or save anywhere. Import reads that same format back in — matching resources by name and publisher, updating counts for topics that already exist and adding anything new.</string>
     <string name="help_settings_title">Settings</string>
-    <string name="help_settings_body">Change the app\'s theme, switch between the white and blue launcher icons, and pick English or Turkish from Settings, reached from the ⋮ menu.</string>
+    <string name="help_settings_body">Change the app\'s theme, switch between the white and blue launcher icons, pick English or Turkish, and turn on local reminder notifications from Settings, reached from the ⋮ menu.</string>
 
     <string name="cd_help_has_sections">Has sections help</string>
     <string name="help_tooltip_has_sections">Whether this exam has sections is decided now and can\'t be changed later.</string>
@@ -479,4 +489,11 @@
     <string name="planner_turns_age">Turns %1$d</string>
     <string name="planner_delete_event">Delete this event</string>
     <string name="planner_delete_series">Delete this series</string>
+
+    <!-- Notifications (data/notifications/NotificationScheduler.kt) -->
+    <string name="notif_channel_name">Reminders</string>
+    <string name="notif_channel_description">Reminders for Planner events and upcoming exam/section dates.</string>
+    <string name="notif_planner_default_body">Reminder</string>
+    <string name="notif_exam_title">Upcoming exam</string>
+    <string name="notif_section_title">Upcoming exam section</string>
 </resources>

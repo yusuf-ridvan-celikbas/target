@@ -93,6 +93,16 @@
     <string name="settings_language_preference">Dil Tercihi</string>
     <string name="settings_language_english">İngilizce</string>
     <string name="settings_language_turkish">Türkçe</string>
+    <string name="settings_notifications">Bildirimler</string>
+    <string name="help_tooltip_notifications">Saatli Planlayıcı etkinlikleri aşağıdaki hatırlatma süresini kullanır. Tüm gün süren etkinlikler ve sınav/bölüm tarihleri her zaman saat 09:00\'da hatırlatılır.</string>
+    <string name="cd_help_notifications">Yardım: bildirimler</string>
+    <string name="settings_notification_lead_time">Hatırlat</string>
+    <string name="notification_lead_at_time">Başlangıç saatinde</string>
+    <string name="notification_lead_15">15 dakika önce</string>
+    <string name="notification_lead_30">30 dakika önce</string>
+    <string name="notification_lead_60">1 saat önce</string>
+    <string name="settings_notifications_all_day_hint">Tüm gün süren etkinlikler ve sınav/bölüm tarihleri saat 09:00\'da hatırlatılır.</string>
+    <string name="settings_notifications_grant_exact_alarm">Tam zamanlı alarmlara henüz izin verilmedi — izin vermek için dokunun.</string>
 
     <!-- Switch Account (ui/switchaccount/SwitchAccountScreen.kt) -->
     <string name="switch_account_empty">Bu cihazda başka hesap yok.</string>
@@ -409,7 +419,7 @@
     <string name="help_backup_title">Bir Dersin Soru Bankalarını Yedekleme</string>
     <string name="help_backup_body">Bir dersin sayfasından Dışa Aktar, tüm Soru Bankası konularını ve sayılarını paylaşabileceğiniz ya da herhangi bir yere kaydedebileceğiniz bir CSV dosyasına kaydeder. İçe Aktar aynı formatı geri okur — kaynakları isim ve yayıncıya göre eşleştirir, var olan konuların sayılarını günceller ve yeni olanları ekler.</string>
     <string name="help_settings_title">Ayarlar</string>
-    <string name="help_settings_body">⋮ menüsünden ulaşılan Ayarlar\'dan uygulamanın temasını değiştirebilir, beyaz ve mavi başlatıcı simgeleri arasında geçiş yapabilir ve İngilizce veya Türkçe seçebilirsiniz.</string>
+    <string name="help_settings_body">⋮ menüsünden ulaşılan Ayarlar\'dan uygulamanın temasını değiştirebilir, beyaz ve mavi başlatıcı simgeleri arasında geçiş yapabilir, İngilizce veya Türkçe seçebilir ve yerel hatırlatma bildirimlerini açabilirsiniz.</string>
 
     <string name="cd_help_has_sections">Bölümlü mü yardımı</string>
     <string name="help_tooltip_has_sections">Sınavın bölümlü olup olmadığı şimdi belirlenir ve sonradan değiştirilemez.</string>
@@ -477,4 +487,11 @@
     <string name="planner_turns_age">%1$d yaşına giriyor</string>
     <string name="planner_delete_event">Bu etkinliği sil</string>
     <string name="planner_delete_series">Bu tekrar dizisini sil</string>
+
+    <!-- Notifications (data/notifications/NotificationScheduler.kt) -->
+    <string name="notif_channel_name">Hatırlatmalar</string>
+    <string name="notif_channel_description">Planlayıcı etkinlikleri ve yaklaşan sınav/bölüm tarihleri için hatırlatmalar.</string>
+    <string name="notif_planner_default_body">Hatırlatma</string>
+    <string name="notif_exam_title">Yaklaşan sınav</string>
+    <string name="notif_section_title">Yaklaşan sınav bölümü</string>
 </resources>

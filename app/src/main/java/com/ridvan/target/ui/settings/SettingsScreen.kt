@@ -1,5 +1,14 @@
 package com.ridvan.target.ui.settings
 
+import android.Manifest
+import android.app.AlarmManager
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings as AndroidSettings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +29,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,12 +40,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.data.local.BannerColor
+import com.ridvan.target.data.local.NotificationLeadTime
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.SegmentedToggle
@@ -51,7 +67,19 @@ fun SettingsScreen(
     val useBlueAppIcon by viewModel.useBlueAppIcon.collectAsStateWithLifecycle()
     val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
     val bannerColor by viewModel.bannerColor.collectAsStateWithLifecycle()
-    val activity = LocalContext.current.findActivity()
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
+    val notificationLeadTime by viewModel.notificationLeadTime.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val activity = context.findActivity()
+
+    var exactAlarmGranted by remember { mutableStateOf(canScheduleExactAlarms(context)) }
+    LifecycleResumeEffect(Unit) {
+        exactAlarmGranted = canScheduleExactAlarms(context)
+        onPauseOrDispose { }
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> viewModel.setNotificationsEnabled(granted) }
 
     AppShell(navigation = shellNavigation, title = stringResource(R.string.menu_app_settings)) { innerPadding ->
         Column(
@@ -121,8 +149,78 @@ fun SettingsScreen(
                     )
                 }
             }
+            GroupedCard {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.settings_notifications), modifier = Modifier.weight(1f))
+                        HelpTooltip(R.string.help_tooltip_notifications, R.string.cd_help_notifications)
+                        Switch(
+                            checked = notificationsEnabled,
+                            onCheckedChange = { enabled ->
+                                if (enabled &&
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                                        PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.setNotificationsEnabled(enabled)
+                                }
+                            },
+                        )
+                    }
+                    if (notificationsEnabled) {
+                        Text(
+                            stringResource(R.string.settings_notification_lead_time),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                        SegmentedToggle(
+                            options = listOf(
+                                SegmentedToggleOption(NotificationLeadTime.AT_TIME, stringResource(R.string.notification_lead_at_time)),
+                                SegmentedToggleOption(NotificationLeadTime.MIN_15, stringResource(R.string.notification_lead_15)),
+                                SegmentedToggleOption(NotificationLeadTime.MIN_30, stringResource(R.string.notification_lead_30)),
+                                SegmentedToggleOption(NotificationLeadTime.HOUR_1, stringResource(R.string.notification_lead_60)),
+                            ),
+                            selected = notificationLeadTime,
+                            onSelect = { viewModel.setNotificationLeadTime(it) },
+                            textStyle = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        )
+                        Text(
+                            stringResource(R.string.settings_notifications_all_day_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                        if (!exactAlarmGranted) {
+                            Text(
+                                stringResource(R.string.settings_notifications_grant_exact_alarm),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                                modifier = Modifier.padding(top = 8.dp).clickable {
+                                    context.startActivity(
+                                        Intent(
+                                            AndroidSettings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                            Uri.parse("package:${context.packageName}"),
+                                        ),
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
+}
+
+private fun canScheduleExactAlarms(context: android.content.Context): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+    val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return true
+    return alarmManager.canScheduleExactAlarms()
 }
 
 @Composable

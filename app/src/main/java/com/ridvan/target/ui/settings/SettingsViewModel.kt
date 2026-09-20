@@ -8,6 +8,7 @@ import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.data.local.AppPreferences
 import com.ridvan.target.data.local.BannerColor
+import com.ridvan.target.data.local.NotificationLeadTime
 import kotlinx.coroutines.flow.StateFlow
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -51,5 +52,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun setBannerColor(color: BannerColor) {
         preferences.setBannerColor(color)
+    }
+
+    val notificationsEnabled: StateFlow<Boolean> = preferences.notificationsEnabled
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        preferences.setNotificationsEnabled(enabled)
+    }
+
+    val notificationLeadTime: StateFlow<NotificationLeadTime> = preferences.notificationLeadTime
+
+    fun setNotificationLeadTime(leadTime: NotificationLeadTime) {
+        preferences.setNotificationLeadTime(leadTime)
     }
 }

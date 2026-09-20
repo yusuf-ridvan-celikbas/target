@@ -4,10 +4,14 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.ui.graphics.Color
 import com.ridvan.target.R
+import com.ridvan.target.data.notifications.NotificationScheduler
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 enum class AppLanguage(val languageTag: String) {
     ENGLISH("en"),
@@ -34,8 +38,22 @@ enum class BannerColor(val hex: Long, val drawableRes: Int, val labelRes: Int) {
     val color: Color get() = Color(hex)
 }
 
+/**
+ * How far ahead of a *timed* Planner event's own start to remind — only meaningful for
+ * events with a startMinuteOfDay. Untimed events, Birthdays, and non-sectioned Exam/Section
+ * dates (none of which have a time-of-day of their own) always remind at a fixed 9:00 AM
+ * instead, regardless of this preference — see NotificationScheduler.
+ */
+enum class NotificationLeadTime(val minutes: Int, val labelRes: Int) {
+    AT_TIME(0, R.string.notification_lead_at_time),
+    MIN_15(15, R.string.notification_lead_15),
+    MIN_30(30, R.string.notification_lead_30),
+    HOUR_1(60, R.string.notification_lead_60),
+}
+
 class AppPreferences(context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
 
     private val systemDarkDefault =
         (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
@@ -101,7 +119,37 @@ class AppPreferences(context: Context) {
             prefs.edit().apply {
                 if (value == null) remove(KEY_USER_ID) else putLong(KEY_USER_ID, value)
             }.apply()
+            // Log Out / Switch Account / Login / Register all funnel through this setter, so
+            // rescheduling here — rather than at each of those call sites — is enough to keep
+            // the pending reminder alarm scoped to whichever account is actually signed in.
+            rescheduleNotifications()
         }
+
+    private val _notificationsEnabled = MutableStateFlow(prefs.getBoolean(KEY_NOTIFICATIONS_ENABLED, false))
+    val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled.asStateFlow()
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_NOTIFICATIONS_ENABLED, enabled).apply()
+        _notificationsEnabled.value = enabled
+        rescheduleNotifications()
+    }
+
+    private val _notificationLeadTime = MutableStateFlow(
+        prefs.getString(KEY_NOTIFICATION_LEAD_TIME, null)?.let { name ->
+            runCatching { NotificationLeadTime.valueOf(name) }.getOrNull()
+        } ?: NotificationLeadTime.MIN_15,
+    )
+    val notificationLeadTime: StateFlow<NotificationLeadTime> = _notificationLeadTime.asStateFlow()
+
+    fun setNotificationLeadTime(leadTime: NotificationLeadTime) {
+        prefs.edit().putString(KEY_NOTIFICATION_LEAD_TIME, leadTime.name).apply()
+        _notificationLeadTime.value = leadTime
+        rescheduleNotifications()
+    }
+
+    private fun rescheduleNotifications() {
+        CoroutineScope(Dispatchers.IO).launch { NotificationScheduler.reschedule(appContext) }
+    }
 
     private companion object {
         const val PREFS_NAME = "target_prefs"
@@ -110,6 +158,8 @@ class AppPreferences(context: Context) {
         const val KEY_BANNER_COLOR = "banner_color"
         const val KEY_APP_LANGUAGE = "app_language"
         const val KEY_USER_ID = "current_user_id"
+        const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
+        const val KEY_NOTIFICATION_LEAD_TIME = "notification_lead_time"
         const val NO_USER = -1L
     }
 }
