@@ -97,3 +97,9 @@ data class PracticeExamEntryDetailRoute(val entryId: Long)
 
 @Serializable
 object PlannerRoute
+
+@Serializable
+object FocusTimerRoute
+
+@Serializable
+object FocusPresetListRoute

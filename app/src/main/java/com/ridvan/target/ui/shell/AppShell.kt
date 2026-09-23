@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
@@ -74,6 +75,7 @@ data class ShellNavigation(
     val onNavigateStatistics: () -> Unit,
     val onNavigateLanguages: () -> Unit,
     val onNavigatePlanner: () -> Unit,
+    val onNavigateFocusTimer: () -> Unit,
     val onNavigateHelp: () -> Unit,
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -84,7 +86,7 @@ data class ShellNavigation(
 )
 
 enum class ShellDestination {
-    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER, HELP, MY_ACCOUNT, SETTINGS, OTHER
+    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER, FOCUS_TIMER, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,6 +201,15 @@ fun AppShell(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navigation.onNavigatePlanner()
+                    },
+                )
+                DrawerItem(
+                    label = stringResource(R.string.label_focus_timer),
+                    icon = Icons.Filled.Timer,
+                    selected = currentDestination == ShellDestination.FOCUS_TIMER,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigation.onNavigateFocusTimer()
                     },
                 )
                 Spacer(Modifier.weight(1f))

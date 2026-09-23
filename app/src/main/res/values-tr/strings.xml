@@ -498,4 +498,38 @@
     <string name="notif_planner_default_body">Hatırlatma</string>
     <string name="notif_exam_title">Yaklaşan sınav</string>
     <string name="notif_section_title">Yaklaşan sınav bölümü</string>
+
+    <!-- Focus Timer (ui/focustimer/) -->
+    <string name="label_focus_timer">Odak Zamanlayıcı</string>
+    <string name="focustimer_preset_list_title">Odak Şablonları</string>
+    <string name="dialog_add_preset_title">Şablon ekle</string>
+    <string name="dialog_edit_preset_title">Şablonu düzenle</string>
+    <string name="label_work_minutes">Çalışma süresi (dk)</string>
+    <string name="label_break_minutes">Mola süresi (dk)</string>
+    <string name="focustimer_preset_empty">Henüz şablon yok — başlamak için bir tane oluşturun.</string>
+    <string name="focustimer_preset_row_subtitle">%1$d dk çalışma / %2$d dk mola</string>
+    <string name="label_preset">Şablon</string>
+    <string name="common_none">Yok</string>
+    <string name="cd_manage_presets">Şablonları yönet</string>
+    <string name="focustimer_no_presets_hint">Henüz şablon yok — oluşturmak için buraya dokunun.</string>
+    <string name="label_link_to_course">Ders (isteğe bağlı)</string>
+    <string name="label_link_to_topic">Konu (isteğe bağlı)</string>
+    <string name="focustimer_start">Başlat</string>
+    <string name="focustimer_pause">Duraklat</string>
+    <string name="focustimer_resume">Devam Et</string>
+    <string name="focustimer_stop">Durdur</string>
+    <string name="focustimer_phase_work">Çalışma</string>
+    <string name="focustimer_phase_break">Mola</string>
+    <string name="focustimer_cycle_count">Tur %1$d</string>
+    <string name="focustimer_alarm_section_title">Alarm</string>
+    <string name="focustimer_choose_ringtone">Zil Sesi Seç</string>
+    <string name="focustimer_browse_audio">Ses Dosyası Seç</string>
+    <string name="focustimer_reset_sound">Varsayılana Sıfırla</string>
+    <string name="focustimer_sound_default">Varsayılan</string>
+    <string name="focustimer_sound_custom">Özel ses seçildi</string>
+    <string name="label_vibration">Titreşim</string>
+    <string name="focustimer_history_title">Geçmiş</string>
+    <string name="focustimer_history_empty">Henüz oturum yok.</string>
+    <string name="focustimer_history_row_subtitle">%1$d tur · %2$s çalışma · %3$s mola</string>
+    <string name="focustimer_keep_screen_hint">Alarmı kaçırmamanız için bir oturum çalışırken ekran açık kalacaktır.</string>
 </resources>

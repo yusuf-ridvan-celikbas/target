@@ -500,4 +500,38 @@
     <string name="notif_planner_default_body">Reminder</string>
     <string name="notif_exam_title">Upcoming exam</string>
     <string name="notif_section_title">Upcoming exam section</string>
+
+    <!-- Focus Timer (ui/focustimer/) -->
+    <string name="label_focus_timer">Focus Timer</string>
+    <string name="focustimer_preset_list_title">Focus Presets</string>
+    <string name="dialog_add_preset_title">Add preset</string>
+    <string name="dialog_edit_preset_title">Edit preset</string>
+    <string name="label_work_minutes">Work minutes</string>
+    <string name="label_break_minutes">Break minutes</string>
+    <string name="focustimer_preset_empty">No presets yet — create one to get started.</string>
+    <string name="focustimer_preset_row_subtitle">%1$d min work / %2$d min break</string>
+    <string name="label_preset">Preset</string>
+    <string name="common_none">None</string>
+    <string name="cd_manage_presets">Manage presets</string>
+    <string name="focustimer_no_presets_hint">No presets yet — tap here to create one.</string>
+    <string name="label_link_to_course">Course (optional)</string>
+    <string name="label_link_to_topic">Topic (optional)</string>
+    <string name="focustimer_start">Start</string>
+    <string name="focustimer_pause">Pause</string>
+    <string name="focustimer_resume">Resume</string>
+    <string name="focustimer_stop">Stop</string>
+    <string name="focustimer_phase_work">Work</string>
+    <string name="focustimer_phase_break">Break</string>
+    <string name="focustimer_cycle_count">Cycle %1$d</string>
+    <string name="focustimer_alarm_section_title">Alarm</string>
+    <string name="focustimer_choose_ringtone">Choose Ringtone</string>
+    <string name="focustimer_browse_audio">Browse Audio File</string>
+    <string name="focustimer_reset_sound">Reset to Default</string>
+    <string name="focustimer_sound_default">Default</string>
+    <string name="focustimer_sound_custom">Custom sound selected</string>
+    <string name="label_vibration">Vibration</string>
+    <string name="focustimer_history_title">History</string>
+    <string name="focustimer_history_empty">No sessions yet.</string>
+    <string name="focustimer_history_row_subtitle">%1$d cycles · %2$s work · %3$s break</string>
+    <string name="focustimer_keep_screen_hint">The screen will stay on while a session is running so you don\'t miss the alarm.</string>
 </resources>

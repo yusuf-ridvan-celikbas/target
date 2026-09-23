@@ -16,6 +16,8 @@ import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.coursedetail.CourseDetailScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
+import com.ridvan.target.ui.focustimer.FocusPresetListScreen
+import com.ridvan.target.ui.focustimer.FocusTimerScreen
 import com.ridvan.target.ui.help.HelpScreen
 import com.ridvan.target.ui.home.HomeScreen
 import com.ridvan.target.ui.languagedetail.LanguageDetailScreen
@@ -68,6 +70,7 @@ fun TargetNavHost() {
         onNavigateStatistics = { navController.navigateToShellDestination(StatisticsRoute) },
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigatePlanner = { navController.navigateToShellDestination(PlannerRoute) },
+        onNavigateFocusTimer = { navController.navigateToShellDestination(FocusTimerRoute) },
         onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
         onNavigateMyAccount = { navController.navigateToShellDestination(MyAccountRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsHomeRoute) },
@@ -274,6 +277,19 @@ fun TargetNavHost() {
                 onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+            )
+        }
+        composable<FocusTimerRoute> {
+            FocusTimerScreen(
+                shellNavigation = shellNavigation,
+                onManagePresets = { navController.navigate(FocusPresetListRoute) },
+                onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+            )
+        }
+        composable<FocusPresetListRoute> {
+            FocusPresetListScreen(
+                onBack = { navController.popBackStack() },
             )
         }
     }

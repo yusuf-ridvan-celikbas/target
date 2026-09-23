@@ -8,6 +8,8 @@ import com.ridvan.target.data.local.dao.CourseDao
 import com.ridvan.target.data.local.dao.ExamCourseDao
 import com.ridvan.target.data.local.dao.ExamDao
 import com.ridvan.target.data.local.dao.ExamTypeDao
+import com.ridvan.target.data.local.dao.FocusPresetDao
+import com.ridvan.target.data.local.dao.FocusSessionDao
 import com.ridvan.target.data.local.dao.LanguageDao
 import com.ridvan.target.data.local.dao.PlannerEventCompletionDao
 import com.ridvan.target.data.local.dao.PlannerEventDao
@@ -24,6 +26,8 @@ import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.ExamCourse
 import com.ridvan.target.data.local.entity.ExamType
+import com.ridvan.target.data.local.entity.FocusPreset
+import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCompletion
@@ -55,8 +59,10 @@ import com.ridvan.target.data.local.entity.User
         PracticeExamEntryTopicResult::class,
         PlannerEvent::class,
         PlannerEventCompletion::class,
+        FocusPreset::class,
+        FocusSession::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = false,
 )
 abstract class TargetDatabase : RoomDatabase() {
@@ -76,6 +82,8 @@ abstract class TargetDatabase : RoomDatabase() {
     abstract fun practiceExamEntryTopicResultDao(): PracticeExamEntryTopicResultDao
     abstract fun plannerEventDao(): PlannerEventDao
     abstract fun plannerEventCompletionDao(): PlannerEventCompletionDao
+    abstract fun focusPresetDao(): FocusPresetDao
+    abstract fun focusSessionDao(): FocusSessionDao
 
     companion object {
         @Volatile
@@ -87,7 +95,7 @@ abstract class TargetDatabase : RoomDatabase() {
                     context.applicationContext,
                     TargetDatabase::class.java,
                     "target.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18).build().also { INSTANCE = it }
             }
     }
 }

@@ -371,3 +371,47 @@ val MIGRATION_16_17 = object : Migration(16, 17) {
         )
     }
 }
+
+val MIGRATION_17_18 = object : Migration(17, 18) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Focus Timer: reusable named work/break presets, and one row per completed run.
+        // No backfill needed — brand new feature with no prior data, same shape as MIGRATION_16_17.
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS focus_presets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                workMinutes INTEGER NOT NULL,
+                breakMinutes INTEGER NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_presets_userId ON focus_presets(userId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS focus_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                presetId INTEGER REFERENCES focus_presets(id) ON DELETE SET NULL,
+                presetName TEXT NOT NULL,
+                workMinutes INTEGER NOT NULL,
+                breakMinutes INTEGER NOT NULL,
+                courseId INTEGER REFERENCES courses(id) ON DELETE SET NULL,
+                topicId INTEGER REFERENCES topics(id) ON DELETE SET NULL,
+                startedAt INTEGER NOT NULL,
+                endedAt INTEGER NOT NULL,
+                cyclesCompleted INTEGER NOT NULL,
+                totalWorkMinutes INTEGER NOT NULL,
+                totalBreakMinutes INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_userId ON focus_sessions(userId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_presetId ON focus_sessions(presetId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_courseId ON focus_sessions(courseId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_topicId ON focus_sessions(topicId)")
+    }
+}

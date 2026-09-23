@@ -151,6 +151,26 @@ class AppPreferences(context: Context) {
         CoroutineScope(Dispatchers.IO).launch { NotificationScheduler.reschedule(appContext) }
     }
 
+    // Focus Timer's alarm sound/vibration preferences — unrelated to the Planner/Exam reminder
+    // system above, so neither of these calls rescheduleNotifications().
+    private val _focusAlarmSoundUri = MutableStateFlow(prefs.getString(KEY_FOCUS_ALARM_SOUND_URI, null))
+    val focusAlarmSoundUri: StateFlow<String?> = _focusAlarmSoundUri.asStateFlow()
+
+    fun setFocusAlarmSoundUri(uri: String?) {
+        prefs.edit().apply {
+            if (uri == null) remove(KEY_FOCUS_ALARM_SOUND_URI) else putString(KEY_FOCUS_ALARM_SOUND_URI, uri)
+        }.apply()
+        _focusAlarmSoundUri.value = uri
+    }
+
+    private val _focusVibrationEnabled = MutableStateFlow(prefs.getBoolean(KEY_FOCUS_VIBRATION_ENABLED, true))
+    val focusVibrationEnabled: StateFlow<Boolean> = _focusVibrationEnabled.asStateFlow()
+
+    fun setFocusVibrationEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_FOCUS_VIBRATION_ENABLED, enabled).apply()
+        _focusVibrationEnabled.value = enabled
+    }
+
     private companion object {
         const val PREFS_NAME = "target_prefs"
         const val KEY_DARK_MODE = "dark_mode"
@@ -160,6 +180,8 @@ class AppPreferences(context: Context) {
         const val KEY_USER_ID = "current_user_id"
         const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val KEY_NOTIFICATION_LEAD_TIME = "notification_lead_time"
+        const val KEY_FOCUS_ALARM_SOUND_URI = "focus_alarm_sound_uri"
+        const val KEY_FOCUS_VIBRATION_ENABLED = "focus_vibration_enabled"
         const val NO_USER = -1L
     }
 }
