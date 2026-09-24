@@ -56,6 +56,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -269,7 +271,16 @@ private fun IdleContent(
         ) { closeMenu ->
             presets.forEach { preset ->
                 DropdownMenuItem(
-                    text = { Text(preset.name) },
+                    text = {
+                        Column {
+                            Text(preset.name, style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                stringResource(R.string.focustimer_preset_row_subtitle, preset.workMinutes, preset.breakMinutes),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    },
                     onClick = { onSelectPreset(preset.id); closeMenu() },
                 )
             }
@@ -630,7 +641,10 @@ private fun HistorySection(
 private fun DropdownField(selectedLabel: String, items: @Composable (closeMenu: () -> Unit) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val arrowRotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "dropdownArrow")
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+    // The menu matches the box's measured width instead of wrapping its items.
+    var boxWidthPx by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+    Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp).onSizeChanged { boxWidthPx = it.width }) {
         Surface(
             onClick = { expanded = true },
             shape = MaterialTheme.shapes.medium,
@@ -650,7 +664,11 @@ private fun DropdownField(selectedLabel: String, items: @Composable (closeMenu: 
                 )
             }
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.width(with(density) { boxWidthPx.toDp() }),
+        ) {
             items { expanded = false }
         }
     }
