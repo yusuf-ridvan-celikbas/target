@@ -63,6 +63,7 @@ import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.findActivity
@@ -407,7 +408,10 @@ private fun RunningContent(
             )
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            HelpTooltip(R.string.help_tooltip_focustimer_controls, R.string.cd_help_focustimer_controls)
+        }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
                 onClick = if (session.isPaused) onResume else onPause,

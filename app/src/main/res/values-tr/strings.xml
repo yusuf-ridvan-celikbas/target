@@ -518,6 +518,8 @@
     <string name="focustimer_pause">Duraklat</string>
     <string name="focustimer_resume">Devam Et</string>
     <string name="focustimer_stop">Durdur</string>
+    <string name="cd_help_focustimer_controls">Zamanlayıcı kontrolleri yardımı</string>
+    <string name="help_tooltip_focustimer_controls">Duraklat, oturumu bitirmeden geri sayımı dondurur; duraklatılan süre sayılmaz. Devam Et, kaldığınız yerden sürdürür. Durdur, oturumu bitirir ve Geçmişe kaydeder.</string>
     <string name="focustimer_phase_work">Çalışma</string>
     <string name="focustimer_phase_break">Mola</string>
     <string name="focustimer_cycle_count">Tur %1$d</string>

@@ -520,6 +520,8 @@
     <string name="focustimer_pause">Pause</string>
     <string name="focustimer_resume">Resume</string>
     <string name="focustimer_stop">Stop</string>
+    <string name="cd_help_focustimer_controls">Timer controls help</string>
+    <string name="help_tooltip_focustimer_controls">Pause freezes the countdown without ending the session; paused time is not counted. Resume continues from where you left off. Stop ends the session and saves it to History.</string>
     <string name="focustimer_phase_work">Work</string>
     <string name="focustimer_phase_break">Break</string>
     <string name="focustimer_cycle_count">Cycle %1$d</string>
