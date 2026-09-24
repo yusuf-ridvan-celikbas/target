@@ -358,6 +358,8 @@
     <string name="csv_header_accuracy">Accuracy %</string>
     <string name="csv_header_duration_minutes">Duration (minutes)</string>
     <string name="cd_import_course_csv">Import Question Bank data</string>
+    <string name="course_menu_export_hint">Save this course\'s question banks as a CSV file</string>
+    <string name="course_menu_import_hint">Merge a CSV back in (matched by name + publisher)</string>
     <string name="import_result_title">Import</string>
     <string name="import_result_summary">Imported %1$d rows — %2$d new resources, %3$d new topics, %4$d new topic entries added, %5$d updated.</string>
     <string name="import_result_invalid">No valid rows found in that file. Make sure it\'s a CSV exported from this app.</string>
@@ -440,10 +442,6 @@
     <string name="help_tooltip_stats_period">Narrows both the numbers and the chart to a recent window ending today.</string>
     <string name="cd_help_stats_source">Source help</string>
     <string name="help_tooltip_stats_source">Switches the data source between logged Practice Sessions and completed Practice Exams.</string>
-    <string name="cd_help_course_export">Export help</string>
-    <string name="help_tooltip_course_export">Exports only this course\'s Question Bank resources and their topics as a CSV — one-way, nothing is read back in.</string>
-    <string name="cd_help_course_import">Import help</string>
-    <string name="help_tooltip_course_import">Matches existing resources by name + publisher and overwrites their topic counts. New resources or topics are added.</string>
     <string name="cd_help_app_color_preference">App color help</string>
     <string name="help_tooltip_app_color_preference">Blue uses your wallpaper\'s live colors (Material You). Any other color stays fixed regardless of wallpaper.</string>
     <string name="cd_help_preferred_name">Preferred name help</string>

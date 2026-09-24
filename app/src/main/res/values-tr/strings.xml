@@ -358,6 +358,8 @@
     <string name="csv_header_accuracy">Doğruluk %</string>
     <string name="csv_header_duration_minutes">Süre (dakika)</string>
     <string name="cd_import_course_csv">Soru Bankası verilerini içe aktar</string>
+    <string name="course_menu_export_hint">Bu dersin soru bankalarını CSV dosyası olarak kaydet</string>
+    <string name="course_menu_import_hint">Bir CSV dosyasını geri birleştir (isim + yayınevine göre)</string>
     <string name="import_result_title">İçe Aktarma</string>
     <string name="import_result_summary">%1$d satır işlendi — %2$d yeni kaynak, %3$d yeni konu, %4$d yeni konu eklemesi, %5$d güncellendi.</string>
     <string name="import_result_invalid">O dosyada geçerli satır bulunamadı. Bu uygulamadan dışa aktarılmış bir CSV olduğundan emin ol.</string>
@@ -438,10 +440,6 @@
     <string name="help_tooltip_stats_period">Hem sayıları hem de grafiği bugüne kadar olan yakın bir zaman aralığına daraltır.</string>
     <string name="cd_help_stats_source">Kaynak yardımı</string>
     <string name="help_tooltip_stats_source">Veri kaynağını kaydedilen Pratik Oturumları ile tamamlanan Deneme Sınavları arasında değiştirir.</string>
-    <string name="cd_help_course_export">Dışa aktarma yardımı</string>
-    <string name="help_tooltip_course_export">Yalnızca bu dersin Soru Bankası kaynaklarını ve konularını CSV olarak dışa aktarır — tek yönlüdür, hiçbir şey geri okunmaz.</string>
-    <string name="cd_help_course_import">İçe aktarma yardımı</string>
-    <string name="help_tooltip_course_import">Mevcut kaynakları isim + yayınevine göre eşleştirir ve konu sayılarının üzerine yazar. Yeni kaynaklar veya konular eklenir.</string>
     <string name="cd_help_app_color_preference">Uygulama rengi yardımı</string>
     <string name="help_tooltip_app_color_preference">Mavi, duvar kağıdınızın canlı renklerini kullanır (Material You). Diğer renkler duvar kağıdından bağımsız, sabit kalır.</string>
     <string name="cd_help_preferred_name">Tercih edilen isim yardımı</string>

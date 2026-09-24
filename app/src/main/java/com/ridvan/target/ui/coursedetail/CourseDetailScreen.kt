@@ -14,14 +14,17 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -35,8 +38,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,6 +74,7 @@ fun CourseDetailScreen(
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val exportHeaders = listOf(
         stringResource(R.string.csv_header_resource),
@@ -93,7 +100,13 @@ fun CourseDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(course?.name?.let { courseDisplayName(it) }.orEmpty()) },
+                title = {
+                    Text(
+                        course?.name?.let { courseDisplayName(it) }.orEmpty(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
@@ -103,23 +116,48 @@ fun CourseDetailScreen(
                     IconButton(onClick = { showEditDialog = true }) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_edit_course))
                     }
-                    IconButton(onClick = {
-                        viewModel.fetchQuestionBankExportRows { rows ->
-                            val file = CourseQuestionBankCsvExporter.writeCourseQuestionBankCsv(
-                                context, course?.name.orEmpty(), exportHeaders, rows,
-                            )
-                            shareCsvFile(context, file, exportChooserTitle)
+                    // Less-frequent actions live in an overflow menu, each with a one-line explanation
+                    // (replacing the old per-icon help tooltips), so the title gets room to fit.
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.cd_more))
                         }
-                    }) {
-                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.cd_export_course_csv))
-                    }
-                    HelpTooltip(R.string.help_tooltip_course_export, R.string.cd_help_course_export)
-                    IconButton(onClick = { importLauncher.launch(arrayOf("*/*")) }) {
-                        Icon(Icons.Filled.FileOpen, contentDescription = stringResource(R.string.cd_import_course_csv))
-                    }
-                    HelpTooltip(R.string.help_tooltip_course_import, R.string.cd_help_course_import)
-                    IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_course))
+                        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                            CourseMenuItem(
+                                icon = Icons.Filled.Share,
+                                label = stringResource(R.string.cd_export_course_csv),
+                                hint = stringResource(R.string.course_menu_export_hint),
+                                onClick = {
+                                    menuExpanded = false
+                                    viewModel.fetchQuestionBankExportRows { rows ->
+                                        val file = CourseQuestionBankCsvExporter.writeCourseQuestionBankCsv(
+                                            context, course?.name.orEmpty(), exportHeaders, rows,
+                                        )
+                                        shareCsvFile(context, file, exportChooserTitle)
+                                    }
+                                },
+                            )
+                            CourseMenuItem(
+                                icon = Icons.Filled.FileOpen,
+                                label = stringResource(R.string.cd_import_course_csv),
+                                hint = stringResource(R.string.course_menu_import_hint),
+                                onClick = {
+                                    menuExpanded = false
+                                    importLauncher.launch(arrayOf("*/*"))
+                                },
+                            )
+                            HorizontalDivider()
+                            CourseMenuItem(
+                                icon = Icons.Filled.Delete,
+                                label = stringResource(R.string.cd_delete_course),
+                                hint = null,
+                                color = MaterialTheme.colorScheme.error,
+                                onClick = {
+                                    menuExpanded = false
+                                    showDeleteConfirm = true
+                                },
+                            )
+                        }
                     }
                 },
             )
@@ -334,4 +372,26 @@ private fun CourseExamTypeField(examTypes: List<ExamType>, selectedId: Long?, on
             }
         }
     }
+}
+
+@Composable
+private fun CourseMenuItem(
+    icon: ImageVector,
+    label: String,
+    hint: String?,
+    onClick: () -> Unit,
+    color: Color = Color.Unspecified,
+) {
+    DropdownMenuItem(
+        leadingIcon = { Icon(icon, contentDescription = null, tint = if (color == Color.Unspecified) LocalContentColor.current else color) },
+        text = {
+            Column {
+                Text(label, color = color)
+                if (hint != null) {
+                    Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        },
+        onClick = onClick,
+    )
 }
