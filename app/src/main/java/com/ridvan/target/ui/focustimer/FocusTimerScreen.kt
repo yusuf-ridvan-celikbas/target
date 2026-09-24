@@ -7,6 +7,7 @@ import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,11 +16,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -215,14 +220,17 @@ fun FocusTimerScreen(
                 )
             }
 
-            Spacer(Modifier.height(24.dp))
-            HistorySection(
-                history = history,
-                onCourseClick = onCourseClick,
-                onLanguageClick = onLanguageClick,
-                onTopicClick = onTopicClick,
-                onDelete = viewModel::deleteHistorySession,
-            )
+            // History is hidden while a session runs, keeping the running view focused on the timer.
+            if (session == null) {
+                Spacer(Modifier.height(24.dp))
+                HistorySection(
+                    history = history,
+                    onCourseClick = onCourseClick,
+                    onLanguageClick = onLanguageClick,
+                    onTopicClick = onTopicClick,
+                    onDelete = viewModel::deleteHistorySession,
+                )
+            }
         }
     }
 }
@@ -399,13 +407,33 @@ private fun RunningContent(
             )
         }
 
-        Spacer(Modifier.height(24.dp))
-        Row {
-            OutlinedButton(onClick = if (session.isPaused) onResume else onPause) {
-                Text(stringResource(if (session.isPaused) R.string.focustimer_resume else R.string.focustimer_pause))
+        Spacer(Modifier.height(32.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(
+                onClick = if (session.isPaused) onResume else onPause,
+                modifier = Modifier.weight(1f).height(88.dp),
+                shape = MaterialTheme.shapes.large,
+            ) {
+                Icon(
+                    if (session.isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp),
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    stringResource(if (session.isPaused) R.string.focustimer_resume else R.string.focustimer_pause),
+                    style = MaterialTheme.typography.titleLarge,
+                )
             }
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = onStop) { Text(stringResource(R.string.focustimer_stop)) }
+            Button(
+                onClick = onStop,
+                modifier = Modifier.weight(1f).height(88.dp),
+                shape = MaterialTheme.shapes.large,
+            ) {
+                Icon(Icons.Filled.Stop, contentDescription = null, modifier = Modifier.size(36.dp))
+                Spacer(Modifier.width(10.dp))
+                Text(stringResource(R.string.focustimer_stop), style = MaterialTheme.typography.titleLarge)
+            }
         }
     }
 }
