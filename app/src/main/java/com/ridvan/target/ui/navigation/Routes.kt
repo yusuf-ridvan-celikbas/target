@@ -112,3 +112,6 @@ object FocusPresetListRoute
 
 @Serializable
 object FocusHistoryRoute
+
+@Serializable
+object FocusHistoryHomeRoute

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material.icons.filled.Translate
@@ -76,6 +78,7 @@ data class ShellNavigation(
     val onNavigateLanguages: () -> Unit,
     val onNavigatePlanner: () -> Unit,
     val onNavigateFocusTimer: () -> Unit,
+    val onNavigateStudyHistory: () -> Unit,
     val onNavigateHelp: () -> Unit,
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -86,7 +89,7 @@ data class ShellNavigation(
 )
 
 enum class ShellDestination {
-    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER, FOCUS_TIMER, HELP, MY_ACCOUNT, SETTINGS, OTHER
+    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER, FOCUS_TIMER, STUDY_HISTORY, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,6 +105,7 @@ fun AppShell(
     val scope = rememberCoroutineScope()
     var overflowExpanded by remember { mutableStateOf(false) }
     var studyExpanded by remember { mutableStateOf(true) }
+    var focusExpanded by remember { mutableStateOf(true) }
     val bannerColor by (LocalContext.current.applicationContext as TargetApplication).preferences.bannerColor
         .collectAsStateWithLifecycle()
 
@@ -203,15 +207,34 @@ fun AppShell(
                         navigation.onNavigatePlanner()
                     },
                 )
-                DrawerItem(
-                    label = stringResource(R.string.label_focus_timer),
-                    icon = Icons.Filled.Timer,
-                    selected = currentDestination == ShellDestination.FOCUS_TIMER,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateFocusTimer()
-                    },
+                DrawerGroupHeader(
+                    label = stringResource(R.string.label_focus_group),
+                    icon = Icons.Filled.SelfImprovement,
+                    expanded = focusExpanded,
+                    onToggleExpand = { focusExpanded = !focusExpanded },
                 )
+                if (focusExpanded) {
+                    DrawerItem(
+                        label = stringResource(R.string.label_focus_timer),
+                        icon = Icons.Filled.Timer,
+                        selected = currentDestination == ShellDestination.FOCUS_TIMER,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateFocusTimer()
+                        },
+                    )
+                    DrawerItem(
+                        label = stringResource(R.string.focustimer_history_page_title),
+                        icon = Icons.Filled.History,
+                        selected = currentDestination == ShellDestination.STUDY_HISTORY,
+                        indented = true,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateStudyHistory()
+                        },
+                    )
+                }
                 Spacer(Modifier.weight(1f))
                 DrawerItem(
                     label = stringResource(R.string.label_my_account),

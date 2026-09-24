@@ -3,6 +3,7 @@ package com.ridvan.target.ui.focustimer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,6 +48,9 @@ import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.startOfTodayMillis
+import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
+import com.ridvan.target.ui.shell.ShellNavigation
 
 private enum class FocusHistoryPeriod(val daysBeforeToday: Int?) {
     LAST_7_DAYS(6),
@@ -66,10 +70,51 @@ private fun subjectKeyOf(item: FocusSessionWithLinks): String = when {
     else -> SUBJECT_NONE
 }
 
+/** Reached from Focus Timer's History header — a back-arrow drill-down. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusHistoryScreen(
     onBack: () -> Unit,
+    onCourseClick: (Long) -> Unit,
+    onLanguageClick: (Long) -> Unit,
+    onTopicClick: (Long) -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.focustimer_history_page_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                    }
+                },
+            )
+        },
+    ) { innerPadding ->
+        FocusHistoryBody(innerPadding, onCourseClick, onLanguageClick, onTopicClick)
+    }
+}
+
+/** Reached from the drawer's Focus group — its own shell-level route, so it keeps the drawer chrome. */
+@Composable
+fun FocusHistoryHomeScreen(
+    shellNavigation: ShellNavigation,
+    onCourseClick: (Long) -> Unit,
+    onLanguageClick: (Long) -> Unit,
+    onTopicClick: (Long) -> Unit,
+) {
+    AppShell(
+        navigation = shellNavigation,
+        currentDestination = ShellDestination.STUDY_HISTORY,
+        title = stringResource(R.string.focustimer_history_page_title),
+    ) { innerPadding ->
+        FocusHistoryBody(innerPadding, onCourseClick, onLanguageClick, onTopicClick)
+    }
+}
+
+@Composable
+private fun FocusHistoryBody(
+    innerPadding: PaddingValues,
     onCourseClick: (Long) -> Unit,
     onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
@@ -119,110 +164,97 @@ fun FocusHistoryScreen(
     }
     val filtersActive = query.isNotBlank() || period != FocusHistoryPeriod.ALL || subjectKey != SUBJECT_ALL || presetName != null
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.focustimer_history_page_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .imePadding()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            label = { Text(stringResource(R.string.focustimer_history_search)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { query = "" }) {
+                        Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.cd_clear_search))
                     }
-                },
-            )
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .imePadding()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                label = { Text(stringResource(R.string.focustimer_history_search)) },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
-                            Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.cd_clear_search))
-                        }
-                    }
-                },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(12.dp))
-            SegmentedToggle(
-                options = listOf(
-                    SegmentedToggleOption(FocusHistoryPeriod.LAST_7_DAYS, stringResource(R.string.focustimer_history_period_7_days)),
-                    SegmentedToggleOption(FocusHistoryPeriod.LAST_30_DAYS, stringResource(R.string.focustimer_history_period_30_days)),
-                    SegmentedToggleOption(FocusHistoryPeriod.ALL, stringResource(R.string.focustimer_history_period_all)),
-                ),
-                selected = period,
-                onSelect = { period = it },
-            )
-            FilterField(
-                label = stringResource(R.string.focustimer_history_filter_subject),
-                selectedLabel = when (subjectKey) {
-                    SUBJECT_ALL -> stringResource(R.string.focustimer_history_all_subjects)
-                    SUBJECT_NONE -> stringResource(R.string.focustimer_history_not_linked)
-                    else -> subjectOptions.firstOrNull { it.first == subjectKey }?.second
-                        ?: stringResource(R.string.focustimer_history_all_subjects)
-                },
-                options = listOf(
-                    SUBJECT_ALL to stringResource(R.string.focustimer_history_all_subjects),
-                    SUBJECT_NONE to stringResource(R.string.focustimer_history_not_linked),
-                ) + subjectOptions,
-                onSelect = { subjectKey = it },
-            )
-            FilterField(
-                label = stringResource(R.string.focustimer_history_filter_preset),
-                selectedLabel = presetName ?: stringResource(R.string.focustimer_history_all_presets),
-                options = listOf<Pair<String?, String>>(null to stringResource(R.string.focustimer_history_all_presets)) +
-                    presetOptions.map { it to it },
-                onSelect = { presetName = it },
-            )
-
-            Spacer(Modifier.height(16.dp))
-            val totalWork = filtered.sumOf { it.session.totalWorkMinutes }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    stringResource(
-                        R.string.focustimer_history_summary,
-                        filtered.size,
-                        stringResource(R.string.duration_format, totalWork / 60, totalWork % 60),
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f),
-                )
-                if (filtersActive) {
-                    TextButton(onClick = {
-                        query = ""
-                        period = FocusHistoryPeriod.ALL
-                        subjectKey = SUBJECT_ALL
-                        presetName = null
-                    }) { Text(stringResource(R.string.focustimer_history_clear_filters)) }
                 }
-            }
-            Spacer(Modifier.height(8.dp))
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(12.dp))
+        SegmentedToggle(
+            options = listOf(
+                SegmentedToggleOption(FocusHistoryPeriod.LAST_7_DAYS, stringResource(R.string.focustimer_history_period_7_days)),
+                SegmentedToggleOption(FocusHistoryPeriod.LAST_30_DAYS, stringResource(R.string.focustimer_history_period_30_days)),
+                SegmentedToggleOption(FocusHistoryPeriod.ALL, stringResource(R.string.focustimer_history_period_all)),
+            ),
+            selected = period,
+            onSelect = { period = it },
+        )
+        FilterField(
+            label = stringResource(R.string.focustimer_history_filter_subject),
+            selectedLabel = when (subjectKey) {
+                SUBJECT_ALL -> stringResource(R.string.focustimer_history_all_subjects)
+                SUBJECT_NONE -> stringResource(R.string.focustimer_history_not_linked)
+                else -> subjectOptions.firstOrNull { it.first == subjectKey }?.second
+                    ?: stringResource(R.string.focustimer_history_all_subjects)
+            },
+            options = listOf(
+                SUBJECT_ALL to stringResource(R.string.focustimer_history_all_subjects),
+                SUBJECT_NONE to stringResource(R.string.focustimer_history_not_linked),
+            ) + subjectOptions,
+            onSelect = { subjectKey = it },
+        )
+        FilterField(
+            label = stringResource(R.string.focustimer_history_filter_preset),
+            selectedLabel = presetName ?: stringResource(R.string.focustimer_history_all_presets),
+            options = listOf<Pair<String?, String>>(null to stringResource(R.string.focustimer_history_all_presets)) +
+                presetOptions.map { it to it },
+            onSelect = { presetName = it },
+        )
 
-            when {
-                history.isEmpty() -> Text(stringResource(R.string.focustimer_history_empty))
-                filtered.isEmpty() -> Text(stringResource(R.string.focustimer_history_no_matches))
-                else -> GroupedCard {
-                    filtered.forEach { item ->
-                        FocusHistoryRow(
-                            item = item,
-                            onCourseClick = onCourseClick,
-                            onLanguageClick = onLanguageClick,
-                            onTopicClick = onTopicClick,
-                            onDeleteClick = { pendingDelete = item },
-                        )
-                        HorizontalDivider()
-                    }
+        Spacer(Modifier.height(16.dp))
+        val totalWork = filtered.sumOf { it.session.totalWorkMinutes }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                stringResource(
+                    R.string.focustimer_history_summary,
+                    filtered.size,
+                    stringResource(R.string.duration_format, totalWork / 60, totalWork % 60),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            if (filtersActive) {
+                TextButton(onClick = {
+                    query = ""
+                    period = FocusHistoryPeriod.ALL
+                    subjectKey = SUBJECT_ALL
+                    presetName = null
+                }) { Text(stringResource(R.string.focustimer_history_clear_filters)) }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+
+        when {
+            history.isEmpty() -> Text(stringResource(R.string.focustimer_history_empty))
+            filtered.isEmpty() -> Text(stringResource(R.string.focustimer_history_no_matches))
+            else -> GroupedCard {
+                filtered.forEach { item ->
+                    FocusHistoryRow(
+                        item = item,
+                        onCourseClick = onCourseClick,
+                        onLanguageClick = onLanguageClick,
+                        onTopicClick = onTopicClick,
+                        onDeleteClick = { pendingDelete = item },
+                    )
+                    HorizontalDivider()
                 }
             }
         }

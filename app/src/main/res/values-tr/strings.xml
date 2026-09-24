@@ -23,6 +23,7 @@
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
     <string name="label_study_group">Çalışma</string>
+    <string name="label_focus_group">Odak</string>
     <string name="label_planner">Planlayıcı</string>
     <string name="label_exams">Sınavlar</string>
     <string name="label_courses">Dersler</string>
