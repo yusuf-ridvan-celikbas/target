@@ -10,9 +10,9 @@ import android.os.Vibrator
 import android.os.VibratorManager
 
 /**
- * Plays the Focus Timer's phase-end alert: a ringtone (system default, or a user-chosen
- * ringtone/audio file Uri persisted in AppPreferences.focusAlarmSoundUri) plus an optional
- * short vibration. Foreground-only by design (see CLAUDE.md's Focus Timer scope) — this is
+ * Plays one Focus Timer sound (work/break start/end — see FocusSoundEvent): a ringtone (system
+ * default, or a user-chosen ringtone/audio file Uri from AppPreferences.focusSoundUris) plus an
+ * optional short vibration. Foreground-only by design (see CLAUDE.md's Focus Timer scope) — this is
  * called directly from the running countdown, not from a scheduled AlarmManager alarm.
  */
 object FocusAlarmPlayer {

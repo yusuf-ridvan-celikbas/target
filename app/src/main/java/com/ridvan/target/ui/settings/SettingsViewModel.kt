@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import com.ridvan.target.TargetApplication
+import com.ridvan.target.data.focustimer.FocusSoundEvent
 import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.data.local.AppPreferences
 import com.ridvan.target.data.local.BannerColor
@@ -66,10 +67,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences.setNotificationLeadTime(leadTime)
     }
 
-    val focusAlarmSoundUri: StateFlow<String?> = preferences.focusAlarmSoundUri
+    val focusSoundUris: StateFlow<Map<FocusSoundEvent, String>> = preferences.focusSoundUris
 
-    fun setFocusAlarmSoundUri(uri: String?) {
-        preferences.setFocusAlarmSoundUri(uri)
+    fun setFocusSoundUri(event: FocusSoundEvent, uri: String?) {
+        preferences.setFocusSoundUri(event, uri)
     }
 
     val focusVibrationEnabled: StateFlow<Boolean> = preferences.focusVibrationEnabled

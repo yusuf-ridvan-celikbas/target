@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.ui.graphics.Color
 import com.ridvan.target.R
+import com.ridvan.target.data.focustimer.FocusSoundEvent
 import com.ridvan.target.data.notifications.NotificationScheduler
 import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
@@ -151,16 +152,31 @@ class AppPreferences(context: Context) {
         CoroutineScope(Dispatchers.IO).launch { NotificationScheduler.reschedule(appContext) }
     }
 
-    // Focus Timer's alarm sound/vibration preferences — unrelated to the Planner/Exam reminder
-    // system above, so neither of these calls rescheduleNotifications().
-    private val _focusAlarmSoundUri = MutableStateFlow(prefs.getString(KEY_FOCUS_ALARM_SOUND_URI, null))
-    val focusAlarmSoundUri: StateFlow<String?> = _focusAlarmSoundUri.asStateFlow()
+    // Focus Timer's sound/vibration preferences — unrelated to the Planner/Exam reminder
+    // system above, so none of these call rescheduleNotifications().
+    private val _focusSoundUris = MutableStateFlow(loadFocusSoundUris())
 
-    fun setFocusAlarmSoundUri(uri: String?) {
+    /** One optional custom sound per [FocusSoundEvent]; a missing entry means the system default. */
+    val focusSoundUris: StateFlow<Map<FocusSoundEvent, String>> = _focusSoundUris.asStateFlow()
+
+    fun setFocusSoundUri(event: FocusSoundEvent, uri: String?) {
         prefs.edit().apply {
-            if (uri == null) remove(KEY_FOCUS_ALARM_SOUND_URI) else putString(KEY_FOCUS_ALARM_SOUND_URI, uri)
+            if (uri == null) remove(event.prefKey) else putString(event.prefKey, uri)
         }.apply()
-        _focusAlarmSoundUri.value = uri
+        _focusSoundUris.value = if (uri == null) _focusSoundUris.value - event else _focusSoundUris.value + (event to uri)
+    }
+
+    private fun loadFocusSoundUris(): Map<FocusSoundEvent, String> {
+        // One-time carry-over from the single pre-split alarm sound: it used to play whenever a
+        // phase ended, so it becomes the Work-end and Break-end sound.
+        prefs.getString(KEY_LEGACY_FOCUS_ALARM_SOUND_URI, null)?.let { legacy ->
+            prefs.edit()
+                .putString(FocusSoundEvent.WORK_END.prefKey, legacy)
+                .putString(FocusSoundEvent.BREAK_END.prefKey, legacy)
+                .remove(KEY_LEGACY_FOCUS_ALARM_SOUND_URI)
+                .apply() // apply() updates the in-memory values immediately, so the read below sees them.
+        }
+        return FocusSoundEvent.entries.mapNotNull { event -> prefs.getString(event.prefKey, null)?.let { event to it } }.toMap()
     }
 
     private val _focusVibrationEnabled = MutableStateFlow(prefs.getBoolean(KEY_FOCUS_VIBRATION_ENABLED, true))
@@ -180,7 +196,7 @@ class AppPreferences(context: Context) {
         const val KEY_USER_ID = "current_user_id"
         const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val KEY_NOTIFICATION_LEAD_TIME = "notification_lead_time"
-        const val KEY_FOCUS_ALARM_SOUND_URI = "focus_alarm_sound_uri"
+        const val KEY_LEGACY_FOCUS_ALARM_SOUND_URI = "focus_alarm_sound_uri"
         const val KEY_FOCUS_VIBRATION_ENABLED = "focus_vibration_enabled"
         const val NO_USER = -1L
     }

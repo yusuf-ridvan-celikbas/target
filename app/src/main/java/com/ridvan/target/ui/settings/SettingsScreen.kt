@@ -25,13 +25,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
@@ -57,6 +59,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.data.focustimer.FocusSoundEvent
 import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.data.local.BannerColor
 import com.ridvan.target.data.local.NotificationLeadTime
@@ -81,7 +84,7 @@ fun SettingsScreen(
     val bannerColor by viewModel.bannerColor.collectAsStateWithLifecycle()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val notificationLeadTime by viewModel.notificationLeadTime.collectAsStateWithLifecycle()
-    val focusAlarmSoundUri by viewModel.focusAlarmSoundUri.collectAsStateWithLifecycle()
+    val focusSoundUris by viewModel.focusSoundUris.collectAsStateWithLifecycle()
     val focusVibrationEnabled by viewModel.focusVibrationEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context.findActivity()
@@ -94,15 +97,21 @@ fun SettingsScreen(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted -> viewModel.setNotificationsEnabled(granted) }
+    // Both pickers are shared by all four sound rows; this remembers which row launched them.
+    var pendingSoundEvent by rememberSaveable { mutableStateOf<FocusSoundEvent?>(null) }
     val ringtoneLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val uri = result.data?.let { IntentCompat.getParcelableExtra(it, RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java) }
-        if (uri != null) viewModel.setFocusAlarmSoundUri(uri.toString())
+        val event = pendingSoundEvent
+        if (uri != null && event != null) viewModel.setFocusSoundUri(event, uri.toString())
+        pendingSoundEvent = null
     }
     val audioFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
+        val event = pendingSoundEvent
+        if (uri != null && event != null) {
             context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            viewModel.setFocusAlarmSoundUri(uri.toString())
+            viewModel.setFocusSoundUri(event, uri.toString())
         }
+        pendingSoundEvent = null
     }
 
     val scrollState = rememberScrollState()
@@ -258,40 +267,32 @@ fun SettingsScreen(
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     Text(stringResource(R.string.settings_focus_timer_preferences), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        stringResource(R.string.settings_focus_alarm_sound),
+                        stringResource(R.string.settings_focus_sounds),
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 12.dp),
+                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                     )
-                    Text(
-                        if (focusAlarmSoundUri == null) stringResource(R.string.focustimer_sound_default) else stringResource(R.string.focustimer_sound_custom),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
-                    )
-                    OutlinedButton(
-                        onClick = {
-                            ringtoneLauncher.launch(
-                                Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
-                                    putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION)
-                                    putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
-                                    putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
-                                    focusAlarmSoundUri?.let { putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(it)) }
-                                },
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(stringResource(R.string.focustimer_choose_ringtone))
-                    }
-                    OutlinedButton(
-                        onClick = { audioFileLauncher.launch(arrayOf("audio/*")) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    ) {
-                        Text(stringResource(R.string.focustimer_browse_audio))
-                    }
-                    if (focusAlarmSoundUri != null) {
-                        TextButton(onClick = { viewModel.setFocusAlarmSoundUri(null) }, modifier = Modifier.padding(top = 4.dp)) {
-                            Text(stringResource(R.string.focustimer_reset_sound))
-                        }
+                    FocusSoundEvent.entries.forEach { event ->
+                        val uri = focusSoundUris[event]
+                        FocusSoundRow(
+                            label = stringResource(event.labelRes),
+                            soundUri = uri,
+                            onChooseRingtone = {
+                                pendingSoundEvent = event
+                                ringtoneLauncher.launch(
+                                    Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                                        putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION)
+                                        putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+                                        putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                                        uri?.let { putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(it)) }
+                                    },
+                                )
+                            },
+                            onBrowseAudioFile = {
+                                pendingSoundEvent = event
+                                audioFileLauncher.launch(arrayOf("audio/*"))
+                            },
+                            onReset = { viewModel.setFocusSoundUri(event, null) },
+                        )
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
                         Text(stringResource(R.string.label_vibration), modifier = Modifier.weight(1f))
@@ -332,6 +333,64 @@ private fun ColorSwatch(
                     Icons.Filled.Check,
                     contentDescription = null,
                     tint = if (color.luminance() >= 0.5f) Color.Black else Color.White,
+                )
+            }
+        }
+    }
+}
+
+/** One Focus Timer sound slot: its name, the current sound's title, and a menu to change it. */
+@Composable
+private fun FocusSoundRow(
+    label: String,
+    soundUri: String?,
+    onChooseRingtone: () -> Unit,
+    onBrowseAudioFile: () -> Unit,
+    onReset: () -> Unit,
+) {
+    val context = LocalContext.current
+    var menuExpanded by remember { mutableStateOf(false) }
+    val customFallback = stringResource(R.string.focustimer_sound_custom)
+    val soundTitle = if (soundUri == null) {
+        stringResource(R.string.focustimer_sound_default)
+    } else {
+        remember(soundUri) {
+            runCatching { RingtoneManager.getRingtone(context, Uri.parse(soundUri))?.getTitle(context) }.getOrNull()
+        } ?: customFallback
+    }
+    Box {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { menuExpanded = true }
+                .padding(vertical = 8.dp),
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    soundTitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Icon(Icons.Filled.MusicNote, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        }
+        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.focustimer_choose_ringtone)) },
+                onClick = { menuExpanded = false; onChooseRingtone() },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.focustimer_browse_audio)) },
+                onClick = { menuExpanded = false; onBrowseAudioFile() },
+            )
+            if (soundUri != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.focustimer_reset_sound)) },
+                    onClick = { menuExpanded = false; onReset() },
                 )
             }
         }

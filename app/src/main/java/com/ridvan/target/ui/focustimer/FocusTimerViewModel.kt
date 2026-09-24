@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.focustimer.FocusAlarmPlayer
+import com.ridvan.target.data.focustimer.FocusSoundEvent
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusPreset
@@ -30,6 +31,9 @@ enum class FocusPhase { WORK, BREAK }
 
 private const val RECENT_HISTORY_DAYS_BEFORE_TODAY = 6
 
+/** How long the "Start break?" / "Start work?" prompt waits before assuming the user left. */
+const val FOCUS_CONFIRM_TIMEOUT_MILLIS = 30_000L
+
 /**
  * In-memory only — not persisted to Room while running (see CLAUDE.md's Focus Timer scope:
  * foreground-only was the explicit choice, so losing an in-progress run to OS process death is
@@ -51,6 +55,15 @@ data class RunningFocusSession(
     val pausedRemainingMillis: Long,
     val cyclesCompleted: Int,
     val startedAt: Long,
+    /** This session's own round lengths — start as the preset's, grow via "Rest of session" add-time.
+     * The preset itself is never changed, and History still snapshots the preset's values. */
+    val workMinutes: Int,
+    val breakMinutes: Int,
+    /** Non-null while a phase has ended and we're waiting for the user to confirm the next one. */
+    val awaitingNextPhase: FocusPhase? = null,
+    val promptEndsAt: Long = 0L,
+    /** Full length of the current round, including any added time — the progress border's 100%. */
+    val phaseDurationMillis: Long = 0L,
 )
 
 class FocusTimerViewModel(application: Application) : AndroidViewModel(application) {
@@ -81,9 +94,14 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    // Read at alarm time only — editing these lives in App Settings' Focus Timer Preferences.
-    private val focusAlarmSoundUri: StateFlow<String?> = appPreferences.focusAlarmSoundUri
+    // Read at sound time only — editing these lives in App Settings' Focus Timer Preferences.
+    private val focusSoundUris: StateFlow<Map<FocusSoundEvent, String>> = appPreferences.focusSoundUris
     private val focusVibrationEnabled: StateFlow<Boolean> = appPreferences.focusVibrationEnabled
+
+    /** End sounds also vibrate (they're what pulls the user back); start sounds follow a tap, so they don't. */
+    private fun playSound(event: FocusSoundEvent, vibrate: Boolean) {
+        FocusAlarmPlayer.playAlarm(appContext, focusSoundUris.value[event], vibrate && focusVibrationEnabled.value)
+    }
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
@@ -93,6 +111,9 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _remainingMillis = MutableStateFlow(0L)
     val remainingMillis: StateFlow<Long> = _remainingMillis.asStateFlow()
+
+    private val _promptRemainingMillis = MutableStateFlow(0L)
+    val promptRemainingMillis: StateFlow<Long> = _promptRemainingMillis.asStateFlow()
 
     private var tickerJob: Job? = null
     private var lastTickAt = 0L
@@ -122,12 +143,16 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
             topicName = topicName,
             phase = FocusPhase.WORK,
             phaseEndAt = now + preset.workMinutes * 60_000L,
+            phaseDurationMillis = preset.workMinutes * 60_000L,
+            workMinutes = preset.workMinutes,
+            breakMinutes = preset.breakMinutes,
             isPaused = false,
             pausedRemainingMillis = 0L,
             cyclesCompleted = 0,
             startedAt = now,
         )
         _remainingMillis.value = preset.workMinutes * 60_000L
+        playSound(FocusSoundEvent.WORK_START, vibrate = false)
         startTicker()
     }
 
@@ -144,37 +169,122 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     private fun tick() {
         val session = _runningSession.value ?: return
         val now = System.currentTimeMillis()
+        if (session.awaitingNextPhase != null) {
+            // Waiting on "Start break?"/"Start work?" — this time counts toward neither phase.
+            lastTickAt = now
+            val promptRemaining = session.promptEndsAt - now
+            if (promptRemaining <= 0) {
+                // No answer: assume the user left the desk, end and save what was done.
+                stopSession()
+            } else {
+                _promptRemainingMillis.value = promptRemaining
+            }
+            return
+        }
         if (session.isPaused) {
             _remainingMillis.value = session.pausedRemainingMillis
             lastTickAt = now
             return
         }
-        val delta = (now - lastTickAt).coerceAtLeast(0)
-        lastTickAt = now
-        when (session.phase) {
-            FocusPhase.WORK -> accumulatedWorkMillis += delta
-            FocusPhase.BREAK -> accumulatedBreakMillis += delta
-        }
+        accrue(session.phase, now)
         val remaining = session.phaseEndAt - now
         if (remaining <= 0) {
-            FocusAlarmPlayer.playAlarm(appContext, focusAlarmSoundUri.value, focusVibrationEnabled.value)
+            playSound(if (session.phase == FocusPhase.WORK) FocusSoundEvent.WORK_END else FocusSoundEvent.BREAK_END, vibrate = true)
             val nextPhase = if (session.phase == FocusPhase.WORK) FocusPhase.BREAK else FocusPhase.WORK
-            val nextDurationMinutes = if (nextPhase == FocusPhase.WORK) session.preset.workMinutes else session.preset.breakMinutes
             val newCycles = if (session.phase == FocusPhase.WORK) session.cyclesCompleted + 1 else session.cyclesCompleted
             _runningSession.value = session.copy(
-                phase = nextPhase,
-                phaseEndAt = now + nextDurationMinutes * 60_000L,
                 cyclesCompleted = newCycles,
+                awaitingNextPhase = nextPhase,
+                promptEndsAt = now + FOCUS_CONFIRM_TIMEOUT_MILLIS,
             )
-            _remainingMillis.value = nextDurationMinutes * 60_000L
+            _remainingMillis.value = 0L
+            _promptRemainingMillis.value = FOCUS_CONFIRM_TIMEOUT_MILLIS
         } else {
             _remainingMillis.value = remaining
         }
     }
 
+    /** The user answered the prompt — start the phase it offered. */
+    fun confirmNextPhase() {
+        val session = _runningSession.value ?: return
+        val nextPhase = session.awaitingNextPhase ?: return
+        beginPhase(session, nextPhase, System.currentTimeMillis())
+    }
+
+    /** "Skip to break"/"Skip to work": end the current phase now and start the other one directly —
+     * no confirmation prompt, since the user is evidently at the desk. A skipped work round still
+     * counts as a completed cycle. */
+    fun skipToNextPhase() {
+        val session = _runningSession.value ?: return
+        if (session.awaitingNextPhase != null) return
+        val now = System.currentTimeMillis()
+        if (!session.isPaused) accrue(session.phase, now)
+        val next = if (session.phase == FocusPhase.WORK) FocusPhase.BREAK else FocusPhase.WORK
+        val cycles = if (session.phase == FocusPhase.WORK) session.cyclesCompleted + 1 else session.cyclesCompleted
+        beginPhase(session.copy(cyclesCompleted = cycles), next, now)
+    }
+
+    /**
+     * Adds [minutes] to the running phase. With [keepForRestOfSession], every later round of the
+     * same phase in this session is that much longer too (the preset itself is untouched).
+     */
+    fun addTime(minutes: Int, keepForRestOfSession: Boolean) {
+        val session = _runningSession.value ?: return
+        if (minutes <= 0 || session.awaitingNextPhase != null) return
+        val extraMillis = minutes * 60_000L
+        var updated = if (session.isPaused) {
+            session.copy(
+                pausedRemainingMillis = session.pausedRemainingMillis + extraMillis,
+                phaseDurationMillis = session.phaseDurationMillis + extraMillis,
+            )
+        } else {
+            session.copy(
+                phaseEndAt = session.phaseEndAt + extraMillis,
+                phaseDurationMillis = session.phaseDurationMillis + extraMillis,
+            )
+        }
+        if (keepForRestOfSession) {
+            updated = when (session.phase) {
+                FocusPhase.WORK -> updated.copy(workMinutes = updated.workMinutes + minutes)
+                FocusPhase.BREAK -> updated.copy(breakMinutes = updated.breakMinutes + minutes)
+            }
+        }
+        _runningSession.value = updated
+        _remainingMillis.value = if (updated.isPaused) {
+            updated.pausedRemainingMillis
+        } else {
+            (updated.phaseEndAt - System.currentTimeMillis()).coerceAtLeast(0)
+        }
+    }
+
+    private fun beginPhase(session: RunningFocusSession, phase: FocusPhase, now: Long) {
+        val durationMillis = (if (phase == FocusPhase.WORK) session.workMinutes else session.breakMinutes) * 60_000L
+        lastTickAt = now
+        _runningSession.value = session.copy(
+            phase = phase,
+            phaseEndAt = now + durationMillis,
+            phaseDurationMillis = durationMillis,
+            isPaused = false,
+            pausedRemainingMillis = 0L,
+            awaitingNextPhase = null,
+            promptEndsAt = 0L,
+        )
+        _remainingMillis.value = durationMillis
+        playSound(if (phase == FocusPhase.WORK) FocusSoundEvent.WORK_START else FocusSoundEvent.BREAK_START, vibrate = false)
+    }
+
+    private fun accrue(phase: FocusPhase, now: Long) {
+        val delta = (now - lastTickAt).coerceAtLeast(0)
+        lastTickAt = now
+        when (phase) {
+            FocusPhase.WORK -> accumulatedWorkMillis += delta
+            FocusPhase.BREAK -> accumulatedBreakMillis += delta
+        }
+    }
+
     fun pauseSession() {
         val session = _runningSession.value ?: return
-        if (session.isPaused) return
+        if (session.isPaused || session.awaitingNextPhase != null) return
         val remaining = (session.phaseEndAt - System.currentTimeMillis()).coerceAtLeast(0)
         _runningSession.value = session.copy(isPaused = true, pausedRemainingMillis = remaining)
     }
@@ -194,6 +304,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         persistSession(session, System.currentTimeMillis())
         _runningSession.value = null
         _remainingMillis.value = 0L
+        _promptRemainingMillis.value = 0L
     }
 
     private fun persistSession(session: RunningFocusSession, endedAt: Long) {

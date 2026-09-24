@@ -1,10 +1,16 @@
 package com.ridvan.target.ui.focustimer
 
 import android.view.WindowManager
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,17 +25,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,12 +48,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
@@ -84,6 +104,7 @@ fun FocusTimerScreen(
     val recentHistory by viewModel.recentHistory.collectAsStateWithLifecycle()
     val runningSession by viewModel.runningSession.collectAsStateWithLifecycle()
     val remainingMillis by viewModel.remainingMillis.collectAsStateWithLifecycle()
+    val promptRemainingMillis by viewModel.promptRemainingMillis.collectAsStateWithLifecycle()
 
     var selectedPresetId by remember { mutableStateOf<Long?>(null) }
     var linkMode by remember { mutableStateOf(LinkMode.NONE) }
@@ -181,6 +202,10 @@ fun FocusTimerScreen(
                 RunningContent(
                     session = session,
                     remainingMillis = remainingMillis,
+                    promptRemainingMillis = promptRemainingMillis,
+                    onConfirmNextPhase = viewModel::confirmNextPhase,
+                    onAddTime = viewModel::addTime,
+                    onSkip = viewModel::skipToNextPhase,
                     onPause = viewModel::pauseSession,
                     onResume = viewModel::resumeSession,
                     onStop = viewModel::stopSession,
@@ -311,6 +336,10 @@ private fun IdleContent(
 private fun RunningContent(
     session: RunningFocusSession,
     remainingMillis: Long,
+    promptRemainingMillis: Long,
+    onConfirmNextPhase: () -> Unit,
+    onAddTime: (minutes: Int, keepForRestOfSession: Boolean) -> Unit,
+    onSkip: () -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
@@ -318,13 +347,31 @@ private fun RunningContent(
     onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
 ) {
+    var showEndConfirm by remember { mutableStateOf(false) }
+    var showCustomTime by remember { mutableStateOf(false) }
+    var keepForRestOfSession by rememberSaveable { mutableStateOf(false) }
+    val awaitingNextPhase = session.awaitingNextPhase
+    val isWork = session.phase == FocusPhase.WORK
+
     val phaseLabel = if (session.phase == FocusPhase.WORK) stringResource(R.string.focustimer_phase_work) else stringResource(R.string.focustimer_phase_break)
     val phaseColor = if (session.phase == FocusPhase.WORK) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
 
+    val progress = if (session.phaseDurationMillis > 0) {
+        (remainingMillis.toFloat() / session.phaseDurationMillis).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(phaseLabel, style = MaterialTheme.typography.headlineSmall, color = phaseColor)
-        Text(formatCountdown(remainingMillis), style = MaterialTheme.typography.displayLarge)
-        Text(stringResource(R.string.focustimer_cycle_count, session.cyclesCompleted), style = MaterialTheme.typography.bodyMedium)
+        CountdownBorder(
+            progress = progress,
+            color = phaseColor,
+            modifier = Modifier.fillMaxWidth(0.85f),
+        ) {
+            Text(phaseLabel, style = MaterialTheme.typography.headlineSmall, color = phaseColor)
+            Text(formatCountdown(remainingMillis), style = MaterialTheme.typography.displayLarge)
+            Text(stringResource(R.string.focustimer_cycle_count, session.cyclesCompleted), style = MaterialTheme.typography.bodyMedium)
+        }
 
         val linkLabel = listOfNotNull(session.courseName, session.languageName, session.topicName).joinToString(" · ")
         if (linkLabel.isNotEmpty()) {
@@ -351,6 +398,7 @@ private fun RunningContent(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
                 onClick = if (session.isPaused) onResume else onPause,
+                enabled = awaitingNextPhase == null,
                 modifier = Modifier.weight(1f).height(88.dp),
                 shape = MaterialTheme.shapes.large,
             ) {
@@ -366,7 +414,7 @@ private fun RunningContent(
                 )
             }
             Button(
-                onClick = onStop,
+                onClick = { showEndConfirm = true },
                 modifier = Modifier.weight(1f).height(88.dp),
                 shape = MaterialTheme.shapes.large,
             ) {
@@ -375,6 +423,123 @@ private fun RunningContent(
                 Text(stringResource(R.string.focustimer_stop), style = MaterialTheme.typography.titleLarge)
             }
         }
+
+        OutlinedButton(
+            onClick = onSkip,
+            enabled = awaitingNextPhase == null,
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+        ) {
+            Icon(Icons.Filled.SkipNext, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(if (isWork) R.string.focustimer_skip_to_break else R.string.focustimer_skip_to_work))
+        }
+
+        Spacer(Modifier.height(16.dp))
+        GroupedCard {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    stringResource(if (isWork) R.string.focustimer_add_time_work else R.string.focustimer_add_time_break),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                ) {
+                    listOf(2, 5, 10).forEach { minutes ->
+                        FilledTonalButton(
+                            onClick = { onAddTime(minutes, keepForRestOfSession) },
+                            enabled = awaitingNextPhase == null,
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                            modifier = Modifier.weight(1f),
+                        ) { Text(stringResource(R.string.focustimer_add_minutes, minutes)) }
+                    }
+                    FilledTonalButton(
+                        onClick = { showCustomTime = true },
+                        enabled = awaitingNextPhase == null,
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                        modifier = Modifier.weight(1.4f),
+                    ) { Text(stringResource(R.string.focustimer_add_custom), maxLines = 1) }
+                }
+                SegmentedToggle(
+                    options = listOf(
+                        SegmentedToggleOption(false, stringResource(R.string.focustimer_scope_this_round)),
+                        SegmentedToggleOption(true, stringResource(R.string.focustimer_scope_rest_of_session)),
+                    ),
+                    selected = keepForRestOfSession,
+                    onSelect = { keepForRestOfSession = it },
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                )
+                Text(
+                    stringResource(R.string.focustimer_session_durations, session.workMinutes, session.breakMinutes),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+    }
+
+    // A phase just ended: the user has FOCUS_CONFIRM_TIMEOUT_MILLIS to confirm the next one,
+    // otherwise the ViewModel ends and saves the session. Not dismissable by tapping outside/Back,
+    // so an accidental dismiss can't silently leave the session in limbo.
+    if (awaitingNextPhase != null) {
+        val startsBreak = awaitingNextPhase == FocusPhase.BREAK
+        val secondsLeft = ((promptRemainingMillis + 999) / 1000).toInt()
+        AlertDialog(
+            onDismissRequest = {},
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+            title = {
+                Text(stringResource(if (startsBreak) R.string.focustimer_prompt_start_break_title else R.string.focustimer_prompt_start_work_title))
+            },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.focustimer_prompt_message))
+                    CountdownBorder(
+                        progress = (promptRemainingMillis.toFloat() / FOCUS_CONFIRM_TIMEOUT_MILLIS).coerceIn(0f, 1f),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 16.dp).fillMaxWidth(0.6f),
+                    ) {
+                        Text(stringResource(R.string.focustimer_prompt_seconds, secondsLeft), style = MaterialTheme.typography.displaySmall)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = onConfirmNextPhase) {
+                    Text(stringResource(if (startsBreak) R.string.focustimer_start_break else R.string.focustimer_start_work))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndConfirm = true }) { Text(stringResource(R.string.focustimer_end_session)) }
+            },
+        )
+    }
+
+    if (showCustomTime) {
+        CustomTimeDialog(
+            onConfirm = { minutes ->
+                onAddTime(minutes, keepForRestOfSession)
+                showCustomTime = false
+            },
+            onDismiss = { showCustomTime = false },
+        )
+    }
+
+    if (showEndConfirm) {
+        AlertDialog(
+            onDismissRequest = { showEndConfirm = false },
+            title = { Text(stringResource(R.string.focustimer_end_session_confirm_title)) },
+            text = { Text(stringResource(R.string.focustimer_end_session_confirm_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showEndConfirm = false
+                    onStop()
+                }) { Text(stringResource(R.string.focustimer_end_session)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
+            },
+        )
     }
 }
 
@@ -466,3 +631,92 @@ private fun formatCountdown(millis: Long): String {
     val seconds = totalSeconds % 60
     return "%02d:%02d".format(minutes, seconds)
 }
+
+private const val MAX_CUSTOM_ADD_MINUTES = 180
+
+@Composable
+private fun CustomTimeDialog(onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
+    var text by remember { mutableStateOf("") }
+    val minutes = text.toIntOrNull()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.focustimer_add_custom_title)) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { input ->
+                    val digits = input.filter { it.isDigit() }.take(3)
+                    text = digits.toIntOrNull()?.coerceAtMost(MAX_CUSTOM_ADD_MINUTES)?.toString() ?: digits
+                },
+                label = { Text(stringResource(R.string.focustimer_add_custom_label)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { minutes?.let(onConfirm) }, enabled = minutes != null && minutes > 0) {
+                Text(stringResource(R.string.common_add))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+    )
+}
+
+/**
+ * A rounded-square outline around the countdown that is eaten away clockwise from the top
+ * centre as the round runs down ([progress] = fraction of the round still remaining).
+ * Updates arrive once a second, so the fraction is animated linearly to look continuous.
+ */
+@Composable
+private fun CountdownBorder(
+    progress: Float,
+    color: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 1_000, easing = LinearEasing),
+        label = "countdownBorder",
+    )
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .drawBehind {
+                val strokeWidth = 8.dp.toPx()
+                val inset = strokeWidth / 2
+                val left = inset
+                val top = inset
+                val right = size.width - inset
+                val bottom = size.height - inset
+                val radius = 28.dp.toPx().coerceAtMost((bottom - top) / 2)
+                // Built by hand (not addRoundRect) so the path starts at top centre and runs clockwise.
+                val outline = Path().apply {
+                    moveTo(size.width / 2, top)
+                    lineTo(right - radius, top)
+                    arcTo(Rect(right - 2 * radius, top, right, top + 2 * radius), -90f, 90f, false)
+                    lineTo(right, bottom - radius)
+                    arcTo(Rect(right - 2 * radius, bottom - 2 * radius, right, bottom), 0f, 90f, false)
+                    lineTo(left + radius, bottom)
+                    arcTo(Rect(left, bottom - 2 * radius, left + 2 * radius, bottom), 90f, 90f, false)
+                    lineTo(left, top + radius)
+                    arcTo(Rect(left, top, left + 2 * radius, top + 2 * radius), 180f, 90f, false)
+                    lineTo(size.width / 2, top)
+                }
+                val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                drawPath(outline, trackColor, style = stroke)
+                if (animatedProgress > 0f) {
+                    val measure = PathMeasure().apply { setPath(outline, false) }
+                    val length = measure.length
+                    val remaining = Path()
+                    // The elapsed part [0, elapsed) is gone; what's left runs to the end of the path.
+                    measure.getSegment((1f - animatedProgress) * length, length, remaining, true)
+                    drawPath(remaining, color, style = stroke)
+                }
+            }
+            .padding(horizontal = 24.dp, vertical = 28.dp),
+        content = content,
+    )
+}
+
