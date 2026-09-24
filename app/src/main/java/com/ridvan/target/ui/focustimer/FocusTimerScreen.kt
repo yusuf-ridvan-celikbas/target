@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SkipNext
@@ -40,6 +41,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -53,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -621,13 +624,31 @@ private fun HistorySection(
     }
 }
 
+/** A rounded, tinted box with a down arrow (flips up while open) so the picker reads as tappable. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DropdownField(selectedLabel: String, items: @Composable (closeMenu: () -> Unit) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
+    val arrowRotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "dropdownArrow")
     Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(selectedLabel, style = MaterialTheme.typography.bodyLarge)
+        Surface(
+            onClick = { expanded = true },
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            ) {
+                Text(selectedLabel, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Icon(
+                    Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.rotate(arrowRotation),
+                )
+            }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items { expanded = false }
