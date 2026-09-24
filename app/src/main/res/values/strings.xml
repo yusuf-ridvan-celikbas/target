@@ -552,9 +552,12 @@
     <string name="focustimer_end_session_confirm_message">Are you sure you want to end the session?</string>
     <string name="focustimer_skip_to_break">Skip to break</string>
     <string name="focustimer_skip_to_work">Skip to work</string>
-    <string name="focustimer_add_time_work">Add time to this work round</string>
-    <string name="focustimer_add_time_break">Add time to this break</string>
+    <string name="focustimer_add_time_work">Adjust time for this work round</string>
+    <string name="focustimer_add_time_break">Adjust time for this break</string>
     <string name="focustimer_add_minutes">+%1$d min</string>
+    <string name="focustimer_subtract_minutes">−%1$d min</string>
+    <string name="focustimer_subtract">Subtract</string>
+    <string name="focustimer_apply">Apply</string>
     <string name="focustimer_add_custom">Custom…</string>
     <string name="focustimer_add_custom_title">Add time</string>
     <string name="focustimer_add_custom_label">Minutes</string>

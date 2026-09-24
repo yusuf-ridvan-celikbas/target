@@ -550,9 +550,12 @@
     <string name="focustimer_end_session_confirm_message">Oturumu bitirmek istediğinizden emin misiniz?</string>
     <string name="focustimer_skip_to_break">Molaya geç</string>
     <string name="focustimer_skip_to_work">Çalışmaya geç</string>
-    <string name="focustimer_add_time_work">Bu çalışma turuna süre ekle</string>
-    <string name="focustimer_add_time_break">Bu molaya süre ekle</string>
+    <string name="focustimer_add_time_work">Bu çalışma turunun süresini ayarla</string>
+    <string name="focustimer_add_time_break">Bu molanın süresini ayarla</string>
     <string name="focustimer_add_minutes">+%1$d dk</string>
+    <string name="focustimer_subtract_minutes">−%1$d dk</string>
+    <string name="focustimer_subtract">Çıkar</string>
+    <string name="focustimer_apply">Uygula</string>
     <string name="focustimer_add_custom">Özel…</string>
     <string name="focustimer_add_custom_title">Süre ekle</string>
     <string name="focustimer_add_custom_label">Dakika</string>

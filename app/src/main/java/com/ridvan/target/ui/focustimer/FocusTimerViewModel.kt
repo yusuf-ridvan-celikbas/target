@@ -34,6 +34,9 @@ private const val RECENT_HISTORY_DAYS_BEFORE_TODAY = 6
 /** How long the "Start break?" / "Start work?" prompt waits before assuming the user left. */
 const val FOCUS_CONFIRM_TIMEOUT_MILLIS = 30_000L
 
+/** "Rest of session" cuts never shorten a work/break round below this. */
+private const val MIN_ROUND_MINUTES = 1
+
 /**
  * In-memory only — not persisted to Room while running (see CLAUDE.md's Focus Timer scope:
  * foreground-only was the explicit choice, so losing an in-progress run to OS process death is
@@ -189,16 +192,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         accrue(session.phase, now)
         val remaining = session.phaseEndAt - now
         if (remaining <= 0) {
-            playSound(if (session.phase == FocusPhase.WORK) FocusSoundEvent.WORK_END else FocusSoundEvent.BREAK_END, vibrate = true)
-            val nextPhase = if (session.phase == FocusPhase.WORK) FocusPhase.BREAK else FocusPhase.WORK
-            val newCycles = if (session.phase == FocusPhase.WORK) session.cyclesCompleted + 1 else session.cyclesCompleted
-            _runningSession.value = session.copy(
-                cyclesCompleted = newCycles,
-                awaitingNextPhase = nextPhase,
-                promptEndsAt = now + FOCUS_CONFIRM_TIMEOUT_MILLIS,
-            )
-            _remainingMillis.value = 0L
-            _promptRemainingMillis.value = FOCUS_CONFIRM_TIMEOUT_MILLIS
+            finishPhase(session, now)
         } else {
             _remainingMillis.value = remaining
         }
@@ -225,36 +219,53 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     /**
-     * Adds [minutes] to the running phase. With [keepForRestOfSession], every later round of the
-     * same phase in this session is that much longer too (the preset itself is untouched).
+     * Adds [minutes] to the running round, or cuts it when negative. A cut larger than the time
+     * left ends the round right away, through the normal "Start break?/Start work?" prompt. With
+     * [keepForRestOfSession], every later round of the same phase in this session changes by the
+     * same amount too, never below [MIN_ROUND_MINUTES] (the preset itself is untouched).
      */
-    fun addTime(minutes: Int, keepForRestOfSession: Boolean) {
+    fun adjustTime(minutes: Int, keepForRestOfSession: Boolean) {
         val session = _runningSession.value ?: return
-        if (minutes <= 0 || session.awaitingNextPhase != null) return
-        val extraMillis = minutes * 60_000L
+        if (minutes == 0 || session.awaitingNextPhase != null) return
+        val now = System.currentTimeMillis()
+        val deltaMillis = minutes * 60_000L
+        val currentRemaining = if (session.isPaused) session.pausedRemainingMillis else (session.phaseEndAt - now).coerceAtLeast(0)
+        val newRemaining = (currentRemaining + deltaMillis).coerceAtLeast(0)
+        // Shift the round's total by the same amount the remaining time actually moved, so the
+        // progress border stays consistent with the elapsed part.
+        val newDuration = (session.phaseDurationMillis + (newRemaining - currentRemaining)).coerceAtLeast(newRemaining)
         var updated = if (session.isPaused) {
-            session.copy(
-                pausedRemainingMillis = session.pausedRemainingMillis + extraMillis,
-                phaseDurationMillis = session.phaseDurationMillis + extraMillis,
-            )
+            session.copy(pausedRemainingMillis = newRemaining, phaseDurationMillis = newDuration)
         } else {
-            session.copy(
-                phaseEndAt = session.phaseEndAt + extraMillis,
-                phaseDurationMillis = session.phaseDurationMillis + extraMillis,
-            )
+            session.copy(phaseEndAt = now + newRemaining, phaseDurationMillis = newDuration)
         }
         if (keepForRestOfSession) {
             updated = when (session.phase) {
-                FocusPhase.WORK -> updated.copy(workMinutes = updated.workMinutes + minutes)
-                FocusPhase.BREAK -> updated.copy(breakMinutes = updated.breakMinutes + minutes)
+                FocusPhase.WORK -> updated.copy(workMinutes = (updated.workMinutes + minutes).coerceAtLeast(MIN_ROUND_MINUTES))
+                FocusPhase.BREAK -> updated.copy(breakMinutes = (updated.breakMinutes + minutes).coerceAtLeast(MIN_ROUND_MINUTES))
             }
         }
-        _runningSession.value = updated
-        _remainingMillis.value = if (updated.isPaused) {
-            updated.pausedRemainingMillis
+        if (newRemaining == 0L) {
+            if (!session.isPaused) accrue(session.phase, now)
+            finishPhase(updated.copy(isPaused = false), now)
         } else {
-            (updated.phaseEndAt - System.currentTimeMillis()).coerceAtLeast(0)
+            _runningSession.value = updated
+            _remainingMillis.value = newRemaining
         }
+    }
+
+    /** The round is over: play its end sound, count the cycle, and wait for the user to confirm the next one. */
+    private fun finishPhase(session: RunningFocusSession, now: Long) {
+        playSound(if (session.phase == FocusPhase.WORK) FocusSoundEvent.WORK_END else FocusSoundEvent.BREAK_END, vibrate = true)
+        val nextPhase = if (session.phase == FocusPhase.WORK) FocusPhase.BREAK else FocusPhase.WORK
+        val newCycles = if (session.phase == FocusPhase.WORK) session.cyclesCompleted + 1 else session.cyclesCompleted
+        _runningSession.value = session.copy(
+            cyclesCompleted = newCycles,
+            awaitingNextPhase = nextPhase,
+            promptEndsAt = now + FOCUS_CONFIRM_TIMEOUT_MILLIS,
+        )
+        _remainingMillis.value = 0L
+        _promptRemainingMillis.value = FOCUS_CONFIRM_TIMEOUT_MILLIS
     }
 
     private fun beginPhase(session: RunningFocusSession, phase: FocusPhase, now: Long) {

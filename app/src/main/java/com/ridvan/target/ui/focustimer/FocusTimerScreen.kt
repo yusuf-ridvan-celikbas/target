@@ -204,7 +204,7 @@ fun FocusTimerScreen(
                     remainingMillis = remainingMillis,
                     promptRemainingMillis = promptRemainingMillis,
                     onConfirmNextPhase = viewModel::confirmNextPhase,
-                    onAddTime = viewModel::addTime,
+                    onAdjustTime = viewModel::adjustTime,
                     onSkip = viewModel::skipToNextPhase,
                     onPause = viewModel::pauseSession,
                     onResume = viewModel::resumeSession,
@@ -338,7 +338,7 @@ private fun RunningContent(
     remainingMillis: Long,
     promptRemainingMillis: Long,
     onConfirmNextPhase: () -> Unit,
-    onAddTime: (minutes: Int, keepForRestOfSession: Boolean) -> Unit,
+    onAdjustTime: (minutes: Int, keepForRestOfSession: Boolean) -> Unit,
     onSkip: () -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
@@ -445,9 +445,9 @@ private fun RunningContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 ) {
-                    listOf(2, 5, 10).forEach { minutes ->
+                    TIME_STEPS.forEach { minutes ->
                         FilledTonalButton(
-                            onClick = { onAddTime(minutes, keepForRestOfSession) },
+                            onClick = { onAdjustTime(minutes, keepForRestOfSession) },
                             enabled = awaitingNextPhase == null,
                             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
                             modifier = Modifier.weight(1f),
@@ -459,6 +459,21 @@ private fun RunningContent(
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1.4f),
                     ) { Text(stringResource(R.string.focustimer_add_custom), maxLines = 1) }
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                ) {
+                    TIME_STEPS.forEach { minutes ->
+                        OutlinedButton(
+                            onClick = { onAdjustTime(-minutes, keepForRestOfSession) },
+                            enabled = awaitingNextPhase == null,
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                            modifier = Modifier.weight(1f),
+                        ) { Text(stringResource(R.string.focustimer_subtract_minutes, minutes)) }
+                    }
+                    // Keeps the minus buttons lined up under the plus buttons.
+                    Spacer(Modifier.weight(1.4f))
                 }
                 SegmentedToggle(
                     options = listOf(
@@ -518,7 +533,7 @@ private fun RunningContent(
     if (showCustomTime) {
         CustomTimeDialog(
             onConfirm = { minutes ->
-                onAddTime(minutes, keepForRestOfSession)
+                onAdjustTime(minutes, keepForRestOfSession)
                 showCustomTime = false
             },
             onDismiss = { showCustomTime = false },
@@ -632,30 +647,44 @@ private fun formatCountdown(millis: Long): String {
     return "%02d:%02d".format(minutes, seconds)
 }
 
+private val TIME_STEPS = listOf(2, 5, 10)
 private const val MAX_CUSTOM_ADD_MINUTES = 180
 
+/** [onConfirm] receives a signed minute count — negative when Subtract is selected. */
 @Composable
 private fun CustomTimeDialog(onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
     var text by remember { mutableStateOf("") }
+    var subtract by remember { mutableStateOf(false) }
     val minutes = text.toIntOrNull()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.focustimer_add_custom_title)) },
         text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { input ->
-                    val digits = input.filter { it.isDigit() }.take(3)
-                    text = digits.toIntOrNull()?.coerceAtMost(MAX_CUSTOM_ADD_MINUTES)?.toString() ?: digits
-                },
-                label = { Text(stringResource(R.string.focustimer_add_custom_label)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-            )
+            Column {
+                SegmentedToggle(
+                    options = listOf(
+                        SegmentedToggleOption(false, stringResource(R.string.common_add)),
+                        SegmentedToggleOption(true, stringResource(R.string.focustimer_subtract)),
+                    ),
+                    selected = subtract,
+                    onSelect = { subtract = it },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                )
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { input ->
+                        val digits = input.filter { it.isDigit() }.take(3)
+                        text = digits.toIntOrNull()?.coerceAtMost(MAX_CUSTOM_ADD_MINUTES)?.toString() ?: digits
+                    },
+                    label = { Text(stringResource(R.string.focustimer_add_custom_label)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                )
+            }
         },
         confirmButton = {
-            TextButton(onClick = { minutes?.let(onConfirm) }, enabled = minutes != null && minutes > 0) {
-                Text(stringResource(R.string.common_add))
+            TextButton(onClick = { minutes?.let { onConfirm(if (subtract) -it else it) } }, enabled = minutes != null && minutes > 0) {
+                Text(stringResource(R.string.focustimer_apply))
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
