@@ -8,6 +8,10 @@ import java.util.Locale
 fun formatDate(epochMillis: Long): String =
     SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date(epochMillis))
 
+/** 24-hour "HH:mm", matching Home's clock and the Planner's time ranges. */
+fun formatTime(epochMillis: Long): String =
+    SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(epochMillis))
+
 private fun startOfDay(epochMillis: Long): Calendar {
     val calendar = Calendar.getInstance()
     calendar.timeInMillis = epochMillis

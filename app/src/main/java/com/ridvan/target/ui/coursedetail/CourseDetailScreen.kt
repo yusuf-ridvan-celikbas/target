@@ -60,6 +60,7 @@ import com.ridvan.target.ui.common.shareCsvFile
 fun CourseDetailScreen(
     onStudyResourcesClick: () -> Unit,
     onTopicsClick: () -> Unit,
+    onWorkHistoryClick: () -> Unit,
     onBack: () -> Unit,
     viewModel: CourseDetailViewModel = viewModel(),
 ) {
@@ -146,6 +147,12 @@ fun CourseDetailScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {
                 Text(stringResource(R.string.label_topics))
+            }
+            Button(
+                onClick = onWorkHistoryClick,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            ) {
+                Text(stringResource(R.string.label_work_history))
             }
         }
     }

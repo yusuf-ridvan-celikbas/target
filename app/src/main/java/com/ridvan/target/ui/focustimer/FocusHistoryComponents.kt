@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.ui.common.courseDisplayName
@@ -28,20 +30,17 @@ internal fun focusSessionLinkLabel(item: FocusSessionWithLinks): String? {
     return listOfNotNull(owner, item.topicName).joinToString(" · ").ifEmpty { null }
 }
 
-/** Shared by FocusTimerScreen's recent-history card and FocusHistoryScreen's full list. */
+/** Shared by FocusTimerScreen's recent-history card and every FocusHistoryScreen variant; tapping opens FocusSessionDetailScreen. */
 @Composable
 internal fun FocusHistoryRow(
     item: FocusSessionWithLinks,
-    onCourseClick: (Long) -> Unit,
-    onLanguageClick: (Long) -> Unit,
-    onTopicClick: (Long) -> Unit,
+    onClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
     val session = item.session
     val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
     val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
     val linkLabel = focusSessionLinkLabel(item)
-    val hasLink = session.courseId != null || session.languageId != null
     ListItem(
         headlineContent = { Text("${session.presetName} — ${formatDate(session.startedAt)}") },
         supportingContent = {
@@ -50,6 +49,15 @@ internal fun FocusHistoryRow(
                     Text(linkLabel, color = MaterialTheme.colorScheme.primary)
                 }
                 Text(stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText))
+                session.notes?.takeIf { it.isNotBlank() }?.let { notes ->
+                    Text(
+                        notes,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontStyle = FontStyle.Italic,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         },
         trailingContent = {
@@ -58,17 +66,7 @@ internal fun FocusHistoryRow(
             }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = if (hasLink) {
-            Modifier.clickable {
-                when {
-                    session.topicId != null -> onTopicClick(session.topicId)
-                    session.courseId != null -> onCourseClick(session.courseId)
-                    session.languageId != null -> onLanguageClick(session.languageId)
-                }
-            }
-        } else {
-            Modifier
-        },
+        modifier = Modifier.clickable(onClick = onClick),
     )
 }
 

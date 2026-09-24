@@ -116,6 +116,17 @@ object FocusHistoryRoute
 @Serializable
 object FocusHistoryHomeRoute
 
+@Serializable
+data class FocusSessionDetailRoute(val sessionId: Long)
+
+/** Focus Timer history filtered to one course — reached from CourseDetailScreen's Work History button. */
+@Serializable
+data class CourseWorkHistoryRoute(val courseId: Long)
+
+/** Focus Timer history filtered to one language — reached from LanguageDetailScreen's Work History button. */
+@Serializable
+data class LanguageWorkHistoryRoute(val languageId: Long)
+
 /** App Settings opened from Focus Timer's settings icon — same screen as SettingsRoute, scrolled to Focus Timer Preferences. */
 @Serializable
 object FocusTimerSettingsRoute

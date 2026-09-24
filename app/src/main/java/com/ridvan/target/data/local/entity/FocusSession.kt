@@ -60,4 +60,6 @@ data class FocusSession(
     val cyclesCompleted: Int,
     val totalWorkMinutes: Int,
     val totalBreakMinutes: Int,
+    /** Free-text annotation added afterwards on the session's detail screen, e.g. "Studied Dativ". */
+    val notes: String? = null,
 )

@@ -92,6 +92,7 @@ fun FocusTimerScreen(
     onManagePresets: () -> Unit,
     onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
+    onSessionClick: (Long) -> Unit,
     onCourseClick: (Long) -> Unit,
     onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
@@ -221,9 +222,7 @@ fun FocusTimerScreen(
                 HistorySection(
                     history = recentHistory,
                     onOpenHistory = onOpenHistory,
-                    onCourseClick = onCourseClick,
-                    onLanguageClick = onLanguageClick,
-                    onTopicClick = onTopicClick,
+                    onSessionClick = onSessionClick,
                     onDelete = viewModel::deleteHistorySession,
                 )
             }
@@ -562,9 +561,7 @@ private fun RunningContent(
 private fun HistorySection(
     history: List<FocusSessionWithLinks>,
     onOpenHistory: () -> Unit,
-    onCourseClick: (Long) -> Unit,
-    onLanguageClick: (Long) -> Unit,
-    onTopicClick: (Long) -> Unit,
+    onSessionClick: (Long) -> Unit,
     onDelete: (FocusSession) -> Unit,
 ) {
     var pendingDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
@@ -604,9 +601,7 @@ private fun HistorySection(
             history.forEach { item ->
                 FocusHistoryRow(
                     item = item,
-                    onCourseClick = onCourseClick,
-                    onLanguageClick = onLanguageClick,
-                    onTopicClick = onTopicClick,
+                    onClick = { onSessionClick(item.session.id) },
                     onDeleteClick = { pendingDelete = item },
                 )
                 HorizontalDivider()

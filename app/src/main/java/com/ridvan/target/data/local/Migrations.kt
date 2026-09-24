@@ -446,6 +446,14 @@ val MIGRATION_18_19 = object : Migration(18, 19) {
     }
 }
 
+val MIGRATION_20_21 = object : Migration(20, 21) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Focus Timer sessions gain a free-text notes field (edited on FocusSessionDetailScreen) —
+        // plain nullable ADD COLUMN, no backfill possible for existing sessions.
+        db.execSQL("ALTER TABLE focus_sessions ADD COLUMN notes TEXT")
+    }
+}
+
 val MIGRATION_19_20 = object : Migration(19, 20) {
     override fun migrate(db: SupportSQLiteDatabase) {
         // Focus Timer sessions can now optionally link to a Language (+ one of its Topics)

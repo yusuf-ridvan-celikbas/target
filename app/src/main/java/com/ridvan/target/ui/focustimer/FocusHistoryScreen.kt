@@ -75,9 +75,7 @@ private fun subjectKeyOf(item: FocusSessionWithLinks): String = when {
 @Composable
 fun FocusHistoryScreen(
     onBack: () -> Unit,
-    onCourseClick: (Long) -> Unit,
-    onLanguageClick: (Long) -> Unit,
-    onTopicClick: (Long) -> Unit,
+    onSessionClick: (Long) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -91,7 +89,42 @@ fun FocusHistoryScreen(
             )
         },
     ) { innerPadding ->
-        FocusHistoryBody(innerPadding, onCourseClick, onLanguageClick, onTopicClick)
+        FocusHistoryBody(innerPadding, onSessionClick)
+    }
+}
+
+/**
+ * A course's or language's own Work History — reached from CourseDetailScreen/LanguageDetailScreen,
+ * via CourseWorkHistoryRoute/LanguageWorkHistoryRoute. The ViewModel reads the owner from the route.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FocusWorkHistoryScreen(
+    onBack: () -> Unit,
+    onSessionClick: (Long) -> Unit,
+    viewModel: FocusHistoryViewModel = viewModel(),
+) {
+    val courseName by viewModel.scopeCourseName.collectAsStateWithLifecycle()
+    val languageName by viewModel.scopeLanguageName.collectAsStateWithLifecycle()
+    val ownerName = courseName?.let { courseDisplayName(it) } ?: languageName
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        ownerName?.let { stringResource(R.string.focus_work_history_title, it) }
+                            ?: stringResource(R.string.label_work_history),
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                    }
+                },
+            )
+        },
+    ) { innerPadding ->
+        FocusHistoryBody(innerPadding, onSessionClick, viewModel)
     }
 }
 
@@ -99,25 +132,21 @@ fun FocusHistoryScreen(
 @Composable
 fun FocusHistoryHomeScreen(
     shellNavigation: ShellNavigation,
-    onCourseClick: (Long) -> Unit,
-    onLanguageClick: (Long) -> Unit,
-    onTopicClick: (Long) -> Unit,
+    onSessionClick: (Long) -> Unit,
 ) {
     AppShell(
         navigation = shellNavigation,
         currentDestination = ShellDestination.STUDY_HISTORY,
         title = stringResource(R.string.focustimer_history_page_title),
     ) { innerPadding ->
-        FocusHistoryBody(innerPadding, onCourseClick, onLanguageClick, onTopicClick)
+        FocusHistoryBody(innerPadding, onSessionClick)
     }
 }
 
 @Composable
 private fun FocusHistoryBody(
     innerPadding: PaddingValues,
-    onCourseClick: (Long) -> Unit,
-    onLanguageClick: (Long) -> Unit,
-    onTopicClick: (Long) -> Unit,
+    onSessionClick: (Long) -> Unit,
     viewModel: FocusHistoryViewModel = viewModel(),
 ) {
     val history by viewModel.history.collectAsStateWithLifecycle()
@@ -143,7 +172,7 @@ private fun FocusHistoryBody(
         .sortedBy { it.second.lowercase() }
     val presetOptions = history.map { it.session.presetName }.distinct().sortedBy { it.lowercase() }
 
-    // Search matches the preset name plus the linked course (raw and translated), language and topic.
+    // Search matches the preset name, the linked course (raw and translated), language and topic, and notes.
     val searchText: Map<Long, String> = history.associate { item ->
         item.session.id to listOfNotNull(
             item.session.presetName,
@@ -151,6 +180,7 @@ private fun FocusHistoryBody(
             item.courseName?.let { courseDisplayName(it) },
             item.languageName,
             item.topicName,
+            item.session.notes,
         ).joinToString(" ").lowercase()
     }
 
@@ -197,7 +227,7 @@ private fun FocusHistoryBody(
             selected = period,
             onSelect = { period = it },
         )
-        FilterField(
+        if (!viewModel.isScoped) FilterField(
             label = stringResource(R.string.focustimer_history_filter_subject),
             selectedLabel = when (subjectKey) {
                 SUBJECT_ALL -> stringResource(R.string.focustimer_history_all_subjects)
@@ -249,9 +279,7 @@ private fun FocusHistoryBody(
                 filtered.forEach { item ->
                     FocusHistoryRow(
                         item = item,
-                        onCourseClick = onCourseClick,
-                        onLanguageClick = onLanguageClick,
-                        onTopicClick = onTopicClick,
+                        onClick = { onSessionClick(item.session.id) },
                         onDeleteClick = { pendingDelete = item },
                     )
                     HorizontalDivider()
