@@ -22,6 +22,7 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
+import com.ridvan.target.ui.common.formatTime
 
 /** "Chemistry · Mol Kavramı" / "German · Verbs" / null when the session wasn't linked to anything. */
 @Composable
@@ -42,13 +43,19 @@ internal fun FocusHistoryRow(
     val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
     val linkLabel = focusSessionLinkLabel(item)
     ListItem(
-        headlineContent = { Text("${session.presetName} — ${formatDate(session.startedAt)}") },
+        // Date and start time lead, matching FocusSessionDetailScreen's title; the preset moves into the stats line.
+        headlineContent = {
+            Text(stringResource(R.string.focus_session_title, formatDate(session.startedAt), formatTime(session.startedAt)))
+        },
         supportingContent = {
             Column {
                 if (linkLabel != null) {
                     Text(linkLabel, color = MaterialTheme.colorScheme.primary)
                 }
-                Text(stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText))
+                Text(
+                    "${session.presetName} · " +
+                        stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText),
+                )
                 session.notes?.takeIf { it.isNotBlank() }?.let { notes ->
                     Text(
                         notes,
@@ -79,7 +86,10 @@ internal fun FocusSessionDeleteDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.focustimer_delete_session_title)) },
-        text = { Text(stringResource(R.string.focustimer_delete_session_message, item.session.presetName, formatDate(item.session.startedAt))) },
+        text = {
+            val whenLabel = stringResource(R.string.focus_session_title, formatDate(item.session.startedAt), formatTime(item.session.startedAt))
+            Text(stringResource(R.string.focustimer_delete_session_message, item.session.presetName, whenLabel))
+        },
         confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.common_delete)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
