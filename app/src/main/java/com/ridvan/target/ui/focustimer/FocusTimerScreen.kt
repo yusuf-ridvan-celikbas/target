@@ -21,20 +21,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -49,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -57,6 +52,7 @@ import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusPreset
 import com.ridvan.target.data.local.entity.FocusSession
@@ -67,7 +63,6 @@ import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.findActivity
-import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
@@ -80,6 +75,7 @@ private enum class LinkMode { NONE, COURSE, LANGUAGE }
 fun FocusTimerScreen(
     shellNavigation: ShellNavigation,
     onManagePresets: () -> Unit,
+    onOpenHistory: () -> Unit,
     onCourseClick: (Long) -> Unit,
     onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
@@ -89,7 +85,7 @@ fun FocusTimerScreen(
     val presets by viewModel.presets.collectAsStateWithLifecycle()
     val courses by viewModel.courses.collectAsStateWithLifecycle()
     val languages by viewModel.languages.collectAsStateWithLifecycle()
-    val history by viewModel.history.collectAsStateWithLifecycle()
+    val recentHistory by viewModel.recentHistory.collectAsStateWithLifecycle()
     val runningSession by viewModel.runningSession.collectAsStateWithLifecycle()
     val remainingMillis by viewModel.remainingMillis.collectAsStateWithLifecycle()
     val alarmSoundUri by viewModel.focusAlarmSoundUri.collectAsStateWithLifecycle()
@@ -225,7 +221,8 @@ fun FocusTimerScreen(
             if (session == null) {
                 Spacer(Modifier.height(24.dp))
                 HistorySection(
-                    history = history,
+                    history = recentHistory,
+                    onOpenHistory = onOpenHistory,
                     onCourseClick = onCourseClick,
                     onLanguageClick = onLanguageClick,
                     onTopicClick = onTopicClick,
@@ -444,85 +441,70 @@ private fun RunningContent(
 
 @Composable
 private fun HistorySection(
-    history: List<FocusSession>,
+    history: List<FocusSessionWithLinks>,
+    onOpenHistory: () -> Unit,
     onCourseClick: (Long) -> Unit,
     onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
     onDelete: (FocusSession) -> Unit,
 ) {
-    var pendingDeleteSession by remember { mutableStateOf<FocusSession?>(null) }
+    var pendingDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
 
-    Text(stringResource(R.string.focustimer_history_title), style = MaterialTheme.typography.titleMedium)
+    // The whole header row opens the full, filterable history page.
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpenHistory)
+            .padding(vertical = 4.dp),
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(R.string.focustimer_history_title), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.focustimer_history_recent_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            stringResource(R.string.focustimer_history_see_all),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
     Spacer(Modifier.height(8.dp))
     if (history.isEmpty()) {
-        Text(stringResource(R.string.focustimer_history_empty))
+        Text(stringResource(R.string.focustimer_history_recent_empty))
     } else {
         GroupedCard {
-            history.forEach { session ->
-                HistoryRow(
-                    session = session,
+            history.forEach { item ->
+                FocusHistoryRow(
+                    item = item,
                     onCourseClick = onCourseClick,
                     onLanguageClick = onLanguageClick,
                     onTopicClick = onTopicClick,
-                    onDeleteClick = { pendingDeleteSession = session },
+                    onDeleteClick = { pendingDelete = item },
                 )
                 HorizontalDivider()
             }
         }
     }
 
-    pendingDeleteSession?.let { session ->
-        AlertDialog(
-            onDismissRequest = { pendingDeleteSession = null },
-            title = { Text(stringResource(R.string.focustimer_delete_session_title)) },
-            text = { Text(stringResource(R.string.focustimer_delete_session_message, session.presetName, formatDate(session.startedAt))) },
-            confirmButton = {
-                TextButton(onClick = {
-                    onDelete(session)
-                    pendingDeleteSession = null
-                }) { Text(stringResource(R.string.common_delete)) }
+    pendingDelete?.let { item ->
+        FocusSessionDeleteDialog(
+            item = item,
+            onConfirm = {
+                onDelete(item.session)
+                pendingDelete = null
             },
-            dismissButton = {
-                TextButton(onClick = { pendingDeleteSession = null }) { Text(stringResource(R.string.common_cancel)) }
-            },
+            onDismiss = { pendingDelete = null },
         )
     }
-}
-
-@Composable
-private fun HistoryRow(
-    session: FocusSession,
-    onCourseClick: (Long) -> Unit,
-    onLanguageClick: (Long) -> Unit,
-    onTopicClick: (Long) -> Unit,
-    onDeleteClick: () -> Unit,
-) {
-    val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
-    val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
-    val hasLink = session.courseId != null || session.languageId != null
-    ListItem(
-        headlineContent = { Text("${session.presetName} — ${formatDate(session.startedAt)}") },
-        supportingContent = {
-            Text(stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText))
-        },
-        trailingContent = {
-            IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_focus_session))
-            }
-        },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = if (hasLink) {
-            Modifier.clickable {
-                when {
-                    session.topicId != null -> onTopicClick(session.topicId)
-                    session.courseId != null -> onCourseClick(session.courseId)
-                    session.languageId != null -> onLanguageClick(session.languageId)
-                }
-            }
-        } else {
-            Modifier
-        },
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

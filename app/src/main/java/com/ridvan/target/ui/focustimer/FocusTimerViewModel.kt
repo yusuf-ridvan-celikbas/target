@@ -5,11 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.focustimer.FocusAlarmPlayer
+import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusPreset
 import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Topic
+import com.ridvan.target.ui.common.startOfTodayMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,10 +22,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 enum class FocusPhase { WORK, BREAK }
+
+private const val RECENT_HISTORY_DAYS_BEFORE_TODAY = 6
 
 /**
  * In-memory only — not persisted to Room while running (see CLAUDE.md's Focus Timer scope:
@@ -68,7 +73,12 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     val languages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val history: StateFlow<List<FocusSession>> = (userId?.let { focusSessionDao.getByUserId(it) } ?: flowOf(emptyList()))
+    /** Only the last 7 calendar days (today + the 6 before it) — the full list lives on FocusHistoryScreen. */
+    val recentHistory: StateFlow<List<FocusSessionWithLinks>> = (userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()))
+        .map { items ->
+            val cutoff = startOfTodayMillis() - RECENT_HISTORY_DAYS_BEFORE_TODAY * 24L * 60 * 60 * 1000
+            items.filter { it.session.startedAt >= cutoff }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val focusAlarmSoundUri: StateFlow<String?> = appPreferences.focusAlarmSoundUri

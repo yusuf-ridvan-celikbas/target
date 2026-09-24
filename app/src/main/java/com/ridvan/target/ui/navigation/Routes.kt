@@ -109,3 +109,6 @@ object FocusTimerRoute
 
 @Serializable
 object FocusPresetListRoute
+
+@Serializable
+object FocusHistoryRoute

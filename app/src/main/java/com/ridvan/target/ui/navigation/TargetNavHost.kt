@@ -16,6 +16,7 @@ import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.coursedetail.CourseDetailScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
+import com.ridvan.target.ui.focustimer.FocusHistoryScreen
 import com.ridvan.target.ui.focustimer.FocusPresetListScreen
 import com.ridvan.target.ui.focustimer.FocusTimerScreen
 import com.ridvan.target.ui.help.HelpScreen
@@ -299,6 +300,7 @@ fun TargetNavHost() {
             FocusTimerScreen(
                 shellNavigation = shellNavigation,
                 onManagePresets = { navController.navigate(FocusPresetListRoute) },
+                onOpenHistory = { navController.navigate(FocusHistoryRoute) },
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
                 onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
@@ -307,6 +309,14 @@ fun TargetNavHost() {
         composable<FocusPresetListRoute> {
             FocusPresetListScreen(
                 onBack = { navController.popBackStack() },
+            )
+        }
+        composable<FocusHistoryRoute> {
+            FocusHistoryScreen(
+                onBack = { navController.popBackStack() },
+                onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
             )
         }
     }

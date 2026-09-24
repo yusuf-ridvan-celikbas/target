@@ -15,6 +15,16 @@ interface FocusSessionDao {
     @Delete
     suspend fun delete(session: FocusSession)
 
-    @Query("SELECT * FROM focus_sessions WHERE userId = :userId ORDER BY startedAt DESC")
-    fun getByUserId(userId: Long): Flow<List<FocusSession>>
+    @Query(
+        """
+        SELECT focus_sessions.*, courses.name AS courseName, languages.name AS languageName, topics.name AS topicName
+        FROM focus_sessions
+        LEFT JOIN courses ON courses.id = focus_sessions.courseId
+        LEFT JOIN languages ON languages.id = focus_sessions.languageId
+        LEFT JOIN topics ON topics.id = focus_sessions.topicId
+        WHERE focus_sessions.userId = :userId
+        ORDER BY focus_sessions.startedAt DESC
+        """
+    )
+    fun getAllWithLinksByUserId(userId: Long): Flow<List<FocusSessionWithLinks>>
 }
