@@ -524,7 +524,6 @@
     <string name="focustimer_phase_work">Çalışma</string>
     <string name="focustimer_phase_break">Mola</string>
     <string name="focustimer_cycle_count">Tur %1$d</string>
-    <string name="focustimer_alarm_section_title">Alarm</string>
     <string name="focustimer_choose_ringtone">Zil Sesi Seç</string>
     <string name="focustimer_browse_audio">Ses Dosyası Seç</string>
     <string name="focustimer_reset_sound">Varsayılana Sıfırla</string>
@@ -533,6 +532,9 @@
     <string name="label_vibration">Titreşim</string>
     <string name="focustimer_history_title">Geçmiş</string>
     <string name="focustimer_history_empty">Henüz oturum yok.</string>
+    <string name="cd_focus_timer_settings">Odak Zamanlayıcı ayarları</string>
+    <string name="settings_focus_timer_preferences">Odak Zamanlayıcı Tercihleri</string>
+    <string name="settings_focus_alarm_sound">Alarm sesi</string>
     <string name="focustimer_history_recent_hint">Son 7 gün</string>
     <string name="focustimer_history_recent_empty">Son 7 günde oturum yok.</string>
     <string name="focustimer_history_see_all">Tümünü gör</string>

@@ -81,11 +81,9 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val focusAlarmSoundUri: StateFlow<String?> = appPreferences.focusAlarmSoundUri
-    val focusVibrationEnabled: StateFlow<Boolean> = appPreferences.focusVibrationEnabled
-
-    fun setFocusAlarmSoundUri(uri: String?) = appPreferences.setFocusAlarmSoundUri(uri)
-    fun setFocusVibrationEnabled(enabled: Boolean) = appPreferences.setFocusVibrationEnabled(enabled)
+    // Read at alarm time only — editing these lives in App Settings' Focus Timer Preferences.
+    private val focusAlarmSoundUri: StateFlow<String?> = appPreferences.focusAlarmSoundUri
+    private val focusVibrationEnabled: StateFlow<Boolean> = appPreferences.focusVibrationEnabled
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)

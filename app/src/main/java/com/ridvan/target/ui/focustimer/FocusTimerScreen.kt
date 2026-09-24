@@ -1,11 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
-import android.content.Intent
-import android.media.RingtoneManager
-import android.net.Uri
 import android.view.WindowManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
@@ -31,9 +27,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
@@ -76,6 +71,7 @@ fun FocusTimerScreen(
     shellNavigation: ShellNavigation,
     onManagePresets: () -> Unit,
     onOpenHistory: () -> Unit,
+    onOpenSettings: () -> Unit,
     onCourseClick: (Long) -> Unit,
     onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
@@ -88,8 +84,6 @@ fun FocusTimerScreen(
     val recentHistory by viewModel.recentHistory.collectAsStateWithLifecycle()
     val runningSession by viewModel.runningSession.collectAsStateWithLifecycle()
     val remainingMillis by viewModel.remainingMillis.collectAsStateWithLifecycle()
-    val alarmSoundUri by viewModel.focusAlarmSoundUri.collectAsStateWithLifecycle()
-    val vibrationEnabled by viewModel.focusVibrationEnabled.collectAsStateWithLifecycle()
 
     var selectedPresetId by remember { mutableStateOf<Long?>(null) }
     var linkMode by remember { mutableStateOf(LinkMode.NONE) }
@@ -127,21 +121,15 @@ fun FocusTimerScreen(
         }
     }
 
-    val ringtoneLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val uri = result.data?.let { IntentCompat.getParcelableExtra(it, RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java) }
-        if (uri != null) viewModel.setFocusAlarmSoundUri(uri.toString())
-    }
-    val audioFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            viewModel.setFocusAlarmSoundUri(uri.toString())
-        }
-    }
-
     AppShell(
         navigation = shellNavigation,
         currentDestination = ShellDestination.FOCUS_TIMER,
         title = stringResource(R.string.label_focus_timer),
+        actions = {
+            IconButton(onClick = onOpenSettings) {
+                Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.cd_focus_timer_settings))
+            }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -173,21 +161,6 @@ fun FocusTimerScreen(
                     topics = topics,
                     selectedTopicId = selectedTopicId,
                     onSelectTopic = { selectedTopicId = it },
-                    alarmSoundUri = alarmSoundUri,
-                    vibrationEnabled = vibrationEnabled,
-                    onChooseRingtone = {
-                        ringtoneLauncher.launch(
-                            Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
-                                putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION)
-                                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
-                                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
-                                alarmSoundUri?.let { putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(it)) }
-                            },
-                        )
-                    },
-                    onBrowseAudioFile = { audioFileLauncher.launch(arrayOf("audio/*")) },
-                    onResetSound = { viewModel.setFocusAlarmSoundUri(null) },
-                    onSetVibration = { viewModel.setFocusVibrationEnabled(it) },
                     onStart = {
                         val preset = presets.firstOrNull { it.id == selectedPresetId } ?: return@IdleContent
                         val topicName = topics.firstOrNull { it.id == selectedTopicId }?.name
@@ -250,12 +223,6 @@ private fun IdleContent(
     topics: List<Topic>,
     selectedTopicId: Long?,
     onSelectTopic: (Long?) -> Unit,
-    alarmSoundUri: String?,
-    vibrationEnabled: Boolean,
-    onChooseRingtone: () -> Unit,
-    onBrowseAudioFile: () -> Unit,
-    onResetSound: () -> Unit,
-    onSetVibration: (Boolean) -> Unit,
     onStart: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -328,34 +295,6 @@ private fun IdleContent(
                         DropdownMenuItem(text = { Text(topic.name) }, onClick = { onSelectTopic(topic.id); closeMenu() })
                     }
                 }
-            }
-        }
-    }
-
-    Spacer(Modifier.height(16.dp))
-    GroupedCard {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(stringResource(R.string.focustimer_alarm_section_title), style = MaterialTheme.typography.titleMedium)
-            Text(
-                if (alarmSoundUri == null) stringResource(R.string.focustimer_sound_default) else stringResource(R.string.focustimer_sound_custom),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-            )
-            OutlinedButton(onClick = onChooseRingtone, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.focustimer_choose_ringtone))
-            }
-            Spacer(Modifier.height(8.dp))
-            OutlinedButton(onClick = onBrowseAudioFile, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.focustimer_browse_audio))
-            }
-            if (alarmSoundUri != null) {
-                TextButton(onClick = onResetSound, modifier = Modifier.padding(top = 4.dp)) {
-                    Text(stringResource(R.string.focustimer_reset_sound))
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                Text(stringResource(R.string.label_vibration), modifier = Modifier.weight(1f))
-                Switch(checked = vibrationEnabled, onCheckedChange = onSetVibration)
             }
         }
     }

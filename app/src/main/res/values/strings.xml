@@ -526,7 +526,6 @@
     <string name="focustimer_phase_work">Work</string>
     <string name="focustimer_phase_break">Break</string>
     <string name="focustimer_cycle_count">Cycle %1$d</string>
-    <string name="focustimer_alarm_section_title">Alarm</string>
     <string name="focustimer_choose_ringtone">Choose Ringtone</string>
     <string name="focustimer_browse_audio">Browse Audio File</string>
     <string name="focustimer_reset_sound">Reset to Default</string>
@@ -535,6 +534,9 @@
     <string name="label_vibration">Vibration</string>
     <string name="focustimer_history_title">History</string>
     <string name="focustimer_history_empty">No sessions yet.</string>
+    <string name="cd_focus_timer_settings">Focus Timer settings</string>
+    <string name="settings_focus_timer_preferences">Focus Timer Preferences</string>
+    <string name="settings_focus_alarm_sound">Alarm sound</string>
     <string name="focustimer_history_recent_hint">Last 7 days</string>
     <string name="focustimer_history_recent_empty">No sessions in the last 7 days.</string>
     <string name="focustimer_history_see_all">See all</string>

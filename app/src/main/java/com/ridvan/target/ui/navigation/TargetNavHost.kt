@@ -303,6 +303,7 @@ fun TargetNavHost() {
                 shellNavigation = shellNavigation,
                 onManagePresets = { navController.navigate(FocusPresetListRoute) },
                 onOpenHistory = { navController.navigate(FocusHistoryRoute) },
+                onOpenSettings = { navController.navigate(FocusTimerSettingsRoute) },
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
                 onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
@@ -312,6 +313,9 @@ fun TargetNavHost() {
             FocusPresetListScreen(
                 onBack = { navController.popBackStack() },
             )
+        }
+        composable<FocusTimerSettingsRoute> {
+            SettingsScreen(shellNavigation = shellNavigation, scrollToFocusTimer = true)
         }
         composable<FocusHistoryHomeRoute> {
             FocusHistoryHomeScreen(

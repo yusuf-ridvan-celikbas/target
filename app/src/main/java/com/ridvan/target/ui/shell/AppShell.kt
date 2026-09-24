@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -99,6 +100,8 @@ fun AppShell(
     currentDestination: ShellDestination = ShellDestination.OTHER,
     title: String = "",
     floatingActionButton: @Composable () -> Unit = {},
+    /** Screen-specific top-bar icons, placed before the shared overflow menu. */
+    actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -285,6 +288,7 @@ fun AppShell(
                         }
                     },
                     actions = {
+                        actions()
                         IconButton(onClick = { overflowExpanded = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.cd_more))
                         }

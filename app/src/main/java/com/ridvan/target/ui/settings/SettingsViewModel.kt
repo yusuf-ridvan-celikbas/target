@@ -65,4 +65,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setNotificationLeadTime(leadTime: NotificationLeadTime) {
         preferences.setNotificationLeadTime(leadTime)
     }
+
+    val focusAlarmSoundUri: StateFlow<String?> = preferences.focusAlarmSoundUri
+
+    fun setFocusAlarmSoundUri(uri: String?) {
+        preferences.setFocusAlarmSoundUri(uri)
+    }
+
+    val focusVibrationEnabled: StateFlow<Boolean> = preferences.focusVibrationEnabled
+
+    fun setFocusVibrationEnabled(enabled: Boolean) {
+        preferences.setFocusVibrationEnabled(enabled)
+    }
 }
