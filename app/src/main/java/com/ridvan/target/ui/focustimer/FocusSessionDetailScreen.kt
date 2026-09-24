@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,7 +73,16 @@ fun FocusSessionDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(item?.session?.presetName.orEmpty()) },
+                // Date and clock time identify a session better than its preset (shown in the Session card).
+                title = {
+                    item?.session?.let { session ->
+                        Text(
+                            stringResource(R.string.focus_session_title, formatDate(session.startedAt), formatTime(session.startedAt)),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

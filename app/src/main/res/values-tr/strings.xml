@@ -581,6 +581,7 @@
     <string name="focustimer_history_no_matches">Bu filtrelere uyan oturum yok.</string>
     <string name="label_work_history">Çalışma Geçmişi</string>
     <string name="focus_work_history_title">%1$s — Çalışma Geçmişi</string>
+    <string name="focus_session_title">%1$s · %2$s</string>
     <string name="focus_session_time_section">Zaman</string>
     <string name="focus_session_date">Tarih: %1$s</string>
     <string name="focus_session_time_range">Saat: %1$s – %2$s</string>
