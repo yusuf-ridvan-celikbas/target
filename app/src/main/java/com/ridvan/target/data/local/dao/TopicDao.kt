@@ -22,6 +22,9 @@ interface TopicDao {
     @Query("SELECT * FROM topics WHERE courseId = :courseId ORDER BY name ASC")
     fun getByCourseId(courseId: Long): Flow<List<Topic>>
 
+    @Query("SELECT * FROM topics WHERE languageId = :languageId ORDER BY name ASC")
+    fun getByLanguageId(languageId: Long): Flow<List<Topic>>
+
     @Query("SELECT * FROM topics WHERE id = :id")
     fun getById(id: Long): Flow<Topic?>
 
@@ -38,4 +41,18 @@ interface TopicDao {
         """
     )
     fun getTopicTotalsByCourseId(courseId: Long): Flow<List<TopicWithTotals>>
+
+    @Query(
+        """
+        SELECT topics.*,
+               COALESCE(SUM(study_resource_topics.testCount), 0) AS totalTestCount,
+               COALESCE(SUM(study_resource_topics.questionCount), 0) AS totalQuestionCount
+        FROM topics
+        LEFT JOIN study_resource_topics ON study_resource_topics.topicId = topics.id
+        WHERE topics.languageId = :languageId
+        GROUP BY topics.id
+        ORDER BY topics.name ASC
+        """
+    )
+    fun getTopicTotalsByLanguageId(languageId: Long): Flow<List<TopicWithTotals>>
 }

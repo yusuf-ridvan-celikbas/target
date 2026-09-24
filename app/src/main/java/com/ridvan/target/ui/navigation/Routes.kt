@@ -84,6 +84,12 @@ object TopicHomeRoute
 data class TopicCourseListByTypeRoute(val examTypeId: Long)
 
 @Serializable
+object TopicLanguageExamCoursesRoute
+
+@Serializable
+data class LanguageTopicListRoute(val languageId: Long)
+
+@Serializable
 object HelpRoute
 
 @Serializable

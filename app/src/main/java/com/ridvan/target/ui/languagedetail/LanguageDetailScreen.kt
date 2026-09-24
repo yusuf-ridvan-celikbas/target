@@ -33,6 +33,7 @@ import com.ridvan.target.R
 @Composable
 fun LanguageDetailScreen(
     onStudyResourcesClick: () -> Unit,
+    onTopicsClick: () -> Unit,
     onBack: () -> Unit,
     viewModel: LanguageDetailViewModel = viewModel(),
 ) {
@@ -66,6 +67,12 @@ fun LanguageDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(R.string.label_study_resources))
+            }
+            Button(
+                onClick = onTopicsClick,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            ) {
+                Text(stringResource(R.string.label_topics))
             }
         }
     }

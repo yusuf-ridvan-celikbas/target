@@ -45,11 +45,13 @@ class PracticeExamEntryDetailViewModel(
     val topicResults: StateFlow<List<PracticeExamEntryTopicResultWithTopic>> = practiceExamEntryTopicResultDao.getByEntryId(entryId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val topicsForCourse: Flow<List<Topic>> = studyResource.filterNotNull().flatMapLatest { resource ->
-        resource.courseId?.let { topicDao.getByCourseId(it) } ?: flowOf(emptyList())
+    private val topicsForOwner: Flow<List<Topic>> = studyResource.filterNotNull().flatMapLatest { resource ->
+        resource.courseId?.let { topicDao.getByCourseId(it) }
+            ?: resource.languageId?.let { topicDao.getByLanguageId(it) }
+            ?: flowOf(emptyList())
     }
 
-    val availableTopicsToAdd: StateFlow<List<Topic>> = combine(topicsForCourse, topicResults) { allTopics, added ->
+    val availableTopicsToAdd: StateFlow<List<Topic>> = combine(topicsForOwner, topicResults) { allTopics, added ->
         val addedIds = added.map { it.topicResult.topicId }.toSet()
         allTopics.filterNot { it.id in addedIds }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

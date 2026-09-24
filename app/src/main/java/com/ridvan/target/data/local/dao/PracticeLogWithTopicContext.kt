@@ -7,5 +7,6 @@ data class PracticeLogWithTopicContext(
     @Embedded val practiceLog: PracticeLog,
     val topicId: Long,
     val topicName: String,
-    val courseId: Long,
+    val courseId: Long?,
+    val languageId: Long?,
 )

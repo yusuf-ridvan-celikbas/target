@@ -104,7 +104,7 @@ fun PracticeExamEntryDetailScreen(
                 )
             }
 
-            if (studyResource?.courseId != null) {
+            if (studyResource?.courseId != null || studyResource?.languageId != null) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,

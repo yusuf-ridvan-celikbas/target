@@ -28,30 +28,30 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.ExamType
+import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.examTypeDisplayName
 import com.ridvan.target.ui.courselist.CourseListViewModel
+import com.ridvan.target.ui.languagelist.LanguageListViewModel
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
-/**
- * Topics are Course-only (see CLAUDE.md) — unlike CourseListScreen/StudyResourceHomeScreen,
- * this bucket menu excludes the Language Exam Courses entry entirely rather than routing it
- * somewhere, since a Language has no Topics list to drill into.
- */
 @Composable
 fun TopicHomeScreen(
     shellNavigation: ShellNavigation,
     onCourseTypeClick: (ExamType) -> Unit,
+    onLanguageTypeClick: () -> Unit,
     onCourseShortcutClick: (Long) -> Unit,
+    onLanguageShortcutClick: (Long) -> Unit,
     viewModel: CourseListViewModel = viewModel(),
+    languageListViewModel: LanguageListViewModel = viewModel(),
 ) {
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
-    val courseExamTypes = examTypes.filterNot { it.name == LANGUAGE_EXAM_TYPE_NAME }
     val allCourses by viewModel.courses.collectAsStateWithLifecycle()
+    val languages by languageListViewModel.languages.collectAsStateWithLifecycle()
     val expandedTypes = remember { mutableStateMapOf<Long, Boolean>() }
 
     AppShell(
@@ -60,7 +60,8 @@ fun TopicHomeScreen(
         title = stringResource(R.string.label_topics),
     ) { innerPadding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            courseExamTypes.forEach { examType ->
+            examTypes.forEach { examType ->
+                val isLanguageType = examType.name == LANGUAGE_EXAM_TYPE_NAME
                 val expanded = expandedTypes[examType.id] ?: false
                 item(key = "bucket-${examType.id}") {
                     GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
@@ -68,16 +69,27 @@ fun TopicHomeScreen(
                             title = stringResource(R.string.course_type_bucket_title, examTypeDisplayName(examType.name)),
                             expanded = expanded,
                             onToggleExpand = { expandedTypes[examType.id] = !expanded },
-                            onClick = { onCourseTypeClick(examType) },
+                            onClick = { if (isLanguageType) onLanguageTypeClick() else onCourseTypeClick(examType) },
                         )
                         if (expanded) {
-                            val coursesForType = allCourses.filter { it.examTypeId == examType.id }
-                            if (coursesForType.isEmpty()) {
-                                BucketEmptyHint()
+                            if (isLanguageType) {
+                                if (languages.isEmpty()) {
+                                    BucketEmptyHint()
+                                } else {
+                                    languages.forEach { language ->
+                                        LanguageShortcutRow(language = language, onClick = { onLanguageShortcutClick(language.id) })
+                                        HorizontalDivider()
+                                    }
+                                }
                             } else {
-                                coursesForType.forEach { course ->
-                                    CourseShortcutRow(course = course, onClick = { onCourseShortcutClick(course.id) })
-                                    HorizontalDivider()
+                                val coursesForType = allCourses.filter { it.examTypeId == examType.id }
+                                if (coursesForType.isEmpty()) {
+                                    BucketEmptyHint()
+                                } else {
+                                    coursesForType.forEach { course ->
+                                        CourseShortcutRow(course = course, onClick = { onCourseShortcutClick(course.id) })
+                                        HorizontalDivider()
+                                    }
                                 }
                             }
                         }
@@ -110,6 +122,15 @@ private fun CourseShortcutRow(course: Course, onClick: () -> Unit) {
     ListItem(
         leadingContent = { CourseIconAvatar(course.icon) },
         headlineContent = { Text(courseDisplayName(course.name)) },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+    )
+}
+
+@Composable
+private fun LanguageShortcutRow(language: Language, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(language.name) },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
     )

@@ -10,6 +10,7 @@ import com.ridvan.target.data.local.dao.PracticeExamTopicAggregate
 import com.ridvan.target.data.local.dao.PracticeLogWithTopicContext
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
+import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Topic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,7 +50,10 @@ data class StatsSummary(
 data class TopicBreakdownEntry(
     val topicId: Long,
     val topicName: String,
-    val courseName: String,
+    /** The owning Course's or Language's name, whichever is set. */
+    val ownerName: String,
+    /** True when ownerName is a Course (translatable via courseDisplayName), false for a Language. */
+    val isCourse: Boolean,
     val tests: Int,
     val solved: Int,
     val unsolved: Int,
@@ -60,7 +64,10 @@ data class TopicBreakdownEntry(
 data class WeakTopicEntry(
     val topicId: Long,
     val topicName: String,
-    val courseName: String,
+    /** The owning Course's or Language's name, whichever is set. */
+    val ownerName: String,
+    /** True when ownerName is a Course (translatable via courseDisplayName), false for a Language. */
+    val isCourse: Boolean,
     val correctCount: Int,
     val wrongCount: Int,
 ) {
@@ -77,6 +84,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     private val courseDao = targetApplication.database.courseDao()
     private val examCourseDao = targetApplication.database.examCourseDao()
     private val topicDao = targetApplication.database.topicDao()
+    private val languageDao = targetApplication.database.languageDao()
     private val practiceLogDao = targetApplication.database.practiceLogDao()
     private val practiceExamEntryDao = targetApplication.database.practiceExamEntryDao()
     private val practiceExamEntryTopicResultDao = targetApplication.database.practiceExamEntryTopicResultDao()
@@ -107,6 +115,9 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val allCourses: StateFlow<List<Course>> = (userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val allLanguages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _selectedExamId = MutableStateFlow<Long?>(null)
@@ -140,7 +151,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         allLogs, _selectedExamId, _selectedCourseId, _selectedTopicId, examCourseIds,
     ) { logs, examId, courseId, topicId, examIds ->
         logs.filter { row ->
-            (examId == null || (examIds != null && row.courseId in examIds)) &&
+            (examId == null || (examIds != null && row.courseId != null && row.courseId in examIds)) &&
                 (courseId == null || row.courseId == courseId) &&
                 (topicId == null || row.topicId == topicId)
         }
@@ -170,13 +181,16 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val breakdown: StateFlow<List<TopicBreakdownEntry>> = combine(filteredLogs, _period, allCourses) { logs, period, courses ->
+    val breakdown: StateFlow<List<TopicBreakdownEntry>> = combine(filteredLogs, _period, allCourses, allLanguages) { logs, period, courses, languages ->
         val courseNames = courses.associateBy({ it.id }, { it.name })
+        val languageNames = languages.associateBy({ it.id }, { it.name })
         windowForPeriod(logs, period) { it.practiceLog.loggedAt }.groupBy { it.topicId }.map { (topicId, rows) ->
+            val first = rows.first()
             TopicBreakdownEntry(
                 topicId = topicId,
-                topicName = rows.first().topicName,
-                courseName = courseNames[rows.first().courseId].orEmpty(),
+                topicName = first.topicName,
+                ownerName = first.courseId?.let { courseNames[it] } ?: first.languageId?.let { languageNames[it] }.orEmpty(),
+                isCourse = first.courseId != null,
                 tests = rows.sumOf { it.practiceLog.testsSolved },
                 solved = rows.sumOf { it.practiceLog.solvedCount },
                 unsolved = rows.sumOf { it.practiceLog.unsolvedCount },
@@ -224,14 +238,15 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     ) { aggregates, examId, courseId, examIds ->
         aggregates
             .filter { row ->
-                (examId == null || (examIds != null && row.courseId in examIds)) &&
+                (examId == null || (examIds != null && row.courseId != null && row.courseId in examIds)) &&
                     (courseId == null || row.courseId == courseId)
             }
             .map {
                 WeakTopicEntry(
                     topicId = it.topicId,
                     topicName = it.topicName,
-                    courseName = it.courseName,
+                    ownerName = it.courseName ?: it.languageName.orEmpty(),
+                    isCourse = it.courseName != null,
                     correctCount = it.totalCorrectCount,
                     wrongCount = it.totalWrongCount,
                 )

@@ -18,11 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -50,8 +55,11 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusPreset
 import com.ridvan.target.data.local.entity.FocusSession
+import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.ui.common.SegmentedToggle
+import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.findActivity
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.shell.AppShell
@@ -59,18 +67,22 @@ import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 import kotlinx.coroutines.flow.flowOf
 
+private enum class LinkMode { NONE, COURSE, LANGUAGE }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusTimerScreen(
     shellNavigation: ShellNavigation,
     onManagePresets: () -> Unit,
     onCourseClick: (Long) -> Unit,
+    onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
     viewModel: FocusTimerViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val presets by viewModel.presets.collectAsStateWithLifecycle()
     val courses by viewModel.courses.collectAsStateWithLifecycle()
+    val languages by viewModel.languages.collectAsStateWithLifecycle()
     val history by viewModel.history.collectAsStateWithLifecycle()
     val runningSession by viewModel.runningSession.collectAsStateWithLifecycle()
     val remainingMillis by viewModel.remainingMillis.collectAsStateWithLifecycle()
@@ -78,7 +90,9 @@ fun FocusTimerScreen(
     val vibrationEnabled by viewModel.focusVibrationEnabled.collectAsStateWithLifecycle()
 
     var selectedPresetId by remember { mutableStateOf<Long?>(null) }
+    var linkMode by remember { mutableStateOf(LinkMode.NONE) }
     var selectedCourseId by remember { mutableStateOf<Long?>(null) }
+    var selectedLanguageId by remember { mutableStateOf<Long?>(null) }
     var selectedTopicId by remember { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(presets) {
@@ -87,8 +101,12 @@ fun FocusTimerScreen(
         }
     }
 
-    val topics by remember(selectedCourseId) {
-        selectedCourseId?.let { viewModel.topicsForCourse(it) } ?: flowOf(emptyList())
+    val topics by remember(linkMode, selectedCourseId, selectedLanguageId) {
+        when (linkMode) {
+            LinkMode.COURSE -> selectedCourseId?.let { viewModel.topicsForCourse(it) } ?: flowOf(emptyList())
+            LinkMode.LANGUAGE -> selectedLanguageId?.let { viewModel.topicsForLanguage(it) } ?: flowOf(emptyList())
+            LinkMode.NONE -> flowOf(emptyList())
+        }
     }.collectAsStateWithLifecycle(initialValue = emptyList())
 
     // The screen must not turn off/lock while a session is running, or the in-app alarm could
@@ -137,9 +155,19 @@ fun FocusTimerScreen(
                     selectedPresetId = selectedPresetId,
                     onSelectPreset = { selectedPresetId = it },
                     onManagePresets = onManagePresets,
+                    linkMode = linkMode,
+                    onSelectLinkMode = {
+                        linkMode = it
+                        selectedCourseId = null
+                        selectedLanguageId = null
+                        selectedTopicId = null
+                    },
                     courses = courses,
                     selectedCourseId = selectedCourseId,
                     onSelectCourse = { selectedCourseId = it; selectedTopicId = null },
+                    languages = languages,
+                    selectedLanguageId = selectedLanguageId,
+                    onSelectLanguage = { selectedLanguageId = it; selectedTopicId = null },
                     topics = topics,
                     selectedTopicId = selectedTopicId,
                     onSelectTopic = { selectedTopicId = it },
@@ -160,9 +188,18 @@ fun FocusTimerScreen(
                     onSetVibration = { viewModel.setFocusVibrationEnabled(it) },
                     onStart = {
                         val preset = presets.firstOrNull { it.id == selectedPresetId } ?: return@IdleContent
-                        val courseName = courses.firstOrNull { it.id == selectedCourseId }?.name
                         val topicName = topics.firstOrNull { it.id == selectedTopicId }?.name
-                        viewModel.startSession(preset, selectedCourseId, courseName, selectedCourseId?.let { selectedTopicId }, topicName)
+                        when (linkMode) {
+                            LinkMode.COURSE -> {
+                                val courseName = courses.firstOrNull { it.id == selectedCourseId }?.name
+                                viewModel.startSession(preset, selectedCourseId, courseName, null, null, selectedTopicId, topicName)
+                            }
+                            LinkMode.LANGUAGE -> {
+                                val languageName = languages.firstOrNull { it.id == selectedLanguageId }?.name
+                                viewModel.startSession(preset, null, null, selectedLanguageId, languageName, selectedTopicId, topicName)
+                            }
+                            LinkMode.NONE -> viewModel.startSession(preset, null, null, null, null, null, null)
+                        }
                     },
                 )
             } else {
@@ -173,12 +210,19 @@ fun FocusTimerScreen(
                     onResume = viewModel::resumeSession,
                     onStop = viewModel::stopSession,
                     onCourseClick = onCourseClick,
+                    onLanguageClick = onLanguageClick,
                     onTopicClick = onTopicClick,
                 )
             }
 
             Spacer(Modifier.height(24.dp))
-            HistorySection(history = history, onCourseClick = onCourseClick, onTopicClick = onTopicClick)
+            HistorySection(
+                history = history,
+                onCourseClick = onCourseClick,
+                onLanguageClick = onLanguageClick,
+                onTopicClick = onTopicClick,
+                onDelete = viewModel::deleteHistorySession,
+            )
         }
     }
 }
@@ -189,9 +233,14 @@ private fun IdleContent(
     selectedPresetId: Long?,
     onSelectPreset: (Long) -> Unit,
     onManagePresets: () -> Unit,
+    linkMode: LinkMode,
+    onSelectLinkMode: (LinkMode) -> Unit,
     courses: List<Course>,
     selectedCourseId: Long?,
     onSelectCourse: (Long?) -> Unit,
+    languages: List<Language>,
+    selectedLanguageId: Long?,
+    onSelectLanguage: (Long?) -> Unit,
     topics: List<Topic>,
     selectedTopicId: Long?,
     onSelectTopic: (Long?) -> Unit,
@@ -228,25 +277,51 @@ private fun IdleContent(
     }
 
     Spacer(Modifier.height(16.dp))
-    Text(stringResource(R.string.label_link_to_course), style = MaterialTheme.typography.labelSmall)
-    DropdownField(
-        selectedLabel = courses.firstOrNull { it.id == selectedCourseId }?.name ?: stringResource(R.string.common_none),
-    ) { closeMenu ->
-        DropdownMenuItem(text = { Text(stringResource(R.string.common_none)) }, onClick = { onSelectCourse(null); closeMenu() })
-        courses.forEach { course ->
-            DropdownMenuItem(text = { Text(course.name) }, onClick = { onSelectCourse(course.id); closeMenu() })
-        }
-    }
+    GroupedCard {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.focustimer_link_section_title), style = MaterialTheme.typography.titleMedium)
+            SegmentedToggle(
+                options = listOf(
+                    SegmentedToggleOption(LinkMode.NONE, stringResource(R.string.common_none)),
+                    SegmentedToggleOption(LinkMode.COURSE, stringResource(R.string.label_course)),
+                    SegmentedToggleOption(LinkMode.LANGUAGE, stringResource(R.string.label_language)),
+                ),
+                selected = linkMode,
+                onSelect = onSelectLinkMode,
+                textStyle = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
 
-    if (selectedCourseId != null) {
-        Spacer(Modifier.height(8.dp))
-        Text(stringResource(R.string.label_link_to_topic), style = MaterialTheme.typography.labelSmall)
-        DropdownField(
-            selectedLabel = topics.firstOrNull { it.id == selectedTopicId }?.name ?: stringResource(R.string.common_none),
-        ) { closeMenu ->
-            DropdownMenuItem(text = { Text(stringResource(R.string.common_none)) }, onClick = { onSelectTopic(null); closeMenu() })
-            topics.forEach { topic ->
-                DropdownMenuItem(text = { Text(topic.name) }, onClick = { onSelectTopic(topic.id); closeMenu() })
+            if (linkMode == LinkMode.COURSE) {
+                Text(stringResource(R.string.label_course), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 12.dp))
+                DropdownField(
+                    selectedLabel = courses.firstOrNull { it.id == selectedCourseId }?.name ?: stringResource(R.string.common_select),
+                ) { closeMenu ->
+                    courses.forEach { course ->
+                        DropdownMenuItem(text = { Text(course.name) }, onClick = { onSelectCourse(course.id); closeMenu() })
+                    }
+                }
+            } else if (linkMode == LinkMode.LANGUAGE) {
+                Text(stringResource(R.string.label_language), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 12.dp))
+                DropdownField(
+                    selectedLabel = languages.firstOrNull { it.id == selectedLanguageId }?.name ?: stringResource(R.string.common_select),
+                ) { closeMenu ->
+                    languages.forEach { language ->
+                        DropdownMenuItem(text = { Text(language.name) }, onClick = { onSelectLanguage(language.id); closeMenu() })
+                    }
+                }
+            }
+
+            if (linkMode != LinkMode.NONE && (selectedCourseId != null || selectedLanguageId != null)) {
+                Text(stringResource(R.string.label_link_to_topic), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 8.dp))
+                DropdownField(
+                    selectedLabel = topics.firstOrNull { it.id == selectedTopicId }?.name ?: stringResource(R.string.common_none),
+                ) { closeMenu ->
+                    DropdownMenuItem(text = { Text(stringResource(R.string.common_none)) }, onClick = { onSelectTopic(null); closeMenu() })
+                    topics.forEach { topic ->
+                        DropdownMenuItem(text = { Text(topic.name) }, onClick = { onSelectTopic(topic.id); closeMenu() })
+                    }
+                }
             }
         }
     }
@@ -295,6 +370,7 @@ private fun RunningContent(
     onResume: () -> Unit,
     onStop: () -> Unit,
     onCourseClick: (Long) -> Unit,
+    onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
 ) {
     val phaseLabel = if (session.phase == FocusPhase.WORK) stringResource(R.string.focustimer_phase_work) else stringResource(R.string.focustimer_phase_break)
@@ -305,7 +381,7 @@ private fun RunningContent(
         Text(formatCountdown(remainingMillis), style = MaterialTheme.typography.displayLarge)
         Text(stringResource(R.string.focustimer_cycle_count, session.cyclesCompleted), style = MaterialTheme.typography.bodyMedium)
 
-        val linkLabel = listOfNotNull(session.courseName, session.topicName).joinToString(" · ")
+        val linkLabel = listOfNotNull(session.courseName, session.languageName, session.topicName).joinToString(" · ")
         if (linkLabel.isNotEmpty()) {
             Text(
                 linkLabel,
@@ -314,7 +390,11 @@ private fun RunningContent(
                 modifier = Modifier
                     .padding(top = 4.dp)
                     .clickable {
-                        if (session.topicId != null) onTopicClick(session.topicId) else session.courseId?.let(onCourseClick)
+                        when {
+                            session.topicId != null -> onTopicClick(session.topicId)
+                            session.courseId != null -> onCourseClick(session.courseId)
+                            session.languageId != null -> onLanguageClick(session.languageId)
+                        }
                     },
             )
         }
@@ -331,7 +411,15 @@ private fun RunningContent(
 }
 
 @Composable
-private fun HistorySection(history: List<FocusSession>, onCourseClick: (Long) -> Unit, onTopicClick: (Long) -> Unit) {
+private fun HistorySection(
+    history: List<FocusSession>,
+    onCourseClick: (Long) -> Unit,
+    onLanguageClick: (Long) -> Unit,
+    onTopicClick: (Long) -> Unit,
+    onDelete: (FocusSession) -> Unit,
+) {
+    var pendingDeleteSession by remember { mutableStateOf<FocusSession?>(null) }
+
     Text(stringResource(R.string.focustimer_history_title), style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(8.dp))
     if (history.isEmpty()) {
@@ -339,27 +427,65 @@ private fun HistorySection(history: List<FocusSession>, onCourseClick: (Long) ->
     } else {
         GroupedCard {
             history.forEach { session ->
-                HistoryRow(session = session, onCourseClick = onCourseClick, onTopicClick = onTopicClick)
+                HistoryRow(
+                    session = session,
+                    onCourseClick = onCourseClick,
+                    onLanguageClick = onLanguageClick,
+                    onTopicClick = onTopicClick,
+                    onDeleteClick = { pendingDeleteSession = session },
+                )
                 HorizontalDivider()
             }
         }
     }
+
+    pendingDeleteSession?.let { session ->
+        AlertDialog(
+            onDismissRequest = { pendingDeleteSession = null },
+            title = { Text(stringResource(R.string.focustimer_delete_session_title)) },
+            text = { Text(stringResource(R.string.focustimer_delete_session_message, session.presetName, formatDate(session.startedAt))) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDelete(session)
+                    pendingDeleteSession = null
+                }) { Text(stringResource(R.string.common_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDeleteSession = null }) { Text(stringResource(R.string.common_cancel)) }
+            },
+        )
+    }
 }
 
 @Composable
-private fun HistoryRow(session: FocusSession, onCourseClick: (Long) -> Unit, onTopicClick: (Long) -> Unit) {
+private fun HistoryRow(
+    session: FocusSession,
+    onCourseClick: (Long) -> Unit,
+    onLanguageClick: (Long) -> Unit,
+    onTopicClick: (Long) -> Unit,
+    onDeleteClick: () -> Unit,
+) {
     val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
     val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
-    val hasLink = session.courseId != null
+    val hasLink = session.courseId != null || session.languageId != null
     ListItem(
         headlineContent = { Text("${session.presetName} — ${formatDate(session.startedAt)}") },
         supportingContent = {
             Text(stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText))
         },
+        trailingContent = {
+            IconButton(onClick = onDeleteClick) {
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_focus_session))
+            }
+        },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = if (hasLink) {
             Modifier.clickable {
-                if (session.topicId != null) onTopicClick(session.topicId) else session.courseId?.let(onCourseClick)
+                when {
+                    session.topicId != null -> onTopicClick(session.topicId)
+                    session.courseId != null -> onCourseClick(session.courseId)
+                    session.languageId != null -> onLanguageClick(session.languageId)
+                }
             }
         } else {
             Modifier

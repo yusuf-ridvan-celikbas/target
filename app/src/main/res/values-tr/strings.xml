@@ -532,4 +532,8 @@
     <string name="focustimer_history_empty">Henüz oturum yok.</string>
     <string name="focustimer_history_row_subtitle">%1$d tur · %2$s çalışma · %3$s mola</string>
     <string name="focustimer_keep_screen_hint">Alarmı kaçırmamanız için bir oturum çalışırken ekran açık kalacaktır.</string>
+    <string name="focustimer_link_section_title">Bağlantı</string>
+    <string name="cd_delete_focus_session">Oturumu sil</string>
+    <string name="focustimer_delete_session_title">Bu oturum silinsin mi?</string>
+    <string name="focustimer_delete_session_message">"%1$s — %2$s kalıcı olarak silinecek."</string>
 </resources>

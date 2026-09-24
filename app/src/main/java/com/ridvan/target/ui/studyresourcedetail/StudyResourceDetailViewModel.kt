@@ -55,12 +55,14 @@ class StudyResourceDetailViewModel(
         studyResourceTopicDao.getByStudyResourceIdWithProgress(studyResourceId)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val topicsForCourse: Flow<List<Topic>> = studyResource.filterNotNull().flatMapLatest { resource ->
-        resource.courseId?.let { topicDao.getByCourseId(it) } ?: flowOf(emptyList())
+    private val topicsForOwner: Flow<List<Topic>> = studyResource.filterNotNull().flatMapLatest { resource ->
+        resource.courseId?.let { topicDao.getByCourseId(it) }
+            ?: resource.languageId?.let { topicDao.getByLanguageId(it) }
+            ?: flowOf(emptyList())
     }
 
     val availableTopicsToAdd: StateFlow<List<Topic>> = combine(
-        topicsForCourse,
+        topicsForOwner,
         attachedTopics,
     ) { allTopics, attached ->
         val attachedIds = attached.map { it.studyResourceTopic.topicId }.toSet()
@@ -96,12 +98,18 @@ class StudyResourceDetailViewModel(
 
     fun addTopic(name: String) {
         val trimmed = name.trim()
-        val courseId = studyResource.value?.courseId
-        if (trimmed.isEmpty() || courseId == null) return
+        val resource = studyResource.value
+        val courseId = resource?.courseId
+        val languageId = resource?.languageId
+        if (trimmed.isEmpty() || (courseId == null && languageId == null)) return
         viewModelScope.launch {
-            val existing = topicDao.getByCourseId(courseId).first()
-                .firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
-            val topicId = existing?.id ?: topicDao.insert(Topic(name = trimmed, courseId = courseId))
+            val existingTopics = when {
+                courseId != null -> topicDao.getByCourseId(courseId).first()
+                languageId != null -> topicDao.getByLanguageId(languageId).first()
+                else -> emptyList()
+            }
+            val existing = existingTopics.firstOrNull { it.name.equals(trimmed, ignoreCase = true) }
+            val topicId = existing?.id ?: topicDao.insert(Topic(name = trimmed, courseId = courseId, languageId = languageId))
             if (attachedTopics.value.none { it.studyResourceTopic.topicId == topicId }) {
                 val nextOrderIndex = attachedTopics.value.size
                 studyResourceTopicDao.insert(

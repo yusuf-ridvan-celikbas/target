@@ -32,14 +32,17 @@ interface PracticeExamEntryTopicResultDao {
 
     @Query(
         """
-        SELECT topics.id AS topicId, topics.name AS topicName, topics.courseId AS courseId, courses.name AS courseName,
+        SELECT topics.id AS topicId, topics.name AS topicName,
+               topics.courseId AS courseId, courses.name AS courseName,
+               topics.languageId AS languageId, languages.name AS languageName,
                COALESCE(SUM(practice_exam_entry_topic_results.questionCount), 0) AS totalQuestionCount,
                COALESCE(SUM(practice_exam_entry_topic_results.correctCount), 0) AS totalCorrectCount,
                COALESCE(SUM(practice_exam_entry_topic_results.wrongCount), 0) AS totalWrongCount
         FROM practice_exam_entry_topic_results
         JOIN topics ON topics.id = practice_exam_entry_topic_results.topicId
-        JOIN courses ON courses.id = topics.courseId
-        WHERE courses.userId = :userId
+        LEFT JOIN courses ON courses.id = topics.courseId
+        LEFT JOIN languages ON languages.id = topics.languageId
+        WHERE (courses.userId = :userId) OR (languages.userId = :userId)
         GROUP BY topics.id
         """
     )

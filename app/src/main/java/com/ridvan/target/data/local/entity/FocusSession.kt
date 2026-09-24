@@ -32,8 +32,14 @@ import androidx.room.PrimaryKey
             childColumns = ["topicId"],
             onDelete = ForeignKey.SET_NULL,
         ),
+        ForeignKey(
+            entity = Language::class,
+            parentColumns = ["id"],
+            childColumns = ["languageId"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
     ],
-    indices = [Index("userId"), Index("presetId"), Index("courseId"), Index("topicId")],
+    indices = [Index("userId"), Index("presetId"), Index("courseId"), Index("topicId"), Index("languageId")],
 )
 data class FocusSession(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -44,9 +50,11 @@ data class FocusSession(
     val presetName: String,
     val workMinutes: Int,
     val breakMinutes: Int,
-    /** Optional link to what was being studied — courseId set alone, both set, or neither. */
+    /** Optional link to what was being studied — exactly one of courseId/languageId set, or neither.
+     * topicId (when set) belongs to whichever of the two is set. */
     val courseId: Long? = null,
     val topicId: Long? = null,
+    val languageId: Long? = null,
     val startedAt: Long,
     val endedAt: Long,
     val cyclesCompleted: Int,

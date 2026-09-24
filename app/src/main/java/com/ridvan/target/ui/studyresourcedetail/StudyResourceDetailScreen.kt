@@ -128,7 +128,9 @@ fun StudyResourceDetailScreen(
                 )
             }
 
-            if (studyResource?.type == StudyResourceType.QUESTION_BANK && studyResource?.courseId != null) {
+            if (studyResource?.type == StudyResourceType.QUESTION_BANK &&
+                (studyResource?.courseId != null || studyResource?.languageId != null)
+            ) {
                 GroupedCard(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
                     TopicsSectionHeader(onAddClick = { showAddTopicDialog = true })
                     if (attachedTopics.isEmpty()) {

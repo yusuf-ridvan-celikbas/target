@@ -14,12 +14,20 @@ import androidx.room.PrimaryKey
             childColumns = ["courseId"],
             onDelete = ForeignKey.CASCADE,
         ),
+        ForeignKey(
+            entity = Language::class,
+            parentColumns = ["id"],
+            childColumns = ["languageId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
     ],
-    indices = [Index("courseId")],
+    indices = [Index("courseId"), Index("languageId")],
 )
 data class Topic(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val courseId: Long,
+    /** Exactly one of courseId/languageId is set. */
+    val courseId: Long? = null,
+    val languageId: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

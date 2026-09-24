@@ -4,21 +4,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ridvan.target.R
-import com.ridvan.target.ui.common.courseDisplayName
-import androidx.compose.ui.res.stringResource
 
 @Composable
-fun TopicListScreen(
+fun LanguageTopicListScreen(
     onTopicClick: (Long) -> Unit,
     onBack: () -> Unit,
-    viewModel: TopicListViewModel = viewModel(),
+    viewModel: LanguageTopicListViewModel = viewModel(),
 ) {
-    val courseName by viewModel.courseName.collectAsStateWithLifecycle()
+    val languageName by viewModel.languageName.collectAsStateWithLifecycle()
     val topics by viewModel.topics.collectAsStateWithLifecycle()
 
     TopicListContent(
-        title = stringResource(R.string.topiclist_title, courseDisplayName(courseName)),
+        title = languageName,
         topics = topics,
         onAdd = viewModel::addTopic,
         onTopicClick = onTopicClick,

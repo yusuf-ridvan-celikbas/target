@@ -38,6 +38,7 @@ import com.ridvan.target.ui.statistics.StatisticsScreen
 import com.ridvan.target.ui.switchaccount.SwitchAccountScreen
 import com.ridvan.target.ui.topicdetail.TopicDetailScreen
 import com.ridvan.target.ui.topicprogress.TopicProgressScreen
+import com.ridvan.target.ui.topiclist.LanguageTopicListScreen
 import com.ridvan.target.ui.topiclist.TopicHomeScreen
 import com.ridvan.target.ui.topiclist.TopicListScreen
 import com.ridvan.target.ui.user.UserEditScreen
@@ -168,12 +169,26 @@ fun TargetNavHost() {
             TopicHomeScreen(
                 shellNavigation = shellNavigation,
                 onCourseTypeClick = { examType -> navController.navigate(TopicCourseListByTypeRoute(examType.id)) },
+                onLanguageTypeClick = { navController.navigate(TopicLanguageExamCoursesRoute) },
                 onCourseShortcutClick = { courseId -> navController.navigate(TopicListRoute(courseId)) },
+                onLanguageShortcutClick = { languageId -> navController.navigate(LanguageTopicListRoute(languageId)) },
             )
         }
         composable<TopicCourseListByTypeRoute> {
             CourseListByTypeScreen(
                 onCourseClick = { courseId -> navController.navigate(TopicListRoute(courseId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<TopicLanguageExamCoursesRoute> {
+            LanguageExamCoursesScreen(
+                onLanguageClick = { languageId -> navController.navigate(LanguageTopicListRoute(languageId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<LanguageTopicListRoute> {
+            LanguageTopicListScreen(
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
                 onBack = { navController.popBackStack() },
             )
         }
@@ -207,6 +222,7 @@ fun TargetNavHost() {
             val languageId = backStackEntry.toRoute<LanguageDetailRoute>().languageId
             LanguageDetailScreen(
                 onStudyResourcesClick = { navController.navigate(LanguageStudyResourceRoute(languageId)) },
+                onTopicsClick = { navController.navigate(LanguageTopicListRoute(languageId)) },
                 onBack = { navController.popBackStack() },
             )
         }
@@ -284,6 +300,7 @@ fun TargetNavHost() {
                 shellNavigation = shellNavigation,
                 onManagePresets = { navController.navigate(FocusPresetListRoute) },
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
             )
         }

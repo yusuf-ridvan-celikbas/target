@@ -191,8 +191,9 @@ fun StatisticsScreen(
 
 @Composable
 private fun WeakTopicRow(entry: WeakTopicEntry, onClick: () -> Unit) {
+    val ownerLabel = if (entry.isCourse) courseDisplayName(entry.ownerName) else entry.ownerName
     ListItem(
-        headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, courseDisplayName(entry.courseName))) },
+        headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, ownerLabel)) },
         supportingContent = { Text(stringResource(R.string.stats_weak_topic_row, entry.correctCount, entry.wrongCount, entry.accuracyPercent)) },
         modifier = Modifier.clickable(onClick = onClick),
     )
@@ -223,8 +224,9 @@ private fun SourceToggle(source: StatsSource, onSelect: (StatsSource) -> Unit, m
 @Composable
 private fun BreakdownRow(entry: TopicBreakdownEntry, onClick: () -> Unit) {
     val durationText = stringResource(R.string.duration_format, entry.durationMinutes / 60, entry.durationMinutes % 60)
+    val ownerLabel = if (entry.isCourse) courseDisplayName(entry.ownerName) else entry.ownerName
     ListItem(
-        headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, courseDisplayName(entry.courseName))) },
+        headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, ownerLabel)) },
         supportingContent = {
             Text(stringResource(R.string.session_row_summary, entry.tests, entry.solved, entry.unsolved, entry.blank, durationText))
         },

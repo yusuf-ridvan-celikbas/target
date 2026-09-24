@@ -8,6 +8,7 @@ import com.ridvan.target.data.focustimer.FocusAlarmPlayer
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusPreset
 import com.ridvan.target.data.local.entity.FocusSession
+import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Topic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,8 +33,11 @@ enum class FocusPhase { WORK, BREAK }
  */
 data class RunningFocusSession(
     val preset: FocusPreset,
+    /** Exactly one of courseId/languageId is set, or neither. */
     val courseId: Long?,
     val courseName: String?,
+    val languageId: Long?,
+    val languageName: String?,
     val topicId: Long?,
     val topicName: String?,
     val phase: FocusPhase,
@@ -49,6 +53,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     private val focusPresetDao = targetApplication.database.focusPresetDao()
     private val focusSessionDao = targetApplication.database.focusSessionDao()
     private val courseDao = targetApplication.database.courseDao()
+    private val languageDao = targetApplication.database.languageDao()
     private val topicDao = targetApplication.database.topicDao()
     private val appPreferences = targetApplication.preferences
     private val userId = targetApplication.preferences.currentUserId
@@ -58,6 +63,9 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val courses: StateFlow<List<Course>> = (userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val languages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val history: StateFlow<List<FocusSession>> = (userId?.let { focusSessionDao.getByUserId(it) } ?: flowOf(emptyList()))
@@ -70,6 +78,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     fun setFocusVibrationEnabled(enabled: Boolean) = appPreferences.setFocusVibrationEnabled(enabled)
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
+    fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
 
     private val _runningSession = MutableStateFlow<RunningFocusSession?>(null)
     val runningSession: StateFlow<RunningFocusSession?> = _runningSession.asStateFlow()
@@ -82,7 +91,15 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     private var accumulatedWorkMillis = 0L
     private var accumulatedBreakMillis = 0L
 
-    fun startSession(preset: FocusPreset, courseId: Long?, courseName: String?, topicId: Long?, topicName: String?) {
+    fun startSession(
+        preset: FocusPreset,
+        courseId: Long?,
+        courseName: String?,
+        languageId: Long?,
+        languageName: String?,
+        topicId: Long?,
+        topicName: String?,
+    ) {
         val now = System.currentTimeMillis()
         accumulatedWorkMillis = 0L
         accumulatedBreakMillis = 0L
@@ -91,6 +108,8 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
             preset = preset,
             courseId = courseId,
             courseName = courseName,
+            languageId = languageId,
+            languageName = languageName,
             topicId = topicId,
             topicName = topicName,
             phase = FocusPhase.WORK,
@@ -178,6 +197,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
             workMinutes = session.preset.workMinutes,
             breakMinutes = session.preset.breakMinutes,
             courseId = session.courseId,
+            languageId = session.languageId,
             topicId = session.topicId,
             startedAt = session.startedAt,
             endedAt = endedAt,
@@ -190,6 +210,10 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         // existing "one-off IO launch outside any lifecycle" convention (AppPreferences's
         // rescheduleNotifications), rather than needing two different code paths here.
         CoroutineScope(Dispatchers.IO).launch { focusSessionDao.insert(focusSession) }
+    }
+
+    fun deleteHistorySession(session: FocusSession) {
+        viewModelScope.launch { focusSessionDao.delete(session) }
     }
 
     override fun onCleared() {

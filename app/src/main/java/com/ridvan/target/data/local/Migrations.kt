@@ -415,3 +415,43 @@ val MIGRATION_17_18 = object : Migration(17, 18) {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_topicId ON focus_sessions(topicId)")
     }
 }
+
+val MIGRATION_18_19 = object : Migration(18, 19) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Topics generalize from Course-only to Course-or-Language, mirroring StudyResource's
+        // dual-nullable courseId/languageId shape. SQLite can't relax an existing NOT NULL column
+        // via ALTER TABLE, so this uses the same drop-column/recreate pattern as MIGRATION_13_14 —
+        // every existing row keeps its courseId, languageId comes back NULL.
+        db.execSQL(
+            """
+            CREATE TABLE topics_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                courseId INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+                languageId INTEGER REFERENCES languages(id) ON DELETE CASCADE,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            INSERT INTO topics_new (id, name, courseId, languageId, createdAt)
+            SELECT id, name, courseId, NULL, createdAt FROM topics
+            """.trimIndent()
+        )
+        db.execSQL("DROP TABLE topics")
+        db.execSQL("ALTER TABLE topics_new RENAME TO topics")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_topics_courseId ON topics(courseId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_topics_languageId ON topics(languageId)")
+    }
+}
+
+val MIGRATION_19_20 = object : Migration(19, 20) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Focus Timer sessions can now optionally link to a Language (+ one of its Topics)
+        // instead of a Course — same plain nullable ADD COLUMN shape as MIGRATION_4_5's
+        // exams.languageId, no recreate needed since focus_sessions' columns are already nullable.
+        db.execSQL("ALTER TABLE focus_sessions ADD COLUMN languageId INTEGER REFERENCES languages(id) ON DELETE SET NULL")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_languageId ON focus_sessions(languageId)")
+    }
+}
