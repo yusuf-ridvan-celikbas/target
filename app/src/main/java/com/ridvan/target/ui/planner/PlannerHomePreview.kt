@@ -1,6 +1,8 @@
 package com.ridvan.target.ui.planner
 
+import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.dao.PlannerEventWithLinks
+import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import java.time.LocalDate
@@ -50,4 +52,25 @@ fun upcomingEventOccurrences(
         }
         .sortedWith(compareBy({ it.occurrenceDateMillis }, { it.event.startMinuteOfDay ?: Int.MAX_VALUE }))
         .take(maxItems)
+}
+
+/** Home's "Studied" section: today's sessions (in time order) plus today's and this week's totals. */
+data class StudiedPreview(
+    val today: List<PlannerAgendaItem.Studied>,
+    val todayMinutes: Int,
+    val weekMinutes: Int,
+)
+
+fun studiedPreview(
+    focusSessions: List<FocusSessionWithLinks>,
+    practiceLogs: List<PracticeLogPlannerRow>,
+): StudiedPreview {
+    val today = LocalDate.now()
+    val week = studiedItemsInRange(focusSessions, practiceLogs, mondayOf(today)..today)
+    val todayItems = week.filter { it.date == today }.sortedBy { it.minuteOfDay }
+    return StudiedPreview(
+        today = todayItems,
+        todayMinutes = todayItems.sumOf { it.studiedMinutes },
+        weekMinutes = week.sumOf { it.studiedMinutes },
+    )
 }

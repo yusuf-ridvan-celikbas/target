@@ -10,6 +10,8 @@ import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import com.ridvan.target.data.local.entity.User
 import com.ridvan.target.ui.common.startOfTodayMillis
 import com.ridvan.target.ui.planner.PlannerPreviewOccurrence
+import com.ridvan.target.ui.planner.StudiedPreview
+import com.ridvan.target.ui.planner.studiedPreview
 import com.ridvan.target.ui.planner.upcomingEventOccurrences
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +39,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val sectionDao = targetApplication.database.sectionDao()
     private val plannerEventDao = targetApplication.database.plannerEventDao()
     private val plannerEventCompletionDao = targetApplication.database.plannerEventCompletionDao()
+    private val focusSessionDao = targetApplication.database.focusSessionDao()
+    private val practiceLogDao = targetApplication.database.practiceLogDao()
     private val preferences = targetApplication.preferences
     private val userId = preferences.currentUserId
 
@@ -69,6 +73,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     ) { events, completions ->
         upcomingEventOccurrences(events, completions, HOME_PLANNER_WINDOW_DAYS, HOME_PLANNER_MAX_ITEMS)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val studied: StateFlow<StudiedPreview> = combine(
+        userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
+    ) { focus, practice -> studiedPreview(focus, practice) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudiedPreview(emptyList(), 0, 0))
 
     fun togglePlannerOccurrenceDone(occurrence: PlannerPreviewOccurrence) {
         viewModelScope.launch {

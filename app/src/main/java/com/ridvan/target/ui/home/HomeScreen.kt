@@ -1,5 +1,16 @@
 package com.ridvan.target.ui.home
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import com.ridvan.target.ui.common.courseDisplayName
+import com.ridvan.target.ui.common.formatTime
+import com.ridvan.target.ui.focustimer.focusSessionLinkLabel
+import com.ridvan.target.ui.planner.PlannerAgendaItem
+import com.ridvan.target.ui.planner.StudiedPreview
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -52,11 +63,14 @@ fun HomeScreen(
     shellNavigation: ShellNavigation,
     onExamClick: (Long) -> Unit,
     onSectionClick: (Long) -> Unit,
+    onFocusSessionClick: (Long) -> Unit,
+    onPracticeSessionClick: (Long) -> Unit,
     viewModel: HomeViewModel = viewModel(),
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
     val upcomingEvents by viewModel.upcomingEvents.collectAsStateWithLifecycle()
     val upcomingPlannerEvents by viewModel.upcomingPlannerEvents.collectAsStateWithLifecycle()
+    val studied by viewModel.studied.collectAsStateWithLifecycle()
 
     AppShell(navigation = shellNavigation, currentDestination = ShellDestination.HOME) { innerPadding ->
         Column(
@@ -93,6 +107,13 @@ fun HomeScreen(
                 occurrences = upcomingPlannerEvents,
                 onToggleDone = viewModel::togglePlannerOccurrenceDone,
                 onOpenPlanner = shellNavigation.onNavigatePlanner,
+                studied = studied,
+                onStudiedClick = { item ->
+                    when (item) {
+                        is PlannerAgendaItem.FocusSessionEntry -> onFocusSessionClick(item.item.session.id)
+                        is PlannerAgendaItem.PracticeLogEntry -> onPracticeSessionClick(item.row.practiceLog.studyResourceTopicId)
+                    }
+                },
             )
         }
     }
@@ -106,6 +127,8 @@ private fun PlannerPreviewCard(
     occurrences: List<PlannerPreviewOccurrence>,
     onToggleDone: (PlannerPreviewOccurrence) -> Unit,
     onOpenPlanner: () -> Unit,
+    studied: StudiedPreview,
+    onStudiedClick: (PlannerAgendaItem.Studied) -> Unit,
 ) {
     GroupedCard {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -139,6 +162,7 @@ private fun PlannerPreviewCard(
                     )
                 }
             }
+            StudiedSection(studied, onStudiedClick)
         }
     }
 }
@@ -257,3 +281,78 @@ private fun UpcomingEventRow(event: UpcomingEvent, onClick: () -> Unit) {
         }
     }
 }
+
+/** What was actually studied today (Focus + Practice Sessions), with today's and this week's totals. */
+@Composable
+private fun StudiedSection(studied: StudiedPreview, onItemClick: (PlannerAgendaItem.Studied) -> Unit) {
+    HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text(
+            stringResource(R.string.home_studied_today, durationText(studied.todayMinutes)),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            stringResource(R.string.home_studied_week, durationText(studied.weekMinutes)),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    if (studied.today.isEmpty()) {
+        Text(
+            stringResource(R.string.home_studied_empty),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+    } else {
+        studied.today.forEach { item -> StudiedPreviewRow(item, onClick = { onItemClick(item) }) }
+    }
+}
+
+@Composable
+private fun StudiedPreviewRow(item: PlannerAgendaItem.Studied, onClick: () -> Unit) {
+    val (icon, label, startMillis) = when (item) {
+        is PlannerAgendaItem.FocusSessionEntry -> Triple(
+            Icons.Filled.Timer,
+            focusSessionLinkLabel(item.item) ?: item.item.session.presetName,
+            item.item.session.startedAt,
+        )
+        is PlannerAgendaItem.PracticeLogEntry -> Triple(
+            Icons.Filled.Quiz,
+            listOfNotNull(item.row.courseName?.let { courseDisplayName(it) } ?: item.row.languageName, item.row.topicName)
+                .joinToString(" · "),
+            item.row.practiceLog.loggedAt,
+        )
+    }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val labelColor by animateColorAsState(
+        targetValue = if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        label = "studiedPreviewLabelColor",
+    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
+        Text(
+            label,
+            color = labelColor,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier.weight(1f).padding(start = 12.dp),
+        )
+        Text(
+            "${formatTime(startMillis)} · ${durationText(item.studiedMinutes)}",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun durationText(minutes: Int): String = stringResource(R.string.duration_format, minutes / 60, minutes % 60)

@@ -104,6 +104,8 @@ fun TargetNavHost() {
                 shellNavigation = shellNavigation,
                 onExamClick = { examId -> navController.navigate(ExamDetailRoute(examId)) },
                 onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
+                onFocusSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },
+                onPracticeSessionClick = { id -> navController.navigate(TopicProgressRoute(id)) },
             )
         }
         composable<ExamListRoute> {

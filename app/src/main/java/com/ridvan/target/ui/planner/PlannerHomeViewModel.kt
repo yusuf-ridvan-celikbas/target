@@ -182,19 +182,29 @@ private fun buildAgendaItems(raw: PlannerRawData, range: ClosedRange<LocalDate>)
             PlannerAgendaItem.SectionEntry(section.examId, section.id, "$examLabel – ${section.name}", date)
         }
 
-    val focusItems = raw.focusSessions.mapNotNull { item ->
+    val studiedItems = studiedItemsInRange(raw.focusSessions, raw.practiceLogs, range)
+
+    return (eventItems + examItems + sectionItems + studiedItems).sortedBy { it.date }
+}
+
+/** Focus sessions (by start time) and Practice Sessions (by log time) falling in [range] —
+ *  shared by the Planner agenda and Home's Planner card. */
+internal fun studiedItemsInRange(
+    focusSessions: List<FocusSessionWithLinks>,
+    practiceLogs: List<PracticeLogPlannerRow>,
+    range: ClosedRange<LocalDate>,
+): List<PlannerAgendaItem.Studied> {
+    val focusItems = focusSessions.mapNotNull { item ->
         val started = Instant.ofEpochMilli(item.session.startedAt).atZone(ZoneId.systemDefault())
         val date = started.toLocalDate()
         if (date !in range) return@mapNotNull null
         PlannerAgendaItem.FocusSessionEntry(item, date, started.hour * 60 + started.minute)
     }
-
-    val practiceItems = raw.practiceLogs.mapNotNull { row ->
+    val practiceItems = practiceLogs.mapNotNull { row ->
         val logged = Instant.ofEpochMilli(row.practiceLog.loggedAt).atZone(ZoneId.systemDefault())
         val date = logged.toLocalDate()
         if (date !in range) return@mapNotNull null
         PlannerAgendaItem.PracticeLogEntry(row, date, logged.hour * 60 + logged.minute)
     }
-
-    return (eventItems + examItems + sectionItems + focusItems + practiceItems).sortedBy { it.date }
+    return focusItems + practiceItems
 }
