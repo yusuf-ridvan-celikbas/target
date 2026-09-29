@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseDisplayName
-import com.ridvan.target.ui.focustimer.focusSessionLinkLabel
+import com.ridvan.target.ui.focustimer.focusSessionTitle
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -107,7 +107,7 @@ private fun YearItemRow(item: PlannerAgendaItem, onItemClick: (PlannerAgendaItem
         is PlannerAgendaItem.EventOccurrence -> item.event.title
         is PlannerAgendaItem.ExamEntry -> item.label
         is PlannerAgendaItem.SectionEntry -> item.label
-        is PlannerAgendaItem.FocusSessionEntry -> focusSessionLinkLabel(item.item) ?: item.item.session.presetName
+        is PlannerAgendaItem.FocusSessionEntry -> focusSessionTitle(item.item)
         is PlannerAgendaItem.PracticeLogEntry -> listOfNotNull(
             item.row.courseName?.let { courseDisplayName(it) } ?: item.row.languageName,
             item.row.topicName,

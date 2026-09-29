@@ -62,4 +62,6 @@ data class FocusSession(
     val totalBreakMinutes: Int,
     /** Free-text annotation added afterwards on the session's detail screen, e.g. "Studied Dativ". */
     val notes: String? = null,
+    /** Logged by hand (studied without the timer): no preset (presetName is blank) and no cycles. */
+    val isManual: Boolean = false,
 )

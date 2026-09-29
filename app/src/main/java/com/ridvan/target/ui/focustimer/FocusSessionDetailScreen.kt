@@ -51,7 +51,7 @@ import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.common.formatTime
 import kotlinx.coroutines.flow.flowOf
 
-private enum class SessionLinkMode { NONE, COURSE, LANGUAGE }
+internal enum class SessionLinkMode { NONE, COURSE, LANGUAGE }
 
 /** One Focus Timer session: when it ran, what it covered, what it's linked to, and the user's notes. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +69,7 @@ fun FocusSessionDetailScreen(
     var showLinkDialog by remember { mutableStateOf(false) }
     var showNotesDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showTimeDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -108,7 +109,16 @@ fun FocusSessionDetailScreen(
             // When it ran — date plus the exact start and end times.
             GroupedCard {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(stringResource(R.string.focus_session_time_section), style = MaterialTheme.typography.titleMedium)
+                    // Only a hand-logged session's times can be corrected; timer sessions recorded their own.
+                    if (session.isManual) {
+                        SectionHeader(
+                            title = stringResource(R.string.focus_session_time_section),
+                            action = stringResource(R.string.focus_session_edit),
+                            onAction = { showTimeDialog = true },
+                        )
+                    } else {
+                        Text(stringResource(R.string.focus_session_time_section), style = MaterialTheme.typography.titleMedium)
+                    }
                     Text(stringResource(R.string.focus_session_date, formatDate(session.startedAt)), modifier = Modifier.padding(top = 8.dp))
                     val endLabel = if (formatDate(session.endedAt) == formatDate(session.startedAt)) {
                         formatTime(session.endedAt)
@@ -131,21 +141,18 @@ fun FocusSessionDetailScreen(
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     Text(stringResource(R.string.focus_session_summary_section), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        stringResource(
-                            R.string.focus_session_preset,
-                            session.presetName,
-                            stringResource(R.string.focustimer_preset_row_subtitle, session.workMinutes, session.breakMinutes),
-                        ),
+                        if (session.isManual) {
+                            stringResource(R.string.focus_manual_logged_by_hand)
+                        } else {
+                            stringResource(
+                                R.string.focus_session_preset,
+                                session.presetName,
+                                stringResource(R.string.focustimer_preset_row_subtitle, session.workMinutes, session.breakMinutes),
+                            )
+                        },
                         modifier = Modifier.padding(top = 8.dp),
                     )
-                    Text(
-                        stringResource(
-                            R.string.focustimer_history_row_subtitle,
-                            session.cyclesCompleted,
-                            stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60),
-                            stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60),
-                        ),
-                    )
+                    Text(focusSessionStatsLine(session))
                 }
             }
 
@@ -208,6 +215,18 @@ fun FocusSessionDetailScreen(
                 showLinkDialog = false
             },
             onDismiss = { showLinkDialog = false },
+        )
+    }
+
+    if (showTimeDialog && current != null) {
+        FocusManualSessionDialog(
+            linkSource = null,
+            initial = current.session,
+            onConfirm = {
+                viewModel.updateTimes(it)
+                showTimeDialog = false
+            },
+            onDismiss = { showTimeDialog = false },
         )
     }
 
@@ -335,7 +354,7 @@ private fun LinkSessionDialog(
 }
 
 @Composable
-private fun <T> PickerField(label: String, selectedLabel: String, options: List<Pair<T, String>>, onSelect: (T) -> Unit) {
+internal fun <T> PickerField(label: String, selectedLabel: String, options: List<Pair<T, String>>, onSelect: (T) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
         Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {

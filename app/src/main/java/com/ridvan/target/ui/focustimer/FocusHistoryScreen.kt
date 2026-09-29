@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.focustimer
 
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -156,6 +158,10 @@ private fun FocusHistoryBody(
     var subjectKey by rememberSaveable { mutableStateOf(SUBJECT_ALL) }
     var presetName by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
+    var showManualDialog by remember { mutableStateOf(false) }
+    val courses by viewModel.courses.collectAsStateWithLifecycle()
+    val languages by viewModel.languages.collectAsStateWithLifecycle()
+    val manualLabel = stringResource(R.string.focus_manual_label)
 
     // Subject options come from what's actually in history, so every choice has at least one match.
     val subjectOptions: List<Pair<String, String>> = history
@@ -175,7 +181,7 @@ private fun FocusHistoryBody(
     // Search matches the preset name, the linked course (raw and translated), language and topic, and notes.
     val searchText: Map<Long, String> = history.associate { item ->
         item.session.id to listOfNotNull(
-            item.session.presetName,
+            if (item.session.isManual) manualLabel else item.session.presetName,
             item.courseName,
             item.courseName?.let { courseDisplayName(it) },
             item.languageName,
@@ -243,9 +249,9 @@ private fun FocusHistoryBody(
         )
         FilterField(
             label = stringResource(R.string.focustimer_history_filter_preset),
-            selectedLabel = presetName ?: stringResource(R.string.focustimer_history_all_presets),
+            selectedLabel = presetName?.let { it.ifEmpty { manualLabel } } ?: stringResource(R.string.focustimer_history_all_presets),
             options = listOf<Pair<String?, String>>(null to stringResource(R.string.focustimer_history_all_presets)) +
-                presetOptions.map { it to it },
+                presetOptions.map { it to it.ifEmpty { manualLabel } },
             onSelect = { presetName = it },
         )
 
@@ -270,6 +276,10 @@ private fun FocusHistoryBody(
                 }) { Text(stringResource(R.string.focustimer_history_clear_filters)) }
             }
         }
+        OutlinedButton(onClick = { showManualDialog = true }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            Icon(Icons.Filled.Add, contentDescription = null)
+            Text(stringResource(R.string.focus_manual_add_button), modifier = Modifier.padding(start = 8.dp))
+        }
         Spacer(Modifier.height(8.dp))
 
         when {
@@ -286,6 +296,19 @@ private fun FocusHistoryBody(
                 }
             }
         }
+    }
+
+    if (showManualDialog) {
+        FocusManualSessionDialog(
+            linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage),
+            initialCourseId = viewModel.scopeCourseId,
+            initialLanguageId = viewModel.scopeLanguageId,
+            onConfirm = {
+                viewModel.addManualSession(it)
+                showManualDialog = false
+            },
+            onDismiss = { showManualDialog = false },
+        )
     }
 
     pendingDelete?.let { item ->

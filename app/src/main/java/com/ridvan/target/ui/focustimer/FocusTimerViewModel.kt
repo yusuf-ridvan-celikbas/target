@@ -342,6 +342,11 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         CoroutineScope(Dispatchers.IO).launch { focusSessionDao.insert(focusSession) }
     }
 
+    fun addManualSession(form: ManualFocusSessionForm) {
+        val uid = userId ?: return
+        viewModelScope.launch { focusSessionDao.insert(form.toNewSession(uid)) }
+    }
+
     fun deleteHistorySession(session: FocusSession) {
         viewModelScope.launch { focusSessionDao.delete(session) }
     }

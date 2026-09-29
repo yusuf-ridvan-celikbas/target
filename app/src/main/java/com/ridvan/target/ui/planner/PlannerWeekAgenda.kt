@@ -36,7 +36,8 @@ import com.ridvan.target.data.local.entity.PlannerEventCategory
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatTime
-import com.ridvan.target.ui.focustimer.focusSessionLinkLabel
+import com.ridvan.target.ui.focustimer.focusSessionStatsLine
+import com.ridvan.target.ui.focustimer.focusSessionTitle
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -252,26 +253,21 @@ private fun AgendaRow(
         }
         is PlannerAgendaItem.FocusSessionEntry -> {
             val session = item.item.session
-            val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
-            val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onItemClick(item) },
                 leadingContent = { StudiedIcon(Icons.Filled.Timer) },
-                headlineContent = { Text(focusSessionLinkLabel(item.item) ?: session.presetName) },
+                headlineContent = { Text(focusSessionTitle(item.item)) },
                 supportingContent = {
                     Column {
                         Text(
                             stringResource(
-                                R.string.planner_studied_focus,
+                                if (session.isManual) R.string.planner_studied_manual else R.string.planner_studied_focus,
                                 "${formatTime(session.startedAt)} – ${formatTime(session.endedAt)}",
                             ),
                             style = MaterialTheme.typography.bodySmall,
                         )
-                        Text(
-                            stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                        Text(focusSessionStatsLine(session), style = MaterialTheme.typography.bodySmall)
                     }
                 },
             )

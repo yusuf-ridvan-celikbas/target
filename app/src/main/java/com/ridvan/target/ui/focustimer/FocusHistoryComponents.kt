@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.data.local.entity.FocusSession
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
@@ -31,6 +32,28 @@ internal fun focusSessionLinkLabel(item: FocusSessionWithLinks): String? {
     return listOfNotNull(owner, item.topicName).joinToString(" · ").ifEmpty { null }
 }
 
+/** The preset a session ran on, or "Manual" for one logged by hand. */
+@Composable
+internal fun focusSessionPresetLabel(session: FocusSession): String =
+    if (session.isManual) stringResource(R.string.focus_manual_label) else session.presetName
+
+/** What a session is about: its link, else its preset (or "Manual"). */
+@Composable
+internal fun focusSessionTitle(item: FocusSessionWithLinks): String =
+    focusSessionLinkLabel(item) ?: focusSessionPresetLabel(item.session)
+
+/** "2 cycles · 0h 40m work · 0h 7m break" — manual sessions have no cycles, so just work/break. */
+@Composable
+internal fun focusSessionStatsLine(session: FocusSession): String {
+    val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
+    val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
+    return if (session.isManual) {
+        stringResource(R.string.focus_manual_stats, workText, breakText)
+    } else {
+        stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText)
+    }
+}
+
 /** Shared by FocusTimerScreen's recent-history card and every FocusHistoryScreen variant; tapping opens FocusSessionDetailScreen. */
 @Composable
 internal fun FocusHistoryRow(
@@ -39,8 +62,6 @@ internal fun FocusHistoryRow(
     onDeleteClick: () -> Unit,
 ) {
     val session = item.session
-    val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
-    val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
     val linkLabel = focusSessionLinkLabel(item)
     ListItem(
         // Date and start time lead, matching FocusSessionDetailScreen's title; the preset moves into the stats line.
@@ -52,10 +73,7 @@ internal fun FocusHistoryRow(
                 if (linkLabel != null) {
                     Text(linkLabel, color = MaterialTheme.colorScheme.primary)
                 }
-                Text(
-                    "${session.presetName} · " +
-                        stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText),
-                )
+                Text("${focusSessionPresetLabel(session)} · ${focusSessionStatsLine(session)}")
                 session.notes?.takeIf { it.isNotBlank() }?.let { notes ->
                     Text(
                         notes,
@@ -88,7 +106,7 @@ internal fun FocusSessionDeleteDialog(
         title = { Text(stringResource(R.string.focustimer_delete_session_title)) },
         text = {
             val whenLabel = stringResource(R.string.focus_session_title, formatDate(item.session.startedAt), formatTime(item.session.startedAt))
-            Text(stringResource(R.string.focustimer_delete_session_message, item.session.presetName, whenLabel))
+            Text(stringResource(R.string.focustimer_delete_session_message, focusSessionPresetLabel(item.session), whenLabel))
         },
         confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.common_delete)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },

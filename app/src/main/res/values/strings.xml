@@ -599,6 +599,16 @@
     <string name="focus_session_time_range">Time: %1$s – %2$s</string>
     <string name="focus_session_total">Total: %1$s</string>
     <string name="focus_session_summary_section">Session</string>
+    <string name="focus_manual_label">Manual</string>
+    <string name="focus_manual_add_button">Log a session manually</string>
+    <string name="focus_manual_add_title">Log a Study Session</string>
+    <string name="focus_manual_edit_title">Edit Session Time</string>
+    <string name="focus_manual_break_minutes">Break (minutes)</string>
+    <string name="focus_manual_work_hint">Work time: %1$s</string>
+    <string name="focus_manual_break_too_long">The break must be shorter than the session.</string>
+    <string name="focus_manual_stats">%1$s work · %2$s break</string>
+    <string name="focus_manual_logged_by_hand">Logged manually (no timer)</string>
+    <string name="planner_studied_manual">Manual · %1$s</string>
     <string name="focus_session_preset">Preset: %1$s (%2$s)</string>
     <string name="focus_session_link_section">Linked to</string>
     <string name="focus_session_link_dialog_title">Link session</string>

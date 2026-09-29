@@ -597,6 +597,16 @@
     <string name="focus_session_time_range">Saat: %1$s – %2$s</string>
     <string name="focus_session_total">Toplam: %1$s</string>
     <string name="focus_session_summary_section">Oturum</string>
+    <string name="focus_manual_label">Elle</string>
+    <string name="focus_manual_add_button">Oturumu elle kaydet</string>
+    <string name="focus_manual_add_title">Çalışma Oturumu Kaydet</string>
+    <string name="focus_manual_edit_title">Oturum Saatini Düzenle</string>
+    <string name="focus_manual_break_minutes">Mola (dakika)</string>
+    <string name="focus_manual_work_hint">Çalışma süresi: %1$s</string>
+    <string name="focus_manual_break_too_long">Mola, oturumdan kısa olmalı.</string>
+    <string name="focus_manual_stats">%1$s çalışma · %2$s mola</string>
+    <string name="focus_manual_logged_by_hand">Elle kaydedildi (zamanlayıcı yok)</string>
+    <string name="planner_studied_manual">Elle · %1$s</string>
     <string name="focus_session_preset">Ön ayar: %1$s (%2$s)</string>
     <string name="focus_session_link_section">Bağlantı</string>
     <string name="focus_session_link_dialog_title">Oturumu bağla</string>

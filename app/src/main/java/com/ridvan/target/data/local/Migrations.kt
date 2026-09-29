@@ -463,3 +463,10 @@ val MIGRATION_19_20 = object : Migration(19, 20) {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_languageId ON focus_sessions(languageId)")
     }
 }
+
+val MIGRATION_21_22 = object : Migration(21, 22) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Focus sessions can now be logged by hand (no timer, no preset); every existing row ran on the timer.
+        db.execSQL("ALTER TABLE focus_sessions ADD COLUMN isManual INTEGER NOT NULL DEFAULT 0")
+    }
+}

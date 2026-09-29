@@ -55,6 +55,21 @@ class FocusSessionDetailViewModel(
         }
     }
 
+    /** Re-times a hand-logged session; its link and notes are left as they are. */
+    fun updateTimes(form: ManualFocusSessionForm) {
+        val session = item.value?.session ?: return
+        viewModelScope.launch {
+            focusSessionDao.update(
+                session.copy(
+                    startedAt = form.startedAt,
+                    endedAt = form.endedAt,
+                    totalWorkMinutes = form.workMinutes,
+                    totalBreakMinutes = form.breakMinutes,
+                ),
+            )
+        }
+    }
+
     fun delete(onDeleted: () -> Unit) {
         val session = item.value?.session ?: return
         viewModelScope.launch {

@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import androidx.compose.material.icons.filled.Add
 import android.view.WindowManager
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -229,6 +230,8 @@ fun FocusTimerScreen(
                     onOpenHistory = onOpenHistory,
                     onSessionClick = onSessionClick,
                     onDelete = viewModel::deleteHistorySession,
+                    linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage),
+                    onAddManual = viewModel::addManualSession,
                 )
             }
         }
@@ -577,8 +580,11 @@ private fun HistorySection(
     onOpenHistory: () -> Unit,
     onSessionClick: (Long) -> Unit,
     onDelete: (FocusSession) -> Unit,
+    linkSource: ManualSessionLinkSource,
+    onAddManual: (ManualFocusSessionForm) -> Unit,
 ) {
     var pendingDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
+    var showManualDialog by remember { mutableStateOf(false) }
 
     // The whole header row opens the full, filterable history page.
     Row(
@@ -605,6 +611,21 @@ private fun HistorySection(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+    // Studied without the timer? Log it by hand so History (and the Planner) still count it.
+    TextButton(onClick = { showManualDialog = true }) {
+        Icon(Icons.Filled.Add, contentDescription = null)
+        Text(stringResource(R.string.focus_manual_add_button), modifier = Modifier.padding(start = 8.dp))
+    }
+    if (showManualDialog) {
+        FocusManualSessionDialog(
+            linkSource = linkSource,
+            onConfirm = {
+                onAddManual(it)
+                showManualDialog = false
+            },
+            onDismiss = { showManualDialog = false },
         )
     }
     Spacer(Modifier.height(8.dp))

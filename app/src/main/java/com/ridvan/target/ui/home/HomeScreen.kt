@@ -8,7 +8,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.size
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatTime
-import com.ridvan.target.ui.focustimer.focusSessionLinkLabel
+import com.ridvan.target.ui.focustimer.focusSessionTitle
 import com.ridvan.target.ui.planner.PlannerAgendaItem
 import com.ridvan.target.ui.planner.StudiedPreview
 import androidx.compose.animation.animateColorAsState
@@ -316,7 +316,7 @@ private fun StudiedPreviewRow(item: PlannerAgendaItem.Studied, onClick: () -> Un
     val (icon, label, startMillis) = when (item) {
         is PlannerAgendaItem.FocusSessionEntry -> Triple(
             Icons.Filled.Timer,
-            focusSessionLinkLabel(item.item) ?: item.item.session.presetName,
+            focusSessionTitle(item.item),
             item.item.session.startedAt,
         )
         is PlannerAgendaItem.PracticeLogEntry -> Triple(

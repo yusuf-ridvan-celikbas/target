@@ -1,5 +1,9 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.data.local.entity.Course
+import com.ridvan.target.data.local.entity.Language
+import com.ridvan.target.data.local.entity.Topic
+import kotlinx.coroutines.flow.Flow
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -29,10 +33,12 @@ class FocusHistoryViewModel(
     private val focusSessionDao = targetApplication.database.focusSessionDao()
     private val courseDao = targetApplication.database.courseDao()
     private val languageDao = targetApplication.database.languageDao()
+    private val topicDao = targetApplication.database.topicDao()
     private val userId = targetApplication.preferences.currentUserId
 
-    private val scopeCourseId: Long? = savedStateHandle.get<Long>("courseId")
-    private val scopeLanguageId: Long? = savedStateHandle.get<Long>("languageId")
+    /** On a Work History page, a manually logged session starts linked to that course/language. */
+    val scopeCourseId: Long? = savedStateHandle.get<Long>("courseId")
+    val scopeLanguageId: Long? = savedStateHandle.get<Long>("languageId")
 
     /** True on a course's/language's Work History, where the Subject filter is redundant. */
     val isScoped: Boolean = scopeCourseId != null || scopeLanguageId != null
@@ -53,6 +59,20 @@ class FocusHistoryViewModel(
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val courses: StateFlow<List<Course>> = (userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val languages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
+    fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
+
+    fun addManualSession(form: ManualFocusSessionForm) {
+        val uid = userId ?: return
+        viewModelScope.launch { focusSessionDao.insert(form.toNewSession(uid)) }
+    }
 
     fun deleteSession(session: FocusSession) {
         viewModelScope.launch { focusSessionDao.delete(session) }
