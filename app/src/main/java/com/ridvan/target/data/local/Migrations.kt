@@ -470,3 +470,28 @@ val MIGRATION_21_22 = object : Migration(21, 22) {
         db.execSQL("ALTER TABLE focus_sessions ADD COLUMN isManual INTEGER NOT NULL DEFAULT 0")
     }
 }
+
+val MIGRATION_22_23 = object : Migration(22, 23) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Reading: a per-user Books table, reading presets, and book/page columns on focus sessions.
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS books (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                title TEXT NOT NULL,
+                author TEXT,
+                totalPages INTEGER,
+                isFinished INTEGER NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_books_userId ON books(userId)")
+        db.execSQL("ALTER TABLE focus_presets ADD COLUMN isReading INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE focus_sessions ADD COLUMN bookId INTEGER REFERENCES books(id) ON DELETE SET NULL")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_focus_sessions_bookId ON focus_sessions(bookId)")
+        db.execSQL("ALTER TABLE focus_sessions ADD COLUMN startPage INTEGER")
+        db.execSQL("ALTER TABLE focus_sessions ADD COLUMN endPage INTEGER")
+    }
+}

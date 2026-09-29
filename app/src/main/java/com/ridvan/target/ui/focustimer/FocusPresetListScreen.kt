@@ -1,5 +1,8 @@
 package com.ridvan.target.ui.focustimer
 
+import androidx.compose.material3.Checkbox
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,8 +88,8 @@ fun FocusPresetListScreen(
         PresetDialog(
             title = stringResource(R.string.dialog_add_preset_title),
             initial = null,
-            onConfirm = { name, work, brk ->
-                viewModel.addPreset(name, work, brk)
+            onConfirm = { name, work, brk, reading ->
+                viewModel.addPreset(name, work, brk, reading)
                 showAddDialog = false
             },
             onDelete = null,
@@ -98,8 +101,8 @@ fun FocusPresetListScreen(
         PresetDialog(
             title = stringResource(R.string.dialog_edit_preset_title),
             initial = preset,
-            onConfirm = { name, work, brk ->
-                viewModel.updatePreset(preset, name, work, brk)
+            onConfirm = { name, work, brk, reading ->
+                viewModel.updatePreset(preset, name, work, brk, reading)
                 editingPreset = null
             },
             onDelete = {
@@ -116,7 +119,8 @@ private fun PresetRow(preset: FocusPreset, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(preset.name) },
         supportingContent = {
-            Text(stringResource(R.string.focustimer_preset_row_subtitle, preset.workMinutes, preset.breakMinutes))
+            val times = stringResource(R.string.focustimer_preset_row_subtitle, preset.workMinutes, preset.breakMinutes)
+            Text(if (preset.isReading) "$times · ${stringResource(R.string.label_reading)}" else times)
         },
         modifier = Modifier.clickable(onClick = onClick),
     )
@@ -126,13 +130,14 @@ private fun PresetRow(preset: FocusPreset, onClick: () -> Unit) {
 private fun PresetDialog(
     title: String,
     initial: FocusPreset?,
-    onConfirm: (name: String, workMinutes: Int, breakMinutes: Int) -> Unit,
+    onConfirm: (name: String, workMinutes: Int, breakMinutes: Int, isReading: Boolean) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
     var name by remember { mutableStateOf(initial?.name ?: "") }
     var workText by remember { mutableStateOf(initial?.workMinutes?.toString() ?: "") }
     var breakText by remember { mutableStateOf(initial?.breakMinutes?.toString() ?: "") }
+    var isReading by remember { mutableStateOf(initial?.isReading ?: false) }
 
     val work = workText.toIntOrNull() ?: 0
     val brk = breakText.toIntOrNull() ?: 0
@@ -166,6 +171,18 @@ private fun PresetDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
+                // A reading preset picks a book and asks for the page reached at the end.
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                    Checkbox(checked = isReading, onCheckedChange = { isReading = it })
+                    Column {
+                        Text(stringResource(R.string.reading_preset_switch))
+                        Text(
+                            stringResource(R.string.reading_preset_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 if (onDelete != null) {
                     TextButton(onClick = onDelete, modifier = Modifier.padding(top = 8.dp)) {
                         Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
@@ -175,7 +192,7 @@ private fun PresetDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name, work, brk) }, enabled = canSave) { Text(stringResource(R.string.common_save)) }
+            TextButton(onClick = { onConfirm(name, work, brk, isReading) }, enabled = canSave) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }

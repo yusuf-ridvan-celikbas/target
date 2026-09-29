@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.reading.BookProgress
+import com.ridvan.target.ui.reading.bookProgressFlow
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Topic
@@ -34,6 +36,7 @@ class FocusHistoryViewModel(
     private val courseDao = targetApplication.database.courseDao()
     private val languageDao = targetApplication.database.languageDao()
     private val topicDao = targetApplication.database.topicDao()
+    private val bookDao = targetApplication.database.bookDao()
     private val userId = targetApplication.preferences.currentUserId
 
     /** On a Work History page, a manually logged session starts linked to that course/language. */
@@ -69,9 +72,15 @@ class FocusHistoryViewModel(
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
 
+    val books: StateFlow<List<BookProgress>> = bookProgressFlow(bookDao, focusSessionDao, userId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun addManualSession(form: ManualFocusSessionForm) {
         val uid = userId ?: return
-        viewModelScope.launch { focusSessionDao.insert(form.toNewSession(uid)) }
+        viewModelScope.launch {
+            focusSessionDao.insert(form.toNewSession(uid))
+            if (form.finishesBook && form.bookId != null) bookDao.markFinished(form.bookId)
+        }
     }
 
     fun deleteSession(session: FocusSession) {

@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.navigation
 
+import com.ridvan.target.ui.reading.BookDetailScreen
+import com.ridvan.target.ui.reading.ReadingScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -77,6 +79,7 @@ fun TargetNavHost() {
         onNavigatePlanner = { navController.navigateToShellDestination(PlannerRoute) },
         onNavigateFocusTimer = { navController.navigateToShellDestination(FocusTimerRoute) },
         onNavigateStudyHistory = { navController.navigateToShellDestination(FocusHistoryHomeRoute) },
+        onNavigateReading = { navController.navigateToShellDestination(ReadingRoute) },
         onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
         onNavigateMyAccount = { navController.navigateToShellDestination(MyAccountRoute) },
         onNavigateSettings = { navController.navigateToShellDestination(SettingsHomeRoute) },
@@ -356,6 +359,19 @@ fun TargetNavHost() {
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
                 onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+                onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
+            )
+        }
+        composable<ReadingRoute> {
+            ReadingScreen(
+                shellNavigation = shellNavigation,
+                onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
+            )
+        }
+        composable<BookDetailRoute> {
+            BookDetailScreen(
+                onBack = { navController.popBackStack() },
+                onSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },
             )
         }
     }

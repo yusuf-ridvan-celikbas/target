@@ -19,19 +19,21 @@ class FocusPresetListViewModel(application: Application) : AndroidViewModel(appl
     val presets: StateFlow<List<FocusPreset>> = (userId?.let { focusPresetDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun addPreset(name: String, workMinutes: Int, breakMinutes: Int) {
+    fun addPreset(name: String, workMinutes: Int, breakMinutes: Int, isReading: Boolean) {
         val trimmed = name.trim()
         if (trimmed.isEmpty() || userId == null || workMinutes <= 0 || breakMinutes <= 0) return
         viewModelScope.launch {
-            focusPresetDao.insert(FocusPreset(userId = userId, name = trimmed, workMinutes = workMinutes, breakMinutes = breakMinutes))
+            focusPresetDao.insert(
+                FocusPreset(userId = userId, name = trimmed, workMinutes = workMinutes, breakMinutes = breakMinutes, isReading = isReading),
+            )
         }
     }
 
-    fun updatePreset(preset: FocusPreset, name: String, workMinutes: Int, breakMinutes: Int) {
+    fun updatePreset(preset: FocusPreset, name: String, workMinutes: Int, breakMinutes: Int, isReading: Boolean) {
         val trimmed = name.trim()
         if (trimmed.isEmpty() || workMinutes <= 0 || breakMinutes <= 0) return
         viewModelScope.launch {
-            focusPresetDao.update(preset.copy(name = trimmed, workMinutes = workMinutes, breakMinutes = breakMinutes))
+            focusPresetDao.update(preset.copy(name = trimmed, workMinutes = workMinutes, breakMinutes = breakMinutes, isReading = isReading))
         }
     }
 

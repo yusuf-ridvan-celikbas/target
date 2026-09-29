@@ -1,5 +1,8 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.data.local.entity.Book
+import com.ridvan.target.ui.reading.BookProgress
+import com.ridvan.target.ui.reading.bookProgressFlow
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -53,6 +56,11 @@ data class RunningFocusSession(
     val topicId: Long?,
     val topicName: String?,
     val phase: FocusPhase,
+    /** Reading presets: the book being read and the page it started from. */
+    val bookId: Long? = null,
+    val bookTitle: String? = null,
+    val startPage: Int? = null,
+    val totalPages: Int? = null,
     val phaseEndAt: Long,
     val isPaused: Boolean,
     val pausedRemainingMillis: Long,
@@ -69,6 +77,15 @@ data class RunningFocusSession(
     val phaseDurationMillis: Long = 0L,
 )
 
+/** A just-ended reading session waiting for "what page are you on?". */
+data class PendingPageEntry(
+    val sessionId: Long,
+    val bookId: Long,
+    val bookTitle: String?,
+    val startPage: Int,
+    val totalPages: Int?,
+)
+
 class FocusTimerViewModel(application: Application) : AndroidViewModel(application) {
     private val targetApplication = application as TargetApplication
     private val focusPresetDao = targetApplication.database.focusPresetDao()
@@ -76,6 +93,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     private val courseDao = targetApplication.database.courseDao()
     private val languageDao = targetApplication.database.languageDao()
     private val topicDao = targetApplication.database.topicDao()
+    private val bookDao = targetApplication.database.bookDao()
     private val appPreferences = targetApplication.preferences
     private val userId = targetApplication.preferences.currentUserId
     private val appContext = application.applicationContext
@@ -88,6 +106,12 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
 
     val languages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val books: StateFlow<List<BookProgress>> = bookProgressFlow(bookDao, focusSessionDao, userId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val _pendingPageEntry = MutableStateFlow<PendingPageEntry?>(null)
+    val pendingPageEntry: StateFlow<PendingPageEntry?> = _pendingPageEntry.asStateFlow()
 
     /** Only the last 7 calendar days (today + the 6 before it) — the full list lives on FocusHistoryScreen. */
     val recentHistory: StateFlow<List<FocusSessionWithLinks>> = (userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()))
@@ -131,6 +155,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         languageName: String?,
         topicId: Long?,
         topicName: String?,
+        book: BookProgress? = null,
     ) {
         val now = System.currentTimeMillis()
         accumulatedWorkMillis = 0L
@@ -144,6 +169,10 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
             languageName = languageName,
             topicId = topicId,
             topicName = topicName,
+            bookId = book?.book?.id,
+            bookTitle = book?.book?.title,
+            startPage = book?.currentPage,
+            totalPages = book?.book?.totalPages,
             phase = FocusPhase.WORK,
             phaseEndAt = now + preset.workMinutes * 60_000L,
             phaseDurationMillis = preset.workMinutes * 60_000L,
@@ -312,13 +341,13 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         val session = _runningSession.value ?: return
         tickerJob?.cancel()
         tickerJob = null
-        persistSession(session, System.currentTimeMillis())
+        persistSession(session, System.currentTimeMillis(), askForPage = true)
         _runningSession.value = null
         _remainingMillis.value = 0L
         _promptRemainingMillis.value = 0L
     }
 
-    private fun persistSession(session: RunningFocusSession, endedAt: Long) {
+    private fun persistSession(session: RunningFocusSession, endedAt: Long, askForPage: Boolean) {
         if (userId == null) return
         val focusSession = FocusSession(
             userId = userId,
@@ -334,17 +363,47 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
             cyclesCompleted = session.cyclesCompleted,
             totalWorkMinutes = (accumulatedWorkMillis / 60_000L).toInt(),
             totalBreakMinutes = (accumulatedBreakMillis / 60_000L).toInt(),
+            bookId = session.bookId,
+            startPage = session.startPage,
         )
         // Fired from stopSession() (still on viewModelScope) or from onCleared() (where
         // viewModelScope is already cancelled) — a fresh scope works for both and matches the
         // existing "one-off IO launch outside any lifecycle" convention (AppPreferences's
         // rescheduleNotifications), rather than needing two different code paths here.
-        CoroutineScope(Dispatchers.IO).launch { focusSessionDao.insert(focusSession) }
+        CoroutineScope(Dispatchers.IO).launch {
+            val id = focusSessionDao.insert(focusSession)
+            // A reading session ends by asking which page was reached (not when the screen is torn down).
+            if (askForPage && session.bookId != null) {
+                _pendingPageEntry.value = PendingPageEntry(id, session.bookId, session.bookTitle, session.startPage ?: 0, session.totalPages)
+            }
+        }
+    }
+
+    fun savePageReached(entry: PendingPageEntry, startPage: Int, endPage: Int) {
+        _pendingPageEntry.value = null
+        viewModelScope.launch {
+            focusSessionDao.setPages(entry.sessionId, startPage, endPage)
+            if (entry.totalPages != null && endPage >= entry.totalPages) bookDao.markFinished(entry.bookId)
+        }
+    }
+
+    fun dismissPageEntry() {
+        _pendingPageEntry.value = null
+    }
+
+    fun addBook(title: String, author: String?, totalPages: Int?, onCreated: (Long) -> Unit) {
+        val uid = userId ?: return
+        viewModelScope.launch {
+            onCreated(bookDao.insert(Book(userId = uid, title = title, author = author, totalPages = totalPages)))
+        }
     }
 
     fun addManualSession(form: ManualFocusSessionForm) {
         val uid = userId ?: return
-        viewModelScope.launch { focusSessionDao.insert(form.toNewSession(uid)) }
+        viewModelScope.launch {
+            focusSessionDao.insert(form.toNewSession(uid))
+            if (form.finishesBook && form.bookId != null) bookDao.markFinished(form.bookId)
+        }
     }
 
     fun deleteHistorySession(session: FocusSession) {
@@ -358,6 +417,6 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         // ViewModel — there is no foreground service keeping the timer alive regardless, so a
         // running session would otherwise be silently discarded with nothing recorded. Save
         // what was accumulated so far as a completed history entry instead of losing it.
-        _runningSession.value?.let { persistSession(it, System.currentTimeMillis()) }
+        _runningSession.value?.let { persistSession(it, System.currentTimeMillis(), askForPage = false) }
     }
 }

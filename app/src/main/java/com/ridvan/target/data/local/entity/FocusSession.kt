@@ -38,8 +38,14 @@ import androidx.room.PrimaryKey
             childColumns = ["languageId"],
             onDelete = ForeignKey.SET_NULL,
         ),
+        ForeignKey(
+            entity = Book::class,
+            parentColumns = ["id"],
+            childColumns = ["bookId"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
     ],
-    indices = [Index("userId"), Index("presetId"), Index("courseId"), Index("topicId"), Index("languageId")],
+    indices = [Index("userId"), Index("presetId"), Index("courseId"), Index("topicId"), Index("languageId"), Index("bookId")],
 )
 data class FocusSession(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -64,4 +70,9 @@ data class FocusSession(
     val notes: String? = null,
     /** Logged by hand (studied without the timer): no preset (presetName is blank) and no cycles. */
     val isManual: Boolean = false,
+    /** Reading sessions: the book, and the page it started from / the page reached. Pages read =
+     *  endPage - startPage; endPage stays null until the user answers "what page are you on?". */
+    val bookId: Long? = null,
+    val startPage: Int? = null,
+    val endPage: Int? = null,
 )

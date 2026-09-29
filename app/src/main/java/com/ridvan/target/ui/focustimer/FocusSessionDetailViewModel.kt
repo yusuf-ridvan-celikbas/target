@@ -1,5 +1,8 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.data.local.entity.Book
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -26,6 +29,7 @@ class FocusSessionDetailViewModel(
     private val courseDao = targetApplication.database.courseDao()
     private val languageDao = targetApplication.database.languageDao()
     private val topicDao = targetApplication.database.topicDao()
+    private val bookDao = targetApplication.database.bookDao()
     private val userId = targetApplication.preferences.currentUserId
 
     val item: StateFlow<FocusSessionWithLinks?> = focusSessionDao.getByIdWithLinks(sessionId)
@@ -36,6 +40,21 @@ class FocusSessionDetailViewModel(
 
     val languages: StateFlow<List<Language>> = (userId?.let { languageDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** The session's book, for its page count when fixing pages. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val book: StateFlow<Book?> = item
+        .flatMapLatest { current -> current?.session?.bookId?.let { bookDao.getById(it) } ?: flowOf(null) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun updatePages(startPage: Int, endPage: Int) {
+        val session = item.value?.session ?: return
+        viewModelScope.launch {
+            focusSessionDao.setPages(session.id, startPage, endPage)
+            val total = book.value?.totalPages
+            if (session.bookId != null && total != null && endPage >= total) bookDao.markFinished(session.bookId)
+        }
+    }
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)

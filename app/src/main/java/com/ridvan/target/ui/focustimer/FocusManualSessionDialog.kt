@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.reading.BookProgress
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,6 +59,11 @@ data class ManualFocusSessionForm(
     val languageId: Long?,
     val topicId: Long?,
     val notes: String?,
+    val bookId: Long? = null,
+    val startPage: Int? = null,
+    val endPage: Int? = null,
+    /** The page reached is the book's last page — mark the book finished. */
+    val finishesBook: Boolean = false,
 )
 
 /** A new history row for a session studied without the timer. No preset, no cycles. */
@@ -76,6 +82,9 @@ fun ManualFocusSessionForm.toNewSession(userId: Long): FocusSession = FocusSessi
     totalBreakMinutes = breakMinutes,
     notes = notes,
     isManual = true,
+    bookId = bookId,
+    startPage = startPage,
+    endPage = endPage,
 )
 
 /** Owner/topic pickers for the dialog's link section — each caller already has these on its ViewModel. */
@@ -84,6 +93,7 @@ data class ManualSessionLinkSource(
     val languages: List<Language>,
     val topicsForCourse: (Long) -> Flow<List<Topic>>,
     val topicsForLanguage: (Long) -> Flow<List<Topic>>,
+    val books: List<BookProgress> = emptyList(),
 )
 
 /**
@@ -132,6 +142,15 @@ fun FocusManualSessionDialog(
     var languageId by remember { mutableStateOf(initialLanguageId) }
     var topicId by remember { mutableStateOf<Long?>(null) }
     var notes by remember { mutableStateOf("") }
+    var reading by remember { mutableStateOf(false) }
+    var bookId by remember { mutableStateOf<Long?>(null) }
+    var startPageText by remember { mutableStateOf("") }
+    var endPageText by remember { mutableStateOf("") }
+    val book = linkSource?.books?.firstOrNull { it.book.id == bookId }
+    val startPage = startPageText.toIntOrNull() ?: 0
+    val endPage = endPageText.toIntOrNull()
+    val totalPages = book?.book?.totalPages
+    val pagesValid = book != null && endPage != null && endPage >= startPage && (totalPages == null || endPage <= totalPages)
 
     val startMinute = startState.hour * 60 + startState.minute
     val endMinute = endState.hour * 60 + endState.minute
@@ -143,7 +162,7 @@ fun FocusManualSessionDialog(
         SessionLinkMode.COURSE -> courseId != null
         SessionLinkMode.LANGUAGE -> languageId != null
     }
-    val isValid = workMinutes > 0 && linkComplete
+    val isValid = workMinutes > 0 && if (reading) pagesValid else linkComplete
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -152,6 +171,19 @@ fun FocusManualSessionDialog(
         },
         text = {
             Column(modifier = Modifier.heightIn(max = 520.dp).verticalScroll(rememberScrollState())) {
+                // Study or reading — reading swaps the course/language link for a book and its pages.
+                if (initial == null && linkSource != null) {
+                    SegmentedToggle(
+                        options = listOf(
+                            SegmentedToggleOption(false, stringResource(R.string.reading_mode_study)),
+                            SegmentedToggleOption(true, stringResource(R.string.label_reading)),
+                        ),
+                        selected = reading,
+                        onSelect = { reading = it },
+                        textStyle = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 12.dp),
+                    )
+                }
                 Text(stringResource(R.string.planner_field_date), style = MaterialTheme.typography.labelSmall)
                 Text(
                     formatDate(dayStartMillis),
@@ -190,8 +222,26 @@ fun FocusManualSessionDialog(
                     modifier = Modifier.padding(top = 4.dp),
                 )
 
+                if (initial == null && linkSource != null && reading) {
+                    ManualReadingSection(
+                        books = linkSource.books,
+                        bookId = bookId,
+                        startPageText = startPageText,
+                        endPageText = endPageText,
+                        onBookChange = { progress ->
+                            bookId = progress.book.id
+                            // Pick up where the book was left off.
+                            startPageText = progress.currentPage.toString()
+                            endPageText = ""
+                        },
+                        onStartChange = { startPageText = it },
+                        onEndChange = { value ->
+                            endPageText = value.toIntOrNull()?.let { if (totalPages != null && it > totalPages) totalPages.toString() else value } ?: value
+                        },
+                    )
+                }
                 if (initial == null && linkSource != null) {
-                    ManualLinkSection(
+                    if (!reading) ManualLinkSection(
                         linkSource = linkSource,
                         mode = mode,
                         courseId = courseId,
@@ -229,10 +279,14 @@ fun FocusManualSessionDialog(
                             endedAt = startedAt + elapsedMinutes * MINUTE_MILLIS,
                             workMinutes = workMinutes,
                             breakMinutes = breakMinutes,
-                            courseId = courseId,
-                            languageId = languageId,
-                            topicId = topicId,
+                            courseId = courseId.takeUnless { reading },
+                            languageId = languageId.takeUnless { reading },
+                            topicId = topicId.takeUnless { reading },
                             notes = notes.trim().ifEmpty { null },
+                            bookId = bookId.takeIf { reading },
+                            startPage = startPage.takeIf { reading },
+                            endPage = endPage.takeIf { reading },
+                            finishesBook = reading && totalPages != null && endPage != null && endPage >= totalPages,
                         ),
                     )
                 },
@@ -342,4 +396,59 @@ private fun utcMillisToLocalDay(utcMillis: Long): Long {
         clear()
         set(utc.get(Calendar.YEAR), utc.get(Calendar.MONTH), utc.get(Calendar.DAY_OF_MONTH))
     }.timeInMillis
+}
+
+@Composable
+private fun ManualReadingSection(
+    books: List<BookProgress>,
+    bookId: Long?,
+    startPageText: String,
+    endPageText: String,
+    onBookChange: (BookProgress) -> Unit,
+    onStartChange: (String) -> Unit,
+    onEndChange: (String) -> Unit,
+) {
+    val readable = books.filter { !it.book.isFinished || it.book.id == bookId }
+    if (readable.isEmpty()) {
+        Text(
+            stringResource(R.string.reading_manual_no_books),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 12.dp),
+        )
+        return
+    }
+    PickerField(
+        label = stringResource(R.string.reading_book),
+        selectedLabel = readable.firstOrNull { it.book.id == bookId }?.book?.title ?: stringResource(R.string.common_select),
+        options = readable.map { it to it.book.title },
+        onSelect = onBookChange,
+    )
+    if (bookId != null) {
+        OutlinedTextField(
+            value = startPageText,
+            onValueChange = { value -> onStartChange(value.filter { it.isDigit() }.take(5)) },
+            label = { Text(stringResource(R.string.reading_field_start_page)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+        OutlinedTextField(
+            value = endPageText,
+            onValueChange = { value -> onEndChange(value.filter { it.isDigit() }.take(5)) },
+            label = { Text(stringResource(R.string.reading_field_page_reached)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+        val start = startPageText.toIntOrNull() ?: 0
+        val end = endPageText.toIntOrNull()
+        if (end != null) {
+            Text(
+                if (end >= start) stringResource(R.string.reading_pages_read_live, end - start) else stringResource(R.string.reading_page_before_start),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (end >= start) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+    }
 }

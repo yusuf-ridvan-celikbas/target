@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.shell
 
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -93,6 +94,7 @@ data class ShellNavigation(
     val onNavigatePlanner: () -> Unit,
     val onNavigateFocusTimer: () -> Unit,
     val onNavigateStudyHistory: () -> Unit,
+    val onNavigateReading: () -> Unit,
     val onNavigateHelp: () -> Unit,
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -103,7 +105,7 @@ data class ShellNavigation(
 )
 
 enum class ShellDestination {
-    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER, FOCUS_TIMER, STUDY_HISTORY, HELP, MY_ACCOUNT, SETTINGS, OTHER
+    HOME, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER, FOCUS_TIMER, STUDY_HISTORY, READING, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,7 +138,7 @@ fun AppShell(
         ShellDestination.EXAMS, ShellDestination.COURSES, ShellDestination.STUDY_RESOURCES,
         ShellDestination.TOPICS, ShellDestination.STATISTICS, ShellDestination.LANGUAGES,
     )
-    val focusDestinations = setOf(ShellDestination.FOCUS_TIMER, ShellDestination.STUDY_HISTORY)
+    val focusDestinations = setOf(ShellDestination.FOCUS_TIMER, ShellDestination.STUDY_HISTORY, ShellDestination.READING)
     val bannerColor by (LocalContext.current.applicationContext as TargetApplication).preferences.bannerColor
         .collectAsStateWithLifecycle()
 
@@ -273,6 +275,16 @@ fun AppShell(
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 navigation.onNavigateStudyHistory()
+                            },
+                        )
+                        DrawerItem(
+                            label = stringResource(R.string.label_reading),
+                            icon = Icons.Filled.AutoStories,
+                            selected = currentDestination == ShellDestination.READING,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateReading()
                             },
                         )
                     }

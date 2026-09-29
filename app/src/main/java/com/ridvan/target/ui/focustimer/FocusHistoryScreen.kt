@@ -161,6 +161,7 @@ private fun FocusHistoryBody(
     var showManualDialog by remember { mutableStateOf(false) }
     val courses by viewModel.courses.collectAsStateWithLifecycle()
     val languages by viewModel.languages.collectAsStateWithLifecycle()
+    val books by viewModel.books.collectAsStateWithLifecycle()
     val manualLabel = stringResource(R.string.focus_manual_label)
 
     // Subject options come from what's actually in history, so every choice has at least one match.
@@ -186,6 +187,7 @@ private fun FocusHistoryBody(
             item.courseName?.let { courseDisplayName(it) },
             item.languageName,
             item.topicName,
+            item.bookTitle,
             item.session.notes,
         ).joinToString(" ").lowercase()
     }
@@ -300,7 +302,7 @@ private fun FocusHistoryBody(
 
     if (showManualDialog) {
         FocusManualSessionDialog(
-            linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage),
+            linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
             initialCourseId = viewModel.scopeCourseId,
             initialLanguageId = viewModel.scopeLanguageId,
             onConfirm = {

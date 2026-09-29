@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.reading.ReadingPagesDialog
+import com.ridvan.target.ui.reading.isReading
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +63,7 @@ fun FocusSessionDetailScreen(
     onCourseClick: (Long) -> Unit,
     onLanguageClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
+    onBookClick: (Long) -> Unit,
     viewModel: FocusSessionDetailViewModel = viewModel(),
 ) {
     val item by viewModel.item.collectAsStateWithLifecycle()
@@ -70,6 +73,8 @@ fun FocusSessionDetailScreen(
     var showNotesDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showTimeDialog by remember { mutableStateOf(false) }
+    var showPagesDialog by remember { mutableStateOf(false) }
+    val book by viewModel.book.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -156,6 +161,36 @@ fun FocusSessionDetailScreen(
                 }
             }
 
+            // Reading sessions: the book and the pages covered, fixable here (e.g. after "Skip").
+            if (session.isReading) {
+                GroupedCard(modifier = Modifier.padding(top = 12.dp)) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                        SectionHeader(
+                            title = stringResource(R.string.label_reading),
+                            action = stringResource(R.string.focus_session_edit),
+                            onAction = { showPagesDialog = true },
+                        )
+                        current.bookTitle?.let { title ->
+                            Text(
+                                title,
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline,
+                                modifier = Modifier.clickable { session.bookId?.let(onBookClick) },
+                            )
+                        }
+                        val start = session.startPage
+                        val end = session.endPage
+                        Text(
+                            if (start != null && end != null) {
+                                stringResource(R.string.reading_session_pages, start, end, end - start)
+                            } else {
+                                stringResource(R.string.reading_session_pages_missing)
+                            },
+                        )
+                    }
+                }
+            }
+
             // What it's linked to — tappable through to the real course/language/topic.
             GroupedCard(modifier = Modifier.padding(top = 12.dp)) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -227,6 +262,21 @@ fun FocusSessionDetailScreen(
                 showTimeDialog = false
             },
             onDismiss = { showTimeDialog = false },
+        )
+    }
+
+    if (showPagesDialog && current != null) {
+        ReadingPagesDialog(
+            bookTitle = current.bookTitle,
+            startPage = current.session.startPage ?: 0,
+            endPage = current.session.endPage,
+            totalPages = book?.totalPages,
+            startEditable = true,
+            onConfirm = { start, end ->
+                viewModel.updatePages(start, end)
+                showPagesDialog = false
+            },
+            onDismiss = { showPagesDialog = false },
         )
     }
 

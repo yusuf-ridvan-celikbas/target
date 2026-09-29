@@ -5,8 +5,12 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * A book read in reading-preset Focus sessions. Per-user, like Course/Language. Progress isn't
+ * stored here — the current page is the furthest end page any of its sessions reached (see ReadingStats.kt).
+ */
 @Entity(
-    tableName = "focus_presets",
+    tableName = "books",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -17,13 +21,13 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("userId")],
 )
-data class FocusPreset(
+data class Book(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val userId: Long? = null,
-    val name: String,
-    val workMinutes: Int,
-    val breakMinutes: Int,
-    /** A reading preset: sessions pick a Book and ask for the page reached when they end. */
-    val isReading: Boolean = false,
+    val title: String,
+    val author: String? = null,
+    /** Optional — without it there's no percentage, just "page X". */
+    val totalPages: Int? = null,
+    val isFinished: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
 )

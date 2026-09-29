@@ -8,4 +8,5 @@ data class FocusSessionWithLinks(
     val courseName: String?,
     val languageName: String?,
     val topicName: String?,
+    val bookTitle: String?,
 )

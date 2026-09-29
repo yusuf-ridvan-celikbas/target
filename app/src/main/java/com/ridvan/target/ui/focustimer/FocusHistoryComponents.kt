@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.reading.pagesRead
 import com.ridvan.target.data.local.entity.FocusSession
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -40,18 +41,20 @@ internal fun focusSessionPresetLabel(session: FocusSession): String =
 /** What a session is about: its link, else its preset (or "Manual"). */
 @Composable
 internal fun focusSessionTitle(item: FocusSessionWithLinks): String =
-    focusSessionLinkLabel(item) ?: focusSessionPresetLabel(item.session)
+    item.bookTitle ?: focusSessionLinkLabel(item) ?: focusSessionPresetLabel(item.session)
 
 /** "2 cycles · 0h 40m work · 0h 7m break" — manual sessions have no cycles, so just work/break. */
 @Composable
 internal fun focusSessionStatsLine(session: FocusSession): String {
     val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
     val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
-    return if (session.isManual) {
+    val base = if (session.isManual) {
         stringResource(R.string.focus_manual_stats, workText, breakText)
     } else {
         stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText)
     }
+    // Reading sessions add their pages once the page reached is known.
+    return if (session.endPage != null) "$base · ${stringResource(R.string.reading_pages_suffix, session.pagesRead())}" else base
 }
 
 /** Shared by FocusTimerScreen's recent-history card and every FocusHistoryScreen variant; tapping opens FocusSessionDetailScreen. */
@@ -70,8 +73,9 @@ internal fun FocusHistoryRow(
         },
         supportingContent = {
             Column {
-                if (linkLabel != null) {
-                    Text(linkLabel, color = MaterialTheme.colorScheme.primary)
+                val subject = item.bookTitle ?: linkLabel
+                if (subject != null) {
+                    Text(subject, color = MaterialTheme.colorScheme.primary)
                 }
                 Text("${focusSessionPresetLabel(session)} · ${focusSessionStatsLine(session)}")
                 session.notes?.takeIf { it.isNotBlank() }?.let { notes ->

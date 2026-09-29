@@ -130,3 +130,9 @@ data class LanguageWorkHistoryRoute(val languageId: Long)
 /** App Settings opened from Focus Timer's settings icon — same screen as SettingsRoute, scrolled to Focus Timer Preferences. */
 @Serializable
 object FocusTimerSettingsRoute
+
+@Serializable
+object ReadingRoute
+
+@Serializable
+data class BookDetailRoute(val bookId: Long)
