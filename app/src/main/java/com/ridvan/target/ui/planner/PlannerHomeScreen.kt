@@ -44,6 +44,8 @@ fun PlannerHomeScreen(
     onSectionClick: (Long) -> Unit,
     onCourseClick: (Long) -> Unit,
     onTopicClick: (Long) -> Unit,
+    onFocusSessionClick: (Long) -> Unit,
+    onPracticeSessionClick: (Long) -> Unit,
     viewModel: PlannerHomeViewModel = viewModel(),
 ) {
     val viewMode by viewModel.viewMode.collectAsStateWithLifecycle()
@@ -69,6 +71,8 @@ fun PlannerHomeScreen(
             }
             is PlannerAgendaItem.ExamEntry -> onExamClick(item.examId)
             is PlannerAgendaItem.SectionEntry -> onSectionClick(item.sectionId)
+            is PlannerAgendaItem.FocusSessionEntry -> onFocusSessionClick(item.item.session.id)
+            is PlannerAgendaItem.PracticeLogEntry -> onPracticeSessionClick(item.row.practiceLog.studyResourceTopicId)
         }
     }
 
@@ -116,6 +120,25 @@ fun PlannerHomeScreen(
                 IconButton(onClick = viewModel::nextPeriod) {
                     Icon(Icons.Filled.ChevronRight, contentDescription = stringResource(R.string.cd_next_period))
                 }
+            }
+
+            // Total studied across the shown period (Month view drops the neighbouring months' grid days).
+            val periodStudied = agendaItems.filterIsInstance<PlannerAgendaItem.Studied>().filter {
+                viewMode != PlannerViewMode.MONTH || (it.date.month == anchorDate.month && it.date.year == anchorDate.year)
+            }
+            if (periodStudied.isNotEmpty()) {
+                val minutes = periodStudied.sumOf { it.studiedMinutes }
+                Text(
+                    stringResource(
+                        R.string.planner_period_studied_total,
+                        stringResource(R.string.duration_format, minutes / 60, minutes % 60),
+                        periodStudied.size,
+                    ),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             when (viewMode) {

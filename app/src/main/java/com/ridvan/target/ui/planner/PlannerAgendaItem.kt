@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.planner
 
+import com.ridvan.target.data.local.dao.FocusSessionWithLinks
+import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
 import com.ridvan.target.data.local.entity.PlannerEvent
 import java.time.LocalDate
 
@@ -31,4 +33,27 @@ sealed interface PlannerAgendaItem {
         val label: String,
         override val date: LocalDate,
     ) : PlannerAgendaItem
+
+    /** Already-studied time, shown read-only on the day it happened. [minuteOfDay] is when it started (Focus)
+     *  or was logged (Practice Session), used to order the day's rows. */
+    sealed interface Studied : PlannerAgendaItem {
+        val minuteOfDay: Int
+        val studiedMinutes: Int
+    }
+
+    data class FocusSessionEntry(
+        val item: FocusSessionWithLinks,
+        override val date: LocalDate,
+        override val minuteOfDay: Int,
+    ) : Studied {
+        override val studiedMinutes: Int get() = item.session.totalWorkMinutes
+    }
+
+    data class PracticeLogEntry(
+        val row: PracticeLogPlannerRow,
+        override val date: LocalDate,
+        override val minuteOfDay: Int,
+    ) : Studied {
+        override val studiedMinutes: Int get() = row.practiceLog.durationMinutes
+    }
 }

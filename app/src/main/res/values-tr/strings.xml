@@ -457,6 +457,10 @@
     <string name="planner_view_year">Yıl</string>
     <string name="cd_previous_period">Önceki dönem</string>
     <string name="cd_next_period">Sonraki dönem</string>
+    <string name="planner_day_studied_total">Çalışılan %1$s</string>
+    <string name="planner_period_studied_total">Toplam çalışma: %1$s · %2$d oturum</string>
+    <string name="planner_studied_focus">Odak Zamanlayıcı · %1$s</string>
+    <string name="planner_studied_practice">Pratik · %1$s · %2$s</string>
     <string name="planner_day_empty">Planlanan bir şey yok</string>
     <string name="planner_dialog_new_title">Planlayıcı Etkinliği Ekle</string>
     <string name="planner_dialog_edit_title">Planlayıcı Etkinliğini Düzenle</string>

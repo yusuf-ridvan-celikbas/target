@@ -2,12 +2,15 @@ package com.ridvan.target.ui.planner
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -15,8 +18,10 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -25,6 +30,8 @@ import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCategory
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseDisplayName
+import com.ridvan.target.ui.common.formatTime
+import com.ridvan.target.ui.focustimer.focusSessionLinkLabel
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -66,11 +73,25 @@ fun DayAgendaCard(
     onTopicClick: (Long) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-        Text(
-            dayHeaderLabel(date),
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(bottom = 4.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+        ) {
+            Text(dayHeaderLabel(date), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+            // How much was actually studied that day (Focus work time + Practice Session time).
+            val studied = items.filterIsInstance<PlannerAgendaItem.Studied>()
+            if (studied.isNotEmpty()) {
+                val minutes = studied.sumOf { it.studiedMinutes }
+                Text(
+                    stringResource(
+                        R.string.planner_day_studied_total,
+                        stringResource(R.string.duration_format, minutes / 60, minutes % 60),
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+        }
         GroupedCard {
             if (items.isEmpty()) {
                 Text(
@@ -88,8 +109,11 @@ fun DayAgendaCard(
     }
 }
 
-private fun sortMinute(item: PlannerAgendaItem): Int =
-    (item as? PlannerAgendaItem.EventOccurrence)?.event?.startMinuteOfDay ?: Int.MAX_VALUE
+private fun sortMinute(item: PlannerAgendaItem): Int = when (item) {
+    is PlannerAgendaItem.EventOccurrence -> item.event.startMinuteOfDay ?: Int.MAX_VALUE
+    is PlannerAgendaItem.Studied -> item.minuteOfDay
+    else -> Int.MAX_VALUE
+}
 
 @Composable
 private fun AgendaRow(
@@ -148,7 +172,64 @@ private fun AgendaRow(
                 headlineContent = { Text(item.label) },
             )
         }
+        is PlannerAgendaItem.FocusSessionEntry -> {
+            val session = item.item.session
+            val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
+            val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onItemClick(item) },
+                leadingContent = { StudiedIcon(Icons.Filled.Timer) },
+                headlineContent = { Text(focusSessionLinkLabel(item.item) ?: session.presetName) },
+                supportingContent = {
+                    Column {
+                        Text(
+                            stringResource(
+                                R.string.planner_studied_focus,
+                                "${formatTime(session.startedAt)} – ${formatTime(session.endedAt)}",
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Text(
+                            stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                },
+            )
+        }
+        is PlannerAgendaItem.PracticeLogEntry -> {
+            val row = item.row
+            val log = row.practiceLog
+            val owner = row.courseName?.let { courseDisplayName(it) } ?: row.languageName
+            val durationText = stringResource(R.string.duration_format, log.durationMinutes / 60, log.durationMinutes % 60)
+            val blank = log.questionCount?.let { (it - log.solvedCount - log.unsolvedCount).coerceAtLeast(0) } ?: 0
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onItemClick(item) },
+                leadingContent = { StudiedIcon(Icons.Filled.Quiz) },
+                headlineContent = { Text(listOfNotNull(owner, row.topicName).joinToString(" · ")) },
+                supportingContent = {
+                    Column {
+                        Text(
+                            stringResource(R.string.planner_studied_practice, row.studyResourceName, formatTime(log.loggedAt)),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Text(
+                            stringResource(R.string.session_row_summary, log.testsSolved, log.solvedCount, log.unsolvedCount, blank, durationText),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                },
+            )
+        }
     }
+}
+
+/** Studied rows use the tertiary color, so work already done reads apart from plans at a glance. */
+@Composable
+private fun StudiedIcon(icon: ImageVector) {
+    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary)
 }
 
 @Composable

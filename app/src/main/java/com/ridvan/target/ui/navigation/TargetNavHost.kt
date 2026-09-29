@@ -300,6 +300,8 @@ fun TargetNavHost() {
                 onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+                onFocusSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },
+                onPracticeSessionClick = { id -> navController.navigate(TopicProgressRoute(id)) },
             )
         }
         composable<FocusTimerRoute> {

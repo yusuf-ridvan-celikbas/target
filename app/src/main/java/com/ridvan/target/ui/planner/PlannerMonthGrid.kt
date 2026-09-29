@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,7 +34,8 @@ fun PlannerMonthGrid(
 ) {
     val monthStart = anchorDate.withDayOfMonth(1)
     val gridStart = mondayOf(monthStart)
-    val datesWithItems = items.map { it.date }.toSet()
+    val datesWithPlans = items.filterNot { it is PlannerAgendaItem.Studied }.map { it.date }.toSet()
+    val datesWithStudy = items.filterIsInstance<PlannerAgendaItem.Studied>().map { it.date }.toSet()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -53,7 +56,8 @@ fun PlannerMonthGrid(
                     MonthGridCell(
                         date = date,
                         inCurrentMonth = date.month == anchorDate.month && date.year == anchorDate.year,
-                        hasItems = date in datesWithItems,
+                        hasPlans = date in datesWithPlans,
+                        hasStudy = date in datesWithStudy,
                         isSelected = date == selectedDate,
                         onClick = { onDateSelected(date) },
                         modifier = Modifier.weight(1f),
@@ -68,7 +72,8 @@ fun PlannerMonthGrid(
 private fun MonthGridCell(
     date: LocalDate,
     inCurrentMonth: Boolean,
-    hasItems: Boolean,
+    hasPlans: Boolean,
+    hasStudy: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -94,14 +99,19 @@ private fun MonthGridCell(
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
-            if (hasItems) {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 2.dp)
-                        .size(4.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape),
-                )
+            // Primary dot = something planned, tertiary dot = something studied that day.
+            if (hasPlans || hasStudy) {
+                Row(modifier = Modifier.padding(top = 2.dp)) {
+                    if (hasPlans) Dot(MaterialTheme.colorScheme.primary)
+                    if (hasPlans && hasStudy) Spacer(Modifier.width(2.dp))
+                    if (hasStudy) Dot(MaterialTheme.colorScheme.tertiary)
+                }
             }
         }
     }
+}
+
+@Composable
+private fun Dot(color: androidx.compose.ui.graphics.Color) {
+    Box(modifier = Modifier.size(4.dp).background(color, CircleShape))
 }

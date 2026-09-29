@@ -67,4 +67,20 @@ interface PracticeLogDao {
         """
     )
     fun getAllForUser(userId: Long): Flow<List<PracticeLogWithTopicContext>>
+
+    @Query(
+        """
+        SELECT practice_logs.*, topics.name AS topicName, courses.name AS courseName,
+               languages.name AS languageName, study_resources.name AS studyResourceName
+        FROM practice_logs
+        JOIN study_resource_topics ON study_resource_topics.id = practice_logs.studyResourceTopicId
+        JOIN study_resources ON study_resources.id = study_resource_topics.studyResourceId
+        JOIN topics ON topics.id = study_resource_topics.topicId
+        LEFT JOIN courses ON courses.id = topics.courseId
+        LEFT JOIN languages ON languages.id = topics.languageId
+        WHERE (courses.userId = :userId) OR (languages.userId = :userId)
+        ORDER BY practice_logs.loggedAt ASC
+        """
+    )
+    fun getAllForPlanner(userId: Long): Flow<List<PracticeLogPlannerRow>>
 }

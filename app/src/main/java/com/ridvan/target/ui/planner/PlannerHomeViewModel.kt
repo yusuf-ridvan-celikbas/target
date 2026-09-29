@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.ExamWithType
+import com.ridvan.target.data.local.dao.FocusSessionWithLinks
+import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
 import com.ridvan.target.data.local.dao.PlannerEventWithLinks
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.PlannerEvent
@@ -12,7 +14,9 @@ import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.examDisplayLabel
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.YearMonth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +35,8 @@ private data class PlannerRawData(
     val completions: List<PlannerEventCompletion>,
     val exams: List<ExamWithType>,
     val sections: List<Section>,
+    val focusSessions: List<FocusSessionWithLinks>,
+    val practiceLogs: List<PracticeLogPlannerRow>,
 )
 
 class PlannerHomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -42,6 +48,8 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
     private val sectionDao = database.sectionDao()
     private val courseDao = database.courseDao()
     private val topicDao = database.topicDao()
+    private val focusSessionDao = database.focusSessionDao()
+    private val practiceLogDao = database.practiceLogDao()
     private val userId = targetApplication.preferences.currentUserId
 
     private val _viewMode = MutableStateFlow(PlannerViewMode.WEEK)
@@ -50,12 +58,21 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
     private val _anchorDate = MutableStateFlow(LocalDate.now())
     val anchorDate: StateFlow<LocalDate> = _anchorDate.asStateFlow()
 
+    // What was actually studied (Focus Timer sessions + logged Practice Sessions), shown alongside the plans.
+    private val studiedData = combine(
+        userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
+    ) { focus, practice -> focus to practice }
+
     private val rawData = combine(
         userId?.let { plannerEventDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { plannerEventCompletionDao.getAllByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()),
-    ) { events, completions, exams, sections -> PlannerRawData(events, completions, exams, sections) }
+        studiedData,
+    ) { events, completions, exams, sections, (focus, practice) ->
+        PlannerRawData(events, completions, exams, sections, focus, practice)
+    }
 
     private val modeAndDate = combine(_viewMode, _anchorDate) { mode, date -> mode to date }
 
@@ -165,5 +182,19 @@ private fun buildAgendaItems(raw: PlannerRawData, range: ClosedRange<LocalDate>)
             PlannerAgendaItem.SectionEntry(section.examId, section.id, "$examLabel – ${section.name}", date)
         }
 
-    return (eventItems + examItems + sectionItems).sortedBy { it.date }
+    val focusItems = raw.focusSessions.mapNotNull { item ->
+        val started = Instant.ofEpochMilli(item.session.startedAt).atZone(ZoneId.systemDefault())
+        val date = started.toLocalDate()
+        if (date !in range) return@mapNotNull null
+        PlannerAgendaItem.FocusSessionEntry(item, date, started.hour * 60 + started.minute)
+    }
+
+    val practiceItems = raw.practiceLogs.mapNotNull { row ->
+        val logged = Instant.ofEpochMilli(row.practiceLog.loggedAt).atZone(ZoneId.systemDefault())
+        val date = logged.toLocalDate()
+        if (date !in range) return@mapNotNull null
+        PlannerAgendaItem.PracticeLogEntry(row, date, logged.hour * 60 + logged.minute)
+    }
+
+    return (eventItems + examItems + sectionItems + focusItems + practiceItems).sortedBy { it.date }
 }

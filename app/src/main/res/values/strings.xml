@@ -459,6 +459,10 @@
     <string name="planner_view_year">Year</string>
     <string name="cd_previous_period">Previous period</string>
     <string name="cd_next_period">Next period</string>
+    <string name="planner_day_studied_total">Studied %1$s</string>
+    <string name="planner_period_studied_total">Total studied: %1$s · %2$d sessions</string>
+    <string name="planner_studied_focus">Focus Timer · %1$s</string>
+    <string name="planner_studied_practice">Practice · %1$s · %2$s</string>
     <string name="planner_day_empty">Nothing planned</string>
     <string name="planner_dialog_new_title">Add Planner Event</string>
     <string name="planner_dialog_edit_title">Edit Planner Event</string>
