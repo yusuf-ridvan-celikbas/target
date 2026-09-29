@@ -335,6 +335,8 @@
     <string name="topic_with_course_title">%1$s (%2$s)</string>
     <string name="statistics_empty">No sessions logged yet for this selection.</string>
     <string name="label_breakdown">Breakdown</string>
+    <string name="stats_reading_empty">No reading in this period.</string>
+    <string name="stats_reading_speed">Speed: %1$s pages/hour</string>
     <string name="stats_source_practice_sessions">Practice Sessions</string>
     <string name="stats_source_practice_exams">Practice Exams</string>
     <string name="statistics_exams_empty">No practice exam attempts logged yet for this selection.</string>
@@ -446,7 +448,7 @@
     <string name="cd_help_stats_period">Period help</string>
     <string name="help_tooltip_stats_period">Narrows both the numbers and the chart to a recent window ending today.</string>
     <string name="cd_help_stats_source">Source help</string>
-    <string name="help_tooltip_stats_source">Switches the data source between logged Practice Sessions and completed Practice Exams.</string>
+    <string name="help_tooltip_stats_source">Switches the data source between logged Practice Sessions, completed Practice Exams, and Reading (pages read in reading sessions).</string>
     <string name="cd_help_app_color_preference">App color help</string>
     <string name="help_tooltip_app_color_preference">Blue uses your wallpaper\'s live colors (Material You). Any other color stays fixed regardless of wallpaper.</string>
     <string name="cd_help_preferred_name">Preferred name help</string>

@@ -136,7 +136,7 @@ fun AppShell(
     }
     val studyDestinations = setOf(
         ShellDestination.EXAMS, ShellDestination.COURSES, ShellDestination.STUDY_RESOURCES,
-        ShellDestination.TOPICS, ShellDestination.STATISTICS, ShellDestination.LANGUAGES,
+        ShellDestination.TOPICS, ShellDestination.LANGUAGES,
     )
     val focusDestinations = setOf(ShellDestination.FOCUS_TIMER, ShellDestination.STUDY_HISTORY, ShellDestination.READING)
     val bannerColor by (LocalContext.current.applicationContext as TargetApplication).preferences.bannerColor
@@ -220,16 +220,6 @@ fun AppShell(
                             },
                         )
                         DrawerItem(
-                            label = stringResource(R.string.label_statistics),
-                            icon = Icons.Filled.BarChart,
-                            selected = currentDestination == ShellDestination.STATISTICS,
-                            indented = true,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navigation.onNavigateStatistics()
-                            },
-                        )
-                        DrawerItem(
                             label = stringResource(R.string.label_languages),
                             icon = Icons.Filled.Translate,
                             selected = currentDestination == ShellDestination.LANGUAGES,
@@ -240,6 +230,16 @@ fun AppShell(
                             },
                         )
                     }
+                    // Statistics covers study and reading alike, so it stands on its own rather than under Study.
+                    DrawerItem(
+                        label = stringResource(R.string.label_statistics),
+                        icon = Icons.Filled.BarChart,
+                        selected = currentDestination == ShellDestination.STATISTICS,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateStatistics()
+                        },
+                    )
                     DrawerItem(
                         label = stringResource(R.string.label_planner),
                         icon = Icons.Filled.CalendarMonth,

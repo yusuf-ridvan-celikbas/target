@@ -1,5 +1,11 @@
 package com.ridvan.target.ui.statistics
 
+import com.ridvan.target.data.local.entity.FocusSession
+import com.ridvan.target.ui.reading.BookProgress
+import com.ridvan.target.ui.reading.bookProgressFlow
+import com.ridvan.target.ui.reading.isReading
+import com.ridvan.target.ui.reading.pagesRead
+import com.ridvan.target.ui.reading.pagesPerHour
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,7 +35,7 @@ import java.util.Locale
 
 enum class StatsPeriod { DAILY, WEEKLY, MONTHLY, ALL_TIME }
 
-enum class StatsSource { PRACTICE_SESSIONS, PRACTICE_EXAMS }
+enum class StatsSource { PRACTICE_SESSIONS, PRACTICE_EXAMS, READING }
 
 data class ChartBucket(val label: String, val solved: Int, val unsolved: Int)
 
@@ -76,6 +82,23 @@ data class WeakTopicEntry(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+/** Reading totals for the chosen period; [booksFinished] is all-time. */
+data class ReadingSummary(
+    val pages: Int,
+    val minutes: Int,
+    val sessions: Int,
+    val pagesPerHour: Double?,
+    val booksFinished: Int,
+)
+
+/** One book's reading within the chosen period, plus its overall progress. */
+data class ReadingBookEntry(
+    val progress: BookProgress,
+    val pages: Int,
+    val minutes: Int,
+    val sessions: Int,
+)
+
 class StatisticsViewModel(application: Application) : AndroidViewModel(application) {
     private val targetApplication = application as TargetApplication
     private val userId = targetApplication.preferences.currentUserId
@@ -88,6 +111,17 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     private val practiceLogDao = targetApplication.database.practiceLogDao()
     private val practiceExamEntryDao = targetApplication.database.practiceExamEntryDao()
     private val practiceExamEntryTopicResultDao = targetApplication.database.practiceExamEntryTopicResultDao()
+    private val focusSessionDao = targetApplication.database.focusSessionDao()
+    private val bookDao = targetApplication.database.bookDao()
+
+    // Reading — Focus Timer sessions on a book (the exam/course/topic filters don't apply here).
+    private val readingSessions: StateFlow<List<FocusSession>> =
+        (userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()))
+            .map { items -> items.map { it.session }.filter { it.isReading } }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val books: StateFlow<List<BookProgress>> = bookProgressFlow(bookDao, focusSessionDao, userId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val allLogs: StateFlow<List<PracticeLogWithTopicContext>> =
         (userId?.let { practiceLogDao.getAllForUser(it) } ?: flowOf(emptyList()))
@@ -252,6 +286,33 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 )
             }
             .sortedBy { it.accuracyPercent }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val readingSummary: StateFlow<ReadingSummary> = combine(readingSessions, books, _period) { sessions, allBooks, period ->
+        val windowed = windowForPeriod(sessions, period) { it.startedAt }
+        val pages = windowed.sumOf { it.pagesRead() }
+        val minutes = windowed.sumOf { it.totalWorkMinutes }
+        ReadingSummary(
+            pages = pages,
+            minutes = minutes,
+            sessions = windowed.size,
+            pagesPerHour = pagesPerHour(pages, minutes),
+            booksFinished = allBooks.count { it.book.isFinished },
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReadingSummary(0, 0, 0, null, 0))
+
+    /** Pages per bucket — drawn as the chart's "solved" segment, with nothing stacked on top. */
+    val readingChartBuckets: StateFlow<List<ChartBucket>> = combine(readingSessions, _period) { sessions, period ->
+        if (sessions.isEmpty()) emptyList() else buildBuckets(sessions, period, { it.startedAt }, { it.pagesRead() }, { 0 })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Books read in the period, most pages first. */
+    val readingBooks: StateFlow<List<ReadingBookEntry>> = combine(readingSessions, books, _period) { sessions, allBooks, period ->
+        val byBook = windowForPeriod(sessions, period) { it.startedAt }.filter { it.bookId != null }.groupBy { it.bookId }
+        allBooks.mapNotNull { progress ->
+            val own = byBook[progress.book.id] ?: return@mapNotNull null
+            ReadingBookEntry(progress, own.sumOf { it.pagesRead() }, own.sumOf { it.totalWorkMinutes }, own.size)
+        }.sortedByDescending { it.pages }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun setExam(id: Long?) {

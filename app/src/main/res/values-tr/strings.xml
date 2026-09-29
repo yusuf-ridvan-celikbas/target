@@ -335,6 +335,8 @@
     <string name="topic_with_course_title">%1$s (%2$s)</string>
     <string name="statistics_empty">Bu seçim için henüz oturum kaydedilmedi.</string>
     <string name="label_breakdown">Dağılım</string>
+    <string name="stats_reading_empty">Bu dönemde okuma yok.</string>
+    <string name="stats_reading_speed">Hız: %1$s sayfa/saat</string>
     <string name="stats_source_practice_sessions">Çalışma Oturumları</string>
     <string name="stats_source_practice_exams">Deneme Sınavları</string>
     <string name="statistics_exams_empty">Bu seçim için henüz deneme sonucu kaydedilmedi.</string>
@@ -444,7 +446,7 @@
     <string name="cd_help_stats_period">Dönem yardımı</string>
     <string name="help_tooltip_stats_period">Hem sayıları hem de grafiği bugüne kadar olan yakın bir zaman aralığına daraltır.</string>
     <string name="cd_help_stats_source">Kaynak yardımı</string>
-    <string name="help_tooltip_stats_source">Veri kaynağını kaydedilen Pratik Oturumları ile tamamlanan Deneme Sınavları arasında değiştirir.</string>
+    <string name="help_tooltip_stats_source">Veri kaynağını kaydedilen Pratik Oturumları, tamamlanan Deneme Sınavları ve Okuma (okuma oturumlarında okunan sayfalar) arasında değiştirir.</string>
     <string name="cd_help_app_color_preference">Uygulama rengi yardımı</string>
     <string name="help_tooltip_app_color_preference">Mavi, duvar kağıdınızın canlı renklerini kullanır (Material You). Diğer renkler duvar kağıdından bağımsız, sabit kalır.</string>
     <string name="cd_help_preferred_name">Tercih edilen isim yardımı</string>

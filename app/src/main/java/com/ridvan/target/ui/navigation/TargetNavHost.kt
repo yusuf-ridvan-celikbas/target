@@ -272,6 +272,7 @@ fun TargetNavHost() {
         }
         composable<StatisticsRoute> {
             StatisticsScreen(
+                onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
                 shellNavigation = shellNavigation,
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
             )

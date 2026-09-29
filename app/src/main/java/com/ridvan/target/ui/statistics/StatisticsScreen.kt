@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.statistics
 
+import com.ridvan.target.ui.reading.bookProgressLabel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,7 @@ import com.ridvan.target.ui.shell.ShellNavigation
 fun StatisticsScreen(
     shellNavigation: ShellNavigation,
     onTopicClick: (Long) -> Unit,
+    onBookClick: (Long) -> Unit,
     viewModel: StatisticsViewModel = viewModel(),
 ) {
     val examGroups by viewModel.examGroups.collectAsStateWithLifecycle()
@@ -65,6 +67,9 @@ fun StatisticsScreen(
     val examSummary by viewModel.examSummary.collectAsStateWithLifecycle()
     val examChartBuckets by viewModel.examChartBuckets.collectAsStateWithLifecycle()
     val weakTopics by viewModel.weakTopics.collectAsStateWithLifecycle()
+    val readingSummary by viewModel.readingSummary.collectAsStateWithLifecycle()
+    val readingChartBuckets by viewModel.readingChartBuckets.collectAsStateWithLifecycle()
+    val readingBooks by viewModel.readingBooks.collectAsStateWithLifecycle()
 
     AppShell(
         navigation = shellNavigation,
@@ -80,15 +85,20 @@ fun StatisticsScreen(
         ) {
             SourceToggle(source = source, onSelect = viewModel::setSource)
 
-            ExamFilterField(examGroups, selectedExamId, onSelect = viewModel::setExam)
-            CourseFilterField(courses, selectedCourseId, onSelect = viewModel::setCourse)
+            // Exams/courses/topics don't apply to reading — its breakdown is by book instead.
+            if (source != StatsSource.READING) {
+                ExamFilterField(examGroups, selectedExamId, onSelect = viewModel::setExam)
+                CourseFilterField(courses, selectedCourseId, onSelect = viewModel::setCourse)
+            }
             if (source == StatsSource.PRACTICE_SESSIONS) {
                 TopicFilterField(topics, selectedTopicId, enabled = selectedCourseId != null, onSelect = viewModel::setTopic)
             }
 
             PeriodToggle(period = period, onSelect = viewModel::setPeriod, modifier = Modifier.padding(top = 16.dp))
 
-            if (source == StatsSource.PRACTICE_SESSIONS) {
+            if (source == StatsSource.READING) {
+                ReadingStats(readingSummary, readingChartBuckets, readingBooks, onBookClick)
+            } else if (source == StatsSource.PRACTICE_SESSIONS) {
                 if (summary.tests == 0 && summary.totalQuestions == 0) {
                     Text(stringResource(R.string.statistics_empty), modifier = Modifier.padding(top = 16.dp))
                 } else {
@@ -209,6 +219,7 @@ private fun SourceToggle(source: StatsSource, onSelect: (StatsSource) -> Unit, m
             options = listOf(
                 SegmentedToggleOption(StatsSource.PRACTICE_SESSIONS, stringResource(R.string.stats_source_practice_sessions)),
                 SegmentedToggleOption(StatsSource.PRACTICE_EXAMS, stringResource(R.string.stats_source_practice_exams)),
+                SegmentedToggleOption(StatsSource.READING, stringResource(R.string.label_reading)),
             ),
             selected = source,
             onSelect = onSelect,
@@ -372,6 +383,73 @@ private fun TrendBarChart(buckets: List<ChartBucket>, modifier: Modifier = Modif
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReadingStats(
+    summary: ReadingSummary,
+    buckets: List<ChartBucket>,
+    books: List<ReadingBookEntry>,
+    onBookClick: (Long) -> Unit,
+) {
+    if (summary.sessions == 0) {
+        Text(stringResource(R.string.stats_reading_empty), modifier = Modifier.padding(top = 16.dp))
+    } else {
+        Text(
+            stringResource(
+                R.string.reading_book_stats,
+                summary.pages,
+                stringResource(R.string.duration_format, summary.minutes / 60, summary.minutes % 60),
+                summary.sessions,
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+        summary.pagesPerHour?.let {
+            Text(
+                stringResource(R.string.stats_reading_speed, "%.1f".format(it)),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+    }
+    Text(
+        stringResource(R.string.reading_stat_finished, summary.booksFinished),
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.padding(top = 4.dp),
+    )
+    if (summary.sessions > 0) {
+        TrendBarChart(buckets = buckets, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
+    }
+    if (books.isNotEmpty()) {
+        Text(
+            stringResource(R.string.label_books),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            books.forEach { entry ->
+                ListItem(
+                    headlineContent = { Text(entry.progress.book.title) },
+                    supportingContent = {
+                        Column {
+                            Text(
+                                stringResource(
+                                    R.string.reading_book_stats,
+                                    entry.pages,
+                                    stringResource(R.string.duration_format, entry.minutes / 60, entry.minutes % 60),
+                                    entry.sessions,
+                                ),
+                            )
+                            Text(bookProgressLabel(entry.progress), color = MaterialTheme.colorScheme.tertiary)
+                        }
+                    },
+                    modifier = Modifier.clickable { onBookClick(entry.progress.book.id) },
+                )
+                HorizontalDivider()
             }
         }
     }
