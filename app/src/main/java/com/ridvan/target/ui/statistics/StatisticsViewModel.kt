@@ -420,7 +420,8 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     private fun bucketLabel(millis: Long, period: StatsPeriod): String {
         val pattern = when (period) {
             StatsPeriod.DAILY, StatsPeriod.WEEKLY -> "d MMM"
-            StatsPeriod.MONTHLY, StatsPeriod.ALL_TIME -> "MMM yy"
+            // Full year — "Sep 26" read like a day (September 26th) rather than September 2026.
+            StatsPeriod.MONTHLY, StatsPeriod.ALL_TIME -> "MMM yyyy"
         }
         return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(millis))
     }

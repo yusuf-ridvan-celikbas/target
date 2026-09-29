@@ -375,12 +375,15 @@ private fun TrendBarChart(buckets: List<ChartBucket>, modifier: Modifier = Modif
         }
         Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
             buckets.forEachIndexed { index, bucket ->
+                // Only every Nth bar is labelled, so a label may spill into its unlabelled
+                // neighbours' space rather than being cut to "Se…" on a many-bar chart.
                 Text(
                     if (index % labelStep == 0) bucket.label else "",
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                    overflow = TextOverflow.Visible,
                     modifier = Modifier.weight(1f),
                 )
             }
