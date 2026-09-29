@@ -122,6 +122,8 @@
     <string name="home_studied_today">Bugün çalışılan: %1$s</string>
     <string name="home_studied_week">Bu hafta: %1$s</string>
     <string name="home_studied_empty">Bugün henüz çalışma yok.</string>
+    <string name="home_reading_today">Bugün okunan: %1$d sayfa</string>
+    <string name="home_reading_week">Bu hafta: %1$d sayfa</string>
     <string name="home_planner_empty">Planlayıcıda şu anda bir şey yok</string>
 
     <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never

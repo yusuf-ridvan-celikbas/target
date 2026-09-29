@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.planner
 
+import com.ridvan.target.ui.reading.BookProgress
+import com.ridvan.target.ui.reading.pagesRead
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.dao.PlannerEventWithLinks
 import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
@@ -59,6 +61,8 @@ data class StudiedPreview(
     val today: List<PlannerAgendaItem.Studied>,
     val todayMinutes: Int,
     val weekMinutes: Int,
+    val todayPages: Int = 0,
+    val weekPages: Int = 0,
 )
 
 fun studiedPreview(
@@ -72,5 +76,21 @@ fun studiedPreview(
         today = todayItems,
         todayMinutes = todayItems.sumOf { it.studiedMinutes },
         weekMinutes = week.sumOf { it.studiedMinutes },
+        todayPages = todayItems.sumOf { it.pagesRead() },
+        weekPages = week.sumOf { it.pagesRead() },
     )
+}
+
+private fun PlannerAgendaItem.Studied.pagesRead(): Int =
+    (this as? PlannerAgendaItem.FocusSessionEntry)?.item?.session?.pagesRead() ?: 0
+
+/** Home's Reading line: the book being read most recently (unfinished), if any. */
+fun currentBook(books: List<BookProgress>, focusSessions: List<FocusSessionWithLinks>): BookProgress? {
+    val unfinished = books.filterNot { it.book.isFinished }
+    val lastReadAt = focusSessions
+        .filter { it.session.bookId != null }
+        .groupBy { it.session.bookId }
+        .mapValues { (_, sessions) -> sessions.maxOf { it.session.startedAt } }
+    // Most recently read first; a book never read yet only shows when nothing has been read.
+    return unfinished.maxByOrNull { lastReadAt[it.book.id] ?: Long.MIN_VALUE }
 }

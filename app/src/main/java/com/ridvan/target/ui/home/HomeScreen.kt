@@ -1,5 +1,9 @@
 package com.ridvan.target.ui.home
 
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.text.style.TextOverflow
+import com.ridvan.target.ui.reading.bookProgressLabel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Timer
@@ -65,12 +69,15 @@ fun HomeScreen(
     onSectionClick: (Long) -> Unit,
     onFocusSessionClick: (Long) -> Unit,
     onPracticeSessionClick: (Long) -> Unit,
+    onBookClick: (Long) -> Unit,
+    onOpenReading: () -> Unit,
     viewModel: HomeViewModel = viewModel(),
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
     val upcomingEvents by viewModel.upcomingEvents.collectAsStateWithLifecycle()
     val upcomingPlannerEvents by viewModel.upcomingPlannerEvents.collectAsStateWithLifecycle()
     val studied by viewModel.studied.collectAsStateWithLifecycle()
+    val reading by viewModel.reading.collectAsStateWithLifecycle()
 
     AppShell(navigation = shellNavigation, currentDestination = ShellDestination.HOME) { innerPadding ->
         Column(
@@ -108,6 +115,9 @@ fun HomeScreen(
                 onToggleDone = viewModel::togglePlannerOccurrenceDone,
                 onOpenPlanner = shellNavigation.onNavigatePlanner,
                 studied = studied,
+                reading = reading,
+                onBookClick = onBookClick,
+                onOpenReading = onOpenReading,
                 onStudiedClick = { item ->
                     when (item) {
                         is PlannerAgendaItem.FocusSessionEntry -> onFocusSessionClick(item.item.session.id)
@@ -128,6 +138,9 @@ private fun PlannerPreviewCard(
     onToggleDone: (PlannerPreviewOccurrence) -> Unit,
     onOpenPlanner: () -> Unit,
     studied: StudiedPreview,
+    reading: HomeReading?,
+    onBookClick: (Long) -> Unit,
+    onOpenReading: () -> Unit,
     onStudiedClick: (PlannerAgendaItem.Studied) -> Unit,
 ) {
     GroupedCard {
@@ -163,6 +176,7 @@ private fun PlannerPreviewCard(
                 }
             }
             StudiedSection(studied, onStudiedClick)
+            reading?.let { ReadingSection(studied, it, onBookClick, onOpenReading) }
         }
     }
 }
@@ -356,3 +370,63 @@ private fun StudiedPreviewRow(item: PlannerAgendaItem.Studied, onClick: () -> Un
 
 @Composable
 private fun durationText(minutes: Int): String = stringResource(R.string.duration_format, minutes / 60, minutes % 60)
+
+/** Pages read today / this week, and the book currently being read with its progress. */
+@Composable
+private fun ReadingSection(
+    studied: StudiedPreview,
+    reading: HomeReading,
+    onBookClick: (Long) -> Unit,
+    onOpenReading: () -> Unit,
+) {
+    HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenReading),
+    ) {
+        Icon(Icons.Filled.AutoStories, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
+        Text(
+            stringResource(R.string.home_reading_today, studied.todayPages),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.weight(1f).padding(start = 12.dp),
+        )
+        Text(
+            stringResource(R.string.home_reading_week, studied.weekPages),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    val book = reading.currentBook
+    if (book != null) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+                .clickable { onBookClick(book.book.id) },
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    book.book.title,
+                    textDecoration = TextDecoration.Underline,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    bookProgressLabel(book),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+            book.percent?.let { percent ->
+                LinearProgressIndicator(
+                    progress = { percent / 100f },
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                )
+            }
+        }
+    }
+}

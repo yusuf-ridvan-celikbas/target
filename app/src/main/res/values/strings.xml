@@ -122,6 +122,8 @@
     <string name="home_studied_today">Studied today: %1$s</string>
     <string name="home_studied_week">This week: %1$s</string>
     <string name="home_studied_empty">Nothing studied yet today.</string>
+    <string name="home_reading_today">Read today: %1$d pages</string>
+    <string name="home_reading_week">This week: %1$d pages</string>
     <string name="home_planner_empty">Nothing on the planner right now</string>
 
     <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
