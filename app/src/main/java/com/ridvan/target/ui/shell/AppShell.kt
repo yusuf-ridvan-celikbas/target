@@ -138,7 +138,7 @@ fun AppShell(
         ShellDestination.EXAMS, ShellDestination.COURSES, ShellDestination.STUDY_RESOURCES,
         ShellDestination.TOPICS, ShellDestination.LANGUAGES,
     )
-    val focusDestinations = setOf(ShellDestination.FOCUS_TIMER, ShellDestination.STUDY_HISTORY, ShellDestination.READING)
+    val focusDestinations = setOf(ShellDestination.FOCUS_TIMER, ShellDestination.STUDY_HISTORY)
     val bannerColor by (LocalContext.current.applicationContext as TargetApplication).preferences.bannerColor
         .collectAsStateWithLifecycle()
 
@@ -277,17 +277,17 @@ fun AppShell(
                                 navigation.onNavigateStudyHistory()
                             },
                         )
-                        DrawerItem(
-                            label = stringResource(R.string.label_reading),
-                            icon = Icons.Filled.AutoStories,
-                            selected = currentDestination == ShellDestination.READING,
-                            indented = true,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navigation.onNavigateReading()
-                            },
-                        )
                     }
+                    // Reading is its own thing (books, pages), not a Focus Timer sub-page, so it stands alone.
+                    DrawerItem(
+                        label = stringResource(R.string.label_reading),
+                        icon = Icons.Filled.AutoStories,
+                        selected = currentDestination == ShellDestination.READING,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateReading()
+                        },
+                    )
                 }
                 // Lower part — account, settings, help, home — set apart by a line and its own background.
                 HorizontalDivider()

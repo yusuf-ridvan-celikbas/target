@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -212,12 +213,15 @@ private fun ChartCard(period: ReadingPeriod, sessions: List<FocusSession>) {
             Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
                 buckets.forEachIndexed { index, bucket ->
                     Text(
-                        if (index % step == 0) bucket.label else "",
+                        // Counted back from the newest bar, so the current day/month always has its label.
+                        if ((buckets.lastIndex - index) % step == 0) bucket.label else "",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         softWrap = false,
+                        // Only every Nth bar is labelled, so a label may spill into its unlabelled neighbours.
+                        overflow = TextOverflow.Visible,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -308,7 +312,8 @@ private fun buckets(period: ReadingPeriod, sessions: List<FocusSession>): List<R
                     monthStart.get(Calendar.MONTH) - first.get(Calendar.MONTH) + 1
                 span.coerceIn(1, 24)
             }
-            val format = SimpleDateFormat("MMM", Locale.getDefault())
+            // Full year, matching the Statistics charts ("Sep 2026", not a bare "Sep").
+            val format = SimpleDateFormat("MMM yyyy", Locale.getDefault())
             (months - 1 downTo 0).map { back ->
                 val start = (monthStart.clone() as Calendar).apply { add(Calendar.MONTH, -back) }
                 val end = (start.clone() as Calendar).apply { add(Calendar.MONTH, 1) }
