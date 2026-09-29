@@ -2,8 +2,10 @@ package com.ridvan.target.ui.shell
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -14,17 +16,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
@@ -32,6 +35,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.DrawerValue
@@ -50,16 +54,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -68,6 +78,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ridvan.target.R
 import com.ridvan.target.TargetApplication
 import kotlinx.coroutines.launch
+
+/** Blur on the page behind the side menu when the menu is fully open. */
+private val DRAWER_MAX_BLUR = 12.dp
 
 data class ShellNavigation(
     val onNavigateHome: () -> Unit,
@@ -105,17 +118,32 @@ fun AppShell(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    // Measured so the drawer's live offset can be turned into an "how open" fraction for the blur.
+    var drawerWidthPx by remember { mutableFloatStateOf(0f) }
     val scope = rememberCoroutineScope()
     var overflowExpanded by remember { mutableStateOf(false) }
-    var studyExpanded by remember { mutableStateOf(true) }
-    var focusExpanded by remember { mutableStateOf(true) }
+    // Groups start collapsed and collapse again every time the drawer closes, so the menu always
+    // opens short; a collapsed group containing the current page tints its header instead.
+    var studyExpanded by remember { mutableStateOf(false) }
+    var focusExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(drawerState.isClosed) {
+        if (drawerState.isClosed) {
+            studyExpanded = false
+            focusExpanded = false
+        }
+    }
+    val studyDestinations = setOf(
+        ShellDestination.EXAMS, ShellDestination.COURSES, ShellDestination.STUDY_RESOURCES,
+        ShellDestination.TOPICS, ShellDestination.STATISTICS, ShellDestination.LANGUAGES,
+    )
+    val focusDestinations = setOf(ShellDestination.FOCUS_TIMER, ShellDestination.STUDY_HISTORY)
     val bannerColor by (LocalContext.current.applicationContext as TargetApplication).preferences.bannerColor
         .collectAsStateWithLifecycle()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(modifier = Modifier.onSizeChanged { drawerWidthPx = it.width.toFloat() }) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -132,153 +160,185 @@ fun AppShell(
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
-                val studyLabel = stringResource(R.string.label_study_group)
-                DrawerGroupHeader(
-                    label = studyLabel,
-                    icon = Icons.Filled.School,
-                    expanded = studyExpanded,
-                    onToggleExpand = { studyExpanded = !studyExpanded },
-                )
-                if (studyExpanded) {
+                // Upper part — the app's features. Scrolls on its own if the groups are expanded,
+                // so the account/settings part below always stays visible.
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 8.dp),
+                ) {
+                    val studyLabel = stringResource(R.string.label_study_group)
+                    DrawerGroupHeader(
+                        label = studyLabel,
+                        icon = Icons.Filled.School,
+                        containsCurrent = currentDestination in studyDestinations,
+                        expanded = studyExpanded,
+                        onToggleExpand = { studyExpanded = !studyExpanded },
+                    )
+                    if (studyExpanded) {
+                        DrawerItem(
+                            label = stringResource(R.string.label_exams),
+                            icon = Icons.AutoMirrored.Filled.Assignment,
+                            selected = currentDestination == ShellDestination.EXAMS,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateExams()
+                            },
+                        )
+                        DrawerItem(
+                            label = stringResource(R.string.label_courses),
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            selected = currentDestination == ShellDestination.COURSES,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateCourses()
+                            },
+                        )
+                        DrawerItem(
+                            label = stringResource(R.string.label_study_resources),
+                            icon = Icons.Filled.Bookmark,
+                            selected = currentDestination == ShellDestination.STUDY_RESOURCES,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateStudyResources()
+                            },
+                        )
+                        DrawerItem(
+                            label = stringResource(R.string.label_topics),
+                            icon = Icons.Filled.Topic,
+                            selected = currentDestination == ShellDestination.TOPICS,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateTopics()
+                            },
+                        )
+                        DrawerItem(
+                            label = stringResource(R.string.label_statistics),
+                            icon = Icons.Filled.BarChart,
+                            selected = currentDestination == ShellDestination.STATISTICS,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateStatistics()
+                            },
+                        )
+                        DrawerItem(
+                            label = stringResource(R.string.label_languages),
+                            icon = Icons.Filled.Translate,
+                            selected = currentDestination == ShellDestination.LANGUAGES,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateLanguages()
+                            },
+                        )
+                    }
                     DrawerItem(
-                        label = stringResource(R.string.label_exams),
-                        icon = Icons.AutoMirrored.Filled.Assignment,
-                        selected = currentDestination == ShellDestination.EXAMS,
-                        indented = true,
+                        label = stringResource(R.string.label_planner),
+                        icon = Icons.Filled.CalendarMonth,
+                        selected = currentDestination == ShellDestination.PLANNER,
                         onClick = {
                             scope.launch { drawerState.close() }
-                            navigation.onNavigateExams()
+                            navigation.onNavigatePlanner()
+                        },
+                    )
+                    DrawerGroupHeader(
+                        label = stringResource(R.string.label_focus_group),
+                        icon = Icons.Filled.SelfImprovement,
+                        containsCurrent = currentDestination in focusDestinations,
+                        expanded = focusExpanded,
+                        onToggleExpand = { focusExpanded = !focusExpanded },
+                    )
+                    if (focusExpanded) {
+                        DrawerItem(
+                            label = stringResource(R.string.label_focus_timer),
+                            icon = Icons.Filled.Timer,
+                            selected = currentDestination == ShellDestination.FOCUS_TIMER,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateFocusTimer()
+                            },
+                        )
+                        DrawerItem(
+                            label = stringResource(R.string.focustimer_history_page_title),
+                            icon = Icons.Filled.History,
+                            selected = currentDestination == ShellDestination.STUDY_HISTORY,
+                            indented = true,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navigation.onNavigateStudyHistory()
+                            },
+                        )
+                    }
+                }
+                // Lower part — account, settings, help, home — set apart by a line and its own background.
+                HorizontalDivider()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .padding(vertical = 8.dp),
+                ) {
+                    DrawerItem(
+                        label = stringResource(R.string.label_my_account),
+                        icon = Icons.Filled.AccountCircle,
+                        selected = currentDestination == ShellDestination.MY_ACCOUNT,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navigation.onNavigateMyAccount()
                         },
                     )
                     DrawerItem(
-                        label = stringResource(R.string.label_courses),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        selected = currentDestination == ShellDestination.COURSES,
-                        indented = true,
+                        label = stringResource(R.string.settings_title),
+                        icon = Icons.Filled.Settings,
+                        selected = currentDestination == ShellDestination.SETTINGS,
                         onClick = {
                             scope.launch { drawerState.close() }
-                            navigation.onNavigateCourses()
+                            navigation.onNavigateSettings()
                         },
                     )
                     DrawerItem(
-                        label = stringResource(R.string.label_study_resources),
-                        icon = Icons.Filled.Bookmark,
-                        selected = currentDestination == ShellDestination.STUDY_RESOURCES,
-                        indented = true,
+                        label = stringResource(R.string.label_help),
+                        icon = Icons.AutoMirrored.Filled.Help,
+                        selected = currentDestination == ShellDestination.HELP,
                         onClick = {
                             scope.launch { drawerState.close() }
-                            navigation.onNavigateStudyResources()
+                            navigation.onNavigateHelp()
                         },
                     )
                     DrawerItem(
-                        label = stringResource(R.string.label_topics),
-                        icon = Icons.Filled.Topic,
-                        selected = currentDestination == ShellDestination.TOPICS,
-                        indented = true,
+                        label = stringResource(R.string.label_home),
+                        icon = Icons.Filled.Home,
+                        selected = currentDestination == ShellDestination.HOME,
                         onClick = {
                             scope.launch { drawerState.close() }
-                            navigation.onNavigateTopics()
-                        },
-                    )
-                    DrawerItem(
-                        label = stringResource(R.string.label_statistics),
-                        icon = Icons.Filled.BarChart,
-                        selected = currentDestination == ShellDestination.STATISTICS,
-                        indented = true,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            navigation.onNavigateStatistics()
-                        },
-                    )
-                    DrawerItem(
-                        label = stringResource(R.string.label_languages),
-                        icon = Icons.Filled.Translate,
-                        selected = currentDestination == ShellDestination.LANGUAGES,
-                        indented = true,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            navigation.onNavigateLanguages()
+                            navigation.onNavigateHome()
                         },
                     )
                 }
-                DrawerItem(
-                    label = stringResource(R.string.label_planner),
-                    icon = Icons.Filled.CalendarMonth,
-                    selected = currentDestination == ShellDestination.PLANNER,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigatePlanner()
-                    },
-                )
-                DrawerGroupHeader(
-                    label = stringResource(R.string.label_focus_group),
-                    icon = Icons.Filled.SelfImprovement,
-                    expanded = focusExpanded,
-                    onToggleExpand = { focusExpanded = !focusExpanded },
-                )
-                if (focusExpanded) {
-                    DrawerItem(
-                        label = stringResource(R.string.label_focus_timer),
-                        icon = Icons.Filled.Timer,
-                        selected = currentDestination == ShellDestination.FOCUS_TIMER,
-                        indented = true,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            navigation.onNavigateFocusTimer()
-                        },
-                    )
-                    DrawerItem(
-                        label = stringResource(R.string.focustimer_history_page_title),
-                        icon = Icons.Filled.History,
-                        selected = currentDestination == ShellDestination.STUDY_HISTORY,
-                        indented = true,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            navigation.onNavigateStudyHistory()
-                        },
-                    )
-                }
-                Spacer(Modifier.weight(1f))
-                DrawerItem(
-                    label = stringResource(R.string.label_my_account),
-                    icon = Icons.Filled.AccountCircle,
-                    selected = currentDestination == ShellDestination.MY_ACCOUNT,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateMyAccount()
-                    },
-                )
-                DrawerItem(
-                    label = stringResource(R.string.settings_title),
-                    icon = Icons.Filled.Settings,
-                    selected = currentDestination == ShellDestination.SETTINGS,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateSettings()
-                    },
-                )
-                DrawerItem(
-                    label = stringResource(R.string.label_help),
-                    icon = Icons.AutoMirrored.Filled.Help,
-                    selected = currentDestination == ShellDestination.HELP,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateHelp()
-                    },
-                )
-                DrawerItem(
-                    label = stringResource(R.string.label_home),
-                    icon = Icons.Filled.Home,
-                    selected = currentDestination == ShellDestination.HOME,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navigation.onNavigateHome()
-                    },
-                )
             }
         },
     ) {
         Scaffold(
+            // The page behind the menu blurs in step with how far the menu is open — a partly pulled
+            // drawer gives a light blur, fully open the full blur. Read inside graphicsLayer (draw
+            // phase), so following a swipe frame by frame doesn't recompose the page.
+            modifier = Modifier.graphicsLayer {
+                val offset = drawerState.currentOffset
+                val openFraction = if (drawerWidthPx > 0f && !offset.isNaN()) {
+                    (1f + offset / drawerWidthPx).coerceIn(0f, 1f)
+                } else {
+                    0f
+                }
+                val radius = DRAWER_MAX_BLUR.toPx() * openFraction
+                renderEffect = if (radius > 0.5f) BlurEffect(radius, radius, TileMode.Clamp) else null
+            },
             topBar = {
                 TopAppBar(
                     title = { Text(title) },
@@ -375,12 +435,14 @@ private fun DrawerItem(
 private fun DrawerGroupHeader(
     label: String,
     icon: ImageVector,
+    containsCurrent: Boolean,
     expanded: Boolean,
     onToggleExpand: () -> Unit,
 ) {
     Surface(
         color = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        // While collapsed, a group holding the open page shows it with the accent color.
+        contentColor = if (containsCurrent && !expanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         shape = MaterialTheme.shapes.small,
         modifier = Modifier
             .fillMaxWidth()
