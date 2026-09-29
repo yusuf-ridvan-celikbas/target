@@ -463,6 +463,11 @@
     <string name="planner_period_studied_total">Total studied: %1$s · %2$d sessions</string>
     <string name="planner_studied_focus">Focus Timer · %1$s</string>
     <string name="planner_studied_practice">Practice · %1$s · %2$s</string>
+    <string name="planner_group_exams">Exams</string>
+    <string name="planner_group_plans">Plans</string>
+    <string name="planner_group_focus">Focus Sessions</string>
+    <string name="planner_group_practice">Practice Sessions</string>
+    <string name="planner_group_header">%1$s (%2$d)</string>
     <string name="planner_day_empty">Nothing planned</string>
     <string name="planner_dialog_new_title">Add Planner Event</string>
     <string name="planner_dialog_edit_title">Edit Planner Event</string>

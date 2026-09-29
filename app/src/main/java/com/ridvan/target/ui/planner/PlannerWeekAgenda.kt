@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Timer
@@ -18,6 +21,8 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -101,11 +106,84 @@ fun DayAgendaCard(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                 )
             } else {
-                items.sortedBy { sortMinute(it) }.forEach { item ->
-                    AgendaRow(item, onToggleDone, onItemClick, onCourseClick, onTopicClick)
+                // Each activity type folds under its own header, in a fixed order; all start folded.
+                val expanded = remember(date) { mutableStateMapOf<AgendaGroup, Boolean>() }
+                val byGroup = items.groupBy { agendaGroupOf(it) }
+                AgendaGroup.entries.forEach { group ->
+                    val groupItems = byGroup[group] ?: return@forEach
+                    val isExpanded = expanded[group] == true
+                    AgendaGroupHeader(
+                        group = group,
+                        items = groupItems,
+                        expanded = isExpanded,
+                        onToggle = { expanded[group] = !isExpanded },
+                    )
+                    if (isExpanded) {
+                        groupItems.sortedBy { sortMinute(it) }.forEach { item ->
+                            AgendaRow(item, onToggleDone, onItemClick, onCourseClick, onTopicClick)
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+/** Declaration order is display order. */
+private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
+    EXAMS(R.string.planner_group_exams, Icons.AutoMirrored.Filled.Assignment),
+    PLANS(R.string.planner_group_plans, Icons.Filled.Event),
+    FOCUS(R.string.planner_group_focus, Icons.Filled.Timer),
+    PRACTICE(R.string.planner_group_practice, Icons.Filled.Quiz),
+}
+
+private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
+    is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
+    is PlannerAgendaItem.EventOccurrence -> AgendaGroup.PLANS
+    is PlannerAgendaItem.FocusSessionEntry -> AgendaGroup.FOCUS
+    is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE
+}
+
+@Composable
+private fun AgendaGroupHeader(
+    group: AgendaGroup,
+    items: List<PlannerAgendaItem>,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+) {
+    val label = stringResource(group.labelRes)
+    val studiedGroup = group == AgendaGroup.FOCUS || group == AgendaGroup.PRACTICE
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        Icon(
+            group.icon,
+            contentDescription = null,
+            tint = if (studiedGroup) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp),
+        )
+        Text(
+            stringResource(R.string.planner_group_header, label, items.size),
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.weight(1f).padding(start = 12.dp),
+        )
+        if (studiedGroup) {
+            val minutes = items.filterIsInstance<PlannerAgendaItem.Studied>().sumOf { it.studiedMinutes }
+            Text(
+                stringResource(R.string.duration_format, minutes / 60, minutes % 60),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(end = 8.dp),
+            )
+        }
+        Icon(
+            if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+            contentDescription = stringResource(if (expanded) R.string.cd_collapse_x else R.string.cd_expand_x, label),
+        )
     }
 }
 
