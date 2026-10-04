@@ -152,7 +152,11 @@ fun FocusSessionDetailScreen(
                             stringResource(
                                 R.string.focus_session_preset,
                                 session.presetName,
-                                stringResource(R.string.focustimer_preset_row_subtitle, session.workMinutes, session.breakMinutes),
+                                stringResource(
+                                    if (session.isReading) R.string.focustimer_preset_row_subtitle_reading
+                                    else R.string.focustimer_preset_row_subtitle,
+                                    session.workMinutes, session.breakMinutes,
+                                ),
                             )
                         },
                         modifier = Modifier.padding(top = 8.dp),

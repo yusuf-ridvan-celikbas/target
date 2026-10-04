@@ -467,6 +467,7 @@
     <string name="planner_day_studied_total">Çalışılan %1$s</string>
     <string name="planner_period_studied_total">Toplam çalışma: %1$s · %2$d oturum</string>
     <string name="planner_studied_focus">Odak Zamanlayıcı · %1$s</string>
+    <string name="planner_studied_reading">Okuma · %1$s</string>
     <string name="planner_studied_practice">Pratik · %1$s · %2$s</string>
     <string name="planner_group_exams">Sınavlar</string>
     <string name="planner_group_plans">Planlar</string>
@@ -526,6 +527,7 @@
     <string name="label_break_minutes">Mola süresi (dk)</string>
     <string name="focustimer_preset_empty">Henüz şablon yok — başlamak için bir tane oluşturun.</string>
     <string name="focustimer_preset_row_subtitle">%1$d dk çalışma / %2$d dk mola</string>
+    <string name="focustimer_preset_row_subtitle_reading">%1$d dk okuma / %2$d dk mola</string>
     <string name="label_preset">Şablon</string>
     <string name="common_none">Yok</string>
     <string name="cd_manage_presets">Şablonları yönet</string>
@@ -666,8 +668,10 @@
     <string name="focus_manual_work_hint">Çalışma süresi: %1$s</string>
     <string name="focus_manual_break_too_long">Mola, oturumdan kısa olmalı.</string>
     <string name="focus_manual_stats">%1$s çalışma · %2$s mola</string>
+    <string name="focus_manual_stats_reading">%1$s okuma · %2$s mola</string>
     <string name="focus_manual_logged_by_hand">Elle kaydedildi (zamanlayıcı yok)</string>
     <string name="planner_studied_manual">Elle · %1$s</string>
+    <string name="planner_studied_manual_reading">Elle okuma · %1$s</string>
     <string name="focus_session_preset">Ön ayar: %1$s (%2$s)</string>
     <string name="focus_session_link_section">Bağlantı</string>
     <string name="focus_session_link_dialog_title">Oturumu bağla</string>
@@ -677,6 +681,7 @@
     <string name="focus_session_no_notes">Henüz not yok.</string>
     <string name="focus_session_notes_hint">ör. Dativ çalıştım</string>
     <string name="focustimer_history_row_subtitle">%1$d tur · %2$s çalışma · %3$s mola</string>
+    <string name="focustimer_history_row_subtitle_reading">%1$d tur · %2$s okuma · %3$s mola</string>
     <string name="focustimer_keep_screen_hint">Alarmı kaçırmamanız için bir oturum çalışırken ekran açık kalacaktır.</string>
     <string name="focustimer_link_section_title">Bağlantı</string>
     <string name="cd_delete_focus_session">Oturumu sil</string>

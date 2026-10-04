@@ -469,6 +469,7 @@
     <string name="planner_day_studied_total">Studied %1$s</string>
     <string name="planner_period_studied_total">Total studied: %1$s · %2$d sessions</string>
     <string name="planner_studied_focus">Focus Timer · %1$s</string>
+    <string name="planner_studied_reading">Reading · %1$s</string>
     <string name="planner_studied_practice">Practice · %1$s · %2$s</string>
     <string name="planner_group_exams">Exams</string>
     <string name="planner_group_plans">Plans</string>
@@ -528,6 +529,7 @@
     <string name="label_break_minutes">Break minutes</string>
     <string name="focustimer_preset_empty">No presets yet — create one to get started.</string>
     <string name="focustimer_preset_row_subtitle">%1$d min work / %2$d min break</string>
+    <string name="focustimer_preset_row_subtitle_reading">%1$d min reading / %2$d min break</string>
     <string name="label_preset">Preset</string>
     <string name="common_none">None</string>
     <string name="cd_manage_presets">Manage presets</string>
@@ -668,8 +670,10 @@
     <string name="focus_manual_work_hint">Work time: %1$s</string>
     <string name="focus_manual_break_too_long">The break must be shorter than the session.</string>
     <string name="focus_manual_stats">%1$s work · %2$s break</string>
+    <string name="focus_manual_stats_reading">%1$s reading · %2$s break</string>
     <string name="focus_manual_logged_by_hand">Logged manually (no timer)</string>
     <string name="planner_studied_manual">Manual · %1$s</string>
+    <string name="planner_studied_manual_reading">Manual reading · %1$s</string>
     <string name="focus_session_preset">Preset: %1$s (%2$s)</string>
     <string name="focus_session_link_section">Linked to</string>
     <string name="focus_session_link_dialog_title">Link session</string>
@@ -679,6 +683,7 @@
     <string name="focus_session_no_notes">No notes yet.</string>
     <string name="focus_session_notes_hint">e.g. Studied Dativ</string>
     <string name="focustimer_history_row_subtitle">%1$d cycles · %2$s work · %3$s break</string>
+    <string name="focustimer_history_row_subtitle_reading">%1$d cycles · %2$s reading · %3$s break</string>
     <string name="focustimer_keep_screen_hint">The screen will stay on while a session is running so you don\'t miss the alarm.</string>
     <string name="focustimer_link_section_title">Link to</string>
     <string name="cd_delete_focus_session">Delete session</string>

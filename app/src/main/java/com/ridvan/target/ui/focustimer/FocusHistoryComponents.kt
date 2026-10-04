@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.reading.isReading
 import com.ridvan.target.ui.reading.pagesRead
 import com.ridvan.target.data.local.entity.FocusSession
 import androidx.compose.foundation.clickable
@@ -48,10 +49,15 @@ internal fun focusSessionTitle(item: FocusSessionWithLinks): String =
 internal fun focusSessionStatsLine(session: FocusSession): String {
     val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
     val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
+    // A reading session says "reading" where a study session says "work".
+    val reading = session.isReading
     val base = if (session.isManual) {
-        stringResource(R.string.focus_manual_stats, workText, breakText)
+        stringResource(if (reading) R.string.focus_manual_stats_reading else R.string.focus_manual_stats, workText, breakText)
     } else {
-        stringResource(R.string.focustimer_history_row_subtitle, session.cyclesCompleted, workText, breakText)
+        stringResource(
+            if (reading) R.string.focustimer_history_row_subtitle_reading else R.string.focustimer_history_row_subtitle,
+            session.cyclesCompleted, workText, breakText,
+        )
     }
     // Reading sessions add their pages once the page reached is known.
     return if (session.endPage != null) "$base · ${stringResource(R.string.reading_pages_suffix, session.pagesRead())}" else base

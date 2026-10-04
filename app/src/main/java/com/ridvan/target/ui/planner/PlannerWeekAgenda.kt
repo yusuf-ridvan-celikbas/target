@@ -268,7 +268,12 @@ private fun AgendaRow(
                     Column {
                         Text(
                             stringResource(
-                                if (session.isManual) R.string.planner_studied_manual else R.string.planner_studied_focus,
+                                when {
+                                    item.isReading && session.isManual -> R.string.planner_studied_manual_reading
+                                    item.isReading -> R.string.planner_studied_reading
+                                    session.isManual -> R.string.planner_studied_manual
+                                    else -> R.string.planner_studied_focus
+                                },
                                 "${formatTime(session.startedAt)} – ${formatTime(session.endedAt)}",
                             ),
                             style = MaterialTheme.typography.bodySmall,
