@@ -254,9 +254,19 @@ private fun LibraryCard(books: List<BookProgress>, onOpenLibrary: () -> Unit, on
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             )
         } else {
-            val reading = books.filter { it.book.status == BookStatus.READING }
-            val preview = reading.ifEmpty { books.sortedByDescending { it.book.createdAt } }.take(BOOKS_PER_SHELF)
-            BookShelf(preview, onBookClick = onBookClick, modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
+            // One shelf: books being read first, then the most recently added.
+            var pulledBookId by rememberSaveable { mutableStateOf<Long?>(null) }
+            val preview = books.sortedWith(
+                compareBy<BookProgress> { it.book.status != BookStatus.READING }.thenByDescending { it.book.createdAt },
+            )
+            SpineShelves(
+                books = preview,
+                pulledBookId = pulledBookId,
+                onPull = { pulledBookId = it },
+                onBookClick = onBookClick,
+                maxRows = 1,
+                modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+            )
         }
     }
 }

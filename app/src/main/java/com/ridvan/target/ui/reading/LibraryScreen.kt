@@ -138,6 +138,8 @@ fun LibraryScreen(
     var sort by rememberSaveable { mutableStateOf(LibrarySort.STATUS) }
     var descending by rememberSaveable { mutableStateOf(sort.defaultDescending) }
     var listView by rememberSaveable { mutableStateOf(false) }
+    // The one book pulled off the shelf (cover showing), if any.
+    var pulledBookId by rememberSaveable { mutableStateOf<Long?>(null) }
     var showAddBook by remember { mutableStateOf(false) }
 
     val visible = books.filter { p ->
@@ -249,12 +251,13 @@ fun LibraryScreen(
                             )
                         }
                     }
-                    val shelves = group.books.chunked(BOOKS_PER_SHELF)
-                    items(shelves.size, key = { index -> "shelf-${group.key}-$index" }) { index ->
-                        BookShelf(
-                            books = shelves[index],
+                    item(key = "shelf-${group.key}") {
+                        SpineShelves(
+                            books = group.books,
+                            pulledBookId = pulledBookId,
+                            onPull = { pulledBookId = it },
                             onBookClick = onBookClick,
-                            modifier = Modifier.padding(top = if (!sort.groups && index == 0) 16.dp else 0.dp, bottom = 12.dp),
+                            modifier = Modifier.padding(top = if (sort.groups) 0.dp else 16.dp, bottom = 12.dp),
                         )
                     }
                 }

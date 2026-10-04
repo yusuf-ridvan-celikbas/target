@@ -213,76 +213,19 @@ private fun CoverRule(ink: Color, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxWidth(0.6f).height(1.dp).background(ink.copy(alpha = 0.5f)))
 }
 
-private fun darken(color: Color, amount: Float) = Color(
+internal fun darken(color: Color, amount: Float) = Color(
     red = color.red * (1 - amount),
     green = color.green * (1 - amount),
     blue = color.blue * (1 - amount),
     alpha = color.alpha,
 )
 
-private fun lighten(color: Color, amount: Float) = Color(
+internal fun lighten(color: Color, amount: Float) = Color(
     red = color.red + (1 - color.red) * amount,
     green = color.green + (1 - color.green) * amount,
     blue = color.blue + (1 - color.blue) * amount,
     alpha = color.alpha,
 )
-
-const val BOOKS_PER_SHELF = 3
-
-// The bookcase's back wall: a warm dark wood, the same in light and dark mode.
-private val shelfWallTop = Color(0xFF4A3628)
-private val shelfWallBottom = Color(0xFF2E2117)
-private val woodLight = Color(0xFFB07A4F)
-private val woodMid = Color(0xFF8A5A36)
-private val woodDark = Color(0xFF5C3A20)
-
-/**
- * One shelf: up to [BOOKS_PER_SHELF] covers standing on a wooden plank, against a slightly
- * darker back wall. Empty slots stay empty so covers keep the same size on every shelf.
- */
-@Composable
-fun BookShelf(books: List<BookProgress>, onBookClick: (Long) -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
-                .background(Brush.verticalGradient(listOf(shelfWallTop, shelfWallBottom)))
-                .padding(start = 16.dp, end = 16.dp, top = 14.dp),
-        ) {
-            repeat(BOOKS_PER_SHELF) { index ->
-                val progress = books.getOrNull(index)
-                Box(modifier = Modifier.weight(1f)) {
-                    if (progress != null) {
-                        BookCover(
-                            book = progress.book,
-                            percent = progress.percent,
-                            modifier = Modifier.fillMaxWidth().clickable { onBookClick(progress.book.id) },
-                        )
-                    }
-                }
-            }
-        }
-        // The plank: a lit top surface, then the darker front edge, then a soft shadow below.
-        Box(modifier = Modifier.fillMaxWidth().height(6.dp).background(Brush.verticalGradient(listOf(woodLight, woodMid))))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-                .clip(RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
-                .background(Brush.verticalGradient(listOf(woodMid, woodDark))),
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .padding(horizontal = 6.dp)
-                .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent))),
-        )
-    }
-}
 
 /** 1–5 stars. With [onRate], tapping a star sets that rating and tapping the current one clears it. */
 @Composable
