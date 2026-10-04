@@ -746,4 +746,25 @@
     <string name="book_genre_textbook">Ders kitabı</string>
     <string name="book_genre_other">Diğer</string>
     <string name="common_clear">Temizle</string>
+    <string name="reading_plan_title">Bitirme planı</string>
+    <string name="reading_forecast">Son hızınla (günde %1$s sayfa) yaklaşık %2$s tarihinde bitirirsin.</string>
+    <string name="reading_forecast_none">Biraz okuma kaydet, bitiş tarihi burada tahmin edilsin.</string>
+    <string name="reading_pages_left">%1$d sayfa kaldı</string>
+    <string name="reading_goal_line">Hedef: %1$s tarihine kadar bitir</string>
+    <string name="reading_goal_today">Bugün: %1$d / %2$d sayfa</string>
+    <string name="reading_goal_minutes_left">yaklaşık %1$d dk kaldı</string>
+    <string name="reading_goal_today_done">Bugünün hedefi tamam</string>
+    <string name="reading_goal_passed">Hedef tarihi geçti. Yeni bir tane belirle?</string>
+    <string name="reading_goal_set">Hedef belirle</string>
+    <string name="reading_goal_change">Değiştir</string>
+    <string name="reading_goal_remove">Kaldır</string>
+    <string name="reading_goal_dialog_title">Okuma hedefi</string>
+    <string name="reading_goal_mode_date">Bitiş tarihi</string>
+    <string name="reading_goal_mode_pace">Günlük sayfa</string>
+    <string name="reading_goal_finish_by">Bitiş</string>
+    <string name="reading_goal_needed">Günde %1$d sayfa</string>
+    <string name="reading_goal_finish_on">%1$s tarihinde bitirirsin</string>
+    <string name="reading_goal_minutes_day">günde yaklaşık %1$d dk</string>
+    <string name="reading_goal_custom">Özel günlük sayfa</string>
+    <string name="home_reading_goal">Bugünün hedefi: %1$d / %2$d sayfa</string>
 </resources>

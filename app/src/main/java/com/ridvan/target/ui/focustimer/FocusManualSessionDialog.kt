@@ -382,7 +382,7 @@ private fun startOfDay(millis: Long): Long = Calendar.getInstance().apply {
     set(Calendar.MILLISECOND, 0)
 }.timeInMillis
 
-private fun localDayToUtcMillis(localDayStart: Long): Long {
+internal fun localDayToUtcMillis(localDayStart: Long): Long {
     val local = Calendar.getInstance().apply { timeInMillis = localDayStart }
     return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
         clear()
@@ -390,7 +390,7 @@ private fun localDayToUtcMillis(localDayStart: Long): Long {
     }.timeInMillis
 }
 
-private fun utcMillisToLocalDay(utcMillis: Long): Long {
+internal fun utcMillisToLocalDay(utcMillis: Long): Long {
     val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = utcMillis }
     return Calendar.getInstance().apply {
         clear()

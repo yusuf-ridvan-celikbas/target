@@ -748,4 +748,25 @@
     <string name="book_genre_textbook">Textbook</string>
     <string name="book_genre_other">Other</string>
     <string name="common_clear">Clear</string>
+    <string name="reading_plan_title">Finish plan</string>
+    <string name="reading_forecast">At your recent pace (%1$s pages a day) you\'ll finish around %2$s.</string>
+    <string name="reading_forecast_none">Log some reading and a finish date will be predicted here.</string>
+    <string name="reading_pages_left">%1$d pages left</string>
+    <string name="reading_goal_line">Goal: finish by %1$s</string>
+    <string name="reading_goal_today">Today: %1$d / %2$d pages</string>
+    <string name="reading_goal_minutes_left">about %1$d min left</string>
+    <string name="reading_goal_today_done">Today\'s goal is done</string>
+    <string name="reading_goal_passed">The goal date has passed. Set a new one?</string>
+    <string name="reading_goal_set">Set a goal</string>
+    <string name="reading_goal_change">Change</string>
+    <string name="reading_goal_remove">Remove</string>
+    <string name="reading_goal_dialog_title">Reading goal</string>
+    <string name="reading_goal_mode_date">Finish by date</string>
+    <string name="reading_goal_mode_pace">Pages a day</string>
+    <string name="reading_goal_finish_by">Finish by</string>
+    <string name="reading_goal_needed">%1$d pages a day</string>
+    <string name="reading_goal_finish_on">You\'ll finish on %1$s</string>
+    <string name="reading_goal_minutes_day">about %1$d min a day</string>
+    <string name="reading_goal_custom">Custom pages a day</string>
+    <string name="home_reading_goal">Today\'s goal: %1$d / %2$d pages</string>
 </resources>

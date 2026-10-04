@@ -2,6 +2,11 @@ package com.ridvan.target.ui.home
 
 import com.ridvan.target.ui.planner.currentBook
 import com.ridvan.target.ui.reading.BookProgress
+import com.ridvan.target.ui.reading.DailyGoal
+import com.ridvan.target.ui.reading.dailyGoal
+import com.ridvan.target.ui.reading.dayStart
+import com.ridvan.target.ui.reading.isReading
+import com.ridvan.target.ui.reading.readingPace
 import com.ridvan.target.ui.reading.bookProgressFlow
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -24,7 +29,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Home's reading line; the page counts come from [StudiedPreview]'s week window. */
-data class HomeReading(val currentBook: BookProgress?)
+/** [goal] is today's share of the current book's finish goal, when it has one; [pagesPerHour] estimates its time. */
+data class HomeReading(val currentBook: BookProgress?, val goal: DailyGoal? = null, val pagesPerHour: Double? = null)
 
 data class UpcomingEvent(
     val examId: Long,
@@ -87,7 +93,19 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         bookProgressFlow(bookDao, focusSessionDao, userId),
         userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
     ) { books, sessions ->
-        if (books.isEmpty() && sessions.none { it.session.bookId != null }) null else HomeReading(currentBook(books, sessions))
+        if (books.isEmpty() && sessions.none { it.session.bookId != null }) {
+            null
+        } else {
+            val book = currentBook(books, sessions)
+            val today = dayStart(System.currentTimeMillis())
+            val reading = sessions.map { it.session }.filter { it.isReading }
+            val own = reading.filter { it.bookId == book?.book?.id }
+            HomeReading(
+                currentBook = book,
+                goal = book?.let { dailyGoal(it.book, own, today) },
+                pagesPerHour = readingPace(own, reading, today).pagesPerHour,
+            )
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val studied: StateFlow<StudiedPreview> = combine(

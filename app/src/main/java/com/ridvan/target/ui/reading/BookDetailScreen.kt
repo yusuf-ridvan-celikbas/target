@@ -57,6 +57,7 @@ fun BookDetailScreen(
 ) {
     val progress by viewModel.progress.collectAsStateWithLifecycle()
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
+    val allReadingSessions by viewModel.allReadingSessions.collectAsStateWithLifecycle()
     var showEdit by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
     var showNotes by remember { mutableStateOf(false) }
@@ -149,6 +150,14 @@ fun BookDetailScreen(
                     }
                 }
             }
+
+            ReadingPlanCard(
+                progress = current,
+                bookSessions = sessions.map { it.session },
+                allReadingSessions = allReadingSessions,
+                onSetGoal = { viewModel.setGoal(book, it) },
+                modifier = Modifier.padding(top = 12.dp),
+            )
 
             GroupedCard(modifier = Modifier.padding(top = 12.dp)) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {

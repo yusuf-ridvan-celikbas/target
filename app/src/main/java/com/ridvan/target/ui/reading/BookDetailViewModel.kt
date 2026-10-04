@@ -34,6 +34,14 @@ class BookDetailViewModel(
         .map { items -> items.filter { it.session.bookId == bookId } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Every reading session (all books) — the fallback pace and speed for the finish forecast. */
+    val allReadingSessions: StateFlow<List<FocusSession>> = (userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()))
+        .map { items -> items.map { it.session }.filter { it.isReading } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** [goalDate] is a day start, or null to remove the goal. */
+    fun setGoal(book: Book, goalDate: Long?) = updateBook(book.copy(goalDate = goalDate))
+
     fun updateBook(book: Book) {
         viewModelScope.launch { bookDao.update(book) }
     }

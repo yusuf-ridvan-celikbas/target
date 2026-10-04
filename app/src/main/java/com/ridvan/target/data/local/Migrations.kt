@@ -510,3 +510,10 @@ val MIGRATION_23_24 = object : Migration(23, 24) {
         db.execSQL("UPDATE books SET coverColor = abs(random()) % 12")
     }
 }
+
+val MIGRATION_24_25 = object : Migration(24, 25) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Reading goals: an optional finish-by day per book.
+        db.execSQL("ALTER TABLE books ADD COLUMN goalDate INTEGER")
+    }
+}

@@ -40,4 +40,6 @@ data class Book(
     val isWantToRead: Boolean = false,
     /** Index into the cover palette (ui/reading/BookCover.kt) — picked at random when the book is added. */
     val coverColor: Int = 0,
+    /** Optional "finish by" day (start-of-day millis) — the daily page goal is derived from it (ui/reading/ReadingForecast.kt). */
+    val goalDate: Long? = null,
 )

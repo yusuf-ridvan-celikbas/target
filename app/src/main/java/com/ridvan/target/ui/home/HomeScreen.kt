@@ -5,6 +5,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.text.style.TextOverflow
 import com.ridvan.target.ui.reading.bookProgressLabel
 import com.ridvan.target.ui.reading.BookCover
+import com.ridvan.target.ui.reading.goalTodayLine
+import com.ridvan.target.ui.reading.minutesFor
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Quiz
@@ -432,6 +434,22 @@ private fun ReadingSection(
                         progress = { percent / 100f },
                         color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                    )
+                }
+                reading.goal?.let { goal ->
+                    Text(
+                        if (goal.done || goal.passed) {
+                            goalTodayLine(goal, reading.pagesPerHour)
+                        } else {
+                            listOfNotNull(
+                                stringResource(R.string.home_reading_goal, goal.readToday, goal.target),
+                                minutesFor(goal.remainingToday, reading.pagesPerHour)
+                                    ?.let { stringResource(R.string.reading_goal_minutes_left, it) },
+                            ).joinToString(" · ")
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (goal.done) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 6.dp),
                     )
                 }
             }
