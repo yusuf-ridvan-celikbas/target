@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -26,29 +28,41 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.Book
+import com.ridvan.target.data.local.entity.BookGenre
+import com.ridvan.target.ui.common.SegmentedToggle
+import com.ridvan.target.ui.common.SegmentedToggleOption
+import com.ridvan.target.ui.focustimer.DropdownField
+import kotlin.random.Random
 
 private const val MAX_PAGE_DIGITS = 5
 
 private fun digitsOnly(value: String): String = value.filter { it.isDigit() }.take(MAX_PAGE_DIGITS)
 
-/** Add (initial == null) or edit a book. Edit also offers "Finished" and Delete. */
+/**
+ * Add (initial == null) or edit a book: everything except notes, which live on the detail page.
+ * [onConfirm] gets the edited copy (a new book gets a random cover colour). Edit also offers Delete.
+ */
 @Composable
 fun BookDialog(
     initial: Book?,
-    onConfirm: (title: String, author: String?, totalPages: Int?, isFinished: Boolean) -> Unit,
+    onConfirm: (Book) -> Unit,
     onDismiss: () -> Unit,
     onDelete: (() -> Unit)? = null,
 ) {
     var title by remember { mutableStateOf(initial?.title.orEmpty()) }
     var author by remember { mutableStateOf(initial?.author.orEmpty()) }
+    var genre by remember { mutableStateOf(initial?.genre) }
     var totalText by remember { mutableStateOf(initial?.totalPages?.toString().orEmpty()) }
-    var finished by remember { mutableStateOf(initial?.isFinished ?: false) }
+    var publisher by remember { mutableStateOf(initial?.publisher.orEmpty()) }
+    var yearText by remember { mutableStateOf(initial?.publishedYear?.toString().orEmpty()) }
+    var status by remember { mutableStateOf(initial?.status ?: BookStatus.READING) }
+    var rating by remember { mutableStateOf(initial?.rating) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (initial == null) R.string.reading_add_book else R.string.reading_edit_book)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
@@ -63,6 +77,13 @@ fun BookDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
+                FieldLabel(R.string.reading_field_genre)
+                DropdownField(selectedLabel = if (genre == null) stringResource(R.string.common_not_set) else bookGenreLabel(genre)) { close ->
+                    DropdownMenuItem(text = { Text(stringResource(R.string.common_not_set)) }, onClick = { genre = null; close() })
+                    BookGenre.entries.forEach { option ->
+                        DropdownMenuItem(text = { Text(bookGenreLabel(option)) }, onClick = { genre = option; close() })
+                    }
+                }
                 OutlinedTextField(
                     value = totalText,
                     onValueChange = { totalText = digitsOnly(it) },
@@ -71,14 +92,27 @@ fun BookDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
-                if (initial != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-                        Checkbox(checked = finished, onCheckedChange = { finished = it })
-                        Text(stringResource(R.string.reading_finished))
-                    }
-                }
+                OutlinedTextField(
+                    value = publisher,
+                    onValueChange = { publisher = it },
+                    label = { Text(stringResource(R.string.reading_field_publisher)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                OutlinedTextField(
+                    value = yearText,
+                    onValueChange = { yearText = it.filter { c -> c.isDigit() }.take(4) },
+                    label = { Text(stringResource(R.string.reading_field_year)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                FieldLabel(R.string.reading_field_status)
+                BookStatusToggle(status, onSelect = { status = it })
+                FieldLabel(R.string.reading_field_rating)
+                RatingStars(rating, starSize = 32.dp, onRate = { rating = it })
                 if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
+                    TextButton(onClick = onDelete, modifier = Modifier.padding(top = 8.dp)) {
                         Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
                         Text(
                             stringResource(R.string.reading_delete_book),
@@ -93,16 +127,47 @@ fun BookDialog(
             TextButton(
                 enabled = title.isNotBlank(),
                 onClick = {
+                    val base = initial ?: Book(title = "", coverColor = Random.nextInt(coverPalette.size))
                     onConfirm(
-                        title.trim(),
-                        author.trim().ifEmpty { null },
-                        totalText.toIntOrNull()?.takeIf { it > 0 },
-                        finished,
+                        base.copy(
+                            title = title.trim(),
+                            author = author.trim().ifEmpty { null },
+                            genre = genre,
+                            totalPages = totalText.toIntOrNull()?.takeIf { it > 0 },
+                            publisher = publisher.trim().ifEmpty { null },
+                            publishedYear = yearText.toIntOrNull()?.takeIf { it > 0 },
+                            rating = rating,
+                        ).withStatus(status),
                     )
                 },
             ) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+    )
+}
+
+@Composable
+private fun FieldLabel(labelRes: Int) {
+    Text(
+        stringResource(labelRes),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+    )
+}
+
+/** Want to read / Reading / Finished — shared by the book form and the detail page. */
+@Composable
+fun BookStatusToggle(status: BookStatus, onSelect: (BookStatus) -> Unit) {
+    SegmentedToggle(
+        options = listOf(
+            SegmentedToggleOption(BookStatus.WANT_TO_READ, bookStatusLabel(BookStatus.WANT_TO_READ)),
+            SegmentedToggleOption(BookStatus.READING, bookStatusLabel(BookStatus.READING)),
+            SegmentedToggleOption(BookStatus.FINISHED, bookStatusLabel(BookStatus.FINISHED)),
+        ),
+        selected = status,
+        onSelect = onSelect,
+        textStyle = MaterialTheme.typography.bodySmall,
     )
 }
 

@@ -34,14 +34,21 @@ class BookDetailViewModel(
         .map { items -> items.filter { it.session.bookId == bookId } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun updateBook(book: Book, title: String, author: String?, totalPages: Int?, isFinished: Boolean) {
-        viewModelScope.launch {
-            bookDao.update(book.copy(title = title, author = author, totalPages = totalPages, isFinished = isFinished))
-        }
+    fun updateBook(book: Book) {
+        viewModelScope.launch { bookDao.update(book) }
     }
 
-    fun setFinished(book: Book, finished: Boolean) {
-        viewModelScope.launch { bookDao.update(book.copy(isFinished = finished)) }
+    fun setStatus(book: Book, status: BookStatus) = updateBook(book.withStatus(status))
+
+    fun setRating(book: Book, rating: Int?) = updateBook(book.copy(rating = rating))
+
+    /** Blank notes save as null. */
+    fun setNotes(book: Book, notes: String) = updateBook(book.copy(notes = notes.trim().ifEmpty { null }))
+
+    /** A different random cover colour than the current one. */
+    fun shuffleColour(book: Book) {
+        val next = (coverPalette.indices - book.coverColor.mod(coverPalette.size)).random()
+        updateBook(book.copy(coverColor = next))
     }
 
     /** Sessions keep their pages and time; they just lose the link (SET_NULL). */

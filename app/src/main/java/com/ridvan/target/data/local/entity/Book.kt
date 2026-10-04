@@ -30,4 +30,14 @@ data class Book(
     val totalPages: Int? = null,
     val isFinished: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
+    val genre: BookGenre? = null,
+    val publisher: String? = null,
+    val publishedYear: Int? = null,
+    /** 1–5 stars, null when unrated. */
+    val rating: Int? = null,
+    val notes: String? = null,
+    /** On the "Want to read" shelf. Status is derived: finished wins, then want-to-read, else reading (see bookStatus()). */
+    val isWantToRead: Boolean = false,
+    /** Index into the cover palette (ui/reading/BookCover.kt) — picked at random when the book is added. */
+    val coverColor: Int = 0,
 )

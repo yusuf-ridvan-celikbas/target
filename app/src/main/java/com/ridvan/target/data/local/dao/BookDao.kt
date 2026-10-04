@@ -28,4 +28,8 @@ interface BookDao {
 
     @Query("UPDATE books SET isFinished = 1 WHERE id = :id")
     suspend fun markFinished(id: Long)
+
+    /** Reading a "Want to read" book moves it to Reading. */
+    @Query("UPDATE books SET isWantToRead = 0 WHERE id = :id")
+    suspend fun clearWantToRead(id: Long)
 }

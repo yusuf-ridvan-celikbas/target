@@ -4,6 +4,8 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.text.style.TextOverflow
 import com.ridvan.target.ui.reading.bookProgressLabel
+import com.ridvan.target.ui.reading.BookCover
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Timer
@@ -401,33 +403,37 @@ private fun ReadingSection(
     studied.todayReading.forEach { item -> StudiedPreviewRow(item, onClick = { onSessionClick(item) }) }
     val book = reading.currentBook
     if (book != null) {
-        Column(
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
                 .clickable { onBookClick(book.book.id) },
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    book.book.title,
-                    textDecoration = TextDecoration.Underline,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    bookProgressLabel(book),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-            book.percent?.let { percent ->
-                LinearProgressIndicator(
-                    progress = { percent / 100f },
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                )
+            BookCover(book.book, percent = book.percent, compact = true, elevation = 2.dp, modifier = Modifier.width(32.dp))
+            Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        book.book.title,
+                        textDecoration = TextDecoration.Underline,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        bookProgressLabel(book),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+                book.percent?.let { percent ->
+                    LinearProgressIndicator(
+                        progress = { percent / 100f },
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                    )
+                }
             }
         }
     }

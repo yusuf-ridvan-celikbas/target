@@ -2,6 +2,7 @@ package com.ridvan.target.ui.navigation
 
 import com.ridvan.target.ui.reading.BookDetailScreen
 import com.ridvan.target.ui.reading.ReadingScreen
+import com.ridvan.target.ui.reading.LibraryScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -368,6 +369,13 @@ fun TargetNavHost() {
         composable<ReadingRoute> {
             ReadingScreen(
                 shellNavigation = shellNavigation,
+                onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
+                onOpenLibrary = { navController.navigate(LibraryRoute) },
+            )
+        }
+        composable<LibraryRoute> {
+            LibraryScreen(
+                onBack = { navController.popBackStack() },
                 onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
             )
         }

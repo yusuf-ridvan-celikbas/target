@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +59,7 @@ private data class ReadingBucket(val label: String, val pages: Int)
 fun ReadingScreen(
     shellNavigation: ShellNavigation,
     onBookClick: (Long) -> Unit,
+    onOpenLibrary: () -> Unit,
     viewModel: ReadingViewModel = viewModel(),
 ) {
     val books by viewModel.books.collectAsStateWithLifecycle()
@@ -97,18 +100,7 @@ fun ReadingScreen(
             ChartCard(period, sessions)
 
             Spacer(Modifier.height(16.dp))
-            Text(stringResource(R.string.label_books), style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            if (books.isEmpty()) {
-                Text(stringResource(R.string.reading_no_books), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else {
-                GroupedCard {
-                    books.forEachIndexed { index, progress ->
-                        BookRow(progress, onClick = { onBookClick(progress.book.id) })
-                        if (index < books.lastIndex) HorizontalDivider()
-                    }
-                }
-            }
+            LibraryCard(books, onOpenLibrary = onOpenLibrary, onBookClick = onBookClick)
             // Room for the FAB over the last row.
             Spacer(Modifier.height(72.dp))
         }
@@ -117,8 +109,8 @@ fun ReadingScreen(
     if (showAddBook) {
         BookDialog(
             initial = null,
-            onConfirm = { title, author, totalPages, _ ->
-                viewModel.addBook(title, author, totalPages)
+            onConfirm = { book ->
+                viewModel.addBook(book)
                 showAddBook = false
             },
             onDismiss = { showAddBook = false },
@@ -230,41 +222,42 @@ private fun ChartCard(period: ReadingPeriod, sessions: List<FocusSession>) {
     }
 }
 
+/** A peek at the library: the books being read on one shelf (or the latest added), tap the header for all of them. */
 @Composable
-private fun BookRow(progress: BookProgress, onClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp),
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(progress.book.title, style = MaterialTheme.typography.bodyLarge)
-            progress.book.author?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+private fun LibraryCard(books: List<BookProgress>, onOpenLibrary: () -> Unit, onBookClick: (Long) -> Unit) {
+    GroupedCard {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenLibrary).padding(16.dp),
+        ) {
+            Icon(Icons.Filled.LocalLibrary, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Text(
-                if (progress.book.isFinished) {
-                    "${bookProgressLabel(progress)} · ${stringResource(R.string.reading_finished)}"
-                } else {
-                    bookProgressLabel(progress)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.padding(top = 2.dp),
+                stringResource(R.string.library_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f).padding(start = 12.dp),
             )
-            progress.percent?.let { percent ->
-                LinearProgressIndicator(
-                    progress = { percent / 100f },
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                )
-            }
+            Text(
+                pluralStringResource(R.plurals.library_card_count, books.size, books.size),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
-        Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 8.dp),
-        )
+        if (books.isEmpty()) {
+            Text(
+                stringResource(R.string.reading_no_books),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            )
+        } else {
+            val reading = books.filter { it.book.status == BookStatus.READING }
+            val preview = reading.ifEmpty { books.sortedByDescending { it.book.createdAt } }.take(BOOKS_PER_SHELF)
+            BookShelf(preview, onBookClick = onBookClick, modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
+        }
     }
 }
 

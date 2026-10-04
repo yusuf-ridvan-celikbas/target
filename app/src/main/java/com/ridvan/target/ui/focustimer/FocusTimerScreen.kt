@@ -3,6 +3,7 @@ package com.ridvan.target.ui.focustimer
 import com.ridvan.target.ui.reading.BookDialog
 import com.ridvan.target.ui.reading.BookProgress
 import com.ridvan.target.ui.reading.ReadingPagesDialog
+import com.ridvan.target.ui.reading.BookCover
 import com.ridvan.target.ui.reading.bookProgressLabel
 import androidx.compose.material.icons.filled.Add
 import android.view.WindowManager
@@ -257,8 +258,8 @@ fun FocusTimerScreen(
     if (showAddBook) {
         BookDialog(
             initial = null,
-            onConfirm = { title, author, totalPages, _ ->
-                viewModel.addBook(title, author, totalPages) { selectedBookId = it }
+            onConfirm = { book ->
+                viewModel.addBook(book) { selectedBookId = it }
                 showAddBook = false
             },
             onDismiss = { showAddBook = false },
@@ -721,7 +722,7 @@ private fun HistorySection(
 /** A rounded, tinted box with a down arrow (flips up while open) so the picker reads as tappable. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DropdownField(selectedLabel: String, items: @Composable (closeMenu: () -> Unit) -> Unit) {
+internal fun DropdownField(selectedLabel: String, items: @Composable (closeMenu: () -> Unit) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val arrowRotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "dropdownArrow")
     // The menu matches the box's measured width instead of wrapping its items.
@@ -895,6 +896,9 @@ private fun BookCard(
                 DropdownField(selectedLabel = selected?.book?.title ?: stringResource(R.string.common_select)) { closeMenu ->
                     readable.forEach { progress ->
                         DropdownMenuItem(
+                            leadingIcon = {
+                                BookCover(progress.book, compact = true, elevation = 1.dp, modifier = Modifier.width(26.dp))
+                            },
                             text = {
                                 Column {
                                     Text(progress.book.title, style = MaterialTheme.typography.bodyLarge)

@@ -2,9 +2,15 @@ package com.ridvan.target.ui.reading
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Shuffle
+import com.ridvan.target.ui.focustimer.NotesDialog
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -53,6 +59,7 @@ fun BookDetailScreen(
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
     var showEdit by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
+    var showNotes by remember { mutableStateOf(false) }
     var pendingSessionDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
 
     Scaffold(
@@ -86,24 +93,59 @@ fun BookDetailScreen(
         ) {
             GroupedCard {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    book.author?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    Text(bookProgressLabel(current), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 4.dp))
+                    Row {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(120.dp)) {
+                            BookCover(book, percent = current.percent, modifier = Modifier.fillMaxWidth())
+                            TextButton(onClick = { viewModel.shuffleColour(book) }) {
+                                Icon(Icons.Filled.Shuffle, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Text(
+                                    stringResource(R.string.book_shuffle_colour),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(start = 4.dp),
+                                )
+                            }
+                        }
+                        Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
+                            Text(book.title, style = MaterialTheme.typography.titleLarge)
+                            book.author?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 2.dp)) }
+                            book.genre?.let {
+                                Text(
+                                    bookGenreLabel(it),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
+                            val details = listOfNotNull(
+                                book.publisher,
+                                book.publishedYear?.toString(),
+                                book.totalPages?.let { stringResource(R.string.book_pages_count, it) },
+                            )
+                            if (details.isNotEmpty()) {
+                                Text(
+                                    details.joinToString(" · "),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
+                            RatingStars(
+                                book.rating,
+                                starSize = 28.dp,
+                                onRate = { viewModel.setRating(book, it) },
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    BookStatusToggle(book.status, onSelect = { viewModel.setStatus(book, it) })
+                    Text(bookProgressLabel(current), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
                     current.percent?.let { percent ->
                         LinearProgressIndicator(
                             progress = { percent / 100f },
                             color = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                         )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-                        Text(
-                            stringResource(if (book.isFinished) R.string.reading_finished else R.string.reading_in_progress),
-                            color = if (book.isFinished) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
-                        )
-                        TextButton(onClick = { viewModel.setFinished(book, !book.isFinished) }) {
-                            Text(stringResource(if (book.isFinished) R.string.reading_mark_unfinished else R.string.reading_mark_finished))
-                        }
                     }
                 }
             }
@@ -125,6 +167,20 @@ fun BookDetailScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                }
+            }
+
+            GroupedCard(modifier = Modifier.padding(top = 12.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.book_notes_title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                        TextButton(onClick = { showNotes = true }) { Text(stringResource(R.string.focus_session_edit)) }
+                    }
+                    Text(
+                        book.notes ?: stringResource(R.string.book_notes_empty),
+                        color = if (book.notes == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
                 }
             }
 
@@ -154,11 +210,23 @@ fun BookDetailScreen(
     if (showEdit && current != null) {
         BookDialog(
             initial = current.book,
-            onConfirm = { title, author, totalPages, finished ->
-                viewModel.updateBook(current.book, title, author, totalPages, finished)
+            onConfirm = { book ->
+                viewModel.updateBook(book)
                 showEdit = false
             },
             onDismiss = { showEdit = false },
+        )
+    }
+    if (showNotes && current != null) {
+        NotesDialog(
+            initial = current.book.notes.orEmpty(),
+            title = stringResource(R.string.book_notes_title),
+            hint = stringResource(R.string.book_notes_hint),
+            onConfirm = { text ->
+                viewModel.setNotes(current.book, text)
+                showNotes = false
+            },
+            onDismiss = { showNotes = false },
         )
     }
     if (showDelete && current != null) {

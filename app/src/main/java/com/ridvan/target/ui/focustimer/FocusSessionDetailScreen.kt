@@ -424,16 +424,22 @@ internal fun <T> PickerField(label: String, selectedLabel: String, options: List
 }
 
 @Composable
-private fun NotesDialog(initial: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun NotesDialog(
+    initial: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+    title: String = stringResource(R.string.focus_session_notes_section),
+    hint: String = stringResource(R.string.focus_session_notes_hint),
+) {
     var text by remember { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.focus_session_notes_section)) },
+        title = { Text(title) },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                placeholder = { Text(stringResource(R.string.focus_session_notes_hint)) },
+                placeholder = { Text(hint) },
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth().heightIn(max = 280.dp).imePadding(),
             )

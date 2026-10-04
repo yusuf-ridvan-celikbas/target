@@ -79,6 +79,7 @@ class FocusHistoryViewModel(
         val uid = userId ?: return
         viewModelScope.launch {
             focusSessionDao.insert(form.toNewSession(uid))
+            form.bookId?.let { bookDao.clearWantToRead(it) }
             if (form.finishesBook && form.bookId != null) bookDao.markFinished(form.bookId)
         }
     }

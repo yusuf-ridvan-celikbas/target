@@ -372,6 +372,7 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         // rescheduleNotifications), rather than needing two different code paths here.
         CoroutineScope(Dispatchers.IO).launch {
             val id = focusSessionDao.insert(focusSession)
+            session.bookId?.let { bookDao.clearWantToRead(it) }
             // A reading session ends by asking which page was reached (not when the screen is torn down).
             if (askForPage && session.bookId != null) {
                 _pendingPageEntry.value = PendingPageEntry(id, session.bookId, session.bookTitle, session.startPage ?: 0, session.totalPages)
@@ -391,17 +392,16 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         _pendingPageEntry.value = null
     }
 
-    fun addBook(title: String, author: String?, totalPages: Int?, onCreated: (Long) -> Unit) {
+    fun addBook(book: Book, onCreated: (Long) -> Unit) {
         val uid = userId ?: return
-        viewModelScope.launch {
-            onCreated(bookDao.insert(Book(userId = uid, title = title, author = author, totalPages = totalPages)))
-        }
+        viewModelScope.launch { onCreated(bookDao.insert(book.copy(userId = uid))) }
     }
 
     fun addManualSession(form: ManualFocusSessionForm) {
         val uid = userId ?: return
         viewModelScope.launch {
             focusSessionDao.insert(form.toNewSession(uid))
+            form.bookId?.let { bookDao.clearWantToRead(it) }
             if (form.finishesBook && form.bookId != null) bookDao.markFinished(form.bookId)
         }
     }

@@ -495,3 +495,18 @@ val MIGRATION_22_23 = object : Migration(22, 23) {
         db.execSQL("ALTER TABLE focus_sessions ADD COLUMN endPage INTEGER")
     }
 }
+
+val MIGRATION_23_24 = object : Migration(23, 24) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Library: genre, publisher/year, rating, notes, a want-to-read status and a generated cover colour.
+        db.execSQL("ALTER TABLE books ADD COLUMN genre TEXT")
+        db.execSQL("ALTER TABLE books ADD COLUMN publisher TEXT")
+        db.execSQL("ALTER TABLE books ADD COLUMN publishedYear INTEGER")
+        db.execSQL("ALTER TABLE books ADD COLUMN rating INTEGER")
+        db.execSQL("ALTER TABLE books ADD COLUMN notes TEXT")
+        db.execSQL("ALTER TABLE books ADD COLUMN isWantToRead INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE books ADD COLUMN coverColor INTEGER NOT NULL DEFAULT 0")
+        // Existing books get a random cover colour too (12 = the cover palette's size).
+        db.execSQL("UPDATE books SET coverColor = abs(random()) % 12")
+    }
+}

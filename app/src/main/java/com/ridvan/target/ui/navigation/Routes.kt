@@ -136,3 +136,7 @@ object ReadingRoute
 
 @Serializable
 data class BookDetailRoute(val bookId: Long)
+
+/** Every book on wooden shelves — a drill-down from the Reading page. */
+@Serializable
+object LibraryRoute
