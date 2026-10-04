@@ -172,7 +172,7 @@ fun BookDetailScreen(
                     )
                     speed?.let {
                         Text(
-                            stringResource(R.string.reading_speed_value, String.format(Locale.getDefault(), "%.1f", it)),
+                            stringResource(R.string.reading_speed_value, formatRate(it)),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

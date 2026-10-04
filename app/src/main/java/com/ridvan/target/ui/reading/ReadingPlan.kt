@@ -39,7 +39,6 @@ import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.focustimer.localDayToUtcMillis
 import com.ridvan.target.ui.focustimer.utcMillisToLocalDay
-import java.util.Locale
 
 private val PACE_CHOICES = listOf(10, 20, 30, 50)
 
@@ -77,7 +76,7 @@ fun ReadingPlanCard(
             val perDay = pace.pagesPerDay
             Text(
                 if (perDay != null) {
-                    stringResource(R.string.reading_forecast, oneDecimal(perDay), formatDate(finishDate(remaining, perDay, today)))
+                    stringResource(R.string.reading_forecast, formatRate(perDay), formatDate(finishDate(remaining, perDay, today)))
                 } else {
                     stringResource(R.string.reading_forecast_none)
                 },
@@ -280,4 +279,3 @@ private fun ResultLines(first: String, minutes: Int?) {
     }
 }
 
-private fun oneDecimal(value: Double): String = String.format(Locale.getDefault(), "%.1f", value)

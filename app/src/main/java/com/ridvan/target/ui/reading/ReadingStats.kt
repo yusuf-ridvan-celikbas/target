@@ -54,3 +54,9 @@ fun bookProgressFlow(bookDao: BookDao, focusSessionDao: FocusSessionDao, userId:
 
 /** Pages per hour, or null with no reading time yet. */
 fun pagesPerHour(pages: Int, minutes: Int): Double? = if (minutes > 0) pages * 60.0 / minutes else null
+
+/** A reading rate to one decimal, without a trailing ".0" for whole numbers: "30", "18.3" (locale decimal mark). */
+fun formatRate(value: Double): String {
+    val tenths = kotlin.math.round(value * 10).toLong()
+    return if (tenths % 10 == 0L) (tenths / 10).toString() else String.format(java.util.Locale.getDefault(), "%.1f", tenths / 10.0)
+}

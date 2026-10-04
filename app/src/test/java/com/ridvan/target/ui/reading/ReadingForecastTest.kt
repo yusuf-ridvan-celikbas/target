@@ -118,4 +118,18 @@ class ReadingForecastTest {
         assertNull(dailyGoal(book.copy(goalDate = null), emptyList(), today))
         assertNull(dailyGoal(book.copy(isFinished = true), emptyList(), today))
     }
+
+    @Test
+    fun `rates drop the trailing zero for whole numbers`() {
+        val saved = java.util.Locale.getDefault()
+        java.util.Locale.setDefault(java.util.Locale.US)
+        try {
+            assertEquals("30", formatRate(30.0))
+            assertEquals("30", formatRate(29.96))
+            assertEquals("18.3", formatRate(18.33))
+            assertEquals("0.5", formatRate(0.5))
+        } finally {
+            java.util.Locale.setDefault(saved)
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.ridvan.target.ui.statistics
 
 import com.ridvan.target.ui.reading.bookProgressLabel
+import com.ridvan.target.ui.reading.formatRate
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -413,7 +414,7 @@ private fun ReadingStats(
         )
         summary.pagesPerHour?.let {
             Text(
-                stringResource(R.string.stats_reading_speed, "%.1f".format(it)),
+                stringResource(R.string.stats_reading_speed, formatRate(it)),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 4.dp),
             )

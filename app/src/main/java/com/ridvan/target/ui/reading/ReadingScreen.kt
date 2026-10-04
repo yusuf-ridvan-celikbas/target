@@ -136,7 +136,7 @@ private fun SummaryCard(sessions: List<FocusSession>, finishedBooks: Int) {
             Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
                 StatCell(
                     stringResource(R.string.reading_stat_speed),
-                    speed?.let { stringResource(R.string.reading_speed_value, String.format(Locale.getDefault(), "%.1f", it)) } ?: "—",
+                    speed?.let { stringResource(R.string.reading_speed_value, formatRate(it)) } ?: "—",
                     Modifier.weight(1f),
                 )
                 StatCell(stringResource(R.string.reading_stat_sessions), sessions.size.toString(), Modifier.weight(1f))
