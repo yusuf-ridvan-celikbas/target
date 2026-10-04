@@ -122,22 +122,28 @@ fun PlannerHomeScreen(
                 }
             }
 
-            // Total studied across the shown period (Month view drops the neighbouring months' grid days).
-            val periodStudied = agendaItems.filterIsInstance<PlannerAgendaItem.Studied>().filter {
+            // Totals across the shown period (Month view drops the neighbouring months' grid days),
+            // with reading kept apart from study time.
+            val (periodReading, periodStudied) = agendaItems.filterIsInstance<PlannerAgendaItem.Studied>().filter {
                 viewMode != PlannerViewMode.MONTH || (it.date.month == anchorDate.month && it.date.year == anchorDate.year)
-            }
+            }.partition { it.isReading }
             if (periodStudied.isNotEmpty()) {
-                val minutes = periodStudied.sumOf { it.studiedMinutes }
-                Text(
+                PeriodTotalLine(
                     stringResource(
                         R.string.planner_period_studied_total,
-                        stringResource(R.string.duration_format, minutes / 60, minutes % 60),
+                        durationText(periodStudied.sumOf { it.studiedMinutes }),
                         periodStudied.size,
                     ),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (periodReading.isNotEmpty()) {
+                PeriodTotalLine(
+                    stringResource(
+                        R.string.planner_period_read_total,
+                        durationText(periodReading.sumOf { it.studiedMinutes }),
+                        periodReading.sumOf { it.pagesRead() },
+                        periodReading.size,
+                    ),
                 )
             }
 
@@ -222,4 +228,15 @@ private fun periodLabel(mode: PlannerViewMode, anchor: LocalDate): String = when
     }
     PlannerViewMode.MONTH -> anchor.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
     PlannerViewMode.YEAR -> anchor.year.toString()
+}
+
+@Composable
+private fun PeriodTotalLine(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.tertiary,
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }

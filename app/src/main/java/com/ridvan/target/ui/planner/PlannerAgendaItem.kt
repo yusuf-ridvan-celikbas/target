@@ -3,6 +3,7 @@ package com.ridvan.target.ui.planner
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
 import com.ridvan.target.data.local.entity.PlannerEvent
+import com.ridvan.target.ui.reading.isReading
 import java.time.LocalDate
 
 /**
@@ -39,6 +40,8 @@ sealed interface PlannerAgendaItem {
     sealed interface Studied : PlannerAgendaItem {
         val minuteOfDay: Int
         val studiedMinutes: Int
+        /** A Focus session spent reading a book — kept apart from study time everywhere it's totalled. */
+        val isReading: Boolean get() = false
     }
 
     data class FocusSessionEntry(
@@ -47,6 +50,7 @@ sealed interface PlannerAgendaItem {
         override val minuteOfDay: Int,
     ) : Studied {
         override val studiedMinutes: Int get() = item.session.totalWorkMinutes
+        override val isReading: Boolean get() = item.session.isReading
     }
 
     data class PracticeLogEntry(

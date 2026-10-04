@@ -176,7 +176,7 @@ private fun PlannerPreviewCard(
                 }
             }
             StudiedSection(studied, onStudiedClick)
-            reading?.let { ReadingSection(studied, it, onBookClick, onOpenReading) }
+            reading?.let { ReadingSection(studied, it, onBookClick, onOpenReading, onStudiedClick) }
         }
     }
 }
@@ -296,7 +296,7 @@ private fun UpcomingEventRow(event: UpcomingEvent, onClick: () -> Unit) {
     }
 }
 
-/** What was actually studied today (Focus + Practice Sessions), with today's and this week's totals. */
+/** What was actually studied today (Focus + Practice Sessions, reading excluded), with today's and this week's totals. */
 @Composable
 private fun StudiedSection(studied: StudiedPreview, onItemClick: (PlannerAgendaItem.Studied) -> Unit) {
     HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
@@ -329,7 +329,7 @@ private fun StudiedSection(studied: StudiedPreview, onItemClick: (PlannerAgendaI
 private fun StudiedPreviewRow(item: PlannerAgendaItem.Studied, onClick: () -> Unit) {
     val (icon, label, startMillis) = when (item) {
         is PlannerAgendaItem.FocusSessionEntry -> Triple(
-            Icons.Filled.Timer,
+            if (item.isReading) Icons.Filled.AutoStories else Icons.Filled.Timer,
             focusSessionTitle(item.item),
             item.item.session.startedAt,
         )
@@ -378,6 +378,7 @@ private fun ReadingSection(
     reading: HomeReading,
     onBookClick: (Long) -> Unit,
     onOpenReading: () -> Unit,
+    onSessionClick: (PlannerAgendaItem.Studied) -> Unit,
 ) {
     HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
     Row(
@@ -386,17 +387,18 @@ private fun ReadingSection(
     ) {
         Icon(Icons.Filled.AutoStories, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
         Text(
-            stringResource(R.string.home_reading_today, studied.todayPages),
+            stringResource(R.string.home_reading_today, studied.todayPages, durationText(studied.todayReadingMinutes)),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f).padding(start = 12.dp),
         )
         Text(
-            stringResource(R.string.home_reading_week, studied.weekPages),
+            stringResource(R.string.home_reading_week, studied.weekPages, durationText(studied.weekReadingMinutes)),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+    studied.todayReading.forEach { item -> StudiedPreviewRow(item, onClick = { onSessionClick(item) }) }
     val book = reading.currentBook
     if (book != null) {
         Column(

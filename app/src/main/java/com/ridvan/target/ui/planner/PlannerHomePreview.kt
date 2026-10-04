@@ -56,11 +56,15 @@ fun upcomingEventOccurrences(
         .take(maxItems)
 }
 
-/** Home's "Studied" section: today's sessions (in time order) plus today's and this week's totals. */
+/** Home's "Studied" and "Reading" sections: today's sessions (in time order) plus today's and this
+ *  week's totals, with reading sessions kept apart from study time. */
 data class StudiedPreview(
     val today: List<PlannerAgendaItem.Studied>,
     val todayMinutes: Int,
     val weekMinutes: Int,
+    val todayReading: List<PlannerAgendaItem.Studied> = emptyList(),
+    val todayReadingMinutes: Int = 0,
+    val weekReadingMinutes: Int = 0,
     val todayPages: Int = 0,
     val weekPages: Int = 0,
 )
@@ -70,18 +74,23 @@ fun studiedPreview(
     practiceLogs: List<PracticeLogPlannerRow>,
 ): StudiedPreview {
     val today = LocalDate.now()
-    val week = studiedItemsInRange(focusSessions, practiceLogs, mondayOf(today)..today)
-    val todayItems = week.filter { it.date == today }.sortedBy { it.minuteOfDay }
+    val (weekReading, weekStudy) = studiedItemsInRange(focusSessions, practiceLogs, mondayOf(today)..today)
+        .partition { it.isReading }
+    val todayStudy = weekStudy.filter { it.date == today }.sortedBy { it.minuteOfDay }
+    val todayReading = weekReading.filter { it.date == today }.sortedBy { it.minuteOfDay }
     return StudiedPreview(
-        today = todayItems,
-        todayMinutes = todayItems.sumOf { it.studiedMinutes },
-        weekMinutes = week.sumOf { it.studiedMinutes },
-        todayPages = todayItems.sumOf { it.pagesRead() },
-        weekPages = week.sumOf { it.pagesRead() },
+        today = todayStudy,
+        todayMinutes = todayStudy.sumOf { it.studiedMinutes },
+        weekMinutes = weekStudy.sumOf { it.studiedMinutes },
+        todayReading = todayReading,
+        todayReadingMinutes = todayReading.sumOf { it.studiedMinutes },
+        weekReadingMinutes = weekReading.sumOf { it.studiedMinutes },
+        todayPages = todayReading.sumOf { it.pagesRead() },
+        weekPages = weekReading.sumOf { it.pagesRead() },
     )
 }
 
-private fun PlannerAgendaItem.Studied.pagesRead(): Int =
+internal fun PlannerAgendaItem.Studied.pagesRead(): Int =
     (this as? PlannerAgendaItem.FocusSessionEntry)?.item?.session?.pagesRead() ?: 0
 
 /** Home's Reading line: the book being read most recently (unfinished), if any. */

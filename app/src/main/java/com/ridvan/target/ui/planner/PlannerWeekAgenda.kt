@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -84,15 +85,19 @@ fun DayAgendaCard(
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
         ) {
             Text(dayHeaderLabel(date), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            // How much was actually studied that day (Focus work time + Practice Session time).
-            val studied = items.filterIsInstance<PlannerAgendaItem.Studied>()
-            if (studied.isNotEmpty()) {
-                val minutes = studied.sumOf { it.studiedMinutes }
+            // How much was studied (Focus work + Practice Sessions) and read that day — kept apart.
+            val (reading, studied) = items.filterIsInstance<PlannerAgendaItem.Studied>().partition { it.isReading }
+            val totals = listOfNotNull(
+                studied.takeIf { it.isNotEmpty() }?.let {
+                    stringResource(R.string.planner_day_studied_total, durationText(it.sumOf { s -> s.studiedMinutes }))
+                },
+                reading.takeIf { it.isNotEmpty() }?.let {
+                    stringResource(R.string.planner_day_read_total, durationText(it.sumOf { s -> s.studiedMinutes }))
+                },
+            )
+            if (totals.isNotEmpty()) {
                 Text(
-                    stringResource(
-                        R.string.planner_day_studied_total,
-                        stringResource(R.string.duration_format, minutes / 60, minutes % 60),
-                    ),
+                    totals.joinToString(" · "),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.tertiary,
                 )
@@ -135,13 +140,14 @@ private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
     EXAMS(R.string.planner_group_exams, Icons.AutoMirrored.Filled.Assignment),
     PLANS(R.string.planner_group_plans, Icons.Filled.Event),
     FOCUS(R.string.planner_group_focus, Icons.Filled.Timer),
+    READING(R.string.planner_group_reading, Icons.Filled.AutoStories),
     PRACTICE(R.string.planner_group_practice, Icons.Filled.Quiz),
 }
 
 private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
     is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
     is PlannerAgendaItem.EventOccurrence -> AgendaGroup.PLANS
-    is PlannerAgendaItem.FocusSessionEntry -> AgendaGroup.FOCUS
+    is PlannerAgendaItem.FocusSessionEntry -> if (item.isReading) AgendaGroup.READING else AgendaGroup.FOCUS
     is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE
 }
 
@@ -153,7 +159,7 @@ private fun AgendaGroupHeader(
     onToggle: () -> Unit,
 ) {
     val label = stringResource(group.labelRes)
-    val studiedGroup = group == AgendaGroup.FOCUS || group == AgendaGroup.PRACTICE
+    val studiedGroup = group == AgendaGroup.FOCUS || group == AgendaGroup.READING || group == AgendaGroup.PRACTICE
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -256,7 +262,7 @@ private fun AgendaRow(
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onItemClick(item) },
-                leadingContent = { StudiedIcon(Icons.Filled.Timer) },
+                leadingContent = { StudiedIcon(if (item.isReading) Icons.Filled.AutoStories else Icons.Filled.Timer) },
                 headlineContent = { Text(focusSessionTitle(item.item)) },
                 supportingContent = {
                     Column {
@@ -327,6 +333,9 @@ private fun StudyLinkLine(
         },
     )
 }
+
+@Composable
+internal fun durationText(minutes: Int): String = stringResource(R.string.duration_format, minutes / 60, minutes % 60)
 
 /** Not private — reused by PlannerHomePreview.kt's compact Home card so its "Today"/"Tomorrow"
  *  rows can show a time too, without duplicating this formatting or leaking java.time past ui/planner. */
