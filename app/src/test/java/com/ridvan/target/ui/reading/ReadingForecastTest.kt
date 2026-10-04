@@ -1,6 +1,7 @@
 package com.ridvan.target.ui.reading
 
 import com.ridvan.target.data.local.entity.Book
+import com.ridvan.target.ui.common.formatRate
 import com.ridvan.target.data.local.entity.FocusSession
 import java.util.Calendar
 import org.junit.Assert.assertEquals

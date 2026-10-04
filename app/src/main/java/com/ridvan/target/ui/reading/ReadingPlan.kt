@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.reading
 
+import com.ridvan.target.ui.common.formatRate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

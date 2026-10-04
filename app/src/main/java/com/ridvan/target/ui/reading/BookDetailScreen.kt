@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.reading
 
+import com.ridvan.target.ui.common.formatRate
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

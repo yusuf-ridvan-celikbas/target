@@ -1,7 +1,7 @@
 package com.ridvan.target.ui.statistics
 
 import com.ridvan.target.ui.reading.bookProgressLabel
-import com.ridvan.target.ui.reading.formatRate
+import com.ridvan.target.ui.common.formatRate
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -125,8 +125,8 @@ fun StatisticsScreen(
                     Text(
                         stringResource(
                             R.string.stat_pace_label,
-                            "%.1f".format(summary.minutesPerQuestion),
-                            "%.1f".format(summary.minutesPerTest),
+                            formatRate(summary.minutesPerQuestion),
+                            formatRate(summary.minutesPerTest),
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 4.dp),
@@ -172,8 +172,8 @@ fun StatisticsScreen(
                     Text(
                         stringResource(
                             R.string.stat_pace_label,
-                            "%.1f".format(examSummary.minutesPerQuestion),
-                            "%.1f".format(examSummary.minutesPerTest),
+                            formatRate(examSummary.minutesPerQuestion),
+                            formatRate(examSummary.minutesPerTest),
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 4.dp),
