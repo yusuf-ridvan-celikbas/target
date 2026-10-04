@@ -81,7 +81,7 @@ private fun spineHeight(progress: BookProgress): Dp = SPINE_MAX_HEIGHT - (progre
 /**
  * Books standing upright, side by side, wrapping onto as many shelves as needed (at most [maxRows]).
  * Tapping a spine pulls that book out — its front cover turns towards you above an empty slot.
- * Tapping the cover opens the book ([onBookClick]); tapping the empty slot puts it back.
+ * Tapping the cover opens the book ([onBookClick]) and puts it back; tapping the empty slot just puts it back.
  * Only one book is out at a time: [pulledBookId] is owned by the screen.
  */
 @Composable
@@ -193,7 +193,11 @@ private fun ShelfRow(
                         translationY = with(density) { (16.dp * (1f - progress)).toPx() }
                         alpha = progress.coerceIn(0f, 1f)
                     }
-                    .clickable { onBookClick(current.book.id) },
+                    .clickable {
+                        // The book goes back on the shelf while its page opens, so it's there on return.
+                        onPull(null)
+                        onBookClick(current.book.id)
+                    },
             )
         }
     }
