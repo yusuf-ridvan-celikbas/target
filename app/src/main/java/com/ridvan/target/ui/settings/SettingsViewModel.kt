@@ -61,6 +61,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences.setNotificationsEnabled(enabled)
     }
 
+    val readingReminderEnabled: StateFlow<Boolean> = preferences.readingReminderEnabled
+
+    fun setReadingReminderEnabled(enabled: Boolean) = preferences.setReadingReminderEnabled(enabled)
+
+    val readingReminderMinute: StateFlow<Int> = preferences.readingReminderMinute
+
+    fun setReadingReminderMinute(minuteOfDay: Int) = preferences.setReadingReminderMinute(minuteOfDay)
+
     val notificationLeadTime: StateFlow<NotificationLeadTime> = preferences.notificationLeadTime
 
     fun setNotificationLeadTime(leadTime: NotificationLeadTime) {

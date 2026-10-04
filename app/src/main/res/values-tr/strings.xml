@@ -767,4 +767,9 @@
     <string name="reading_goal_minutes_day">günde yaklaşık %1$d dk</string>
     <string name="reading_goal_custom">Özel günlük sayfa</string>
     <string name="home_reading_goal">Bugünün hedefi: %1$d / %2$d sayfa</string>
+    <string name="settings_reading_reminder">Okuma hedefi hatırlatıcısı</string>
+    <string name="settings_reading_reminder_time">Hatırlatma saati</string>
+    <string name="settings_reading_reminder_hint">Günde bir kez, yalnızca bitirme hedefi olan bir kitabın bugün için okunacak sayfası kaldıysa.</string>
+    <string name="notif_reading_title">Okuma hedefi: %1$s</string>
+    <string name="notif_reading_body">Bugün %2$d sayfadan %1$d sayfa kaldı</string>
 </resources>

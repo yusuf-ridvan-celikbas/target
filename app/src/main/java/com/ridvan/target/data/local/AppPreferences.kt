@@ -148,6 +148,26 @@ class AppPreferences(context: Context) {
         rescheduleNotifications()
     }
 
+    /** Daily reading-goal reminder (see NotificationScheduler) — on by default, at [readingReminderMinute]. */
+    private val _readingReminderEnabled = MutableStateFlow(prefs.getBoolean(KEY_READING_REMINDER_ENABLED, true))
+    val readingReminderEnabled: StateFlow<Boolean> = _readingReminderEnabled.asStateFlow()
+
+    fun setReadingReminderEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_READING_REMINDER_ENABLED, enabled).apply()
+        _readingReminderEnabled.value = enabled
+        rescheduleNotifications()
+    }
+
+    /** Minute of the day the reading-goal reminder goes off (default 20:00). */
+    private val _readingReminderMinute = MutableStateFlow(prefs.getInt(KEY_READING_REMINDER_MINUTE, DEFAULT_READING_REMINDER_MINUTE))
+    val readingReminderMinute: StateFlow<Int> = _readingReminderMinute.asStateFlow()
+
+    fun setReadingReminderMinute(minuteOfDay: Int) {
+        prefs.edit().putInt(KEY_READING_REMINDER_MINUTE, minuteOfDay).apply()
+        _readingReminderMinute.value = minuteOfDay
+        rescheduleNotifications()
+    }
+
     private fun rescheduleNotifications() {
         CoroutineScope(Dispatchers.IO).launch { NotificationScheduler.reschedule(appContext) }
     }
@@ -196,6 +216,9 @@ class AppPreferences(context: Context) {
         const val KEY_USER_ID = "current_user_id"
         const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val KEY_NOTIFICATION_LEAD_TIME = "notification_lead_time"
+        const val KEY_READING_REMINDER_ENABLED = "reading_reminder_enabled"
+        const val KEY_READING_REMINDER_MINUTE = "reading_reminder_minute"
+        const val DEFAULT_READING_REMINDER_MINUTE = 20 * 60
         const val KEY_LEGACY_FOCUS_ALARM_SOUND_URI = "focus_alarm_sound_uri"
         const val KEY_FOCUS_VIBRATION_ENABLED = "focus_vibration_enabled"
         const val NO_USER = -1L

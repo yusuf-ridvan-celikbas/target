@@ -31,7 +31,7 @@ class TargetApplication : Application() {
         // changes (login/logout/switch) aren't table writes, so those reschedule from
         // AppPreferences itself instead — see its currentUserId setter.
         database.invalidationTracker.addObserver(
-            object : InvalidationTracker.Observer("exams", "sections", "planner_events", "planner_event_completions") {
+            object : InvalidationTracker.Observer("exams", "sections", "planner_events", "planner_event_completions", "books", "focus_sessions") {
                 override fun onInvalidated(tables: Set<String>) {
                     applicationScope.launch { NotificationScheduler.reschedule(this@TargetApplication) }
                 }

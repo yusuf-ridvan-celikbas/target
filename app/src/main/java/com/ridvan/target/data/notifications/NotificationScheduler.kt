@@ -20,6 +20,10 @@ import com.ridvan.target.ui.planner.occurrencesInRange
 import com.ridvan.target.ui.planner.timeRangeLabel
 import com.ridvan.target.ui.planner.toLocalDate
 import com.ridvan.target.ui.planner.toStartOfDayMillis
+import com.ridvan.target.ui.reading.dailyGoal
+import com.ridvan.target.ui.reading.isReading
+import com.ridvan.target.ui.reading.minutesFor
+import com.ridvan.target.ui.reading.readingPace
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -50,6 +54,9 @@ object NotificationScheduler {
      *  Planner event (including a Birthday, which is always all-day), a non-sectioned Exam
      *  date, or a Section date. Not user-configurable yet — see the notifications memory. */
     private const val ALL_DAY_REMINDER_HOUR = 9
+
+    /** A reminder fires only if it came due within this many minutes (covers a late wake-up). */
+    private const val DUE_WINDOW_MINUTES = 30L
 
     /** How far ahead to look for the next occurrence — comfortably past a yearly recurrence. */
     private const val HORIZON_DAYS = 400L
@@ -102,8 +109,13 @@ object NotificationScheduler {
         val userId = app.preferences.currentUserId
         if (!app.preferences.notificationsEnabled.value || userId == null) return
 
+        // Only what came due since the alarm was armed — not every earlier reminder of the day, which
+        // would otherwise pop up again each time a later one fires.
         val now = Instant.now()
-        buildCandidates(app, userId).filter { !it.whenInstant.isAfter(now) }.forEach { showNotification(context, it) }
+        val windowStart = now.minus(java.time.Duration.ofMinutes(DUE_WINDOW_MINUTES))
+        buildCandidates(app, userId)
+            .filter { !it.whenInstant.isAfter(now) && it.whenInstant.isAfter(windowStart) }
+            .forEach { showNotification(context, it) }
 
         reschedule(context)
     }
@@ -180,7 +192,57 @@ object NotificationScheduler {
             )
         }
 
-        return eventCandidates + examCandidates + sectionCandidates
+        return eventCandidates + examCandidates + sectionCandidates + readingCandidates(app, userId, today, zone, strings)
+    }
+
+    /**
+     * One reminder per book with a finish goal, at the reading-reminder time: today's only while today's
+     * page target isn't met yet (checked again when it fires), and tomorrow's so the chain always has
+     * a next one. Nothing after the goal date, and nothing for finished books.
+     */
+    private suspend fun readingCandidates(
+        app: TargetApplication,
+        userId: Long,
+        today: LocalDate,
+        zone: ZoneId,
+        strings: Context,
+    ): List<ReminderCandidate> {
+        if (!app.preferences.readingReminderEnabled.value) return emptyList()
+        val minuteOfDay = app.preferences.readingReminderMinute.value
+        val books = app.database.bookDao().getByUserId(userId).first()
+            .filter { !it.isFinished && it.goalDate != null && it.totalPages != null }
+        if (books.isEmpty()) return emptyList()
+        val reading = app.database.focusSessionDao().getAllWithLinksByUserId(userId).first().map { it.session }.filter { it.isReading }
+        val todayStart = today.toStartOfDayMillis(zone)
+        return books.flatMap { book ->
+            val goalDay = book.goalDate!!.toLocalDate(zone)
+            val own = reading.filter { it.bookId == book.id }
+            val goal = dailyGoal(book, own, todayStart)
+            listOfNotNull(
+                today.takeIf { it <= goalDay && goal != null && !goal.passed && !goal.done }?.let { day ->
+                    val left = goal!!.remainingToday
+                    val minutes = minutesFor(left, readingPace(own, reading, todayStart).pagesPerHour)
+                    ReminderCandidate(
+                        whenInstant = day.atStartOfDay(zone).plusMinutes(minuteOfDay.toLong()).toInstant(),
+                        notificationId = notificationId("reading", book.id, day.toEpochDay()),
+                        title = strings.getString(R.string.notif_reading_title, book.title),
+                        body = listOfNotNull(
+                            strings.getString(R.string.notif_reading_body, left, goal.target),
+                            minutes?.let { strings.getString(R.string.reading_goal_minutes_left, it) },
+                        ).joinToString(" · "),
+                    )
+                },
+                // Tomorrow's is only a placeholder for scheduling — its text is rebuilt (as today's) when it fires.
+                today.plusDays(1).takeIf { it <= goalDay }?.let { day ->
+                    ReminderCandidate(
+                        whenInstant = day.atStartOfDay(zone).plusMinutes(minuteOfDay.toLong()).toInstant(),
+                        notificationId = notificationId("reading", book.id, day.toEpochDay()),
+                        title = strings.getString(R.string.notif_reading_title, book.title),
+                        body = "",
+                    )
+                },
+            )
+        }
     }
 
     private fun reminderInstant(date: LocalDate, minuteOfDay: Int?, leadMinutes: Int, zone: ZoneId): Instant =

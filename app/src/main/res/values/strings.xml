@@ -769,4 +769,9 @@
     <string name="reading_goal_minutes_day">about %1$d min a day</string>
     <string name="reading_goal_custom">Custom pages a day</string>
     <string name="home_reading_goal">Today\'s goal: %1$d / %2$d pages</string>
+    <string name="settings_reading_reminder">Reading goal reminder</string>
+    <string name="settings_reading_reminder_time">Remind me at</string>
+    <string name="settings_reading_reminder_hint">Once a day, only while a book with a finish goal still has pages to read for today.</string>
+    <string name="notif_reading_title">Reading goal: %1$s</string>
+    <string name="notif_reading_body">%1$d of %2$d pages still to read today</string>
 </resources>

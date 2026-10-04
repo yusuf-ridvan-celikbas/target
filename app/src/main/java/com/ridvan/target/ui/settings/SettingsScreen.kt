@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -84,6 +85,9 @@ fun SettingsScreen(
     val bannerColor by viewModel.bannerColor.collectAsStateWithLifecycle()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val notificationLeadTime by viewModel.notificationLeadTime.collectAsStateWithLifecycle()
+    val readingReminderEnabled by viewModel.readingReminderEnabled.collectAsStateWithLifecycle()
+    val readingReminderMinute by viewModel.readingReminderMinute.collectAsStateWithLifecycle()
+    var showReadingReminderTime by remember { mutableStateOf(false) }
     val focusSoundUris by viewModel.focusSoundUris.collectAsStateWithLifecycle()
     val focusVibrationEnabled by viewModel.focusVibrationEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -243,6 +247,44 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 8.dp),
                         )
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.settings_reading_reminder), modifier = Modifier.weight(1f))
+                            Switch(checked = readingReminderEnabled, onCheckedChange = viewModel::setReadingReminderEnabled)
+                        }
+                        if (readingReminderEnabled) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                                Text(
+                                    stringResource(R.string.settings_reading_reminder_time),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Text(
+                                    "%02d:%02d".format(readingReminderMinute / 60, readingReminderMinute % 60),
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        textDecoration = TextDecoration.Underline,
+                                    ),
+                                    modifier = Modifier.clickable { showReadingReminderTime = true },
+                                )
+                            }
+                        }
+                        Text(
+                            stringResource(R.string.settings_reading_reminder_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                        if (showReadingReminderTime) {
+                            ReadingReminderTimeDialog(
+                                initialMinute = readingReminderMinute,
+                                onConfirm = {
+                                    viewModel.setReadingReminderMinute(it)
+                                    showReadingReminderTime = false
+                                },
+                                onDismiss = { showReadingReminderTime = false },
+                            )
+                        }
                         if (!exactAlarmGranted) {
                             Text(
                                 stringResource(R.string.settings_notifications_grant_exact_alarm),
