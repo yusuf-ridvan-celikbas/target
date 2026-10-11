@@ -36,7 +36,7 @@
     <string name="hub_study_history_hint">Every focus session, with filters</string>
     <string name="hub_reading_hint">Books, pages read, your library and reading goals</string>
     <string name="label_study_group">Study</string>
-    <string name="label_focus_group">Timers</string>
+    <string name="label_focus_group">Focus</string>
     <string name="label_planner">Planner</string>
     <string name="label_exams">Exams</string>
     <string name="label_courses">Courses</string>

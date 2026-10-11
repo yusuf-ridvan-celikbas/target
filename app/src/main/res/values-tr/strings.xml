@@ -36,7 +36,7 @@
     <string name="hub_study_history_hint">Tüm odak oturumları, filtrelerle</string>
     <string name="hub_reading_hint">Kitaplar, okunan sayfalar, kitaplığınız ve okuma hedefleri</string>
     <string name="label_study_group">Çalışma</string>
-    <string name="label_focus_group">Zamanlayıcılar</string>
+    <string name="label_focus_group">Odak</string>
     <string name="label_planner">Planlayıcı</string>
     <string name="label_exams">Sınavlar</string>
     <string name="label_courses">Dersler</string>
