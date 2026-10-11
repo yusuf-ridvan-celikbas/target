@@ -524,3 +524,104 @@ val MIGRATION_25_26 = object : Migration(25, 26) {
         db.execSQL("ALTER TABLE focus_sessions ADD COLUMN isFlow INTEGER NOT NULL DEFAULT 0")
     }
 }
+
+val MIGRATION_26_27 = object : Migration(26, 27) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Trip Planner: trips plus their itinerary, bookings, packing list and expenses. Brand-new tables, no backfill.
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS trips (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                destination TEXT,
+                startDate INTEGER NOT NULL,
+                endDate INTEGER NOT NULL,
+                currency TEXT NOT NULL,
+                budgetMinor INTEGER,
+                notes TEXT,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_trips_userId ON trips(userId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS trip_activities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                tripId INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+                title TEXT NOT NULL,
+                category TEXT NOT NULL,
+                date INTEGER NOT NULL,
+                startMinuteOfDay INTEGER,
+                durationMinutes INTEGER,
+                place_name TEXT,
+                place_address TEXT,
+                place_latitude REAL,
+                place_longitude REAL,
+                notes TEXT,
+                isDone INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_trip_activities_tripId ON trip_activities(tripId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS trip_bookings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                tripId INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+                type TEXT NOT NULL,
+                title TEXT NOT NULL,
+                provider TEXT,
+                confirmationCode TEXT,
+                startDate INTEGER NOT NULL,
+                startMinuteOfDay INTEGER,
+                endDate INTEGER,
+                endMinuteOfDay INTEGER,
+                place_name TEXT,
+                place_address TEXT,
+                place_latitude REAL,
+                place_longitude REAL,
+                arrival_name TEXT,
+                arrival_address TEXT,
+                arrival_latitude REAL,
+                arrival_longitude REAL,
+                notes TEXT,
+                externalRef TEXT
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_trip_bookings_tripId ON trip_bookings(tripId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS trip_packing_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                tripId INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                isPacked INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_trip_packing_items_tripId ON trip_packing_items(tripId)")
+
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS trip_expenses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                tripId INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+                title TEXT NOT NULL,
+                amountMinor INTEGER NOT NULL,
+                category TEXT NOT NULL,
+                date INTEGER NOT NULL,
+                notes TEXT
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_trip_expenses_tripId ON trip_expenses(tripId)")
+    }
+}

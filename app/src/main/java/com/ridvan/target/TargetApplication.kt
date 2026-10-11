@@ -5,6 +5,7 @@ import androidx.room.InvalidationTracker
 import com.ridvan.target.data.local.AppPreferences
 import com.ridvan.target.data.local.TargetDatabase
 import com.ridvan.target.data.notifications.NotificationScheduler
+import com.ridvan.target.data.trips.TripLookups
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,6 +14,9 @@ import kotlinx.coroutines.launch
 class TargetApplication : Application() {
     val database: TargetDatabase by lazy { TargetDatabase.getInstance(this) }
     val preferences: AppPreferences by lazy { AppPreferences(this) }
+
+    /** Online helpers for trips — all off (the app is offline); see data/trips/TripLookups.kt. */
+    val tripLookups: TripLookups = TripLookups.OFFLINE
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -31,7 +35,7 @@ class TargetApplication : Application() {
         // changes (login/logout/switch) aren't table writes, so those reschedule from
         // AppPreferences itself instead — see its currentUserId setter.
         database.invalidationTracker.addObserver(
-            object : InvalidationTracker.Observer("exams", "sections", "planner_events", "planner_event_completions", "books", "focus_sessions") {
+            object : InvalidationTracker.Observer("exams", "sections", "planner_events", "planner_event_completions", "books", "focus_sessions", "trips", "trip_activities", "trip_bookings") {
                 override fun onInvalidated(tables: Set<String>) {
                     applicationScope.launch { NotificationScheduler.reschedule(this@TargetApplication) }
                 }
