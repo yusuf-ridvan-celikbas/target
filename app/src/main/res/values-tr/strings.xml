@@ -32,7 +32,7 @@
     <string name="hub_study_resources_hint">Soru bankaları, kitaplar, denemeler ve notlar</string>
     <string name="hub_topics_hint">Konular ve her birinde kaç test olduğu</string>
     <string name="hub_focus_timer_hint">Çalışma ve mola turları ya da elle oturum kaydı</string>
-    <string name="hub_flow_timer_hint">Çalışırken ileri sayar, molayı istediğinizde verirsiniz</string>
+    <string name="hub_flow_timer_hint">İleri sayar, mola istediğin zaman</string>
     <string name="hub_study_history_hint">Tüm odak oturumları, filtrelerle</string>
     <string name="hub_reading_hint">Kitaplar, okunan sayfalar, kitaplığınız ve okuma hedefleri</string>
     <string name="label_study_group">Çalışma</string>

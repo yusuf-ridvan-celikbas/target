@@ -32,7 +32,7 @@
     <string name="hub_study_resources_hint">Question banks, books, practice exams and notes</string>
     <string name="hub_topics_hint">Topics and how many tests each one has</string>
     <string name="hub_focus_timer_hint">Work and break rounds, or log a session by hand</string>
-    <string name="hub_flow_timer_hint">Count up while you work, take a break when you want</string>
+    <string name="hub_flow_timer_hint">Counts up, break whenever you like</string>
     <string name="hub_study_history_hint">Every focus session, with filters</string>
     <string name="hub_reading_hint">Books, pages read, your library and reading goals</string>
     <string name="label_study_group">Study</string>
