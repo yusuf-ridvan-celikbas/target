@@ -21,7 +21,20 @@
     <string name="counts_remaining_of_target">%1$d/%2$d tests · %3$d/%4$d questions</string>
     <string name="delete_confirm_generic">This removes \"%1$s\".</string>
 
-    <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
+    <!-- Navigation shell: bottom tabs + profile menu (ui/shell/AppShell.kt), hub pages (ui/hub/) -->
+    <string name="tab_home">Home</string>
+    <string name="tab_plan">Plan</string>
+    <string name="tab_stats">Stats</string>
+    <string name="cd_profile_menu">Account and settings</string>
+    <string name="hub_exams_hint">Your exams, sections and countdowns</string>
+    <string name="hub_courses_hint">Subjects grouped by exam type</string>
+    <string name="hub_languages_hint">Languages for your language exams</string>
+    <string name="hub_study_resources_hint">Question banks, books, practice exams and notes</string>
+    <string name="hub_topics_hint">Topics and how many tests each one has</string>
+    <string name="hub_focus_timer_hint">Work and break rounds, or log a session by hand</string>
+    <string name="hub_flow_timer_hint">Count up while you work, take a break when you want</string>
+    <string name="hub_study_history_hint">Every focus session, with filters</string>
+    <string name="hub_reading_hint">Books, pages read, your library and reading goals</string>
     <string name="label_study_group">Study</string>
     <string name="label_focus_group">Timers</string>
     <string name="label_planner">Planner</string>
@@ -31,7 +44,6 @@
     <string name="label_languages">Languages</string>
     <string name="label_help">Help</string>
     <string name="label_home">Home</string>
-    <string name="cd_menu">Menu</string>
     <string name="cd_more">More</string>
     <string name="cd_add">Add</string>
     <string name="label_profile">Profile</string>
@@ -415,23 +427,23 @@
 
     <!-- Help (ui/help/HelpScreen.kt) -->
     <string name="help_getting_started_title">Getting Started</string>
-    <string name="help_getting_started_body">Register creates a new account with your name and a password; Login signs into an existing one. You can add more accounts anytime and switch between them from the account menu (⋮ → Account → Switch Account) without losing any data.</string>
+    <string name="help_getting_started_body">Register creates a new account with your name and a password; Login signs into an existing one. You can add more accounts anytime and switch between them from the account icon at the top right (My Account → Switch Account) without losing any data.</string>
     <string name="help_exams_title">Exams</string>
     <string name="help_exams_body">Add an exam from the Exams screen, choosing its type (University Entrance, High School Entrance, Language, or Vocational). If the exam has sections (like TYT/AYT), courses are picked per section instead of one flat list. A Language Exam has a single language field instead of a course pool.</string>
     <string name="help_courses_title">Courses</string>
-    <string name="help_courses_body">Courses are organized by exam type — tap Courses in the menu, pick a bucket, and either browse or tap the arrow to preview and jump straight to a course. Each course can have an icon and, for University/High School/Vocational courses, a Quantitative or Verbal category for grouping.</string>
+    <string name="help_courses_body">Courses are organized by exam type — open the Study tab, tap Courses, pick a bucket, and either browse or tap the arrow to preview and jump straight to a course. Each course can have an icon and, for University/High School/Vocational courses, a Quantitative or Verbal category for grouping.</string>
     <string name="help_study_resources_title">Study Resources</string>
-    <string name="help_study_resources_body">A Study Resource is a book, question bank, or other material you\'re using for a course or language — give it a type (Question Bank, Lecture/Textbook, Practice Exam, or Lecture Notes) and an optional publisher. Reach them from a course\'s page, or browse everything at once from Study Resources in the menu.</string>
+    <string name="help_study_resources_body">A Study Resource is a book, question bank, or other material you\'re using for a course or language — give it a type (Question Bank, Lecture/Textbook, Practice Exam, or Lecture Notes) and an optional publisher. Reach them from a course\'s page, or browse everything at once from Study Resources in the Study tab.</string>
     <string name="help_topics_title">Topics</string>
     <string name="help_topics_body">For Question Bank resources, track how many tests and questions cover each topic. A topic\'s page shows the total across every Question Bank that covers it, broken down by publisher — useful for comparing how thoroughly different books cover the same topic. Reorder a resource\'s topic list by pressing and holding the handle.</string>
     <string name="help_languages_title">Languages</string>
-    <string name="help_languages_body">Languages (like French or German) work like courses but for Language Exams — manage them from the Languages menu item, or from a Language Exam\'s own page.</string>
+    <string name="help_languages_body">Languages (like French or German) work like courses but for Language Exams — manage them from Languages in the Study tab, or from a Language Exam\'s own page.</string>
     <string name="help_shortcuts_title">Quick Shortcuts</string>
     <string name="help_shortcuts_body">In Courses, Study Resources, and Topics, tap the arrow next to an exam type to expand it in place and jump straight to a course — no need to open the full list first.</string>
     <string name="help_backup_title">Backing Up a Course\'s Question Banks</string>
     <string name="help_backup_body">From a course\'s page, Export saves all its Question Bank topics and counts to a CSV file you can share or save anywhere. Import reads that same format back in — matching resources by name and publisher, updating counts for topics that already exist and adding anything new.</string>
     <string name="help_settings_title">Settings</string>
-    <string name="help_settings_body">Change the app\'s theme, switch between the white and blue launcher icons, pick English or Turkish, and turn on local reminder notifications from Settings, reached from the ⋮ menu.</string>
+    <string name="help_settings_body">Change the app\'s theme, switch between the white and blue launcher icons, pick English or Turkish, and turn on local reminder notifications from Settings, reached from the account icon at the top right.</string>
 
     <string name="cd_help_has_sections">Has sections help</string>
     <string name="help_tooltip_has_sections">Whether this exam has sections is decided now and can\'t be changed later.</string>

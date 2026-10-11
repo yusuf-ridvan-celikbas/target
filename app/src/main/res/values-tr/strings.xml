@@ -21,7 +21,20 @@
     <string name="counts_remaining_of_target">%1$d/%2$d test · %3$d/%4$d soru</string>
     <string name="delete_confirm_generic">Bu, \"%1$s\" öğesini kaldırır.</string>
 
-    <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
+    <!-- Navigation shell: bottom tabs + profile menu (ui/shell/AppShell.kt), hub pages (ui/hub/) -->
+    <string name="tab_home">Ana Sayfa</string>
+    <string name="tab_plan">Plan</string>
+    <string name="tab_stats">İstatistik</string>
+    <string name="cd_profile_menu">Hesap ve ayarlar</string>
+    <string name="hub_exams_hint">Sınavlarınız, oturumları ve geri sayımlar</string>
+    <string name="hub_courses_hint">Sınav türüne göre gruplanmış dersler</string>
+    <string name="hub_languages_hint">Dil sınavlarınız için diller</string>
+    <string name="hub_study_resources_hint">Soru bankaları, kitaplar, denemeler ve notlar</string>
+    <string name="hub_topics_hint">Konular ve her birinde kaç test olduğu</string>
+    <string name="hub_focus_timer_hint">Çalışma ve mola turları ya da elle oturum kaydı</string>
+    <string name="hub_flow_timer_hint">Çalışırken ileri sayar, molayı istediğinizde verirsiniz</string>
+    <string name="hub_study_history_hint">Tüm odak oturumları, filtrelerle</string>
+    <string name="hub_reading_hint">Kitaplar, okunan sayfalar, kitaplığınız ve okuma hedefleri</string>
     <string name="label_study_group">Çalışma</string>
     <string name="label_focus_group">Zamanlayıcılar</string>
     <string name="label_planner">Planlayıcı</string>
@@ -31,7 +44,6 @@
     <string name="label_languages">Diller</string>
     <string name="label_help">Yardım</string>
     <string name="label_home">Ana Sayfa</string>
-    <string name="cd_menu">Menü</string>
     <string name="cd_more">Diğer</string>
     <string name="cd_add">Ekle</string>
     <string name="label_profile">Profil</string>
@@ -413,23 +425,23 @@
 
     <!-- Help (ui/help/HelpScreen.kt) -->
     <string name="help_getting_started_title">Başlarken</string>
-    <string name="help_getting_started_body">Kayıt Ol, adınız ve bir şifreyle yeni bir hesap oluşturur; Giriş Yap mevcut bir hesaba girer. İstediğiniz zaman yeni hesaplar ekleyebilir ve hesap menüsünden (⋮ → Hesap → Hesap Değiştir) veri kaybı olmadan hesaplar arasında geçiş yapabilirsiniz.</string>
+    <string name="help_getting_started_body">Kayıt Ol, adınız ve bir şifreyle yeni bir hesap oluşturur; Giriş Yap mevcut bir hesaba girer. İstediğiniz zaman yeni hesaplar ekleyebilir ve sağ üstteki hesap simgesinden (Hesabım → Hesap Değiştir) veri kaybı olmadan hesaplar arasında geçiş yapabilirsiniz.</string>
     <string name="help_exams_title">Sınavlar</string>
     <string name="help_exams_body">Sınavlar ekranından türünü seçerek (Üniversiteye Giriş Sınavı, Lise Giriş Sınavı, Dil Sınavı veya Meslek Sınavı) bir sınav ekleyin. Sınavın bölümleri varsa (TYT/AYT gibi) dersler tek bir listeden değil, bölüm bazında seçilir. Dil Sınavlarında ders havuzu yerine tek bir dil alanı bulunur.</string>
     <string name="help_courses_title">Dersler</string>
-    <string name="help_courses_body">Dersler sınav türüne göre gruplanır — menüden Dersler\'e dokunun, bir grup seçin ve ya listeye göz atın ya da ok işaretine dokunarak bir dersi hızlıca önizleyip doğrudan açın. Her dersin bir simgesi ve Üniversite/Lise/Meslek dersleri için gruplamaya yarayan bir Sayısal veya Sözel kategorisi olabilir.</string>
+    <string name="help_courses_body">Dersler sınav türüne göre gruplanır — Çalışma sekmesinde Dersler\'e dokunun, bir grup seçin ve ya listeye göz atın ya da ok işaretine dokunarak bir dersi hızlıca önizleyip doğrudan açın. Her dersin bir simgesi ve Üniversite/Lise/Meslek dersleri için gruplamaya yarayan bir Sayısal veya Sözel kategorisi olabilir.</string>
     <string name="help_study_resources_title">Çalışma Kaynakları</string>
-    <string name="help_study_resources_body">Çalışma kaynağı, bir ders veya dil için kullandığınız kitap, soru bankası ya da başka bir materyaldir — bir tür (Soru Bankası, Ders Kitabı, Deneme Sınavı veya Ders Notları) ve isteğe bağlı bir yayıncı belirtin. Bir dersin sayfasından ulaşabilir, ya da menüdeki Çalışma Kaynakları\'ndan hepsine birden göz atabilirsiniz.</string>
+    <string name="help_study_resources_body">Çalışma kaynağı, bir ders veya dil için kullandığınız kitap, soru bankası ya da başka bir materyaldir — bir tür (Soru Bankası, Ders Kitabı, Deneme Sınavı veya Ders Notları) ve isteğe bağlı bir yayıncı belirtin. Bir dersin sayfasından ulaşabilir, ya da Çalışma sekmesindeki Çalışma Kaynakları\'ndan hepsine birden göz atabilirsiniz.</string>
     <string name="help_topics_title">Konular</string>
     <string name="help_topics_body">Soru Bankası kaynaklarında, her konunun kaç test ve soru içerdiğini takip edin. Bir konunun sayfası, o konuyu kapsayan tüm soru bankalarındaki toplamı, yayıncıya göre ayrılmış şekilde gösterir — farklı kitapların aynı konuyu ne kadar kapsadığını karşılaştırmak için kullanışlıdır. Bir kaynağın konu listesini tutup sürükleyerek yeniden sıralayabilirsiniz.</string>
     <string name="help_languages_title">Diller</string>
-    <string name="help_languages_body">Diller (Fransızca veya Almanca gibi) Dil Sınavları için derslerle aynı şekilde çalışır — menüdeki Diller\'den ya da bir Dil Sınavının kendi sayfasından yönetebilirsiniz.</string>
+    <string name="help_languages_body">Diller (Fransızca veya Almanca gibi) Dil Sınavları için derslerle aynı şekilde çalışır — Çalışma sekmesindeki Diller\'den ya da bir Dil Sınavının kendi sayfasından yönetebilirsiniz.</string>
     <string name="help_shortcuts_title">Hızlı Kısayollar</string>
     <string name="help_shortcuts_body">Dersler, Çalışma Kaynakları ve Konular\'da, bir sınav türünün yanındaki ok işaretine dokunarak onu yerinde genişletebilir ve bir derse doğrudan atlayabilirsiniz — önce tam listeyi açmanıza gerek kalmaz.</string>
     <string name="help_backup_title">Bir Dersin Soru Bankalarını Yedekleme</string>
     <string name="help_backup_body">Bir dersin sayfasından Dışa Aktar, tüm Soru Bankası konularını ve sayılarını paylaşabileceğiniz ya da herhangi bir yere kaydedebileceğiniz bir CSV dosyasına kaydeder. İçe Aktar aynı formatı geri okur — kaynakları isim ve yayıncıya göre eşleştirir, var olan konuların sayılarını günceller ve yeni olanları ekler.</string>
     <string name="help_settings_title">Ayarlar</string>
-    <string name="help_settings_body">⋮ menüsünden ulaşılan Ayarlar\'dan uygulamanın temasını değiştirebilir, beyaz ve mavi başlatıcı simgeleri arasında geçiş yapabilir, İngilizce veya Türkçe seçebilir ve yerel hatırlatma bildirimlerini açabilirsiniz.</string>
+    <string name="help_settings_body">sağ üstteki hesap simgesinden ulaşılan Ayarlar\'dan uygulamanın temasını değiştirebilir, beyaz ve mavi başlatıcı simgeleri arasında geçiş yapabilir, İngilizce veya Türkçe seçebilir ve yerel hatırlatma bildirimlerini açabilirsiniz.</string>
 
     <string name="cd_help_has_sections">Bölümlü mü yardımı</string>
     <string name="help_tooltip_has_sections">Sınavın bölümlü olup olmadığı şimdi belirlenir ve sonradan değiştirilemez.</string>

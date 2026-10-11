@@ -37,7 +37,10 @@ import com.ridvan.target.ui.practiceexam.PracticeExamEntryDetailScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsHomeScreen
 import com.ridvan.target.ui.settings.SettingsScreen
+import com.ridvan.target.ui.hub.FocusHubScreen
+import com.ridvan.target.ui.hub.StudyHubScreen
 import com.ridvan.target.ui.shell.ShellNavigation
+import com.ridvan.target.ui.shell.ShellTab
 import com.ridvan.target.ui.studyresource.CourseStudyResourceScreen
 import com.ridvan.target.ui.studyresource.LanguageStudyResourceScreen
 import com.ridvan.target.ui.studyresource.StudyResourceHomeScreen
@@ -70,26 +73,45 @@ fun TargetNavHost() {
         navController.navigate(LoginRoute) { popUpTo(0) }
     }
 
+    // Bottom-bar tabs switch with navigateToShellDestination (each tab keeps its own back stack);
+    // pages inside a tab, and the profile menu's pages, are pushed on top of the current tab.
+    val push: (Any) -> Unit = { route -> navController.navigate(route) { launchSingleTop = true } }
+    val tabRoutes = mapOf<ShellTab, Any>(
+        ShellTab.HOME to HomeRoute,
+        ShellTab.STUDY to StudyHubRoute,
+        ShellTab.PLAN to PlannerRoute,
+        ShellTab.FOCUS to FocusHubRoute,
+        ShellTab.STATS to StatisticsRoute,
+    )
     val shellNavigation = ShellNavigation(
         onNavigateHome = { navController.navigateToShellDestination(HomeRoute) },
-        onNavigateExams = { navController.navigateToShellDestination(ExamListRoute) },
-        onNavigateCourses = { navController.navigateToShellDestination(CourseListRoute) },
-        onNavigateStudyResources = { navController.navigateToShellDestination(StudyResourceHomeRoute) },
-        onNavigateTopics = { navController.navigateToShellDestination(TopicHomeRoute) },
+        onNavigateStudyHub = { navController.navigateToShellDestination(StudyHubRoute) },
+        onNavigateFocusHub = { navController.navigateToShellDestination(FocusHubRoute) },
+        onNavigateExams = { push(ExamListRoute) },
+        onNavigateCourses = { push(CourseListRoute) },
+        onNavigateStudyResources = { push(StudyResourceHomeRoute) },
+        onNavigateTopics = { push(TopicHomeRoute) },
         onNavigateStatistics = { navController.navigateToShellDestination(StatisticsRoute) },
-        onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
+        onNavigateLanguages = { push(LanguageListRoute) },
         onNavigatePlanner = { navController.navigateToShellDestination(PlannerRoute) },
-        onNavigateFocusTimer = { navController.navigateToShellDestination(FocusTimerRoute) },
-        onNavigateFlowTimer = { navController.navigateToShellDestination(FlowTimerRoute) },
-        onNavigateStudyHistory = { navController.navigateToShellDestination(FocusHistoryHomeRoute) },
-        onNavigateReading = { navController.navigateToShellDestination(ReadingRoute) },
-        onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
-        onNavigateMyAccount = { navController.navigateToShellDestination(MyAccountRoute) },
-        onNavigateSettings = { navController.navigateToShellDestination(SettingsHomeRoute) },
+        onNavigateFocusTimer = { push(FocusTimerRoute) },
+        onNavigateFlowTimer = { push(FlowTimerRoute) },
+        onNavigateStudyHistory = { push(FocusHistoryHomeRoute) },
+        onNavigateReading = { push(ReadingRoute) },
+        onNavigateHelp = { push(HelpRoute) },
+        onNavigateMyAccount = { push(MyAccountRoute) },
+        onNavigateSettings = { push(SettingsHomeRoute) },
         onNavigateProfile = { navController.navigate(UserEditRoute) },
         onNavigateAppSettings = { navController.navigate(SettingsRoute) },
         onLogOut = signOut,
         onSwitchAccount = { navController.navigate(SwitchAccountRoute) },
+        onReselectTab = { tab ->
+            val root = tabRoutes.getValue(tab)
+            // Back to the tab's own first page; if it isn't on the stack (e.g. Reading opened
+            // straight from Home), open the tab fresh instead.
+            if (!navController.popBackStack(root, inclusive = false)) navController.navigateToShellDestination(root)
+        },
+        onBack = { navController.popBackStack() },
     )
 
     NavHost(navController = navController, startDestination = startDestination) {
@@ -115,6 +137,12 @@ fun TargetNavHost() {
                 onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
                 onOpenReading = shellNavigation.onNavigateReading,
             )
+        }
+        composable<StudyHubRoute> {
+            StudyHubScreen(shellNavigation = shellNavigation)
+        }
+        composable<FocusHubRoute> {
+            FocusHubScreen(shellNavigation = shellNavigation)
         }
         composable<ExamListRoute> {
             ExamListScreen(

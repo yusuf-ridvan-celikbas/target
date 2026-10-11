@@ -11,6 +11,13 @@ object RegisterRoute
 @Serializable
 object HomeRoute
 
+/** Bottom-bar tab roots that list their pages (the other three tabs open a real page directly). */
+@Serializable
+object StudyHubRoute
+
+@Serializable
+object FocusHubRoute
+
 @Serializable
 object ExamListRoute
 
