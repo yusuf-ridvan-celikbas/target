@@ -25,6 +25,7 @@ import com.ridvan.target.ui.focustimer.FocusSessionDetailScreen
 import com.ridvan.target.ui.focustimer.FocusWorkHistoryScreen
 import com.ridvan.target.ui.focustimer.FocusPresetListScreen
 import com.ridvan.target.ui.focustimer.FocusTimerScreen
+import com.ridvan.target.ui.focustimer.FlowTimerScreen
 import com.ridvan.target.ui.help.HelpScreen
 import com.ridvan.target.ui.home.HomeScreen
 import com.ridvan.target.ui.languagedetail.LanguageDetailScreen
@@ -79,6 +80,7 @@ fun TargetNavHost() {
         onNavigateLanguages = { navController.navigateToShellDestination(LanguageListRoute) },
         onNavigatePlanner = { navController.navigateToShellDestination(PlannerRoute) },
         onNavigateFocusTimer = { navController.navigateToShellDestination(FocusTimerRoute) },
+        onNavigateFlowTimer = { navController.navigateToShellDestination(FlowTimerRoute) },
         onNavigateStudyHistory = { navController.navigateToShellDestination(FocusHistoryHomeRoute) },
         onNavigateReading = { navController.navigateToShellDestination(ReadingRoute) },
         onNavigateHelp = { navController.navigateToShellDestination(HelpRoute) },
@@ -317,6 +319,17 @@ fun TargetNavHost() {
             FocusTimerScreen(
                 shellNavigation = shellNavigation,
                 onManagePresets = { navController.navigate(FocusPresetListRoute) },
+                onOpenHistory = { navController.navigate(FocusHistoryRoute) },
+                onOpenSettings = { navController.navigate(FocusTimerSettingsRoute) },
+                onSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },
+                onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
+                onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+            )
+        }
+        composable<FlowTimerRoute> {
+            FlowTimerScreen(
+                shellNavigation = shellNavigation,
                 onOpenHistory = { navController.navigate(FocusHistoryRoute) },
                 onOpenSettings = { navController.navigate(FocusTimerSettingsRoute) },
                 onSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },

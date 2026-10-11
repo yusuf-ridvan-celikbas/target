@@ -142,12 +142,32 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
     private val _promptRemainingMillis = MutableStateFlow(0L)
     val promptRemainingMillis: StateFlow<Long> = _promptRemainingMillis.asStateFlow()
 
+    private val getReady = GetReadyCountdown(viewModelScope)
+    val getReadyRemainingMillis: StateFlow<Long?> = getReady.remainingMillis
+
+    /** Start was confirmed in the summary pop-up: run the get-ready countdown, then the real start. */
+    fun requestStart(
+        preset: FocusPreset,
+        courseId: Long?,
+        courseName: String?,
+        languageId: Long?,
+        languageName: String?,
+        topicId: Long?,
+        topicName: String?,
+        book: BookProgress? = null,
+    ) {
+        if (_runningSession.value != null) return
+        getReady.start { startSession(preset, courseId, courseName, languageId, languageName, topicId, topicName, book) }
+    }
+
+    fun cancelGetReady() = getReady.cancel()
+
     private var tickerJob: Job? = null
     private var lastTickAt = 0L
     private var accumulatedWorkMillis = 0L
     private var accumulatedBreakMillis = 0L
 
-    fun startSession(
+    private fun startSession(
         preset: FocusPreset,
         courseId: Long?,
         courseName: String?,

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.SegmentedToggle
@@ -163,6 +164,14 @@ private fun FocusHistoryBody(
     val languages by viewModel.languages.collectAsStateWithLifecycle()
     val books by viewModel.books.collectAsStateWithLifecycle()
     val manualLabel = stringResource(R.string.focus_manual_label)
+    val flowLabel = stringResource(R.string.flow_label)
+    // Manual and Flow sessions both have a blank presetName; Flow gets its own filter key.
+    fun presetKey(session: FocusSession): String = if (session.isFlow) FLOW_PRESET_KEY else session.presetName
+    fun presetKeyLabel(key: String): String = when (key) {
+        FLOW_PRESET_KEY -> flowLabel
+        "" -> manualLabel
+        else -> key
+    }
 
     // Subject options come from what's actually in history, so every choice has at least one match.
     val subjectOptions: List<Pair<String, String>> = history
@@ -177,12 +186,12 @@ private fun FocusHistoryBody(
         }
         .distinctBy { it.first }
         .sortedBy { it.second.lowercase() }
-    val presetOptions = history.map { it.session.presetName }.distinct().sortedBy { it.lowercase() }
+    val presetOptions = history.map { presetKey(it.session) }.distinct().sortedBy { presetKeyLabel(it).lowercase() }
 
     // Search matches the preset name, the linked course (raw and translated), language and topic, and notes.
     val searchText: Map<Long, String> = history.associate { item ->
         item.session.id to listOfNotNull(
-            if (item.session.isManual) manualLabel else item.session.presetName,
+            presetKeyLabel(presetKey(item.session)),
             item.courseName,
             item.courseName?.let { courseDisplayName(it) },
             item.languageName,
@@ -197,7 +206,7 @@ private fun FocusHistoryBody(
     val filtered = history.filter { item ->
         (cutoff == null || item.session.startedAt >= cutoff) &&
             (subjectKey == SUBJECT_ALL || subjectKeyOf(item) == subjectKey) &&
-            (presetName == null || item.session.presetName == presetName) &&
+            (presetName == null || presetKey(item.session) == presetName) &&
             (trimmedQuery.isEmpty() || searchText[item.session.id].orEmpty().contains(trimmedQuery))
     }
     val filtersActive = query.isNotBlank() || period != FocusHistoryPeriod.ALL || subjectKey != SUBJECT_ALL || presetName != null
@@ -251,9 +260,9 @@ private fun FocusHistoryBody(
         )
         FilterField(
             label = stringResource(R.string.focustimer_history_filter_preset),
-            selectedLabel = presetName?.let { it.ifEmpty { manualLabel } } ?: stringResource(R.string.focustimer_history_all_presets),
+            selectedLabel = presetName?.let { presetKeyLabel(it) } ?: stringResource(R.string.focustimer_history_all_presets),
             options = listOf<Pair<String?, String>>(null to stringResource(R.string.focustimer_history_all_presets)) +
-                presetOptions.map { it to it.ifEmpty { manualLabel } },
+                presetOptions.map { it to presetKeyLabel(it) },
             onSelect = { presetName = it },
         )
 
@@ -341,3 +350,5 @@ private fun <T> FilterField(label: String, selectedLabel: String, options: List<
         }
     }
 }
+
+private const val FLOW_PRESET_KEY = "#flow#"

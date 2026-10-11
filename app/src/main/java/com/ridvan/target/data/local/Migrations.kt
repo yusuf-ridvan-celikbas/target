@@ -517,3 +517,10 @@ val MIGRATION_24_25 = object : Migration(24, 25) {
         db.execSQL("ALTER TABLE books ADD COLUMN goalDate INTEGER")
     }
 }
+
+val MIGRATION_25_26 = object : Migration(25, 26) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Flow Timer: count-up sessions saved alongside Focus Timer ones.
+        db.execSQL("ALTER TABLE focus_sessions ADD COLUMN isFlow INTEGER NOT NULL DEFAULT 0")
+    }
+}

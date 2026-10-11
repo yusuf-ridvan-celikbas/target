@@ -36,8 +36,11 @@ internal fun focusSessionLinkLabel(item: FocusSessionWithLinks): String? {
 
 /** The preset a session ran on, or "Manual" for one logged by hand. */
 @Composable
-internal fun focusSessionPresetLabel(session: FocusSession): String =
-    if (session.isManual) stringResource(R.string.focus_manual_label) else session.presetName
+internal fun focusSessionPresetLabel(session: FocusSession): String = when {
+    session.isManual -> stringResource(R.string.focus_manual_label)
+    session.isFlow -> stringResource(R.string.flow_label)
+    else -> session.presetName
+}
 
 /** What a session is about: its link, else its preset (or "Manual"). */
 @Composable
@@ -51,7 +54,7 @@ internal fun focusSessionStatsLine(session: FocusSession): String {
     val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
     // A reading session says "reading" where a study session says "work".
     val reading = session.isReading
-    val base = if (session.isManual) {
+    val base = if (session.isManual || session.isFlow) {
         stringResource(if (reading) R.string.focus_manual_stats_reading else R.string.focus_manual_stats, workText, breakText)
     } else {
         stringResource(

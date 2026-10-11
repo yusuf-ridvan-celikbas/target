@@ -75,4 +75,7 @@ data class FocusSession(
     val bookId: Long? = null,
     val startPage: Int? = null,
     val endPage: Int? = null,
+    /** Flow Timer: counted up until stopped — no preset (presetName is blank); cyclesCompleted holds
+     *  how many breaks were taken. */
+    val isFlow: Boolean = false,
 )

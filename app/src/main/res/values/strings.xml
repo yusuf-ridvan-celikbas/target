@@ -23,7 +23,7 @@
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
     <string name="label_study_group">Study</string>
-    <string name="label_focus_group">Focus</string>
+    <string name="label_focus_group">Timers</string>
     <string name="label_planner">Planner</string>
     <string name="label_exams">Exams</string>
     <string name="label_courses">Courses</string>
@@ -674,6 +674,31 @@
     <string name="focus_manual_logged_by_hand">Logged manually (no timer)</string>
     <string name="planner_studied_manual">Manual · %1$s</string>
     <string name="planner_studied_manual_reading">Manual reading · %1$s</string>
+    <string name="label_flow_timer">Flow Timer</string>
+    <string name="flow_label">Flow</string>
+    <string name="flow_intro">Counts up from zero and keeps going until you stop. Take a break whenever you need one.</string>
+    <string name="flow_mode_study">Study</string>
+    <string name="flow_take_break">Take a break</string>
+    <string name="flow_back_to_work">Back to work</string>
+    <string name="flow_back_to_reading">Back to reading</string>
+    <string name="flow_totals">Total: %1$s work · %2$s break</string>
+    <string name="flow_totals_reading">Total: %1$s reading · %2$s break</string>
+    <string name="flow_start_summary">Flow Timer · counts up until you stop</string>
+    <string name="flow_start_summary_reading">Flow Timer · reading, counts up until you stop</string>
+    <string name="planner_studied_flow">Flow · %1$s</string>
+    <string name="planner_studied_flow_reading">Flow reading · %1$s</string>
+    <plurals name="flow_breaks_taken">
+        <item quantity="one">%1$d break taken</item>
+        <item quantity="other">%1$d breaks taken</item>
+    </plurals>
+    <plurals name="flow_session_summary">
+        <item quantity="one">Flow Timer (counted up) · %1$d break</item>
+        <item quantity="other">Flow Timer (counted up) · %1$d breaks</item>
+    </plurals>
+    <string name="session_start_title">Start session?</string>
+    <string name="session_start_get_ready_hint">After you tap Start, you get %1$d seconds to get ready.</string>
+    <string name="session_get_ready_title">Get ready</string>
+    <string name="session_get_ready_message">Your session starts in</string>
     <string name="focus_session_preset">Preset: %1$s (%2$s)</string>
     <string name="focus_session_link_section">Linked to</string>
     <string name="focus_session_link_dialog_title">Link session</string>

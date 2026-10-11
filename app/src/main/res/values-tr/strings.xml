@@ -23,7 +23,7 @@
 
     <!-- Navigation shell / drawer / overflow menu (ui/shell/AppShell.kt) -->
     <string name="label_study_group">Çalışma</string>
-    <string name="label_focus_group">Odak</string>
+    <string name="label_focus_group">Zamanlayıcılar</string>
     <string name="label_planner">Planlayıcı</string>
     <string name="label_exams">Sınavlar</string>
     <string name="label_courses">Dersler</string>
@@ -672,6 +672,31 @@
     <string name="focus_manual_logged_by_hand">Elle kaydedildi (zamanlayıcı yok)</string>
     <string name="planner_studied_manual">Elle · %1$s</string>
     <string name="planner_studied_manual_reading">Elle okuma · %1$s</string>
+    <string name="label_flow_timer">Akış Zamanlayıcı</string>
+    <string name="flow_label">Akış</string>
+    <string name="flow_intro">Sıfırdan ileri sayar ve sen durdurana kadar devam eder. İstediğin zaman mola verebilirsin.</string>
+    <string name="flow_mode_study">Çalışma</string>
+    <string name="flow_take_break">Mola ver</string>
+    <string name="flow_back_to_work">Çalışmaya dön</string>
+    <string name="flow_back_to_reading">Okumaya dön</string>
+    <string name="flow_totals">Toplam: %1$s çalışma · %2$s mola</string>
+    <string name="flow_totals_reading">Toplam: %1$s okuma · %2$s mola</string>
+    <string name="flow_start_summary">Akış Zamanlayıcı · sen durdurana kadar ileri sayar</string>
+    <string name="flow_start_summary_reading">Akış Zamanlayıcı · okuma, sen durdurana kadar ileri sayar</string>
+    <string name="planner_studied_flow">Akış · %1$s</string>
+    <string name="planner_studied_flow_reading">Akış okuma · %1$s</string>
+    <plurals name="flow_breaks_taken">
+        <item quantity="one">%1$d mola verildi</item>
+        <item quantity="other">%1$d mola verildi</item>
+    </plurals>
+    <plurals name="flow_session_summary">
+        <item quantity="one">Akış Zamanlayıcı (ileri sayım) · %1$d mola</item>
+        <item quantity="other">Akış Zamanlayıcı (ileri sayım) · %1$d mola</item>
+    </plurals>
+    <string name="session_start_title">Oturum başlasın mı?</string>
+    <string name="session_start_get_ready_hint">Başlata dokunduktan sonra hazırlanmak için %1$d saniyen var.</string>
+    <string name="session_get_ready_title">Hazırlan</string>
+    <string name="session_get_ready_message">Oturumun başlamasına</string>
     <string name="focus_session_preset">Ön ayar: %1$s (%2$s)</string>
     <string name="focus_session_link_section">Bağlantı</string>
     <string name="focus_session_link_dialog_title">Oturumu bağla</string>

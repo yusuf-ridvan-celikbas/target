@@ -94,8 +94,6 @@ import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 import kotlinx.coroutines.flow.flowOf
 
-private enum class LinkMode { NONE, COURSE, LANGUAGE }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusTimerScreen(
@@ -121,12 +119,14 @@ fun FocusTimerScreen(
     val pendingPageEntry by viewModel.pendingPageEntry.collectAsStateWithLifecycle()
 
     var selectedPresetId by remember { mutableStateOf<Long?>(null) }
-    var linkMode by remember { mutableStateOf(LinkMode.NONE) }
+    var linkMode by remember { mutableStateOf(SessionLinkMode.NONE) }
     var selectedCourseId by remember { mutableStateOf<Long?>(null) }
     var selectedLanguageId by remember { mutableStateOf<Long?>(null) }
     var selectedTopicId by remember { mutableStateOf<Long?>(null) }
     var selectedBookId by remember { mutableStateOf<Long?>(null) }
     var showAddBook by remember { mutableStateOf(false) }
+    var pendingStart by remember { mutableStateOf<PendingFocusStart?>(null) }
+    val getReadyRemaining by viewModel.getReadyRemainingMillis.collectAsStateWithLifecycle()
 
     LaunchedEffect(presets) {
         if (selectedPresetId == null || presets.none { it.id == selectedPresetId }) {
@@ -136,9 +136,9 @@ fun FocusTimerScreen(
 
     val topics by remember(linkMode, selectedCourseId, selectedLanguageId) {
         when (linkMode) {
-            LinkMode.COURSE -> selectedCourseId?.let { viewModel.topicsForCourse(it) } ?: flowOf(emptyList())
-            LinkMode.LANGUAGE -> selectedLanguageId?.let { viewModel.topicsForLanguage(it) } ?: flowOf(emptyList())
-            LinkMode.NONE -> flowOf(emptyList())
+            SessionLinkMode.COURSE -> selectedCourseId?.let { viewModel.topicsForCourse(it) } ?: flowOf(emptyList())
+            SessionLinkMode.LANGUAGE -> selectedLanguageId?.let { viewModel.topicsForLanguage(it) } ?: flowOf(emptyList())
+            SessionLinkMode.NONE -> flowOf(emptyList())
         }
     }.collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -206,20 +206,28 @@ fun FocusTimerScreen(
                         val preset = presets.firstOrNull { it.id == selectedPresetId } ?: return@IdleContent
                         if (preset.isReading) {
                             val book = books.firstOrNull { it.book.id == selectedBookId } ?: return@IdleContent
-                            viewModel.startSession(preset, null, null, null, null, null, null, book)
+                            pendingStart = PendingFocusStart(preset, null, book) {
+                                viewModel.requestStart(preset, null, null, null, null, null, null, book)
+                            }
                             return@IdleContent
                         }
                         val topicName = topics.firstOrNull { it.id == selectedTopicId }?.name
-                        when (linkMode) {
-                            LinkMode.COURSE -> {
+                        pendingStart = when (linkMode) {
+                            SessionLinkMode.COURSE -> {
                                 val courseName = courses.firstOrNull { it.id == selectedCourseId }?.name
-                                viewModel.startSession(preset, selectedCourseId, courseName, null, null, selectedTopicId, topicName)
+                                PendingFocusStart(preset, listOfNotNull(courseName, topicName).joinToString(" · ").ifEmpty { null }) {
+                                    viewModel.requestStart(preset, selectedCourseId, courseName, null, null, selectedTopicId, topicName)
+                                }
                             }
-                            LinkMode.LANGUAGE -> {
+                            SessionLinkMode.LANGUAGE -> {
                                 val languageName = languages.firstOrNull { it.id == selectedLanguageId }?.name
-                                viewModel.startSession(preset, null, null, selectedLanguageId, languageName, selectedTopicId, topicName)
+                                PendingFocusStart(preset, listOfNotNull(languageName, topicName).joinToString(" · ").ifEmpty { null }) {
+                                    viewModel.requestStart(preset, null, null, selectedLanguageId, languageName, selectedTopicId, topicName)
+                                }
                             }
-                            LinkMode.NONE -> viewModel.startSession(preset, null, null, null, null, null, null)
+                            SessionLinkMode.NONE -> PendingFocusStart(preset, null) {
+                                viewModel.requestStart(preset, null, null, null, null, null, null)
+                            }
                         }
                     },
                 )
@@ -255,6 +263,21 @@ fun FocusTimerScreen(
         }
     }
 
+    pendingStart?.let { start ->
+        SessionStartDialog(
+            timerLine = "${start.preset.name} — ${presetSubtitle(start.preset)}",
+            linkLine = start.book?.let { bookLine(it) } ?: start.linkLine,
+            onStart = {
+                pendingStart = null
+                start.action()
+            },
+            onDismiss = { pendingStart = null },
+        )
+    }
+    getReadyRemaining?.let { remaining ->
+        GetReadyDialog(remainingMillis = remaining, onCancel = viewModel::cancelGetReady)
+    }
+
     if (showAddBook) {
         BookDialog(
             initial = null,
@@ -287,8 +310,8 @@ private fun IdleContent(
     selectedPresetId: Long?,
     onSelectPreset: (Long) -> Unit,
     onManagePresets: () -> Unit,
-    linkMode: LinkMode,
-    onSelectLinkMode: (LinkMode) -> Unit,
+    linkMode: SessionLinkMode,
+    onSelectLinkMode: (SessionLinkMode) -> Unit,
     courses: List<Course>,
     selectedCourseId: Long?,
     onSelectCourse: (Long?) -> Unit,
@@ -342,55 +365,19 @@ private fun IdleContent(
     if (isReadingPreset) {
         BookCard(books = books, selectedBookId = selectedBookId, onSelectBook = onSelectBook, onAddBook = onAddBook)
     } else {
-        GroupedCard {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(stringResource(R.string.focustimer_link_section_title), style = MaterialTheme.typography.titleMedium)
-                SegmentedToggle(
-                    options = listOf(
-                        SegmentedToggleOption(LinkMode.NONE, stringResource(R.string.common_none)),
-                        SegmentedToggleOption(LinkMode.COURSE, stringResource(R.string.label_course)),
-                        SegmentedToggleOption(LinkMode.LANGUAGE, stringResource(R.string.label_language)),
-                    ),
-                    selected = linkMode,
-                    onSelect = onSelectLinkMode,
-                    textStyle = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                )
-
-                if (linkMode == LinkMode.COURSE) {
-                    Text(stringResource(R.string.label_course), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 12.dp))
-                    DropdownField(
-                        selectedLabel = courses.firstOrNull { it.id == selectedCourseId }?.name ?: stringResource(R.string.common_select),
-                    ) { closeMenu ->
-                        courses.forEach { course ->
-                            DropdownMenuItem(text = { Text(course.name) }, onClick = { onSelectCourse(course.id); closeMenu() })
-                        }
-                    }
-                } else if (linkMode == LinkMode.LANGUAGE) {
-                    Text(stringResource(R.string.label_language), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 12.dp))
-                    DropdownField(
-                        selectedLabel = languages.firstOrNull { it.id == selectedLanguageId }?.name ?: stringResource(R.string.common_select),
-                    ) { closeMenu ->
-                        languages.forEach { language ->
-                            DropdownMenuItem(text = { Text(language.name) }, onClick = { onSelectLanguage(language.id); closeMenu() })
-                        }
-                    }
-                }
-
-                if (linkMode != LinkMode.NONE && (selectedCourseId != null || selectedLanguageId != null)) {
-                    Text(stringResource(R.string.label_link_to_topic), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 8.dp))
-                    DropdownField(
-                        selectedLabel = topics.firstOrNull { it.id == selectedTopicId }?.name ?: stringResource(R.string.common_none),
-                    ) { closeMenu ->
-                        DropdownMenuItem(text = { Text(stringResource(R.string.common_none)) }, onClick = { onSelectTopic(null); closeMenu() })
-                        topics.forEach { topic ->
-                            DropdownMenuItem(text = { Text(topic.name) }, onClick = { onSelectTopic(topic.id); closeMenu() })
-                        }
-                    }
-                }
-            }
-        }
-
+        SessionLinkCard(
+            linkMode = linkMode,
+            onSelectLinkMode = onSelectLinkMode,
+            courses = courses,
+            selectedCourseId = selectedCourseId,
+            onSelectCourse = onSelectCourse,
+            languages = languages,
+            selectedLanguageId = selectedLanguageId,
+            onSelectLanguage = onSelectLanguage,
+            topics = topics,
+            selectedTopicId = selectedTopicId,
+            onSelectTopic = onSelectTopic,
+        )
     }
     Spacer(Modifier.height(16.dp))
     Text(stringResource(R.string.focustimer_keep_screen_hint), style = MaterialTheme.typography.labelSmall)
@@ -638,7 +625,7 @@ private fun RunningContent(
 }
 
 @Composable
-private fun HistorySection(
+internal fun HistorySection(
     history: List<FocusSessionWithLinks>,
     onOpenHistory: () -> Unit,
     onSessionClick: (Long) -> Unit,
@@ -809,117 +796,21 @@ private fun CustomTimeDialog(onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
     )
 }
 
-/**
- * A rounded-square outline around the countdown that is eaten away clockwise from the top
- * centre as the round runs down ([progress] = fraction of the round still remaining).
- * Updates arrive once a second, so the fraction is animated linearly to look continuous.
- */
-@Composable
-private fun CountdownBorder(
-    progress: Float,
-    color: Color,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 1_000, easing = LinearEasing),
-        label = "countdownBorder",
-    )
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .drawBehind {
-                val strokeWidth = 8.dp.toPx()
-                val inset = strokeWidth / 2
-                val left = inset
-                val top = inset
-                val right = size.width - inset
-                val bottom = size.height - inset
-                val radius = 28.dp.toPx().coerceAtMost((bottom - top) / 2)
-                // Built by hand (not addRoundRect) so the path starts at top centre and runs clockwise.
-                val outline = Path().apply {
-                    moveTo(size.width / 2, top)
-                    lineTo(right - radius, top)
-                    arcTo(Rect(right - 2 * radius, top, right, top + 2 * radius), -90f, 90f, false)
-                    lineTo(right, bottom - radius)
-                    arcTo(Rect(right - 2 * radius, bottom - 2 * radius, right, bottom), 0f, 90f, false)
-                    lineTo(left + radius, bottom)
-                    arcTo(Rect(left, bottom - 2 * radius, left + 2 * radius, bottom), 90f, 90f, false)
-                    lineTo(left, top + radius)
-                    arcTo(Rect(left, top, left + 2 * radius, top + 2 * radius), 180f, 90f, false)
-                    lineTo(size.width / 2, top)
-                }
-                val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                drawPath(outline, trackColor, style = stroke)
-                if (animatedProgress > 0f) {
-                    val measure = PathMeasure().apply { setPath(outline, false) }
-                    val length = measure.length
-                    val remaining = Path()
-                    // The elapsed part [0, elapsed) is gone; what's left runs to the end of the path.
-                    measure.getSegment((1f - animatedProgress) * length, length, remaining, true)
-                    drawPath(remaining, color, style = stroke)
-                }
-            }
-            .padding(horizontal = 24.dp, vertical = 28.dp),
-        content = content,
-    )
-}
-
 @Composable
 private fun presetSubtitle(preset: FocusPreset): String {
     val times = stringResource(R.string.focustimer_preset_row_subtitle, preset.workMinutes, preset.breakMinutes)
     return if (preset.isReading) "$times · ${stringResource(R.string.label_reading)}" else times
 }
 
-/** Replaces the Link-to card for a reading preset: which book, and where it's up to. */
+/** What the "Start session?" pop-up shows, and the start it runs once confirmed. */
+private class PendingFocusStart(
+    val preset: FocusPreset,
+    val linkLine: String?,
+    val book: BookProgress? = null,
+    val action: () -> Unit,
+)
+
+/** "Book title · from page 12" for the start pop-up. */
 @Composable
-private fun BookCard(
-    books: List<BookProgress>,
-    selectedBookId: Long?,
-    onSelectBook: (Long) -> Unit,
-    onAddBook: () -> Unit,
-) {
-    // Finished books drop out of the picker (unless already selected); they stay on the Reading page.
-    val readable = books.filter { !it.book.isFinished || it.book.id == selectedBookId }
-    val selected = readable.firstOrNull { it.book.id == selectedBookId }
-    GroupedCard {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.reading_book), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                TextButton(onClick = onAddBook) { Text(stringResource(R.string.reading_add_book)) }
-            }
-            if (readable.isEmpty()) {
-                Text(stringResource(R.string.reading_no_books), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else {
-                DropdownField(selectedLabel = selected?.book?.title ?: stringResource(R.string.common_select)) { closeMenu ->
-                    readable.forEach { progress ->
-                        DropdownMenuItem(
-                            leadingIcon = {
-                                BookCover(progress.book, compact = true, elevation = 1.dp, modifier = Modifier.width(26.dp))
-                            },
-                            text = {
-                                Column {
-                                    Text(progress.book.title, style = MaterialTheme.typography.bodyLarge)
-                                    Text(
-                                        bookProgressLabel(progress),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            },
-                            onClick = { onSelectBook(progress.book.id); closeMenu() },
-                        )
-                    }
-                }
-                Text(
-                    if (selected != null) bookProgressLabel(selected) else stringResource(R.string.reading_select_book_hint),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-            }
-        }
-    }
-}
+internal fun bookLine(book: BookProgress): String =
+    stringResource(R.string.reading_running_label, book.book.title, book.currentPage)

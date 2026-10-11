@@ -108,6 +108,9 @@ object PlannerRoute
 object FocusTimerRoute
 
 @Serializable
+object FlowTimerRoute
+
+@Serializable
 object FocusPresetListRoute
 
 @Serializable

@@ -270,8 +270,10 @@ private fun AgendaRow(
                             stringResource(
                                 when {
                                     item.isReading && session.isManual -> R.string.planner_studied_manual_reading
+                                    item.isReading && session.isFlow -> R.string.planner_studied_flow_reading
                                     item.isReading -> R.string.planner_studied_reading
                                     session.isManual -> R.string.planner_studied_manual
+                                    session.isFlow -> R.string.planner_studied_flow
                                     else -> R.string.planner_studied_focus
                                 },
                                 "${formatTime(session.startedAt)} – ${formatTime(session.endedAt)}",

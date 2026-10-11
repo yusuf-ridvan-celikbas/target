@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -148,6 +149,8 @@ fun FocusSessionDetailScreen(
                     Text(
                         if (session.isManual) {
                             stringResource(R.string.focus_manual_logged_by_hand)
+                        } else if (session.isFlow) {
+                            pluralStringResource(R.plurals.flow_session_summary, session.cyclesCompleted, session.cyclesCompleted)
                         } else {
                             stringResource(
                                 R.string.focus_session_preset,
