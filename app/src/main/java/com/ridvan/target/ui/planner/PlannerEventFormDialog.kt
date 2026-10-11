@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCategory
@@ -422,23 +423,20 @@ private fun PlannerDateField(label: String, value: LocalDate?, onClick: () -> Un
 
 @Composable
 private fun RecurrenceUnitField(selected: RecurrenceUnit?, onSelect: (RecurrenceUnit?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.planner_field_repeats), style = MaterialTheme.typography.labelSmall)
-            Text(recurrenceUnitLabel(selected), style = MaterialTheme.typography.bodyLarge)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    DropdownField(
+        selectedLabel = recurrenceUnitLabel(selected),
+        label = stringResource(R.string.planner_field_repeats),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.planner_recurrence_none)) },
+            onClick = { onSelect(null); close() },
+        )
+        RecurrenceUnit.entries.forEach { unit ->
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.planner_recurrence_none)) },
-                onClick = { onSelect(null); expanded = false },
+                text = { Text(recurrenceUnitLabel(unit)) },
+                onClick = { onSelect(unit); close() },
             )
-            RecurrenceUnit.entries.forEach { unit ->
-                DropdownMenuItem(
-                    text = { Text(recurrenceUnitLabel(unit)) },
-                    onClick = { onSelect(unit); expanded = false },
-                )
-            }
         }
     }
 }
@@ -454,48 +452,36 @@ private fun recurrenceUnitLabel(unit: RecurrenceUnit?): String = when (unit) {
 
 @Composable
 private fun CourseField(courses: List<Course>, selectedId: Long?, onSelect: (Long?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.planner_field_course), style = MaterialTheme.typography.labelSmall)
-            Text(
-                courses.firstOrNull { it.id == selectedId }?.let { courseDisplayName(it.name) } ?: stringResource(R.string.common_select),
-                style = MaterialTheme.typography.bodyLarge,
+    DropdownField(
+        selectedLabel = courses.firstOrNull { it.id == selectedId }?.let { courseDisplayName(it.name) } ?: stringResource(R.string.common_select),
+        label = stringResource(R.string.planner_field_course),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        courses.forEach { course ->
+            DropdownMenuItem(
+                text = { Text(courseDisplayName(course.name)) },
+                onClick = { onSelect(course.id); close() },
             )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            courses.forEach { course ->
-                DropdownMenuItem(
-                    text = { Text(courseDisplayName(course.name)) },
-                    onClick = { onSelect(course.id); expanded = false },
-                )
-            }
         }
     }
 }
 
 @Composable
 private fun TopicField(topics: List<Topic>, selectedId: Long?, onSelect: (Long?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.planner_field_topic), style = MaterialTheme.typography.labelSmall)
-            Text(
-                topics.firstOrNull { it.id == selectedId }?.name ?: stringResource(R.string.common_not_set),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    DropdownField(
+        selectedLabel = topics.firstOrNull { it.id == selectedId }?.name ?: stringResource(R.string.common_not_set),
+        label = stringResource(R.string.planner_field_topic),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.common_not_set)) },
+            onClick = { onSelect(null); close() },
+        )
+        topics.forEach { topic ->
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.common_not_set)) },
-                onClick = { onSelect(null); expanded = false },
+                text = { Text(topic.name) },
+                onClick = { onSelect(topic.id); close() },
             )
-            topics.forEach { topic ->
-                DropdownMenuItem(
-                    text = { Text(topic.name) },
-                    onClick = { onSelect(topic.id); expanded = false },
-                )
-            }
         }
     }
 }

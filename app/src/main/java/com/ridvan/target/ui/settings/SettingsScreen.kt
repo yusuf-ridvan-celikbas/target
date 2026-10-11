@@ -70,6 +70,7 @@ import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.findActivity
 import com.ridvan.target.ui.shell.AppShell
+import com.ridvan.target.ui.shell.ShellDestination
 import com.ridvan.target.ui.shell.ShellNavigation
 
 @Composable
@@ -131,7 +132,7 @@ fun SettingsScreen(
         }
     }
 
-    AppShell(navigation = shellNavigation, title = stringResource(R.string.menu_app_settings)) { innerPadding ->
+    AppShell(navigation = shellNavigation, currentDestination = ShellDestination.SETTINGS, title = stringResource(R.string.settings_title)) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()

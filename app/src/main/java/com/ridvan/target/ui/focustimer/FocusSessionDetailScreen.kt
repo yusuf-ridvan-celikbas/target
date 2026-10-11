@@ -43,6 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.DropdownField
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Language
@@ -136,7 +139,7 @@ fun FocusSessionDetailScreen(
                     Text(
                         stringResource(
                             R.string.focus_session_total,
-                            stringResource(R.string.duration_format, elapsedMinutes / 60, elapsedMinutes % 60),
+                            formatDuration(elapsedMinutes),
                         ),
                     )
                 }
@@ -189,7 +192,7 @@ fun FocusSessionDetailScreen(
                         val end = session.endPage
                         Text(
                             if (start != null && end != null) {
-                                stringResource(R.string.reading_session_pages, start, end, end - start)
+                                stringResource(R.string.reading_session_pages, start, end, countText(R.plurals.count_pages, end - start))
                             } else {
                                 stringResource(R.string.reading_session_pages_missing)
                             },
@@ -412,16 +415,13 @@ private fun LinkSessionDialog(
 
 @Composable
 internal fun <T> PickerField(label: String, selectedLabel: String, options: List<Pair<T, String>>, onSelect: (T) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(label, style = MaterialTheme.typography.labelSmall)
-            Text(selectedLabel, style = MaterialTheme.typography.bodyLarge)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { (value, optionLabel) ->
-                DropdownMenuItem(text = { Text(optionLabel) }, onClick = { onSelect(value); expanded = false })
-            }
+    DropdownField(
+        selectedLabel = selectedLabel,
+        label = label,
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        options.forEach { (value, optionLabel) ->
+            DropdownMenuItem(text = { Text(optionLabel) }, onClick = { onSelect(value); close() })
         }
     }
 }

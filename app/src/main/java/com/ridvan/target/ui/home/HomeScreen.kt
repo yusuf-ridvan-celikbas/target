@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.daysUntil
 import com.ridvan.target.ui.common.daysUntilLabel
@@ -373,7 +375,7 @@ private fun StudiedPreviewRow(item: PlannerAgendaItem.Studied, onClick: () -> Un
 }
 
 @Composable
-private fun durationText(minutes: Int): String = stringResource(R.string.duration_format, minutes / 60, minutes % 60)
+private fun durationText(minutes: Int): String = formatDuration(minutes)
 
 /** Pages read today / this week, and the book currently being read with its progress. */
 @Composable
@@ -391,13 +393,13 @@ private fun ReadingSection(
     ) {
         Icon(Icons.Filled.AutoStories, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
         Text(
-            stringResource(R.string.home_reading_today, studied.todayPages, durationText(studied.todayReadingMinutes)),
+            stringResource(R.string.home_reading_today, countText(R.plurals.count_pages, studied.todayPages), durationText(studied.todayReadingMinutes)),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f).padding(start = 12.dp),
         )
         Text(
-            stringResource(R.string.home_reading_week, studied.weekPages, durationText(studied.weekReadingMinutes)),
+            stringResource(R.string.home_reading_week, countText(R.plurals.count_pages, studied.weekPages), durationText(studied.weekReadingMinutes)),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

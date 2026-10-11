@@ -73,9 +73,6 @@ object SettingsRoute
 object MyAccountRoute
 
 @Serializable
-object SettingsHomeRoute
-
-@Serializable
 object SwitchAccountRoute
 
 @Serializable

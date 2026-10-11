@@ -44,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.DropdownField
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.ui.common.GroupedCard
@@ -158,7 +161,6 @@ private fun FocusHistoryBody(
     var period by rememberSaveable { mutableStateOf(FocusHistoryPeriod.ALL) }
     var subjectKey by rememberSaveable { mutableStateOf(SUBJECT_ALL) }
     var presetName by rememberSaveable { mutableStateOf<String?>(null) }
-    var pendingDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
     var showManualDialog by remember { mutableStateOf(false) }
     val courses by viewModel.courses.collectAsStateWithLifecycle()
     val languages by viewModel.languages.collectAsStateWithLifecycle()
@@ -272,8 +274,8 @@ private fun FocusHistoryBody(
             Text(
                 stringResource(
                     R.string.focustimer_history_summary,
-                    filtered.size,
-                    stringResource(R.string.duration_format, totalWork / 60, totalWork % 60),
+                    countText(R.plurals.count_sessions, filtered.size),
+                    formatDuration(totalWork),
                 ),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f),
@@ -301,7 +303,6 @@ private fun FocusHistoryBody(
                     FocusHistoryRow(
                         item = item,
                         onClick = { onSessionClick(item.session.id) },
-                        onDeleteClick = { pendingDelete = item },
                     )
                     HorizontalDivider()
                 }
@@ -322,31 +323,14 @@ private fun FocusHistoryBody(
         )
     }
 
-    pendingDelete?.let { item ->
-        FocusSessionDeleteDialog(
-            item = item,
-            onConfirm = {
-                viewModel.deleteSession(item.session)
-                pendingDelete = null
-            },
-            onDismiss = { pendingDelete = null },
-        )
-    }
 }
 
-/** Same label-over-value dropdown look as Statistics' filter fields. */
+/** The shared tappable-box picker, same as Statistics' filter fields. */
 @Composable
 private fun <T> FilterField(label: String, selectedLabel: String, options: List<Pair<T, String>>, onSelect: (T) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(label, style = MaterialTheme.typography.labelSmall)
-            Text(selectedLabel, style = MaterialTheme.typography.bodyLarge)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { (value, optionLabel) ->
-                DropdownMenuItem(text = { Text(optionLabel) }, onClick = { onSelect(value); expanded = false })
-            }
+    DropdownField(selectedLabel = selectedLabel, label = label, modifier = Modifier.padding(top = 8.dp)) { close ->
+        options.forEach { (value, optionLabel) ->
+            DropdownMenuItem(text = { Text(optionLabel) }, onClick = { onSelect(value); close() })
         }
     }
 }

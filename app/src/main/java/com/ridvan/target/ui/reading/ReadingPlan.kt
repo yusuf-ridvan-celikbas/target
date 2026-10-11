@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
 import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.SegmentedToggle
@@ -69,7 +70,7 @@ fun ReadingPlanCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.reading_plan_title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                 Text(
-                    stringResource(R.string.reading_pages_left, remaining),
+                    countText(R.plurals.count_pages_left, remaining),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -176,7 +177,7 @@ private fun ReadingGoalDialog(
                     textStyle = MaterialTheme.typography.bodySmall,
                 )
                 Text(
-                    stringResource(R.string.reading_pages_left, remaining),
+                    countText(R.plurals.count_pages_left, remaining),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 12.dp),

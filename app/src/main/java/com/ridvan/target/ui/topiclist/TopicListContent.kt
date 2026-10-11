@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
 import com.ridvan.target.data.local.dao.TopicWithTotals
 import com.ridvan.target.ui.common.AddFab
 
@@ -97,7 +98,7 @@ internal fun TopicListContent(
 private fun TopicRow(topic: TopicWithTotals, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(topic.topic.name) },
-        supportingContent = { Text(stringResource(R.string.counts_tests_questions, topic.totalTestCount, topic.totalQuestionCount)) },
+        supportingContent = { Text(stringResource(R.string.counts_tests_questions, countText(R.plurals.count_tests, topic.totalTestCount), countText(R.plurals.count_questions, topic.totalQuestionCount))) },
         modifier = Modifier.clickable(onClick = onClick),
     )
 }

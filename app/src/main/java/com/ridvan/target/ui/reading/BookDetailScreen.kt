@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.focustimer.FocusHistoryRow
@@ -62,7 +64,6 @@ fun BookDetailScreen(
     var showEdit by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
     var showNotes by remember { mutableStateOf(false) }
-    var pendingSessionDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
 
     Scaffold(
         topBar = {
@@ -121,7 +122,7 @@ fun BookDetailScreen(
                             val details = listOfNotNull(
                                 book.publisher,
                                 book.publishedYear?.toString(),
-                                book.totalPages?.let { stringResource(R.string.book_pages_count, it) },
+                                book.totalPages?.let { countText(R.plurals.count_pages, it) },
                             )
                             if (details.isNotEmpty()) {
                                 Text(
@@ -166,9 +167,9 @@ fun BookDetailScreen(
                     Text(
                         stringResource(
                             R.string.reading_book_stats,
-                            current.pagesRead,
-                            stringResource(R.string.duration_format, current.minutes / 60, current.minutes % 60),
-                            current.sessionCount,
+                            countText(R.plurals.count_pages_read, current.pagesRead),
+                            formatDuration(current.minutes),
+                            countText(R.plurals.count_sessions, current.sessionCount),
                         ),
                     )
                     speed?.let {
@@ -207,7 +208,6 @@ fun BookDetailScreen(
                         FocusHistoryRow(
                             item = item,
                             onClick = { onSessionClick(item.session.id) },
-                            onDeleteClick = { pendingSessionDelete = item },
                         )
                         if (index < sessions.lastIndex) HorizontalDivider()
                     }
@@ -251,16 +251,6 @@ fun BookDetailScreen(
                 }) { Text(stringResource(R.string.common_delete)) }
             },
             dismissButton = { TextButton(onClick = { showDelete = false }) { Text(stringResource(R.string.common_cancel)) } },
-        )
-    }
-    pendingSessionDelete?.let { item ->
-        FocusSessionDeleteDialog(
-            item = item,
-            onConfirm = {
-                viewModel.deleteSession(item.session)
-                pendingSessionDelete = null
-            },
-            onDismiss = { pendingSessionDelete = null },
         )
     }
 }

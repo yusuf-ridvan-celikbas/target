@@ -256,10 +256,6 @@ class FlowTimerViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun deleteHistorySession(session: FocusSession) {
-        viewModelScope.launch { focusSessionDao.delete(session) }
-    }
-
     override fun onCleared() {
         super.onCleared()
         tickerJob?.cancel()

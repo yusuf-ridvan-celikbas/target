@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.data.local.entity.StudyResource
 import com.ridvan.target.data.local.entity.StudyResourceType
 import com.ridvan.target.ui.common.AddFab
@@ -185,49 +186,40 @@ internal fun StudyResourceFormDialog(
 
 @Composable
 internal fun StudyResourceTypeFilterField(selectedType: StudyResourceType?, onSelect: (StudyResourceType?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
     val allLabel = stringResource(R.string.filter_all_study_resource_types)
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.label_type), style = MaterialTheme.typography.labelSmall)
-            Text(selectedType?.let { studyResourceTypeLabel(it) } ?: allLabel, style = MaterialTheme.typography.bodyLarge)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); expanded = false })
-            StudyResourceType.entries.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(studyResourceTypeLabel(option)) },
-                    onClick = {
-                        onSelect(option)
-                        expanded = false
-                    },
-                )
-            }
+    DropdownField(
+        selectedLabel = selectedType?.let { studyResourceTypeLabel(it) } ?: allLabel,
+        label = stringResource(R.string.label_type),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); close() })
+        StudyResourceType.entries.forEach { option ->
+            DropdownMenuItem(
+                text = { Text(studyResourceTypeLabel(option)) },
+                onClick = {
+                    onSelect(option)
+                    close()
+                },
+            )
         }
     }
 }
 
 @Composable
 internal fun StudyResourceTypeField(selectedType: StudyResourceType?, onSelect: (StudyResourceType) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.label_type), style = MaterialTheme.typography.labelSmall)
-                HelpTooltip(R.string.help_tooltip_study_resource_type, R.string.cd_help_study_resource_type)
-            }
-            Text(studyResourceTypeLabel(selectedType), style = MaterialTheme.typography.bodyLarge)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            StudyResourceType.entries.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(studyResourceTypeLabel(option)) },
-                    onClick = {
-                        onSelect(option)
-                        expanded = false
-                    },
-                )
-            }
+    DropdownField(
+        selectedLabel = studyResourceTypeLabel(selectedType),
+        label = stringResource(R.string.label_type),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        StudyResourceType.entries.forEach { option ->
+            DropdownMenuItem(
+                text = { Text(studyResourceTypeLabel(option)) },
+                onClick = {
+                    onSelect(option)
+                    close()
+                },
+            )
         }
     }
 }

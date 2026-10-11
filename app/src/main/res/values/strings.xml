@@ -17,8 +17,8 @@
     <string name="label_icon">Icon</string>
     <string name="label_date">Date</string>
     <string name="label_language">Language</string>
-    <string name="counts_tests_questions">%1$d tests · %2$d questions</string>
-    <string name="counts_remaining_of_target">%1$d/%2$d tests · %3$d/%4$d questions</string>
+    <string name="counts_tests_questions">%1$s · %2$s</string>
+    <string name="counts_remaining_of_target">%1$d/%2$s · %3$d/%4$s</string>
     <string name="delete_confirm_generic">This removes \"%1$s\".</string>
 
     <!-- Navigation shell: bottom tabs + profile menu (ui/shell/AppShell.kt), hub pages (ui/hub/) -->
@@ -47,7 +47,6 @@
     <string name="cd_more">More</string>
     <string name="cd_add">Add</string>
     <string name="label_profile">Profile</string>
-    <string name="menu_app_settings">App Settings</string>
     <string name="label_my_account">My Account</string>
     <string name="menu_log_out">Log Out</string>
     <string name="label_switch_account">Switch Account</string>
@@ -134,8 +133,8 @@
     <string name="home_studied_today">Studied today: %1$s</string>
     <string name="home_studied_week">This week: %1$s</string>
     <string name="home_studied_empty">Nothing studied yet today.</string>
-    <string name="home_reading_today">Read today: %1$d pages · %2$s</string>
-    <string name="home_reading_week">This week: %1$d pages · %2$s</string>
+    <string name="home_reading_today">Read today: %1$s · %2$s</string>
+    <string name="home_reading_week">This week: %1$s · %2$s</string>
     <string name="home_planner_empty">Nothing on the planner right now</string>
 
     <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
@@ -287,7 +286,7 @@
     <string name="dialog_delete_entry_message">This also deletes its topic breakdown, if any.</string>
     <string name="topic_breakdown_section_title">Topic Breakdown</string>
     <string name="action_add_topic_breakdown">+ Add Topic</string>
-    <string name="topic_result_row_summary">%1$d questions · %2$d✓ / %3$d✗</string>
+    <string name="topic_result_row_summary">%1$s · %2$d✓ / %3$d✗</string>
     <string name="topic_result_correct_wrong_remaining_hint">Correct up to %1$d · Wrong up to %2$d</string>
     <string name="action_remove_topic_result">Remove from this exam</string>
     <string name="topic_breakdown_empty">No topic breakdown yet.</string>
@@ -307,11 +306,16 @@
     <string name="contribution_row_title">%1$s — %2$s</string>
 
     <!-- Topic progress (ui/topicprogress/TopicProgressScreen.kt) -->
-    <string name="label_target_counts">Target: %1$d tests · %2$d questions</string>
-    <string name="label_remaining_counts">Remaining: %1$d tests · %2$d questions</string>
+    <string name="label_target_counts">Target: %1$s · %2$s</string>
+    <string name="label_remaining_counts">Remaining: %1$s · %2$s</string>
     <string name="label_tests_remaining_hint">Up to %1$d</string>
-    <string name="progress_aggregate">%1$d tests · %2$d solved · %3$d unsolved · %4$d blank · Net %5$s · %6$s total</string>
+    <string name="progress_aggregate">%1$s · %2$d solved · %3$d unsolved · %4$d blank · Net %5$s · %6$s total</string>
     <string name="duration_format">%1$dh %2$dm</string>
+    <string name="duration_minutes_only">%1$dm</string>
+    <string name="duration_hours_only">%1$dh</string>
+    <string name="focus_stats_work">%1$s work</string>
+    <string name="focus_stats_reading">%1$s reading</string>
+    <string name="focus_stats_break">%1$s break</string>
     <string name="action_log_session">+ Log Session</string>
     <string name="dialog_log_session_title">Log session</string>
     <string name="dialog_edit_session_title">Edit session</string>
@@ -322,7 +326,7 @@
     <string name="label_minutes">Minutes</string>
     <string name="action_delete_session">Delete this session</string>
     <string name="progress_no_sessions">No sessions logged yet. Tap + Log Session to add one.</string>
-    <string name="session_row_summary">%1$d tests · %2$d✓ / %3$d✗ / %4$d blank · %5$s</string>
+    <string name="session_row_summary">%1$s · %2$d✓ / %3$d✗ / %4$d blank · %5$s</string>
     <string name="cd_edit_target_counts">Edit target counts</string>
     <string name="cd_detach_topic">Remove topic from resource</string>
     <string name="dialog_edit_target_counts_title">Edit target counts</string>
@@ -479,7 +483,7 @@
     <string name="cd_previous_period">Previous period</string>
     <string name="cd_next_period">Next period</string>
     <string name="planner_day_studied_total">Studied %1$s</string>
-    <string name="planner_period_studied_total">Total studied: %1$s · %2$d sessions</string>
+    <string name="planner_period_studied_total">Total studied: %1$s · %2$s</string>
     <string name="planner_studied_focus">Focus Timer · %1$s</string>
     <string name="planner_studied_reading">Reading · %1$s</string>
     <string name="planner_studied_practice">Practice · %1$s · %2$s</string>
@@ -489,7 +493,7 @@
     <string name="planner_group_practice">Practice Sessions</string>
     <string name="planner_group_reading">Reading Sessions</string>
     <string name="planner_day_read_total">Read %1$s</string>
-    <string name="planner_period_read_total">Total read: %1$s · %2$d pages · %3$d sessions</string>
+    <string name="planner_period_read_total">Total read: %1$s · %2$s · %3$s</string>
     <string name="planner_group_header">%1$s (%2$d)</string>
     <string name="planner_day_empty">Nothing planned</string>
     <string name="planner_dialog_new_title">Add Planner Event</string>
@@ -615,7 +619,7 @@
     <string name="focustimer_history_not_linked">Not linked</string>
     <string name="focustimer_history_filter_preset">Preset</string>
     <string name="focustimer_history_all_presets">All presets</string>
-    <string name="focustimer_history_summary">%1$d sessions · %2$s work</string>
+    <string name="focustimer_history_summary">%1$s · %2$s work</string>
     <string name="focustimer_history_clear_filters">Clear filters</string>
     <string name="focustimer_history_no_matches">No sessions match these filters.</string>
     <string name="label_work_history">Work History</string>
@@ -658,8 +662,7 @@
     <string name="reading_pages_read_live">Pages read: %1$d</string>
     <string name="reading_page_before_start">The page reached cannot be before the start page.</string>
     <string name="reading_skip">Skip</string>
-    <string name="reading_pages_suffix">%1$d pages</string>
-    <string name="reading_session_pages">Pages %1$d → %2$d (%3$d pages)</string>
+    <string name="reading_session_pages">Pages %1$d → %2$d (%3$s)</string>
     <string name="reading_session_pages_missing">Page reached not recorded yet</string>
     <string name="reading_running_label">%1$s · from page %2$d</string>
     <string name="reading_period_12_months">12 months</string>
@@ -673,7 +676,7 @@
     <string name="reading_chart_per_month">Pages per month</string>
     <string name="reading_chart_max">Highest: %1$d pages</string>
     <string name="reading_no_sessions">No reading sessions yet.</string>
-    <string name="reading_book_stats">%1$d pages read · %2$s · %3$d sessions</string>
+    <string name="reading_book_stats">%1$s · %2$s · %3$s</string>
     <string name="focus_manual_label">Manual</string>
     <string name="focus_manual_add_button">Log a session manually</string>
     <string name="focus_manual_add_title">Log a Study Session</string>
@@ -681,8 +684,6 @@
     <string name="focus_manual_break_minutes">Break (minutes)</string>
     <string name="focus_manual_work_hint">Work time: %1$s</string>
     <string name="focus_manual_break_too_long">The break must be shorter than the session.</string>
-    <string name="focus_manual_stats">%1$s work · %2$s break</string>
-    <string name="focus_manual_stats_reading">%1$s reading · %2$s break</string>
     <string name="focus_manual_logged_by_hand">Logged manually (no timer)</string>
     <string name="planner_studied_manual">Manual · %1$s</string>
     <string name="planner_studied_manual_reading">Manual reading · %1$s</string>
@@ -719,8 +720,6 @@
     <string name="focus_session_edit">Edit</string>
     <string name="focus_session_no_notes">No notes yet.</string>
     <string name="focus_session_notes_hint">e.g. Studied Dativ</string>
-    <string name="focustimer_history_row_subtitle">%1$d cycles · %2$s work · %3$s break</string>
-    <string name="focustimer_history_row_subtitle_reading">%1$d cycles · %2$s reading · %3$s break</string>
     <string name="focustimer_keep_screen_hint">The screen will stay on while a session is running so you don\'t miss the alarm.</string>
     <string name="focustimer_link_section_title">Link to</string>
     <string name="cd_delete_focus_session">Delete session</string>
@@ -761,7 +760,6 @@
     <string name="reading_field_year">Year (optional)</string>
     <string name="reading_field_status">Status</string>
     <string name="reading_field_rating">Rating</string>
-    <string name="book_pages_count">%1$d pages</string>
     <string name="book_shuffle_colour">Shuffle colour</string>
     <string name="book_notes_title">Notes / review</string>
     <string name="book_notes_hint">What did you think of it?</string>
@@ -788,7 +786,6 @@
     <string name="reading_plan_title">Finish plan</string>
     <string name="reading_forecast">At your recent pace (%1$s pages a day) you\'ll finish around %2$s.</string>
     <string name="reading_forecast_none">Log some reading and a finish date will be predicted here.</string>
-    <string name="reading_pages_left">%1$d pages left</string>
     <string name="reading_goal_line">Goal: finish by %1$s</string>
     <string name="reading_goal_today">Today: %1$d / %2$d pages</string>
     <string name="reading_goal_minutes_left">about %1$d min left</string>
@@ -811,4 +808,34 @@
     <string name="settings_reading_reminder_hint">Once a day, only while a book with a finish goal still has pages to read for today.</string>
     <string name="notif_reading_title">Reading goal: %1$s</string>
     <string name="notif_reading_body">%1$d of %2$d pages still to read today</string>
+
+    <!-- Number + word in the right form (ui/common/CountText.kt countText()) -->
+    <plurals name="count_tests">
+        <item quantity="one">%d test</item>
+        <item quantity="other">%d tests</item>
+    </plurals>
+    <plurals name="count_questions">
+        <item quantity="one">%d question</item>
+        <item quantity="other">%d questions</item>
+    </plurals>
+    <plurals name="count_sessions">
+        <item quantity="one">%d session</item>
+        <item quantity="other">%d sessions</item>
+    </plurals>
+    <plurals name="count_pages">
+        <item quantity="one">%d page</item>
+        <item quantity="other">%d pages</item>
+    </plurals>
+    <plurals name="count_pages_read">
+        <item quantity="one">%d page read</item>
+        <item quantity="other">%d pages read</item>
+    </plurals>
+    <plurals name="count_pages_left">
+        <item quantity="one">%d page left</item>
+        <item quantity="other">%d pages left</item>
+    </plurals>
+    <plurals name="count_cycles">
+        <item quantity="one">%d cycle</item>
+        <item quantity="other">%d cycles</item>
+    </plurals>
 </resources>

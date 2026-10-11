@@ -17,8 +17,8 @@
     <string name="label_icon">Simge</string>
     <string name="label_date">Tarih</string>
     <string name="label_language">Dil</string>
-    <string name="counts_tests_questions">%1$d test · %2$d soru</string>
-    <string name="counts_remaining_of_target">%1$d/%2$d test · %3$d/%4$d soru</string>
+    <string name="counts_tests_questions">%1$s · %2$s</string>
+    <string name="counts_remaining_of_target">%1$d/%2$s · %3$d/%4$s</string>
     <string name="delete_confirm_generic">Bu, \"%1$s\" öğesini kaldırır.</string>
 
     <!-- Navigation shell: bottom tabs + profile menu (ui/shell/AppShell.kt), hub pages (ui/hub/) -->
@@ -47,7 +47,6 @@
     <string name="cd_more">Diğer</string>
     <string name="cd_add">Ekle</string>
     <string name="label_profile">Profil</string>
-    <string name="menu_app_settings">Uygulama Ayarları</string>
     <string name="label_my_account">Hesabım</string>
     <string name="menu_log_out">Çıkış Yap</string>
     <string name="label_switch_account">Hesap Değiştir</string>
@@ -134,8 +133,8 @@
     <string name="home_studied_today">Bugün çalışılan: %1$s</string>
     <string name="home_studied_week">Bu hafta: %1$s</string>
     <string name="home_studied_empty">Bugün henüz çalışma yok.</string>
-    <string name="home_reading_today">Bugün okunan: %1$d sayfa · %2$s</string>
-    <string name="home_reading_week">Bu hafta: %1$d sayfa · %2$s</string>
+    <string name="home_reading_today">Bugün okunan: %1$s · %2$s</string>
+    <string name="home_reading_week">Bu hafta: %1$s · %2$s</string>
     <string name="home_planner_empty">Planlayıcıda şu anda bir şey yok</string>
 
     <!-- Exam types (seeded DB data — display-only lookup, see ui/common/ExamTypeDisplay.kt; never
@@ -287,7 +286,7 @@
     <string name="dialog_delete_entry_message">Bu, varsa konu dağılımını da siler.</string>
     <string name="topic_breakdown_section_title">Konu Dağılımı</string>
     <string name="action_add_topic_breakdown">+ Konu Ekle</string>
-    <string name="topic_result_row_summary">%1$d soru · %2$d✓ / %3$d✗</string>
+    <string name="topic_result_row_summary">%1$s · %2$d✓ / %3$d✗</string>
     <string name="topic_result_correct_wrong_remaining_hint">Doğru en fazla %1$d · Yanlış en fazla %2$d</string>
     <string name="action_remove_topic_result">Bu denemeden kaldır</string>
     <string name="topic_breakdown_empty">Henüz konu dağılımı yok.</string>
@@ -307,11 +306,16 @@
     <string name="contribution_row_title">%1$s — %2$s</string>
 
     <!-- Topic progress (ui/topicprogress/TopicProgressScreen.kt) -->
-    <string name="label_target_counts">Hedef: %1$d test · %2$d soru</string>
-    <string name="label_remaining_counts">Kalan: %1$d test · %2$d soru</string>
+    <string name="label_target_counts">Hedef: %1$s · %2$s</string>
+    <string name="label_remaining_counts">Kalan: %1$s · %2$s</string>
     <string name="label_tests_remaining_hint">En fazla %1$d</string>
-    <string name="progress_aggregate">%1$d test · %2$d doğru · %3$d yanlış · %4$d boş · Net %5$s · Toplam %6$s</string>
+    <string name="progress_aggregate">%1$s · %2$d doğru · %3$d yanlış · %4$d boş · Net %5$s · Toplam %6$s</string>
     <string name="duration_format">%1$dsa %2$ddk</string>
+    <string name="duration_minutes_only">%1$ddk</string>
+    <string name="duration_hours_only">%1$dsa</string>
+    <string name="focus_stats_work">%1$s çalışma</string>
+    <string name="focus_stats_reading">%1$s okuma</string>
+    <string name="focus_stats_break">%1$s mola</string>
     <string name="action_log_session">+ Oturum Ekle</string>
     <string name="dialog_log_session_title">Oturum ekle</string>
     <string name="dialog_edit_session_title">Oturumu düzenle</string>
@@ -322,7 +326,7 @@
     <string name="label_minutes">Dakika</string>
     <string name="action_delete_session">Bu oturumu sil</string>
     <string name="progress_no_sessions">Henüz oturum kaydedilmedi. Eklemek için + Oturum Ekle\'ye dokunun.</string>
-    <string name="session_row_summary">%1$d test · %2$d✓ / %3$d✗ / %4$d boş · %5$s</string>
+    <string name="session_row_summary">%1$s · %2$d✓ / %3$d✗ / %4$d boş · %5$s</string>
     <string name="cd_edit_target_counts">Hedef sayıları düzenle</string>
     <string name="cd_detach_topic">Konuyu kaynaktan kaldır</string>
     <string name="dialog_edit_target_counts_title">Hedef sayıları düzenle</string>
@@ -477,7 +481,7 @@
     <string name="cd_previous_period">Önceki dönem</string>
     <string name="cd_next_period">Sonraki dönem</string>
     <string name="planner_day_studied_total">Çalışılan %1$s</string>
-    <string name="planner_period_studied_total">Toplam çalışma: %1$s · %2$d oturum</string>
+    <string name="planner_period_studied_total">Toplam çalışma: %1$s · %2$s</string>
     <string name="planner_studied_focus">Odak Zamanlayıcı · %1$s</string>
     <string name="planner_studied_reading">Okuma · %1$s</string>
     <string name="planner_studied_practice">Pratik · %1$s · %2$s</string>
@@ -487,7 +491,7 @@
     <string name="planner_group_practice">Pratik Oturumları</string>
     <string name="planner_group_reading">Okuma Oturumları</string>
     <string name="planner_day_read_total">Okunan %1$s</string>
-    <string name="planner_period_read_total">Toplam okuma: %1$s · %2$d sayfa · %3$d oturum</string>
+    <string name="planner_period_read_total">Toplam okuma: %1$s · %2$s · %3$s</string>
     <string name="planner_group_header">%1$s (%2$d)</string>
     <string name="planner_day_empty">Planlanan bir şey yok</string>
     <string name="planner_dialog_new_title">Planlayıcı Etkinliği Ekle</string>
@@ -613,7 +617,7 @@
     <string name="focustimer_history_not_linked">Bağlantısız</string>
     <string name="focustimer_history_filter_preset">Ön ayar</string>
     <string name="focustimer_history_all_presets">Tüm ön ayarlar</string>
-    <string name="focustimer_history_summary">%1$d oturum · %2$s çalışma</string>
+    <string name="focustimer_history_summary">%1$s · %2$s çalışma</string>
     <string name="focustimer_history_clear_filters">Filtreleri temizle</string>
     <string name="focustimer_history_no_matches">Bu filtrelere uyan oturum yok.</string>
     <string name="label_work_history">Çalışma Geçmişi</string>
@@ -656,8 +660,7 @@
     <string name="reading_pages_read_live">Okunan sayfa: %1$d</string>
     <string name="reading_page_before_start">Ulaşılan sayfa başlangıç sayfasından önce olamaz.</string>
     <string name="reading_skip">Atla</string>
-    <string name="reading_pages_suffix">%1$d sayfa</string>
-    <string name="reading_session_pages">Sayfa %1$d → %2$d (%3$d sayfa)</string>
+    <string name="reading_session_pages">Sayfa %1$d → %2$d (%3$s)</string>
     <string name="reading_session_pages_missing">Ulaşılan sayfa henüz kaydedilmedi</string>
     <string name="reading_running_label">%1$s · %2$d. sayfadan</string>
     <string name="reading_period_12_months">12 ay</string>
@@ -671,7 +674,7 @@
     <string name="reading_chart_per_month">Aylık sayfa</string>
     <string name="reading_chart_max">En yüksek: %1$d sayfa</string>
     <string name="reading_no_sessions">Henüz okuma oturumu yok.</string>
-    <string name="reading_book_stats">%1$d sayfa okundu · %2$s · %3$d oturum</string>
+    <string name="reading_book_stats">%1$s · %2$s · %3$s</string>
     <string name="focus_manual_label">Elle</string>
     <string name="focus_manual_add_button">Oturumu elle kaydet</string>
     <string name="focus_manual_add_title">Çalışma Oturumu Kaydet</string>
@@ -679,8 +682,6 @@
     <string name="focus_manual_break_minutes">Mola (dakika)</string>
     <string name="focus_manual_work_hint">Çalışma süresi: %1$s</string>
     <string name="focus_manual_break_too_long">Mola, oturumdan kısa olmalı.</string>
-    <string name="focus_manual_stats">%1$s çalışma · %2$s mola</string>
-    <string name="focus_manual_stats_reading">%1$s okuma · %2$s mola</string>
     <string name="focus_manual_logged_by_hand">Elle kaydedildi (zamanlayıcı yok)</string>
     <string name="planner_studied_manual">Elle · %1$s</string>
     <string name="planner_studied_manual_reading">Elle okuma · %1$s</string>
@@ -717,8 +718,6 @@
     <string name="focus_session_edit">Düzenle</string>
     <string name="focus_session_no_notes">Henüz not yok.</string>
     <string name="focus_session_notes_hint">ör. Dativ çalıştım</string>
-    <string name="focustimer_history_row_subtitle">%1$d tur · %2$s çalışma · %3$s mola</string>
-    <string name="focustimer_history_row_subtitle_reading">%1$d tur · %2$s okuma · %3$s mola</string>
     <string name="focustimer_keep_screen_hint">Alarmı kaçırmamanız için bir oturum çalışırken ekran açık kalacaktır.</string>
     <string name="focustimer_link_section_title">Bağlantı</string>
     <string name="cd_delete_focus_session">Oturumu sil</string>
@@ -759,7 +758,6 @@
     <string name="reading_field_year">Yıl (isteğe bağlı)</string>
     <string name="reading_field_status">Durum</string>
     <string name="reading_field_rating">Puan</string>
-    <string name="book_pages_count">%1$d sayfa</string>
     <string name="book_shuffle_colour">Rengi karıştır</string>
     <string name="book_notes_title">Notlar / yorum</string>
     <string name="book_notes_hint">Kitap hakkında ne düşündün?</string>
@@ -786,7 +784,6 @@
     <string name="reading_plan_title">Bitirme planı</string>
     <string name="reading_forecast">Son hızınla (günde %1$s sayfa) yaklaşık %2$s tarihinde bitirirsin.</string>
     <string name="reading_forecast_none">Biraz okuma kaydet, bitiş tarihi burada tahmin edilsin.</string>
-    <string name="reading_pages_left">%1$d sayfa kaldı</string>
     <string name="reading_goal_line">Hedef: %1$s tarihine kadar bitir</string>
     <string name="reading_goal_today">Bugün: %1$d / %2$d sayfa</string>
     <string name="reading_goal_minutes_left">yaklaşık %1$d dk kaldı</string>
@@ -809,4 +806,34 @@
     <string name="settings_reading_reminder_hint">Günde bir kez, yalnızca bitirme hedefi olan bir kitabın bugün için okunacak sayfası kaldıysa.</string>
     <string name="notif_reading_title">Okuma hedefi: %1$s</string>
     <string name="notif_reading_body">Bugün %2$d sayfadan %1$d sayfa kaldı</string>
+
+    <!-- Number + word in the right form (ui/common/CountText.kt countText()) -->
+    <plurals name="count_tests">
+        <item quantity="one">%d test</item>
+        <item quantity="other">%d test</item>
+    </plurals>
+    <plurals name="count_questions">
+        <item quantity="one">%d soru</item>
+        <item quantity="other">%d soru</item>
+    </plurals>
+    <plurals name="count_sessions">
+        <item quantity="one">%d oturum</item>
+        <item quantity="other">%d oturum</item>
+    </plurals>
+    <plurals name="count_pages">
+        <item quantity="one">%d sayfa</item>
+        <item quantity="other">%d sayfa</item>
+    </plurals>
+    <plurals name="count_pages_read">
+        <item quantity="one">%d sayfa okundu</item>
+        <item quantity="other">%d sayfa okundu</item>
+    </plurals>
+    <plurals name="count_pages_left">
+        <item quantity="one">%d sayfa kaldı</item>
+        <item quantity="other">%d sayfa kaldı</item>
+    </plurals>
+    <plurals name="count_cycles">
+        <item quantity="one">%d tur</item>
+        <item quantity="other">%d tur</item>
+    </plurals>
 </resources>

@@ -35,6 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.DropdownField
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.Topic
@@ -103,11 +106,11 @@ fun StatisticsScreen(
                 if (summary.tests == 0 && summary.totalQuestions == 0) {
                     Text(stringResource(R.string.statistics_empty), modifier = Modifier.padding(top = 16.dp))
                 } else {
-                    val durationText = stringResource(R.string.duration_format, summary.durationMinutes / 60, summary.durationMinutes % 60)
+                    val durationText = formatDuration(summary.durationMinutes)
                     Text(
                         stringResource(
                             R.string.progress_aggregate,
-                            summary.tests,
+                            countText(R.plurals.count_tests, summary.tests),
                             summary.solved,
                             summary.unsolved,
                             summary.blank,
@@ -152,11 +155,7 @@ fun StatisticsScreen(
                 if (examSummary.tests == 0) {
                     Text(stringResource(R.string.statistics_exams_empty), modifier = Modifier.padding(top = 16.dp))
                 } else {
-                    val durationText = stringResource(
-                        R.string.duration_format,
-                        examSummary.durationMinutes / 60,
-                        examSummary.durationMinutes % 60,
-                    )
+                    val durationText = formatDuration(examSummary.durationMinutes)
                     Text(
                         stringResource(
                             R.string.practice_exam_entries_summary,
@@ -235,12 +234,12 @@ private fun SourceToggle(source: StatsSource, onSelect: (StatsSource) -> Unit, m
 
 @Composable
 private fun BreakdownRow(entry: TopicBreakdownEntry, onClick: () -> Unit) {
-    val durationText = stringResource(R.string.duration_format, entry.durationMinutes / 60, entry.durationMinutes % 60)
+    val durationText = formatDuration(entry.durationMinutes)
     val ownerLabel = if (entry.isCourse) courseDisplayName(entry.ownerName) else entry.ownerName
     ListItem(
         headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, ownerLabel)) },
         supportingContent = {
-            Text(stringResource(R.string.session_row_summary, entry.tests, entry.solved, entry.unsolved, entry.blank, durationText))
+            Text(stringResource(R.string.session_row_summary, countText(R.plurals.count_tests, entry.tests), entry.solved, entry.unsolved, entry.blank, durationText))
         },
         modifier = Modifier.clickable(onClick = onClick),
     )
@@ -272,25 +271,22 @@ private fun PeriodToggle(period: StatsPeriod, onSelect: (StatsPeriod) -> Unit, m
 
 @Composable
 private fun ExamFilterField(examGroups: List<Pair<String, List<Exam>>>, selectedId: Long?, onSelect: (Long?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
     val allLabel = stringResource(R.string.filter_all_exams)
     val selectedExam = examGroups.firstNotNullOfOrNull { (_, exams) -> exams.firstOrNull { it.id == selectedId } }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.label_exam), style = MaterialTheme.typography.labelSmall)
-            Text(selectedExam?.name ?: allLabel, style = MaterialTheme.typography.bodyLarge)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); expanded = false })
-            examGroups.forEach { (typeName, exams) ->
-                Text(
-                    examTypeDisplayName(typeName),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                )
-                exams.forEach { exam ->
-                    DropdownMenuItem(text = { Text(exam.name) }, onClick = { onSelect(exam.id); expanded = false })
-                }
+    DropdownField(
+        selectedLabel = selectedExam?.name ?: allLabel,
+        label = stringResource(R.string.label_exam),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); close() })
+        examGroups.forEach { (typeName, exams) ->
+            Text(
+                examTypeDisplayName(typeName),
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+            exams.forEach { exam ->
+                DropdownMenuItem(text = { Text(exam.name) }, onClick = { onSelect(exam.id); close() })
             }
         }
     }
@@ -298,43 +294,31 @@ private fun ExamFilterField(examGroups: List<Pair<String, List<Exam>>>, selected
 
 @Composable
 private fun CourseFilterField(courses: List<Course>, selectedId: Long?, onSelect: (Long?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
     val allLabel = stringResource(R.string.filter_all_courses)
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.label_course), style = MaterialTheme.typography.labelSmall)
-            Text(
-                courses.firstOrNull { it.id == selectedId }?.name?.let { courseDisplayName(it) } ?: allLabel,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); expanded = false })
-            courses.forEach { course ->
-                DropdownMenuItem(text = { Text(courseDisplayName(course.name)) }, onClick = { onSelect(course.id); expanded = false })
-            }
+    DropdownField(
+        selectedLabel = courses.firstOrNull { it.id == selectedId }?.name?.let { courseDisplayName(it) } ?: allLabel,
+        label = stringResource(R.string.label_course),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); close() })
+        courses.forEach { course ->
+            DropdownMenuItem(text = { Text(courseDisplayName(course.name)) }, onClick = { onSelect(course.id); close() })
         }
     }
 }
 
 @Composable
 private fun TopicFilterField(topics: List<Topic>, selectedId: Long?, enabled: Boolean, onSelect: (Long?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
     val allLabel = stringResource(R.string.filter_all_topics)
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { expanded = true }) {
-            Text(stringResource(R.string.label_topic), style = MaterialTheme.typography.labelSmall)
-            Text(
-                topics.firstOrNull { it.id == selectedId }?.name ?: allLabel,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); expanded = false })
-            topics.forEach { topic ->
-                DropdownMenuItem(text = { Text(topic.name) }, onClick = { onSelect(topic.id); expanded = false })
-            }
+    DropdownField(
+        selectedLabel = topics.firstOrNull { it.id == selectedId }?.name ?: allLabel,
+        label = stringResource(R.string.label_topic),
+        enabled = enabled,
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        DropdownMenuItem(text = { Text(allLabel) }, onClick = { onSelect(null); close() })
+        topics.forEach { topic ->
+            DropdownMenuItem(text = { Text(topic.name) }, onClick = { onSelect(topic.id); close() })
         }
     }
 }
@@ -405,9 +389,9 @@ private fun ReadingStats(
         Text(
             stringResource(
                 R.string.reading_book_stats,
-                summary.pages,
-                stringResource(R.string.duration_format, summary.minutes / 60, summary.minutes % 60),
-                summary.sessions,
+                countText(R.plurals.count_pages_read, summary.pages),
+                formatDuration(summary.minutes),
+                countText(R.plurals.count_sessions, summary.sessions),
             ),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 16.dp),
@@ -443,9 +427,9 @@ private fun ReadingStats(
                             Text(
                                 stringResource(
                                     R.string.reading_book_stats,
-                                    entry.pages,
-                                    stringResource(R.string.duration_format, entry.minutes / 60, entry.minutes % 60),
-                                    entry.sessions,
+                                    countText(R.plurals.count_pages_read, entry.pages),
+                                    formatDuration(entry.minutes),
+                                    countText(R.plurals.count_sessions, entry.sessions),
                                 ),
                             )
                             Text(bookProgressLabel(entry.progress), color = MaterialTheme.colorScheme.tertiary)

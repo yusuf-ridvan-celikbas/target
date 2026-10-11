@@ -35,7 +35,6 @@ import com.ridvan.target.ui.myaccount.MyAccountScreen
 import com.ridvan.target.ui.planner.PlannerHomeScreen
 import com.ridvan.target.ui.practiceexam.PracticeExamEntryDetailScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
-import com.ridvan.target.ui.settings.SettingsHomeScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.hub.FocusHubScreen
 import com.ridvan.target.ui.hub.StudyHubScreen
@@ -100,9 +99,8 @@ fun TargetNavHost() {
         onNavigateReading = { push(ReadingRoute) },
         onNavigateHelp = { push(HelpRoute) },
         onNavigateMyAccount = { push(MyAccountRoute) },
-        onNavigateSettings = { push(SettingsHomeRoute) },
+        onNavigateSettings = { push(SettingsRoute) },
         onNavigateProfile = { navController.navigate(UserEditRoute) },
-        onNavigateAppSettings = { navController.navigate(SettingsRoute) },
         onLogOut = signOut,
         onSwitchAccount = { navController.navigate(SwitchAccountRoute) },
         onReselectTab = { tab ->
@@ -319,9 +317,6 @@ fun TargetNavHost() {
         }
         composable<MyAccountRoute> {
             MyAccountScreen(shellNavigation = shellNavigation)
-        }
-        composable<SettingsHomeRoute> {
-            SettingsHomeScreen(shellNavigation = shellNavigation)
         }
         composable<HelpRoute> {
             HelpScreen(shellNavigation = shellNavigation)

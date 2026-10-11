@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
 import com.ridvan.target.data.local.dao.StudyResourceTopicWithStudyResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +77,7 @@ fun TopicDetailScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             Text(
-                stringResource(R.string.counts_tests_questions, totalTestCount, totalQuestionCount),
+                stringResource(R.string.counts_tests_questions, countText(R.plurals.count_tests, totalTestCount), countText(R.plurals.count_questions, totalQuestionCount)),
                 style = MaterialTheme.typography.headlineSmall,
             )
             Text(
@@ -135,7 +136,7 @@ private fun ContributionRow(contribution: StudyResourceTopicWithStudyResource, o
             Text(stringResource(R.string.contribution_row_title, contribution.studyResourceName, contribution.studyResourcePublisher ?: noPublisher))
         },
         supportingContent = {
-            Text(stringResource(R.string.counts_tests_questions, contribution.studyResourceTopic.testCount, contribution.studyResourceTopic.questionCount))
+            Text(stringResource(R.string.counts_tests_questions, countText(R.plurals.count_tests, contribution.studyResourceTopic.testCount), countText(R.plurals.count_questions, contribution.studyResourceTopic.questionCount)))
         },
         modifier = Modifier.clickable(onClick = onClick),
     )

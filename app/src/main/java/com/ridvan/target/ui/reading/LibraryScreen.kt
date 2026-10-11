@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
 import com.ridvan.target.ui.common.AddFab
 
 /** How the library is ordered. [groups] sorts put each value on its own labelled shelf. */
@@ -335,7 +336,7 @@ private fun LibraryListRow(progress: BookProgress, onClick: () -> Unit) {
                 book.author?.let { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 val details = listOfNotNull(
                     book.genre?.let { bookGenreLabel(it) },
-                    book.totalPages?.let { stringResource(R.string.book_pages_count, it) },
+                    book.totalPages?.let { countText(R.plurals.count_pages, it) },
                     book.publishedYear?.toString(),
                 )
                 if (details.isNotEmpty()) {

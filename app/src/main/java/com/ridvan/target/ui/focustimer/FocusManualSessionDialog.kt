@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.data.local.entity.Language
@@ -212,7 +213,7 @@ fun FocusManualSessionDialog(
                     if (workMinutes > 0) {
                         stringResource(
                             R.string.focus_manual_work_hint,
-                            stringResource(R.string.duration_format, workMinutes / 60, workMinutes % 60),
+                            formatDuration(workMinutes),
                         )
                     } else {
                         stringResource(R.string.focus_manual_break_too_long)

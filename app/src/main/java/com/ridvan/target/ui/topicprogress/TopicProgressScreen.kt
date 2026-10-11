@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.entity.PracticeLog
 import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.formatDate
@@ -64,7 +66,7 @@ fun TopicProgressScreen(
         if (qc != null) (qc - session.solvedCount - session.unsolvedCount).coerceAtLeast(0) else 0
     }
     val netScore = totalSolved - totalUnsolved / 4.0
-    val durationText = stringResource(R.string.duration_format, totalMinutes / 60, totalMinutes % 60)
+    val durationText = formatDuration(totalMinutes)
 
     val otherSessionsTests = sessions.filter { it.id != editingSession?.id }.sumOf { it.testsSolved }
     val otherSessionsQuestions = sessions.filter { it.id != editingSession?.id }
@@ -103,12 +105,12 @@ fun TopicProgressScreen(
         ) {
             attached?.let { current ->
                 Text(
-                    stringResource(R.string.label_target_counts, current.studyResourceTopic.testCount, current.studyResourceTopic.questionCount),
+                    stringResource(R.string.label_target_counts, countText(R.plurals.count_tests, current.studyResourceTopic.testCount), countText(R.plurals.count_questions, current.studyResourceTopic.questionCount)),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        stringResource(R.string.label_remaining_counts, remainingTests, remainingQuestions),
+                        stringResource(R.string.label_remaining_counts, countText(R.plurals.count_tests, remainingTests), countText(R.plurals.count_questions, remainingQuestions)),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     HelpTooltip(R.string.help_tooltip_remaining_counts, R.string.cd_help_remaining_counts)
@@ -119,7 +121,7 @@ fun TopicProgressScreen(
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
             ) {
                 Text(
-                    stringResource(R.string.progress_aggregate, totalTests, totalSolved, totalUnsolved, totalBlank, "%.2f".format(netScore), durationText),
+                    stringResource(R.string.progress_aggregate, countText(R.plurals.count_tests, totalTests), totalSolved, totalUnsolved, totalBlank, "%.2f".format(netScore), durationText),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 HelpTooltip(R.string.help_tooltip_net_score, R.string.cd_help_net_score)
@@ -203,9 +205,9 @@ private fun SessionRow(session: PracticeLog, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(formatDate(session.loggedAt)) },
         supportingContent = {
-            val durationText = stringResource(R.string.duration_format, session.durationMinutes / 60, session.durationMinutes % 60)
+            val durationText = formatDuration(session.durationMinutes)
             val blank = session.questionCount?.let { (it - session.solvedCount - session.unsolvedCount).coerceAtLeast(0) } ?: 0
-            Text(stringResource(R.string.session_row_summary, session.testsSolved, session.solvedCount, session.unsolvedCount, blank, durationText))
+            Text(stringResource(R.string.session_row_summary, countText(R.plurals.count_tests, session.testsSolved), session.solvedCount, session.unsolvedCount, blank, durationText))
         },
         modifier = Modifier.clickable(onClick = onClick),
     )

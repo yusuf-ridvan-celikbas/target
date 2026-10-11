@@ -78,6 +78,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusPreset
@@ -255,7 +256,6 @@ fun FocusTimerScreen(
                     history = recentHistory,
                     onOpenHistory = onOpenHistory,
                     onSessionClick = onSessionClick,
-                    onDelete = viewModel::deleteHistorySession,
                     linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
                     onAddManual = viewModel::addManualSession,
                 )
@@ -629,11 +629,9 @@ internal fun HistorySection(
     history: List<FocusSessionWithLinks>,
     onOpenHistory: () -> Unit,
     onSessionClick: (Long) -> Unit,
-    onDelete: (FocusSession) -> Unit,
     linkSource: ManualSessionLinkSource,
     onAddManual: (ManualFocusSessionForm) -> Unit,
 ) {
-    var pendingDelete by remember { mutableStateOf<FocusSessionWithLinks?>(null) }
     var showManualDialog by remember { mutableStateOf(false) }
 
     // The whole header row opens the full, filterable history page.
@@ -687,62 +685,12 @@ internal fun HistorySection(
                 FocusHistoryRow(
                     item = item,
                     onClick = { onSessionClick(item.session.id) },
-                    onDeleteClick = { pendingDelete = item },
                 )
                 HorizontalDivider()
             }
         }
     }
 
-    pendingDelete?.let { item ->
-        FocusSessionDeleteDialog(
-            item = item,
-            onConfirm = {
-                onDelete(item.session)
-                pendingDelete = null
-            },
-            onDismiss = { pendingDelete = null },
-        )
-    }
-}
-
-/** A rounded, tinted box with a down arrow (flips up while open) so the picker reads as tappable. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun DropdownField(selectedLabel: String, items: @Composable (closeMenu: () -> Unit) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val arrowRotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "dropdownArrow")
-    // The menu matches the box's measured width instead of wrapping its items.
-    var boxWidthPx by remember { mutableStateOf(0) }
-    val density = LocalDensity.current
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp).onSizeChanged { boxWidthPx = it.width }) {
-        Surface(
-            onClick = { expanded = true },
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
-            ) {
-                Text(selectedLabel, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                Icon(
-                    Icons.Filled.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.rotate(arrowRotation),
-                )
-            }
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.width(with(density) { boxWidthPx.toDp() }),
-        ) {
-            items { expanded = false }
-        }
-    }
 }
 
 private fun formatCountdown(millis: Long): String {

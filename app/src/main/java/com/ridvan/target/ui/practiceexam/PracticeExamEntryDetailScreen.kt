@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.PracticeExamEntryTopicResultWithTopic
 import com.ridvan.target.data.local.entity.PracticeExamEntry
 import com.ridvan.target.data.local.entity.PracticeExamEntryTopicResult
@@ -59,11 +61,7 @@ fun PracticeExamEntryDetailScreen(
     var editingTopicResult by remember { mutableStateOf<PracticeExamEntryTopicResultWithTopic?>(null) }
 
     val blank = ((entry?.questionCount ?: 0) - (entry?.correctCount ?: 0) - (entry?.wrongCount ?: 0)).coerceAtLeast(0)
-    val durationText = stringResource(
-        R.string.duration_format,
-        (entry?.durationMinutes ?: 0) / 60,
-        (entry?.durationMinutes ?: 0) % 60,
-    )
+    val durationText = formatDuration((entry?.durationMinutes ?: 0))
 
     Scaffold(
         topBar = {
@@ -195,7 +193,7 @@ private fun TopicResultRow(result: PracticeExamEntryTopicResultWithTopic, onClic
             Text(
                 stringResource(
                     R.string.topic_result_row_summary,
-                    result.topicResult.questionCount,
+                    countText(R.plurals.count_questions, result.topicResult.questionCount),
                     result.topicResult.correctCount,
                     result.topicResult.wrongCount,
                 )

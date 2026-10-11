@@ -66,8 +66,4 @@ class BookDetailViewModel(
             onDeleted()
         }
     }
-
-    fun deleteSession(session: FocusSession) {
-        viewModelScope.launch { focusSessionDao.delete(session) }
-    }
 }

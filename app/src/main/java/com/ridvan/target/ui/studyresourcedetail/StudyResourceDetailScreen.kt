@@ -53,6 +53,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.StudyResourceTopicWithProgress
 import com.ridvan.target.data.local.entity.PracticeExamEntry
 import com.ridvan.target.data.local.entity.StudyResourceType
@@ -228,7 +230,7 @@ private fun PracticeExamEntriesSection(
         val totalQuestions = totalCorrect + totalWrong
         val accuracy = if (totalQuestions == 0) 0 else totalCorrect * 100 / totalQuestions
         val totalMinutes = entries.sumOf { it.durationMinutes }
-        val durationText = stringResource(R.string.duration_format, totalMinutes / 60, totalMinutes % 60)
+        val durationText = formatDuration(totalMinutes)
         Text(
             stringResource(R.string.practice_exam_entries_summary, entries.size, totalCorrect, totalWrong, accuracy, durationText),
             style = MaterialTheme.typography.bodyMedium,
@@ -438,9 +440,9 @@ private fun TopicRow(
                 stringResource(
                     R.string.counts_remaining_of_target,
                     remainingTests,
-                    attached.studyResourceTopic.testCount,
+                    countText(R.plurals.count_tests, attached.studyResourceTopic.testCount),
                     remainingQuestions,
-                    attached.studyResourceTopic.questionCount,
+                    countText(R.plurals.count_questions, attached.studyResourceTopic.questionCount),
                 )
             )
         },

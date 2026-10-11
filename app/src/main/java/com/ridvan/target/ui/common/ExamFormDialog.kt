@@ -183,52 +183,40 @@ fun AddOrEditExamDialog(
 
 @Composable
 private fun ExamTypeField(examTypes: List<ExamType>, selectedId: Long?, onSelect: (Long) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.exam_field_type_label), style = MaterialTheme.typography.labelSmall)
-            Text(
-                examTypes.firstOrNull { it.id == selectedId }?.name?.let { examTypeDisplayName(it) }
+    DropdownField(
+        selectedLabel = examTypes.firstOrNull { it.id == selectedId }?.name?.let { examTypeDisplayName(it) }
                     ?: stringResource(R.string.common_select),
-                style = MaterialTheme.typography.bodyLarge,
+        label = stringResource(R.string.exam_field_type_label),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        examTypes.forEach { type ->
+            DropdownMenuItem(
+                text = { Text(examTypeDisplayName(type.name)) },
+                onClick = {
+                    onSelect(type.id)
+                    close()
+                },
             )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            examTypes.forEach { type ->
-                DropdownMenuItem(
-                    text = { Text(examTypeDisplayName(type.name)) },
-                    onClick = {
-                        onSelect(type.id)
-                        expanded = false
-                    },
-                )
-            }
         }
     }
 }
 
 @Composable
 private fun LanguageField(languages: List<Language>, selectedId: Long?, onSelect: (Long) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Text(stringResource(R.string.label_language), style = MaterialTheme.typography.labelSmall)
-            Text(
-                languages.firstOrNull { it.id == selectedId }?.name
+    DropdownField(
+        selectedLabel = languages.firstOrNull { it.id == selectedId }?.name
                     ?: if (languages.isEmpty()) stringResource(R.string.exam_no_languages_hint) else stringResource(R.string.common_select),
-                style = MaterialTheme.typography.bodyLarge,
+        label = stringResource(R.string.label_language),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        languages.forEach { language ->
+            DropdownMenuItem(
+                text = { Text(language.name) },
+                onClick = {
+                    onSelect(language.id)
+                    close()
+                },
             )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            languages.forEach { language ->
-                DropdownMenuItem(
-                    text = { Text(language.name) },
-                    onClick = {
-                        onSelect(language.id)
-                        expanded = false
-                    },
-                )
-            }
         }
     }
 }

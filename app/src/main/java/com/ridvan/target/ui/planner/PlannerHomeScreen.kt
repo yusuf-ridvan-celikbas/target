@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.SegmentedToggle
@@ -132,7 +133,7 @@ fun PlannerHomeScreen(
                     stringResource(
                         R.string.planner_period_studied_total,
                         durationText(periodStudied.sumOf { it.studiedMinutes }),
-                        periodStudied.size,
+                        countText(R.plurals.count_sessions, periodStudied.size),
                     ),
                 )
             }
@@ -141,8 +142,8 @@ fun PlannerHomeScreen(
                     stringResource(
                         R.string.planner_period_read_total,
                         durationText(periodReading.sumOf { it.studiedMinutes }),
-                        periodReading.sumOf { it.pagesRead() },
-                        periodReading.size,
+                        countText(R.plurals.count_pages, periodReading.sumOf { it.pagesRead() }),
+                        countText(R.plurals.count_sessions, periodReading.size),
                     ),
                 )
             }

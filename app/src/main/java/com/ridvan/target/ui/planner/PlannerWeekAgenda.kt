@@ -32,6 +32,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCategory
 import com.ridvan.target.ui.common.GroupedCard
@@ -181,7 +183,7 @@ private fun AgendaGroupHeader(
         if (studiedGroup) {
             val minutes = items.filterIsInstance<PlannerAgendaItem.Studied>().sumOf { it.studiedMinutes }
             Text(
-                stringResource(R.string.duration_format, minutes / 60, minutes % 60),
+                formatDuration(minutes),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(end = 8.dp),
@@ -289,7 +291,7 @@ private fun AgendaRow(
             val row = item.row
             val log = row.practiceLog
             val owner = row.courseName?.let { courseDisplayName(it) } ?: row.languageName
-            val durationText = stringResource(R.string.duration_format, log.durationMinutes / 60, log.durationMinutes % 60)
+            val durationText = formatDuration(log.durationMinutes)
             val blank = log.questionCount?.let { (it - log.solvedCount - log.unsolvedCount).coerceAtLeast(0) } ?: 0
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -303,7 +305,7 @@ private fun AgendaRow(
                             style = MaterialTheme.typography.bodySmall,
                         )
                         Text(
-                            stringResource(R.string.session_row_summary, log.testsSolved, log.solvedCount, log.unsolvedCount, blank, durationText),
+                            stringResource(R.string.session_row_summary, countText(R.plurals.count_tests, log.testsSolved), log.solvedCount, log.unsolvedCount, blank, durationText),
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -342,7 +344,7 @@ private fun StudyLinkLine(
 }
 
 @Composable
-internal fun durationText(minutes: Int): String = stringResource(R.string.duration_format, minutes / 60, minutes % 60)
+internal fun durationText(minutes: Int): String = formatDuration(minutes)
 
 /** Not private — reused by PlannerHomePreview.kt's compact Home card so its "Today"/"Tomorrow"
  *  rows can show a time too, without duplicating this formatting or leaking java.time past ui/planner. */

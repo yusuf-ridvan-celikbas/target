@@ -426,10 +426,6 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun deleteHistorySession(session: FocusSession) {
-        viewModelScope.launch { focusSessionDao.delete(session) }
-    }
-
     override fun onCleared() {
         super.onCleared()
         tickerJob?.cancel()

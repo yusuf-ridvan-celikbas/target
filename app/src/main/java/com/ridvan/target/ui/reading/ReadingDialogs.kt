@@ -31,7 +31,7 @@ import com.ridvan.target.data.local.entity.Book
 import com.ridvan.target.data.local.entity.BookGenre
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
-import com.ridvan.target.ui.focustimer.DropdownField
+import com.ridvan.target.ui.common.DropdownField
 import kotlin.random.Random
 
 private const val MAX_PAGE_DIGITS = 5

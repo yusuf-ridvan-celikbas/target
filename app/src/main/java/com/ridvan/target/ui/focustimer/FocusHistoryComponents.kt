@@ -5,11 +5,7 @@ import com.ridvan.target.ui.reading.pagesRead
 import com.ridvan.target.data.local.entity.FocusSession
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatDate
@@ -47,23 +45,24 @@ internal fun focusSessionPresetLabel(session: FocusSession): String = when {
 internal fun focusSessionTitle(item: FocusSessionWithLinks): String =
     item.bookTitle ?: focusSessionLinkLabel(item) ?: focusSessionPresetLabel(item.session)
 
-/** "2 cycles · 0h 40m work · 0h 7m break" — manual sessions have no cycles, so just work/break. */
+/**
+ * "2 cycles · 40m work · 7m break · 12 pages" — only the parts that say something: no cycle count for
+ * manual/Flow sessions or a timer session that never finished a round, no break part when there was no
+ * break, and pages only once the page reached is known. A reading session says "reading" instead of "work".
+ */
 @Composable
 internal fun focusSessionStatsLine(session: FocusSession): String {
-    val workText = stringResource(R.string.duration_format, session.totalWorkMinutes / 60, session.totalWorkMinutes % 60)
-    val breakText = stringResource(R.string.duration_format, session.totalBreakMinutes / 60, session.totalBreakMinutes % 60)
-    // A reading session says "reading" where a study session says "work".
-    val reading = session.isReading
-    val base = if (session.isManual || session.isFlow) {
-        stringResource(if (reading) R.string.focus_manual_stats_reading else R.string.focus_manual_stats, workText, breakText)
-    } else {
-        stringResource(
-            if (reading) R.string.focustimer_history_row_subtitle_reading else R.string.focustimer_history_row_subtitle,
-            session.cyclesCompleted, workText, breakText,
-        )
+    val parts = mutableListOf<String>()
+    if (!session.isManual && !session.isFlow && session.cyclesCompleted > 0) {
+        parts += countText(R.plurals.count_cycles, session.cyclesCompleted)
     }
-    // Reading sessions add their pages once the page reached is known.
-    return if (session.endPage != null) "$base · ${stringResource(R.string.reading_pages_suffix, session.pagesRead())}" else base
+    val workText = formatDuration(session.totalWorkMinutes)
+    parts += stringResource(if (session.isReading) R.string.focus_stats_reading else R.string.focus_stats_work, workText)
+    if (session.totalBreakMinutes > 0) {
+        parts += stringResource(R.string.focus_stats_break, formatDuration(session.totalBreakMinutes))
+    }
+    if (session.endPage != null) parts += countText(R.plurals.count_pages, session.pagesRead())
+    return parts.joinToString(" · ")
 }
 
 /** Shared by FocusTimerScreen's recent-history card and every FocusHistoryScreen variant; tapping opens FocusSessionDetailScreen. */
@@ -71,7 +70,6 @@ internal fun focusSessionStatsLine(session: FocusSession): String {
 internal fun FocusHistoryRow(
     item: FocusSessionWithLinks,
     onClick: () -> Unit,
-    onDeleteClick: () -> Unit,
 ) {
     val session = item.session
     val linkLabel = focusSessionLinkLabel(item)
@@ -96,11 +94,6 @@ internal fun FocusHistoryRow(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-            }
-        },
-        trailingContent = {
-            IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete_focus_session))
             }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),

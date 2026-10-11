@@ -60,7 +60,6 @@ data class ShellNavigation(
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
     val onNavigateProfile: () -> Unit,
-    val onNavigateAppSettings: () -> Unit,
     val onLogOut: () -> Unit,
     val onSwitchAccount: () -> Unit,
     /** Tapping the tab you're already in: back to that tab's own first page. */

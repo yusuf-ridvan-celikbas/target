@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 import com.ridvan.target.ui.common.findActivity
@@ -212,7 +213,6 @@ fun FlowTimerScreen(
                     history = recentHistory,
                     onOpenHistory = onOpenHistory,
                     onSessionClick = onSessionClick,
-                    onDelete = viewModel::deleteHistorySession,
                     linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
                     onAddManual = viewModel::addManualSession,
                 )
@@ -337,8 +337,8 @@ private fun FlowRunningContent(
         Text(
             stringResource(
                 if (isReading) R.string.flow_totals_reading else R.string.flow_totals,
-                stringResource(R.string.duration_format, workMinutes / 60, workMinutes % 60),
-                stringResource(R.string.duration_format, breakMinutes / 60, breakMinutes % 60),
+                formatDuration(workMinutes),
+                formatDuration(breakMinutes),
             ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

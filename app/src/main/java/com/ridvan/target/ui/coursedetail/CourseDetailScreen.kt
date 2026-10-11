@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.data.export.CourseQuestionBankCsvExporter
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.CourseCategory
@@ -348,28 +349,19 @@ private fun CourseCategoryField(selected: CourseCategory?, onSelect: (CourseCate
 
 @Composable
 private fun CourseExamTypeField(examTypes: List<ExamType>, selectedId: Long?, onSelect: (Long) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.exam_field_type_label), style = MaterialTheme.typography.labelSmall)
-                HelpTooltip(R.string.help_tooltip_course_exam_type, R.string.cd_help_course_exam_type)
-            }
-            Text(
-                examTypes.firstOrNull { it.id == selectedId }?.name?.let { examTypeDisplayName(it) } ?: stringResource(R.string.common_select),
-                style = MaterialTheme.typography.bodyLarge,
+    DropdownField(
+        selectedLabel = examTypes.firstOrNull { it.id == selectedId }?.name?.let { examTypeDisplayName(it) } ?: stringResource(R.string.common_select),
+        label = stringResource(R.string.exam_field_type_label),
+        modifier = Modifier.padding(top = 4.dp),
+    ) { close ->
+        examTypes.forEach { type ->
+            DropdownMenuItem(
+                text = { Text(examTypeDisplayName(type.name)) },
+                onClick = {
+                    onSelect(type.id)
+                    close()
+                },
             )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            examTypes.forEach { type ->
-                DropdownMenuItem(
-                    text = { Text(examTypeDisplayName(type.name)) },
-                    onClick = {
-                        onSelect(type.id)
-                        expanded = false
-                    },
-                )
-            }
         }
     }
 }

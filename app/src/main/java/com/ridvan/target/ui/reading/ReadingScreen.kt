@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.entity.FocusSession
 import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.GroupedCard
@@ -130,7 +131,7 @@ private fun SummaryCard(sessions: List<FocusSession>, finishedBooks: Int) {
                 StatCell(stringResource(R.string.reading_stat_pages), pages.toString(), Modifier.weight(1f))
                 StatCell(
                     stringResource(R.string.reading_stat_time),
-                    stringResource(R.string.duration_format, minutes / 60, minutes % 60),
+                    formatDuration(minutes),
                     Modifier.weight(1f),
                 )
             }
