@@ -81,7 +81,7 @@ import com.ridvan.target.data.local.entity.User
         TripExpense::class,
     ],
     version = 27,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class TargetDatabase : RoomDatabase() {
     abstract fun examTypeDao(): ExamTypeDao
