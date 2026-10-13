@@ -50,7 +50,7 @@ import com.ridvan.target.data.local.entity.TripPackingItem
 import com.ridvan.target.data.local.entity.TripPlace
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.common.startOfTodayMillis
-import com.ridvan.target.ui.focustimer.DropdownField
+import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.ui.focustimer.localDayToUtcMillis
 import com.ridvan.target.ui.focustimer.utcMillisToLocalDay
 
@@ -116,8 +116,7 @@ private fun <T> EnumPicker(
     labelOf: @Composable (T) -> String,
     iconOf: (T) -> ImageVector,
 ) {
-    FieldLabel(label)
-    DropdownField(selectedLabel = labelOf(selected)) { close ->
+    DropdownField(selectedLabel = labelOf(selected), label = label, modifier = Modifier.padding(top = 6.dp)) { close ->
         values.forEach { value ->
             DropdownMenuItem(
                 leadingIcon = { Icon(iconOf(value), contentDescription = null) },

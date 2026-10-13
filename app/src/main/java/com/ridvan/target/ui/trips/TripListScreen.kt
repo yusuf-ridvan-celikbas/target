@@ -30,6 +30,7 @@ import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.TripWithTotals
 import com.ridvan.target.ui.common.AddFab
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.ui.common.countText
 import com.ridvan.target.ui.common.formatDate
 import com.ridvan.target.ui.common.startOfTodayMillis
 import com.ridvan.target.ui.shell.AppShell
@@ -112,8 +113,8 @@ private fun TripCard(item: TripWithTotals, today: Long, onClick: () -> Unit) {
                 modifier = Modifier.padding(top = 4.dp),
             )
             val parts = listOfNotNull(
-                stringResource(R.string.trips_card_days, tripDayCount(trip)),
-                item.bookingCount.takeIf { it > 0 }?.let { stringResource(R.string.trips_card_bookings, it) },
+                countText(R.plurals.count_days, tripDayCount(trip)),
+                item.bookingCount.takeIf { it > 0 }?.let { countText(R.plurals.count_bookings, it) },
                 item.packingCount.takeIf { it > 0 }?.let { stringResource(R.string.trips_card_packed, item.packedCount, it) },
                 (item.spentMinor > 0 || trip.budgetMinor != null).takeIf { it }?.let {
                     trip.budgetMinor?.let { budget ->

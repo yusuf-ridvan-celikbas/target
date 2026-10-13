@@ -2,6 +2,8 @@ package com.ridvan.target.ui.planner
 
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
+import com.ridvan.target.data.local.dao.TripActivityWithTrip
+import com.ridvan.target.data.local.dao.TripBookingWithTrip
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.ui.reading.isReading
 import java.time.LocalDate
@@ -32,6 +34,27 @@ sealed interface PlannerAgendaItem {
         val examId: Long,
         val sectionId: Long,
         val label: String,
+        override val date: LocalDate,
+    ) : PlannerAgendaItem
+
+    /** One day of a trip (every day it covers), so the trip itself is visible on the calendar. */
+    data class TripDayEntry(
+        val tripId: Long,
+        val tripName: String,
+        val destination: String?,
+        val dayNumber: Int,
+        val dayCount: Int,
+        override val date: LocalDate,
+    ) : PlannerAgendaItem
+
+    data class TripActivityEntry(
+        val item: TripActivityWithTrip,
+        override val date: LocalDate,
+    ) : PlannerAgendaItem
+
+    /** A booking on its departure / check-in day. */
+    data class TripBookingEntry(
+        val item: TripBookingWithTrip,
         override val date: LocalDate,
     ) : PlannerAgendaItem
 

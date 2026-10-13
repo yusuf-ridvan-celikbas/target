@@ -8,6 +8,10 @@ import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
 import com.ridvan.target.data.local.dao.PlannerEventWithLinks
+import com.ridvan.target.data.local.dao.TripActivityWithTrip
+import com.ridvan.target.data.local.dao.TripBookingWithTrip
+import com.ridvan.target.data.local.entity.Trip
+import java.time.temporal.ChronoUnit
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCompletion
@@ -37,6 +41,9 @@ private data class PlannerRawData(
     val sections: List<Section>,
     val focusSessions: List<FocusSessionWithLinks>,
     val practiceLogs: List<PracticeLogPlannerRow>,
+    val trips: List<Trip>,
+    val tripActivities: List<TripActivityWithTrip>,
+    val tripBookings: List<TripBookingWithTrip>,
 )
 
 class PlannerHomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -50,6 +57,9 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
     private val topicDao = database.topicDao()
     private val focusSessionDao = database.focusSessionDao()
     private val practiceLogDao = database.practiceLogDao()
+    private val tripDao = database.tripDao()
+    private val tripActivityDao = database.tripActivityDao()
+    private val tripBookingDao = database.tripBookingDao()
     private val userId = targetApplication.preferences.currentUserId
 
     private val _viewMode = MutableStateFlow(PlannerViewMode.WEEK)
@@ -64,14 +74,25 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
         userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
     ) { focus, practice -> focus to practice }
 
+    private val examData = combine(
+        userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()),
+    ) { exams, sections -> exams to sections }
+
+    private val tripData = combine(
+        userId?.let { tripDao.getByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { tripActivityDao.getAllWithTripByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { tripBookingDao.getAllWithTripByUserId(it) } ?: flowOf(emptyList()),
+    ) { trips, activities, bookings -> Triple(trips, activities, bookings) }
+
     private val rawData = combine(
         userId?.let { plannerEventDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { plannerEventCompletionDao.getAllByUserId(it) } ?: flowOf(emptyList()),
-        userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
-        userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()),
+        examData,
         studiedData,
-    ) { events, completions, exams, sections, (focus, practice) ->
-        PlannerRawData(events, completions, exams, sections, focus, practice)
+        tripData,
+    ) { events, completions, (exams, sections), (focus, practice), (trips, activities, bookings) ->
+        PlannerRawData(events, completions, exams, sections, focus, practice, trips, activities, bookings)
     }
 
     private val modeAndDate = combine(_viewMode, _anchorDate) { mode, date -> mode to date }
@@ -184,7 +205,31 @@ private fun buildAgendaItems(raw: PlannerRawData, range: ClosedRange<LocalDate>)
 
     val studiedItems = studiedItemsInRange(raw.focusSessions, raw.practiceLogs, range)
 
-    return (eventItems + examItems + sectionItems + studiedItems).sortedBy { it.date }
+    return (eventItems + examItems + sectionItems + studiedItems + tripItemsInRange(raw, range)).sortedBy { it.date }
+}
+
+/** Each day a trip covers inside [range], plus its activities and bookings (by departure / check-in day). */
+private fun tripItemsInRange(raw: PlannerRawData, range: ClosedRange<LocalDate>): List<PlannerAgendaItem> {
+    val days = raw.trips.flatMap { trip ->
+        val start = trip.startDate.toLocalDate()
+        val end = trip.endDate.toLocalDate()
+        val dayCount = ChronoUnit.DAYS.between(start, end).toInt() + 1
+        generateSequence(maxOf(start, range.start)) { it.plusDays(1) }
+            .takeWhile { it <= minOf(end, range.endInclusive) }
+            .map { date ->
+                PlannerAgendaItem.TripDayEntry(
+                    trip.id, trip.name, trip.destination, ChronoUnit.DAYS.between(start, date).toInt() + 1, dayCount, date,
+                )
+            }
+            .toList()
+    }
+    val activities = raw.tripActivities.mapNotNull { item ->
+        item.activity.date.toLocalDate().takeIf { it in range }?.let { PlannerAgendaItem.TripActivityEntry(item, it) }
+    }
+    val bookings = raw.tripBookings.mapNotNull { item ->
+        item.booking.startDate.toLocalDate().takeIf { it in range }?.let { PlannerAgendaItem.TripBookingEntry(item, it) }
+    }
+    return days + activities + bookings
 }
 
 /** Focus sessions (by start time) and Practice Sessions (by log time) falling in [range] —

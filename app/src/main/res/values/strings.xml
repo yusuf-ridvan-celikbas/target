@@ -838,4 +838,126 @@
         <item quantity="one">%d cycle</item>
         <item quantity="other">%d cycles</item>
     </plurals>
+
+    <!-- Trip Planner -->
+    <string name="label_trips">Trips</string>
+    <string name="hub_planner_hint">Your agenda: events, exams and what you studied</string>
+    <string name="hub_trips_hint">Itinerary, bookings, packing and budget</string>
+    <string name="planner_group_trips">Trips</string>
+    <string name="notif_trip_starts">Trip starts today: %1$s</string>
+    <string name="trips_empty">No trips yet. Tap + to plan one.</string>
+    <string name="trips_upcoming">Current and upcoming</string>
+    <string name="trips_past">Past trips</string>
+    <string name="trips_card_packed">%1$d/%2$d packed</string>
+    <string name="trips_card_spent">%1$s spent</string>
+    <string name="trips_card_spent_of">%1$s of %2$s spent</string>
+    <string name="trip_starts_tomorrow">Starts tomorrow</string>
+    <string name="trip_starts_in_days">In %1$d days</string>
+    <string name="trip_day_of">Day %1$d of %2$d</string>
+    <string name="trip_ended">Ended</string>
+    <string name="trip_add_title">New trip</string>
+    <string name="trip_edit_title">Edit trip</string>
+    <string name="trip_delete">Delete trip</string>
+    <string name="trip_delete_message">Delete \"%1$s\" with its itinerary, bookings, packing list and expenses? This can\'t be undone.</string>
+    <string name="trip_field_name">Trip name</string>
+    <string name="trip_field_destination">Destination (optional)</string>
+    <string name="trip_field_start">First day</string>
+    <string name="trip_field_end">Last day</string>
+    <string name="trip_field_currency">Currency (e.g. EUR)</string>
+    <string name="trip_currency_hint">Enter a 3-letter currency code like EUR, USD or TRY.</string>
+    <string name="trip_field_budget">Budget in %1$s (optional)</string>
+    <string name="trip_field_notes">Notes (optional)</string>
+    <string name="trip_tab_itinerary">Plan</string>
+    <string name="trip_tab_bookings">Bookings</string>
+    <string name="trip_tab_packing">Packing</string>
+    <string name="trip_tab_budget">Budget</string>
+    <string name="trip_day_header">Day %1$d · %2$s</string>
+    <string name="trip_day_empty">Nothing planned yet.</string>
+    <string name="trip_activity_add_title">Add to the plan</string>
+    <string name="trip_activity_edit_title">Edit plan item</string>
+    <string name="trip_field_title">Title</string>
+    <string name="trip_field_category">Category</string>
+    <string name="trip_field_day">Day</string>
+    <string name="trip_field_start_time">Set a start time</string>
+    <string name="trip_field_end_time">Set an end time</string>
+    <string name="trip_field_place">Place (optional)</string>
+    <string name="trip_field_address">Address (optional)</string>
+    <string name="trip_bookings_empty">No bookings yet. Tap + to add a flight, hotel or ticket.</string>
+    <string name="trip_booking_add_title">New booking</string>
+    <string name="trip_booking_edit_title">Edit booking</string>
+    <string name="trip_field_type">Type</string>
+    <string name="trip_field_booking_number">Flight / train number</string>
+    <string name="trip_field_provider">Company (optional)</string>
+    <string name="trip_field_confirmation">Confirmation code (optional)</string>
+    <string name="trip_field_departure">Departure</string>
+    <string name="trip_field_arrival">Arrival</string>
+    <string name="trip_field_check_in">Check-in</string>
+    <string name="trip_field_check_out">Check-out</string>
+    <string name="trip_field_set_time">Set a time</string>
+    <string name="trip_field_from">From</string>
+    <string name="trip_field_to">To</string>
+    <string name="trip_field_has_arrival">Add arrival</string>
+    <string name="trip_field_has_check_out">Add check-out</string>
+    <string name="trip_field_booking_price">Price in %1$s (optional)</string>
+    <string name="trip_booking_price_hint">A price is added to the budget as an expense.</string>
+    <string name="trip_confirmation_line">Code: %1$s</string>
+    <string name="trip_booking_flight">Flight</string>
+    <string name="trip_booking_train">Train</string>
+    <string name="trip_booking_bus">Bus</string>
+    <string name="trip_booking_ferry">Ferry</string>
+    <string name="trip_booking_car_rental">Car rental</string>
+    <string name="trip_booking_hotel">Stay</string>
+    <string name="trip_category_other">Other</string>
+    <string name="trip_activity_sightseeing">Sightseeing</string>
+    <string name="trip_activity_food">Food</string>
+    <string name="trip_activity_activity">Activity</string>
+    <string name="trip_activity_transport">Getting around</string>
+    <string name="trip_activity_shopping">Shopping</string>
+    <string name="trip_packing_documents">Documents</string>
+    <string name="trip_packing_clothes">Clothes</string>
+    <string name="trip_packing_toiletries">Toiletries</string>
+    <string name="trip_packing_electronics">Electronics</string>
+    <string name="trip_packing_health">Health</string>
+    <string name="trip_packing_empty">Your packing list is empty.</string>
+    <string name="trip_packed_progress">%1$d of %2$d packed</string>
+    <string name="trip_packing_starter">Add the basics</string>
+    <string name="trip_packing_unpack_all">Untick all</string>
+    <string name="trip_packing_add_title">Add item</string>
+    <string name="trip_packing_edit_title">Edit item</string>
+    <string name="trip_field_item">Item</string>
+    <string name="trip_field_quantity">How many</string>
+    <string name="trip_expense_transport">Transport</string>
+    <string name="trip_expense_stay">Stay</string>
+    <string name="trip_expense_activities">Activities</string>
+    <string name="trip_expenses_empty">No expenses yet. Tap + to log one.</string>
+    <string name="trip_expense_add_title">New expense</string>
+    <string name="trip_expense_edit_title">Edit expense</string>
+    <string name="trip_field_amount">Amount in %1$s</string>
+    <string name="trip_budget_left">%1$s left</string>
+    <string name="trip_budget_over">%1$s over budget</string>
+    <string name="trip_budget_per_day">About %1$s a day</string>
+    <plurals name="count_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="count_bookings">
+        <item quantity="one">%d booking</item>
+        <item quantity="other">%d bookings</item>
+    </plurals>
+    <string-array name="trip_starter_items">
+        <item>DOCUMENTS:Passport / ID</item>
+        <item>DOCUMENTS:Tickets</item>
+        <item>DOCUMENTS:Bank card</item>
+        <item>CLOTHES:Underwear</item>
+        <item>CLOTHES:Socks</item>
+        <item>CLOTHES:Pyjamas</item>
+        <item>CLOTHES:Jacket</item>
+        <item>TOILETRIES:Toothbrush</item>
+        <item>TOILETRIES:Toothpaste</item>
+        <item>TOILETRIES:Deodorant</item>
+        <item>ELECTRONICS:Phone charger</item>
+        <item>ELECTRONICS:Power bank</item>
+        <item>ELECTRONICS:Headphones</item>
+        <item>HEALTH:Medicines</item>
+    </string-array>
 </resources>

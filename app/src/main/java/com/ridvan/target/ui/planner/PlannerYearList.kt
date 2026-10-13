@@ -107,6 +107,9 @@ private fun YearItemRow(item: PlannerAgendaItem, onItemClick: (PlannerAgendaItem
         is PlannerAgendaItem.EventOccurrence -> item.event.title
         is PlannerAgendaItem.ExamEntry -> item.label
         is PlannerAgendaItem.SectionEntry -> item.label
+        is PlannerAgendaItem.TripDayEntry -> item.tripName
+        is PlannerAgendaItem.TripActivityEntry -> item.item.activity.title
+        is PlannerAgendaItem.TripBookingEntry -> item.item.booking.title
         is PlannerAgendaItem.FocusSessionEntry -> focusSessionTitle(item.item)
         is PlannerAgendaItem.PracticeLogEntry -> listOfNotNull(
             item.row.courseName?.let { courseDisplayName(it) } ?: item.row.languageName,

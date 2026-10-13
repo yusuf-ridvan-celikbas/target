@@ -836,4 +836,126 @@
         <item quantity="one">%d tur</item>
         <item quantity="other">%d tur</item>
     </plurals>
+
+    <!-- Trip Planner -->
+    <string name="label_trips">Seyahatler</string>
+    <string name="hub_planner_hint">Ajandan: etkinlikler, sınavlar ve çalıştıkların</string>
+    <string name="hub_trips_hint">Program, rezervasyonlar, bavul ve bütçe</string>
+    <string name="planner_group_trips">Seyahatler</string>
+    <string name="notif_trip_starts">Seyahat bugün başlıyor: %1$s</string>
+    <string name="trips_empty">Henüz seyahat yok. Planlamak için + simgesine dokun.</string>
+    <string name="trips_upcoming">Şu an ve yaklaşan</string>
+    <string name="trips_past">Geçmiş seyahatler</string>
+    <string name="trips_card_packed">%1$d/%2$d hazır</string>
+    <string name="trips_card_spent">%1$s harcandı</string>
+    <string name="trips_card_spent_of">%2$s bütçenin %1$s harcandı</string>
+    <string name="trip_starts_tomorrow">Yarın başlıyor</string>
+    <string name="trip_starts_in_days">%1$d gün sonra</string>
+    <string name="trip_day_of">%1$d. gün / %2$d</string>
+    <string name="trip_ended">Bitti</string>
+    <string name="trip_add_title">Yeni seyahat</string>
+    <string name="trip_edit_title">Seyahati düzenle</string>
+    <string name="trip_delete">Seyahati sil</string>
+    <string name="trip_delete_message">\"%1$s\" programı, rezervasyonları, bavul listesi ve harcamalarıyla birlikte silinsin mi? Bu geri alınamaz.</string>
+    <string name="trip_field_name">Seyahat adı</string>
+    <string name="trip_field_destination">Gidilecek yer (isteğe bağlı)</string>
+    <string name="trip_field_start">İlk gün</string>
+    <string name="trip_field_end">Son gün</string>
+    <string name="trip_field_currency">Para birimi (ör. EUR)</string>
+    <string name="trip_currency_hint">EUR, USD ya da TRY gibi 3 harfli bir kod gir.</string>
+    <string name="trip_field_budget">%1$s cinsinden bütçe (isteğe bağlı)</string>
+    <string name="trip_field_notes">Notlar (isteğe bağlı)</string>
+    <string name="trip_tab_itinerary">Program</string>
+    <string name="trip_tab_bookings">Rezervasyon</string>
+    <string name="trip_tab_packing">Bavul</string>
+    <string name="trip_tab_budget">Bütçe</string>
+    <string name="trip_day_header">%1$d. gün · %2$s</string>
+    <string name="trip_day_empty">Henüz plan yok.</string>
+    <string name="trip_activity_add_title">Programa ekle</string>
+    <string name="trip_activity_edit_title">Program öğesini düzenle</string>
+    <string name="trip_field_title">Başlık</string>
+    <string name="trip_field_category">Kategori</string>
+    <string name="trip_field_day">Gün</string>
+    <string name="trip_field_start_time">Başlangıç saati ekle</string>
+    <string name="trip_field_end_time">Bitiş saati ekle</string>
+    <string name="trip_field_place">Yer (isteğe bağlı)</string>
+    <string name="trip_field_address">Adres (isteğe bağlı)</string>
+    <string name="trip_bookings_empty">Henüz rezervasyon yok. Uçuş, otel ya da bilet eklemek için + simgesine dokun.</string>
+    <string name="trip_booking_add_title">Yeni rezervasyon</string>
+    <string name="trip_booking_edit_title">Rezervasyonu düzenle</string>
+    <string name="trip_field_type">Tür</string>
+    <string name="trip_field_booking_number">Sefer numarası</string>
+    <string name="trip_field_provider">Firma (isteğe bağlı)</string>
+    <string name="trip_field_confirmation">Rezervasyon kodu (isteğe bağlı)</string>
+    <string name="trip_field_departure">Kalkış</string>
+    <string name="trip_field_arrival">Varış</string>
+    <string name="trip_field_check_in">Giriş</string>
+    <string name="trip_field_check_out">Çıkış</string>
+    <string name="trip_field_set_time">Saat ekle</string>
+    <string name="trip_field_from">Nereden</string>
+    <string name="trip_field_to">Nereye</string>
+    <string name="trip_field_has_arrival">Varış ekle</string>
+    <string name="trip_field_has_check_out">Çıkış ekle</string>
+    <string name="trip_field_booking_price">%1$s cinsinden fiyat (isteğe bağlı)</string>
+    <string name="trip_booking_price_hint">Fiyat, bütçeye harcama olarak eklenir.</string>
+    <string name="trip_confirmation_line">Kod: %1$s</string>
+    <string name="trip_booking_flight">Uçuş</string>
+    <string name="trip_booking_train">Tren</string>
+    <string name="trip_booking_bus">Otobüs</string>
+    <string name="trip_booking_ferry">Feribot</string>
+    <string name="trip_booking_car_rental">Araç kiralama</string>
+    <string name="trip_booking_hotel">Konaklama</string>
+    <string name="trip_category_other">Diğer</string>
+    <string name="trip_activity_sightseeing">Gezi</string>
+    <string name="trip_activity_food">Yemek</string>
+    <string name="trip_activity_activity">Etkinlik</string>
+    <string name="trip_activity_transport">Ulaşım</string>
+    <string name="trip_activity_shopping">Alışveriş</string>
+    <string name="trip_packing_documents">Belgeler</string>
+    <string name="trip_packing_clothes">Kıyafetler</string>
+    <string name="trip_packing_toiletries">Kişisel bakım</string>
+    <string name="trip_packing_electronics">Elektronik</string>
+    <string name="trip_packing_health">Sağlık</string>
+    <string name="trip_packing_empty">Bavul listen boş.</string>
+    <string name="trip_packed_progress">%2$d eşyanın %1$d tanesi hazır</string>
+    <string name="trip_packing_starter">Temel eşyaları ekle</string>
+    <string name="trip_packing_unpack_all">Tüm işaretleri kaldır</string>
+    <string name="trip_packing_add_title">Eşya ekle</string>
+    <string name="trip_packing_edit_title">Eşyayı düzenle</string>
+    <string name="trip_field_item">Eşya</string>
+    <string name="trip_field_quantity">Adet</string>
+    <string name="trip_expense_transport">Ulaşım</string>
+    <string name="trip_expense_stay">Konaklama</string>
+    <string name="trip_expense_activities">Etkinlikler</string>
+    <string name="trip_expenses_empty">Henüz harcama yok. Eklemek için + simgesine dokun.</string>
+    <string name="trip_expense_add_title">Yeni harcama</string>
+    <string name="trip_expense_edit_title">Harcamayı düzenle</string>
+    <string name="trip_field_amount">%1$s cinsinden tutar</string>
+    <string name="trip_budget_left">%1$s kaldı</string>
+    <string name="trip_budget_over">Bütçe %1$s aşıldı</string>
+    <string name="trip_budget_per_day">Günde yaklaşık %1$s</string>
+    <plurals name="count_days">
+        <item quantity="one">%d gün</item>
+        <item quantity="other">%d gün</item>
+    </plurals>
+    <plurals name="count_bookings">
+        <item quantity="one">%d rezervasyon</item>
+        <item quantity="other">%d rezervasyon</item>
+    </plurals>
+    <string-array name="trip_starter_items">
+        <item>DOCUMENTS:Pasaport / kimlik</item>
+        <item>DOCUMENTS:Biletler</item>
+        <item>DOCUMENTS:Banka kartı</item>
+        <item>CLOTHES:İç çamaşırı</item>
+        <item>CLOTHES:Çorap</item>
+        <item>CLOTHES:Pijama</item>
+        <item>CLOTHES:Mont</item>
+        <item>TOILETRIES:Diş fırçası</item>
+        <item>TOILETRIES:Diş macunu</item>
+        <item>TOILETRIES:Deodorant</item>
+        <item>ELECTRONICS:Telefon şarj aleti</item>
+        <item>ELECTRONICS:Powerbank</item>
+        <item>ELECTRONICS:Kulaklık</item>
+        <item>HEALTH:İlaçlar</item>
+    </string-array>
 </resources>

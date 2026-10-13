@@ -24,6 +24,8 @@ import com.ridvan.target.ui.reading.dailyGoal
 import com.ridvan.target.ui.reading.isReading
 import com.ridvan.target.ui.reading.minutesFor
 import com.ridvan.target.ui.reading.readingPace
+import com.ridvan.target.ui.trips.minuteLabel
+import com.ridvan.target.ui.trips.timeRangeText
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -192,7 +194,59 @@ object NotificationScheduler {
             )
         }
 
-        return eventCandidates + examCandidates + sectionCandidates + readingCandidates(app, userId, today, zone, strings)
+        return eventCandidates + examCandidates + sectionCandidates + readingCandidates(app, userId, today, zone, strings) +
+            tripCandidates(app, userId, today, horizonEnd, leadMinutes, zone, strings)
+    }
+
+    /**
+     * A trip's first day (at the all-day hour), its unfinished timed activities and its bookings — timed ones
+     * [leadMinutes] early like timed Planner events, untimed bookings at the all-day hour. Untimed activities
+     * get none, or a busy day would ring nine times at 9:00.
+     */
+    private suspend fun tripCandidates(
+        app: TargetApplication,
+        userId: Long,
+        today: LocalDate,
+        horizonEnd: LocalDate,
+        leadMinutes: Int,
+        zone: ZoneId,
+        strings: Context,
+    ): List<ReminderCandidate> {
+        val database = app.database
+        val trips = database.tripDao().getByUserId(userId).first()
+        val starts = trips.mapNotNull { trip ->
+            val date = trip.startDate.toLocalDate(zone).takeIf { it in today..horizonEnd } ?: return@mapNotNull null
+            ReminderCandidate(
+                whenInstant = reminderInstant(date, null, 0, zone),
+                notificationId = notificationId("trip", trip.id, date.toEpochDay()),
+                title = strings.getString(R.string.notif_trip_starts, trip.name),
+                body = trip.destination ?: strings.getString(R.string.notif_planner_default_body),
+            )
+        }
+        val activities = database.tripActivityDao().getAllWithTripByUserId(userId).first().mapNotNull { item ->
+            val activity = item.activity
+            val minute = activity.startMinuteOfDay ?: return@mapNotNull null
+            if (activity.isDone) return@mapNotNull null
+            val date = activity.date.toLocalDate(zone).takeIf { it in today..horizonEnd } ?: return@mapNotNull null
+            ReminderCandidate(
+                whenInstant = reminderInstant(date, minute, leadMinutes, zone),
+                notificationId = notificationId("trip_activity", activity.id, date.toEpochDay()),
+                title = activity.title,
+                body = listOfNotNull(item.tripName, timeRangeText(minute, activity.durationMinutes), activity.place.label).joinToString(" · "),
+            )
+        }
+        val bookings = database.tripBookingDao().getAllWithTripByUserId(userId).first().mapNotNull { item ->
+            val booking = item.booking
+            val date = booking.startDate.toLocalDate(zone).takeIf { it in today..horizonEnd } ?: return@mapNotNull null
+            ReminderCandidate(
+                whenInstant = reminderInstant(date, booking.startMinuteOfDay, leadMinutes, zone),
+                notificationId = notificationId("trip_booking", booking.id, date.toEpochDay()),
+                title = booking.title,
+                body = listOfNotNull(item.tripName, booking.startMinuteOfDay?.let { minuteLabel(it) }, booking.confirmationCode)
+                    .joinToString(" · "),
+            )
+        }
+        return starts + activities + bookings
     }
 
     /**

@@ -45,6 +45,8 @@ data class ShellNavigation(
     val onNavigateHome: () -> Unit,
     val onNavigateStudyHub: () -> Unit,
     val onNavigateFocusHub: () -> Unit,
+    val onNavigatePlanHub: () -> Unit,
+    val onNavigateTrips: () -> Unit,
     val onNavigateExams: () -> Unit,
     val onNavigateCourses: () -> Unit,
     val onNavigateStudyResources: () -> Unit,
@@ -68,7 +70,7 @@ data class ShellNavigation(
 )
 
 enum class ShellDestination {
-    HOME, STUDY_HUB, FOCUS_HUB, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER,
+    HOME, STUDY_HUB, FOCUS_HUB, PLAN_HUB, TRIPS, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER,
     FOCUS_TIMER, FLOW_TIMER, STUDY_HISTORY, READING, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
@@ -85,7 +87,7 @@ enum class ShellTab(val root: ShellDestination, val pages: Set<ShellDestination>
             ShellDestination.TOPICS, ShellDestination.LANGUAGES,
         ),
     ),
-    PLAN(ShellDestination.PLANNER, emptySet()),
+    PLAN(ShellDestination.PLAN_HUB, setOf(ShellDestination.PLANNER, ShellDestination.TRIPS)),
     FOCUS(
         ShellDestination.FOCUS_HUB,
         setOf(
@@ -169,7 +171,7 @@ fun AppShell(
 private fun ShellNavigation.open(tab: ShellTab) = when (tab) {
     ShellTab.HOME -> onNavigateHome()
     ShellTab.STUDY -> onNavigateStudyHub()
-    ShellTab.PLAN -> onNavigatePlanner()
+    ShellTab.PLAN -> onNavigatePlanHub()
     ShellTab.FOCUS -> onNavigateFocusHub()
     ShellTab.STATS -> onNavigateStatistics()
 }

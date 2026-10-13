@@ -2,7 +2,11 @@ package com.ridvan.target.ui.navigation
 
 import kotlinx.serialization.Serializable
 
-/** Every trip — a top-level destination next to the Planner. */
+/** The Plan tab's first page: Planner and Trips. */
+@Serializable
+object PlanHubRoute
+
+/** Every trip — a page of the Plan tab, next to the Planner. */
 @Serializable
 object TripListRoute
 

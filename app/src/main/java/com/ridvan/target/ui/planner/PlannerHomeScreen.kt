@@ -47,6 +47,7 @@ fun PlannerHomeScreen(
     onTopicClick: (Long) -> Unit,
     onFocusSessionClick: (Long) -> Unit,
     onPracticeSessionClick: (Long) -> Unit,
+    onTripClick: (Long) -> Unit,
     viewModel: PlannerHomeViewModel = viewModel(),
 ) {
     val viewMode by viewModel.viewMode.collectAsStateWithLifecycle()
@@ -72,6 +73,9 @@ fun PlannerHomeScreen(
             }
             is PlannerAgendaItem.ExamEntry -> onExamClick(item.examId)
             is PlannerAgendaItem.SectionEntry -> onSectionClick(item.sectionId)
+            is PlannerAgendaItem.TripDayEntry -> onTripClick(item.tripId)
+            is PlannerAgendaItem.TripActivityEntry -> onTripClick(item.item.activity.tripId)
+            is PlannerAgendaItem.TripBookingEntry -> onTripClick(item.item.booking.tripId)
             is PlannerAgendaItem.FocusSessionEntry -> onFocusSessionClick(item.item.session.id)
             is PlannerAgendaItem.PracticeLogEntry -> onPracticeSessionClick(item.row.practiceLog.studyResourceTopicId)
         }
@@ -180,7 +184,8 @@ fun PlannerHomeScreen(
                 }
                 PlannerViewMode.YEAR -> PlannerYearList(
                     year = anchorDate.year,
-                    items = agendaItems,
+                    // One row per trip (its first day, or Jan 1 if it started last year), not one per day.
+                    items = agendaItems.filter { it !is PlannerAgendaItem.TripDayEntry || it.dayNumber == 1 || it.date.dayOfYear == 1 },
                     onItemClick = ::handleItemClick,
                 )
             }

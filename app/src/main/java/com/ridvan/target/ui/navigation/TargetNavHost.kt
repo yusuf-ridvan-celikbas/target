@@ -37,6 +37,9 @@ import com.ridvan.target.ui.practiceexam.PracticeExamEntryDetailScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.hub.FocusHubScreen
+import com.ridvan.target.ui.hub.PlanHubScreen
+import com.ridvan.target.ui.trips.TripDetailScreen
+import com.ridvan.target.ui.trips.TripListScreen
 import com.ridvan.target.ui.hub.StudyHubScreen
 import com.ridvan.target.ui.shell.ShellNavigation
 import com.ridvan.target.ui.shell.ShellTab
@@ -78,7 +81,7 @@ fun TargetNavHost() {
     val tabRoutes = mapOf<ShellTab, Any>(
         ShellTab.HOME to HomeRoute,
         ShellTab.STUDY to StudyHubRoute,
-        ShellTab.PLAN to PlannerRoute,
+        ShellTab.PLAN to PlanHubRoute,
         ShellTab.FOCUS to FocusHubRoute,
         ShellTab.STATS to StatisticsRoute,
     )
@@ -86,13 +89,15 @@ fun TargetNavHost() {
         onNavigateHome = { navController.navigateToShellDestination(HomeRoute) },
         onNavigateStudyHub = { navController.navigateToShellDestination(StudyHubRoute) },
         onNavigateFocusHub = { navController.navigateToShellDestination(FocusHubRoute) },
+        onNavigatePlanHub = { navController.navigateToShellDestination(PlanHubRoute) },
+        onNavigateTrips = { push(TripListRoute) },
         onNavigateExams = { push(ExamListRoute) },
         onNavigateCourses = { push(CourseListRoute) },
         onNavigateStudyResources = { push(StudyResourceHomeRoute) },
         onNavigateTopics = { push(TopicHomeRoute) },
         onNavigateStatistics = { navController.navigateToShellDestination(StatisticsRoute) },
         onNavigateLanguages = { push(LanguageListRoute) },
-        onNavigatePlanner = { navController.navigateToShellDestination(PlannerRoute) },
+        onNavigatePlanner = { push(PlannerRoute) },
         onNavigateFocusTimer = { push(FocusTimerRoute) },
         onNavigateFlowTimer = { push(FlowTimerRoute) },
         onNavigateStudyHistory = { push(FocusHistoryHomeRoute) },
@@ -141,6 +146,18 @@ fun TargetNavHost() {
         }
         composable<FocusHubRoute> {
             FocusHubScreen(shellNavigation = shellNavigation)
+        }
+        composable<PlanHubRoute> {
+            PlanHubScreen(shellNavigation = shellNavigation)
+        }
+        composable<TripListRoute> {
+            TripListScreen(
+                shellNavigation = shellNavigation,
+                onTripClick = { tripId -> navController.navigate(TripDetailRoute(tripId)) },
+            )
+        }
+        composable<TripDetailRoute> {
+            TripDetailScreen(onBack = { navController.popBackStack() })
         }
         composable<ExamListRoute> {
             ExamListScreen(
@@ -336,6 +353,7 @@ fun TargetNavHost() {
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
                 onFocusSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },
                 onPracticeSessionClick = { id -> navController.navigate(TopicProgressRoute(id)) },
+                onTripClick = { tripId -> navController.navigate(TripDetailRoute(tripId)) },
             )
         }
         composable<FocusTimerRoute> {

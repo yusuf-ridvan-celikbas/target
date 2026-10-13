@@ -118,7 +118,7 @@ fun tripExpenseCategoryIcon(category: TripExpenseCategory): ImageVector = when (
 @Composable
 fun tripPhaseLabel(phase: TripPhase): String = when (phase) {
     is TripPhase.Upcoming -> when (phase.daysUntil) {
-        0 -> stringResource(R.string.countdown_today)
+        0 -> stringResource(R.string.days_until_today)
         1 -> stringResource(R.string.trip_starts_tomorrow)
         else -> stringResource(R.string.trip_starts_in_days, phase.daysUntil)
     }

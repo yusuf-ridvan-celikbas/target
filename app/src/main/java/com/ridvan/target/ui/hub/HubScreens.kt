@@ -19,6 +19,8 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.AvTimer
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Topic
@@ -61,6 +63,22 @@ fun StudyHubScreen(shellNavigation: ShellNavigation) {
             listOf(
                 HubEntry(R.string.label_study_resources, R.string.hub_study_resources_hint, Icons.Filled.Bookmark, shellNavigation.onNavigateStudyResources),
                 HubEntry(R.string.label_topics, R.string.hub_topics_hint, Icons.Filled.Topic, shellNavigation.onNavigateTopics),
+            ),
+        ),
+    )
+}
+
+/** The Plan tab's first page — the Planner and trips. */
+@Composable
+fun PlanHubScreen(shellNavigation: ShellNavigation) {
+    HubPage(
+        navigation = shellNavigation,
+        destination = ShellDestination.PLAN_HUB,
+        title = stringResource(R.string.tab_plan),
+        groups = listOf(
+            listOf(
+                HubEntry(R.string.label_planner, R.string.hub_planner_hint, Icons.Filled.CalendarMonth, shellNavigation.onNavigatePlanner),
+                HubEntry(R.string.label_trips, R.string.hub_trips_hint, Icons.Filled.Luggage, shellNavigation.onNavigateTrips),
             ),
         ),
     )

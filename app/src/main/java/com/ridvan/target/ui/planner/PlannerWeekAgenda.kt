@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Timer
@@ -41,6 +42,9 @@ import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatTime
 import com.ridvan.target.ui.focustimer.focusSessionStatsLine
 import com.ridvan.target.ui.focustimer.focusSessionTitle
+import com.ridvan.target.ui.trips.timeRangeText
+import com.ridvan.target.ui.trips.tripActivityCategoryIcon
+import com.ridvan.target.ui.trips.tripBookingTypeIcon
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -140,6 +144,7 @@ fun DayAgendaCard(
 /** Declaration order is display order. */
 private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
     EXAMS(R.string.planner_group_exams, Icons.AutoMirrored.Filled.Assignment),
+    TRIPS(R.string.planner_group_trips, Icons.Filled.Luggage),
     PLANS(R.string.planner_group_plans, Icons.Filled.Event),
     FOCUS(R.string.planner_group_focus, Icons.Filled.Timer),
     READING(R.string.planner_group_reading, Icons.Filled.AutoStories),
@@ -149,6 +154,7 @@ private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
 private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
     is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
     is PlannerAgendaItem.EventOccurrence -> AgendaGroup.PLANS
+    is PlannerAgendaItem.TripDayEntry, is PlannerAgendaItem.TripActivityEntry, is PlannerAgendaItem.TripBookingEntry -> AgendaGroup.TRIPS
     is PlannerAgendaItem.FocusSessionEntry -> if (item.isReading) AgendaGroup.READING else AgendaGroup.FOCUS
     is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE
 }
@@ -199,6 +205,9 @@ private fun AgendaGroupHeader(
 private fun sortMinute(item: PlannerAgendaItem): Int = when (item) {
     is PlannerAgendaItem.EventOccurrence -> item.event.startMinuteOfDay ?: Int.MAX_VALUE
     is PlannerAgendaItem.Studied -> item.minuteOfDay
+    is PlannerAgendaItem.TripDayEntry -> -1
+    is PlannerAgendaItem.TripActivityEntry -> item.item.activity.startMinuteOfDay ?: Int.MAX_VALUE
+    is PlannerAgendaItem.TripBookingEntry -> item.item.booking.startMinuteOfDay ?: Int.MAX_VALUE
     else -> Int.MAX_VALUE
 }
 
@@ -250,6 +259,28 @@ private fun AgendaRow(
                 leadingContent = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) },
                 headlineContent = { Text(item.label) },
             )
+        }
+        is PlannerAgendaItem.TripDayEntry -> TripRow(
+            Icons.Filled.Luggage,
+            item.tripName,
+            listOfNotNull(stringResource(R.string.trip_day_of, item.dayNumber, item.dayCount), item.destination).joinToString(" · "),
+        ) { onItemClick(item) }
+        is PlannerAgendaItem.TripActivityEntry -> {
+            val activity = item.item.activity
+            TripRow(
+                tripActivityCategoryIcon(activity.category),
+                activity.title,
+                listOfNotNull(item.item.tripName, timeRangeText(activity.startMinuteOfDay, activity.durationMinutes), activity.place.label)
+                    .joinToString(" · "),
+            ) { onItemClick(item) }
+        }
+        is PlannerAgendaItem.TripBookingEntry -> {
+            val booking = item.item.booking
+            TripRow(
+                tripBookingTypeIcon(booking.type),
+                booking.title,
+                listOfNotNull(item.item.tripName, timeRangeText(booking.startMinuteOfDay, null), booking.confirmationCode).joinToString(" · "),
+            ) { onItemClick(item) }
         }
         is PlannerAgendaItem.SectionEntry -> {
             ListItem(
@@ -313,6 +344,17 @@ private fun AgendaRow(
             )
         }
     }
+}
+
+@Composable
+private fun TripRow(icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit) {
+    ListItem(
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = Modifier.clickable(onClick = onClick),
+        leadingContent = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+        headlineContent = { Text(title) },
+        supportingContent = { Text(subtitle, style = MaterialTheme.typography.bodySmall) },
+    )
 }
 
 /** Studied rows use the tertiary color, so work already done reads apart from plans at a glance. */
