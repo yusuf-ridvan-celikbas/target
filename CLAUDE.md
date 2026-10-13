@@ -105,3 +105,6 @@ A personal, **fully offline** Android app: the user defines exams, organizes stu
 
 ## Backup
 Settings > Backup card: `data/backup/BackupManager.kt` writes the whole Room DB (WAL checkpointed first) to a user-picked file (`CreateDocument`, `Target-backup-YYYY-MM-DD.db`) and stores `AppPreferences.lastBackupAt`. Restore (`OpenDocument`, binary virtual-document fallback) stages the file in cacheDir, validates it with `BackupValidator` (SQLite header, required tables, user_version <= 27; unit-tested), warns, saves a safety copy to `filesDir/backups/`, closes the DB, replaces target.db (deletes -wal/-shm), clears the session if the signed-in user isn't in the restored DB, relaunches and exits the process. Older backups migrate normally on next open. Preferences are never included.
+
+- **Home top bar**: the greeting ("Welcome to Target, <bold name>!") and today's weekday/date live in the top bar (`AppShell` `titleContent` slot, single-line ellipsis each); the clock card is gone from Home's body.
+- **Swipe-to-delete with Undo**: `FocusHistoryRow(onDelete = ...)` wraps the row in a `SwipeToDismissBox` (end-to-start, red background); `rememberUndoDelete` deletes via the ViewModel and shows a "Session deleted / Undo" snackbar (`AppShell` `snackbarHost` param) that re-inserts the same row. Used on Focus/Flow Timer, Study/Work History and a book's sessions.

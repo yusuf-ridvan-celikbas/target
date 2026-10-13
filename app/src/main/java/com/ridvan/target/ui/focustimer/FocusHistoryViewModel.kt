@@ -83,4 +83,12 @@ class FocusHistoryViewModel(
             if (form.finishesBook && form.bookId != null) bookDao.markFinished(form.bookId)
         }
     }
+
+    fun deleteSession(session: FocusSession) {
+        viewModelScope.launch { focusSessionDao.delete(session) }
+    }
+
+    fun restoreSession(session: FocusSession) {
+        viewModelScope.launch { focusSessionDao.insert(session) }
+    }
 }

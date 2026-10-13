@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
@@ -112,9 +114,12 @@ fun FlowTimerScreen(
         }
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val undoDelete = rememberUndoDelete(snackbarHostState, viewModel::deleteSession, viewModel::restoreSession)
     AppShell(
         navigation = shellNavigation,
         currentDestination = ShellDestination.FLOW_TIMER,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         title = stringResource(R.string.label_flow_timer),
         actions = {
             IconButton(onClick = onOpenSettings) {
@@ -215,6 +220,7 @@ fun FlowTimerScreen(
                     onSessionClick = onSessionClick,
                     linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
                     onAddManual = viewModel::addManualSession,
+                    onDeleteSession = undoDelete,
                 )
             } else {
                 FlowRunningContent(

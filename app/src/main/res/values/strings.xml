@@ -975,4 +975,6 @@
     <string name="restore_confirm_message">Restoring replaces ALL data currently in the app with the contents of this backup. A safety copy of your current data is kept inside the app. The app will restart.</string>
     <string name="restore_confirm_action">Restore</string>
     <string name="restore_failed">Restore failed. Your current data was not changed.</string>
+    <string name="focus_session_deleted">Session deleted</string>
+    <string name="common_undo">Undo</string>
 </resources>

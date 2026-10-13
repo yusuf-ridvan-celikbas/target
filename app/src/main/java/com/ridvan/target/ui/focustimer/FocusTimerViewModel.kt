@@ -435,4 +435,12 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
         // what was accumulated so far as a completed history entry instead of losing it.
         _runningSession.value?.let { persistSession(it, System.currentTimeMillis(), askForPage = false) }
     }
+
+    fun deleteSession(session: FocusSession) {
+        viewModelScope.launch { focusSessionDao.delete(session) }
+    }
+
+    fun restoreSession(session: FocusSession) {
+        viewModelScope.launch { focusSessionDao.insert(session) }
+    }
 }

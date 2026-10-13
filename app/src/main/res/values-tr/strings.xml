@@ -973,4 +973,6 @@
     <string name="restore_confirm_message">Geri yükleme, uygulamadaki TÜM verileri bu yedeğin içeriğiyle değiştirir. Mevcut verilerinin bir güvenlik kopyası uygulama içinde saklanır. Uygulama yeniden başlayacak.</string>
     <string name="restore_confirm_action">Geri yükle</string>
     <string name="restore_failed">Geri yükleme başarısız. Mevcut verilerin değişmedi.</string>
+    <string name="focus_session_deleted">Oturum silindi</string>
+    <string name="common_undo">Geri al</string>
 </resources>

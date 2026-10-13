@@ -78,6 +78,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.entity.Course
@@ -159,9 +161,12 @@ fun FocusTimerScreen(
         }
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val undoDelete = rememberUndoDelete(snackbarHostState, viewModel::deleteSession, viewModel::restoreSession)
     AppShell(
         navigation = shellNavigation,
         currentDestination = ShellDestination.FOCUS_TIMER,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         title = stringResource(R.string.label_focus_timer),
         actions = {
             IconButton(onClick = onOpenSettings) {
@@ -258,6 +263,7 @@ fun FocusTimerScreen(
                     onSessionClick = onSessionClick,
                     linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
                     onAddManual = viewModel::addManualSession,
+                    onDeleteSession = undoDelete,
                 )
             }
         }
@@ -631,6 +637,7 @@ internal fun HistorySection(
     onSessionClick: (Long) -> Unit,
     linkSource: ManualSessionLinkSource,
     onAddManual: (ManualFocusSessionForm) -> Unit,
+    onDeleteSession: ((FocusSession) -> Unit)? = null,
 ) {
     var showManualDialog by remember { mutableStateOf(false) }
 
@@ -685,6 +692,7 @@ internal fun HistorySection(
                 FocusHistoryRow(
                     item = item,
                     onClick = { onSessionClick(item.session.id) },
+                    onDelete = onDeleteSession,
                 )
                 HorizontalDivider()
             }

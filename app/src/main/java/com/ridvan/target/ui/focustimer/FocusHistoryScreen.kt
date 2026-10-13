@@ -28,6 +28,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -83,7 +85,9 @@ fun FocusHistoryScreen(
     onBack: () -> Unit,
     onSessionClick: (Long) -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.focustimer_history_page_title)) },
@@ -95,7 +99,7 @@ fun FocusHistoryScreen(
             )
         },
     ) { innerPadding ->
-        FocusHistoryBody(innerPadding, onSessionClick)
+        FocusHistoryBody(innerPadding, onSessionClick, snackbarHostState)
     }
 }
 
@@ -113,7 +117,9 @@ fun FocusWorkHistoryScreen(
     val courseName by viewModel.scopeCourseName.collectAsStateWithLifecycle()
     val languageName by viewModel.scopeLanguageName.collectAsStateWithLifecycle()
     val ownerName = courseName?.let { courseDisplayName(it) } ?: languageName
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -130,7 +136,7 @@ fun FocusWorkHistoryScreen(
             )
         },
     ) { innerPadding ->
-        FocusHistoryBody(innerPadding, onSessionClick, viewModel)
+        FocusHistoryBody(innerPadding, onSessionClick, snackbarHostState, viewModel)
     }
 }
 
@@ -140,12 +146,14 @@ fun FocusHistoryHomeScreen(
     shellNavigation: ShellNavigation,
     onSessionClick: (Long) -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
     AppShell(
         navigation = shellNavigation,
         currentDestination = ShellDestination.STUDY_HISTORY,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         title = stringResource(R.string.focustimer_history_page_title),
     ) { innerPadding ->
-        FocusHistoryBody(innerPadding, onSessionClick)
+        FocusHistoryBody(innerPadding, onSessionClick, snackbarHostState)
     }
 }
 
@@ -153,8 +161,10 @@ fun FocusHistoryHomeScreen(
 private fun FocusHistoryBody(
     innerPadding: PaddingValues,
     onSessionClick: (Long) -> Unit,
+    snackbarHostState: SnackbarHostState,
     viewModel: FocusHistoryViewModel = viewModel(),
 ) {
+    val undoDelete = rememberUndoDelete(snackbarHostState, viewModel::deleteSession, viewModel::restoreSession)
     val history by viewModel.history.collectAsStateWithLifecycle()
 
     var query by rememberSaveable { mutableStateOf("") }
@@ -303,6 +313,7 @@ private fun FocusHistoryBody(
                     FocusHistoryRow(
                         item = item,
                         onClick = { onSessionClick(item.session.id) },
+                        onDelete = undoDelete,
                     )
                     HorizontalDivider()
                 }

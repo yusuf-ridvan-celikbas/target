@@ -5,6 +5,24 @@ import com.ridvan.target.ui.reading.pagesRead
 import com.ridvan.target.data.local.entity.FocusSession
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -70,7 +88,71 @@ internal fun focusSessionStatsLine(session: FocusSession): String {
 internal fun FocusHistoryRow(
     item: FocusSessionWithLinks,
     onClick: () -> Unit,
+    /** When set, the row can be swiped away (end to start) to delete the session. */
+    onDelete: ((FocusSession) -> Unit)? = null,
 ) {
+    val session = item.session
+    if (onDelete == null) {
+        FocusHistoryRowContent(item, onClick)
+        return
+    }
+    key(session.id) {
+        val state = rememberSwipeToDismissBoxState(
+            confirmValueChange = { value ->
+                if (value == SwipeToDismissBoxValue.EndToStart) {
+                    onDelete(session)
+                    true
+                } else {
+                    false
+                }
+            },
+        )
+        SwipeToDismissBox(
+            state = state,
+            enableDismissFromStartToEnd = false,
+            backgroundContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.errorContainer)
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.common_delete),
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                }
+            },
+        ) {
+            FocusHistoryRowContent(item, onClick, Modifier.background(MaterialTheme.colorScheme.surfaceContainer))
+        }
+    }
+}
+
+/** Returns a delete handler that removes the session and offers an Undo snackbar that restores the same row. */
+@Composable
+internal fun rememberUndoDelete(
+    snackbarHostState: SnackbarHostState,
+    delete: (FocusSession) -> Unit,
+    restore: (FocusSession) -> Unit,
+): (FocusSession) -> Unit {
+    val scope = rememberCoroutineScope()
+    val message = stringResource(R.string.focus_session_deleted)
+    val undo = stringResource(R.string.common_undo)
+    return { session ->
+        delete(session)
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val result = snackbarHostState.showSnackbar(message, actionLabel = undo, duration = SnackbarDuration.Long)
+            if (result == SnackbarResult.ActionPerformed) restore(session)
+        }
+    }
+}
+
+@Composable
+private fun FocusHistoryRowContent(item: FocusSessionWithLinks, onClick: () -> Unit, extra: Modifier = Modifier) {
     val session = item.session
     val linkLabel = focusSessionLinkLabel(item)
     ListItem(
@@ -97,7 +179,7 @@ internal fun FocusHistoryRow(
             }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = extra.clickable(onClick = onClick),
     )
 }
 

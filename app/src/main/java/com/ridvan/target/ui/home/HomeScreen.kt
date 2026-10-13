@@ -85,7 +85,34 @@ fun HomeScreen(
     val studied by viewModel.studied.collectAsStateWithLifecycle()
     val reading by viewModel.reading.collectAsStateWithLifecycle()
 
-    AppShell(navigation = shellNavigation, currentDestination = ShellDestination.HOME) { innerPadding ->
+    val prefix = stringResource(R.string.home_welcome_prefix)
+    val suffix = stringResource(R.string.home_welcome_suffix)
+    val dateText = SimpleDateFormat("EEEE, MMM d, yyyy", Locale.getDefault()).format(Date())
+    AppShell(
+        navigation = shellNavigation,
+        currentDestination = ShellDestination.HOME,
+        titleContent = {
+            Column {
+                Text(
+                    buildAnnotatedString {
+                        append(prefix)
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(currentUser?.preferredName ?: "") }
+                        append(suffix)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    dateText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        },
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -93,21 +120,7 @@ fun HomeScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            val prefix = stringResource(R.string.home_welcome_prefix)
-            val suffix = stringResource(R.string.home_welcome_suffix)
-            Text(
-                buildAnnotatedString {
-                    append(prefix)
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(currentUser?.preferredName ?: "")
-                    }
-                    append(suffix)
-                },
-            )
-            Spacer(Modifier.height(16.dp))
-            ClockCard()
             if (upcomingEvents.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
                 UpcomingEventsCard(
                     events = upcomingEvents,
                     onEventClick = { event ->
@@ -227,29 +240,6 @@ private fun PlannerPreviewRow(occurrence: PlannerPreviewOccurrence, onToggleDone
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        }
-    }
-}
-
-/** Ticks once a minute — a study tracker doesn't need second-accurate updates. */
-@Composable
-private fun ClockCard() {
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = System.currentTimeMillis()
-            delay(60_000 - (now % 60_000))
-        }
-    }
-    val timeText = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(now))
-    val dateText = SimpleDateFormat("EEEE, MMM d, yyyy", Locale.getDefault()).format(Date(now))
-    GroupedCard {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(timeText, style = MaterialTheme.typography.displayMedium)
-            Text(dateText, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }

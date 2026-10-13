@@ -110,6 +110,9 @@ fun AppShell(
     floatingActionButton: @Composable () -> Unit = {},
     /** Screen-specific top-bar icons, placed before the profile menu. */
     actions: @Composable RowScope.() -> Unit = {},
+    /** Replaces the plain-text title (e.g. a title plus a subtitle line). */
+    titleContent: (@Composable () -> Unit)? = null,
+    snackbarHost: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     var profileMenuExpanded by remember { mutableStateOf(false) }
@@ -119,7 +122,7 @@ fun AppShell(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { titleContent?.invoke() ?: Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     if (!isTabRoot) {
                         IconButton(onClick = navigation.onBack) {
@@ -165,6 +168,7 @@ fun AppShell(
             }
         },
         floatingActionButton = floatingActionButton,
+        snackbarHost = snackbarHost,
     ) { innerPadding -> content(innerPadding) }
 }
 

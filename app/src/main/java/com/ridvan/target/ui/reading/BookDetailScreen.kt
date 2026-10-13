@@ -47,6 +47,9 @@ import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.focustimer.FocusHistoryRow
+import com.ridvan.target.ui.focustimer.rememberUndoDelete
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import com.ridvan.target.ui.focustimer.FocusSessionDeleteDialog
 import java.util.Locale
 
@@ -64,8 +67,11 @@ fun BookDetailScreen(
     var showEdit by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
     var showNotes by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val undoDelete = rememberUndoDelete(snackbarHostState, viewModel::deleteSession, viewModel::restoreSession)
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(progress?.book?.title.orEmpty(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -208,6 +214,7 @@ fun BookDetailScreen(
                         FocusHistoryRow(
                             item = item,
                             onClick = { onSessionClick(item.session.id) },
+                            onDelete = undoDelete,
                         )
                         if (index < sessions.lastIndex) HorizontalDivider()
                     }
