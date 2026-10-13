@@ -960,4 +960,19 @@
         <item>ELECTRONICS:Headphones</item>
         <item>HEALTH:Medicines</item>
     </string-array>
+    <string name="settings_backup">Backup</string>
+    <string name="settings_backup_hint">Saves all your data (exams, courses, planner, focus sessions, books, trips and more) into one file. Settings such as theme and sounds are not included.</string>
+    <string name="backup_last">Last backup: %1$s</string>
+    <string name="backup_never">No backup made yet</string>
+    <string name="backup_action">Back up all data</string>
+    <string name="restore_action">Restore from backup</string>
+    <string name="backup_done">Backup saved.</string>
+    <string name="backup_failed">Could not save the backup.</string>
+    <string name="restore_unreadable">That file could not be read or is not a Target backup.</string>
+    <string name="restore_not_target">That file is a database, but not a Target backup.</string>
+    <string name="restore_too_new">This backup was made by a newer version of the app. Update the app first.</string>
+    <string name="restore_confirm_title">Replace all data?</string>
+    <string name="restore_confirm_message">Restoring replaces ALL data currently in the app with the contents of this backup. A safety copy of your current data is kept inside the app. The app will restart.</string>
+    <string name="restore_confirm_action">Restore</string>
+    <string name="restore_failed">Restore failed. Your current data was not changed.</string>
 </resources>

@@ -958,4 +958,19 @@
         <item>ELECTRONICS:Kulaklık</item>
         <item>HEALTH:İlaçlar</item>
     </string-array>
+    <string name="settings_backup">Yedekleme</string>
+    <string name="settings_backup_hint">Tüm verilerini (sınavlar, dersler, planlayıcı, odak oturumları, kitaplar, geziler ve daha fazlası) tek bir dosyaya kaydeder. Tema ve sesler gibi ayarlar dahil değildir.</string>
+    <string name="backup_last">Son yedek: %1$s</string>
+    <string name="backup_never">Henüz yedek alınmadı</string>
+    <string name="backup_action">Tüm verileri yedekle</string>
+    <string name="restore_action">Yedekten geri yükle</string>
+    <string name="backup_done">Yedek kaydedildi.</string>
+    <string name="backup_failed">Yedek kaydedilemedi.</string>
+    <string name="restore_unreadable">Bu dosya okunamadı veya bir Target yedeği değil.</string>
+    <string name="restore_not_target">Bu dosya bir veritabanı ama Target yedeği değil.</string>
+    <string name="restore_too_new">Bu yedek uygulamanın daha yeni bir sürümüyle alınmış. Önce uygulamayı güncelle.</string>
+    <string name="restore_confirm_title">Tüm veriler değiştirilsin mi?</string>
+    <string name="restore_confirm_message">Geri yükleme, uygulamadaki TÜM verileri bu yedeğin içeriğiyle değiştirir. Mevcut verilerinin bir güvenlik kopyası uygulama içinde saklanır. Uygulama yeniden başlayacak.</string>
+    <string name="restore_confirm_action">Geri yükle</string>
+    <string name="restore_failed">Geri yükleme başarısız. Mevcut verilerin değişmedi.</string>
 </resources>

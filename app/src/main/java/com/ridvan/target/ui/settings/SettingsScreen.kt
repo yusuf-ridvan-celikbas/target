@@ -32,6 +32,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.rememberCoroutineScope
+import com.ridvan.target.TargetApplication
+import com.ridvan.target.data.backup.BackupManager
+import com.ridvan.target.data.backup.BackupValidator
+import com.ridvan.target.ui.common.formatDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -130,6 +142,52 @@ fun SettingsScreen(
             scrollState.animateScrollTo(y)
             didScrollToFocus = true
         }
+    }
+
+    val scope = rememberCoroutineScope()
+    val lastBackupAt by (context.applicationContext as TargetApplication).preferences.lastBackupAt.collectAsStateWithLifecycle()
+    var backupMessage by remember { mutableStateOf<Int?>(null) }
+    var restoreConfirm by remember { mutableStateOf(false) }
+    val backupLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        if (uri != null) scope.launch {
+            val ok = withContext(Dispatchers.IO) { BackupManager.backupTo(context, uri) }
+            backupMessage = if (ok) R.string.backup_done else R.string.backup_failed
+        }
+    }
+    val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            val result = withContext(Dispatchers.IO) { BackupManager.stageAndValidate(context, uri) }
+            when (result) {
+                BackupValidator.Result.OK -> restoreConfirm = true
+                BackupValidator.Result.TOO_NEW -> backupMessage = R.string.restore_too_new
+                BackupValidator.Result.NOT_TARGET -> backupMessage = R.string.restore_not_target
+                else -> backupMessage = R.string.restore_unreadable
+            }
+        }
+    }
+    if (restoreConfirm) {
+        AlertDialog(
+            onDismissRequest = { restoreConfirm = false },
+            title = { Text(stringResource(R.string.restore_confirm_title)) },
+            text = { Text(stringResource(R.string.restore_confirm_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    restoreConfirm = false
+                    scope.launch {
+                        val ok = withContext(Dispatchers.IO) { BackupManager.restoreStagedAndRestart(context) }
+                        if (!ok) backupMessage = R.string.restore_failed
+                    }
+                }) { Text(stringResource(R.string.restore_confirm_action)) }
+            },
+            dismissButton = { TextButton(onClick = { restoreConfirm = false }) { Text(stringResource(R.string.common_cancel)) } },
+        )
+    }
+    backupMessage?.let { msg ->
+        AlertDialog(
+            onDismissRequest = { backupMessage = null },
+            text = { Text(stringResource(msg)) },
+            confirmButton = { TextButton(onClick = { backupMessage = null }) { Text(stringResource(R.string.common_ok)) } },
+        )
     }
 
     AppShell(navigation = shellNavigation, currentDestination = ShellDestination.SETTINGS, title = stringResource(R.string.settings_title)) { innerPadding ->
@@ -340,6 +398,22 @@ fun SettingsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
                         Text(stringResource(R.string.label_vibration), modifier = Modifier.weight(1f))
                         Switch(checked = focusVibrationEnabled, onCheckedChange = { viewModel.setFocusVibrationEnabled(it) })
+                    }
+                }
+            }
+            GroupedCard {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.settings_backup), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.settings_backup_hint), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        if (lastBackupAt > 0L) stringResource(R.string.backup_last, formatDate(lastBackupAt)) else stringResource(R.string.backup_never),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Button(onClick = { backupLauncher.launch(BackupManager.defaultFileName()) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.backup_action))
+                    }
+                    OutlinedButton(onClick = { restoreLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.restore_action))
                     }
                 }
             }

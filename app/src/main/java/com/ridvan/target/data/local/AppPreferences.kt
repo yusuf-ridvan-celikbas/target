@@ -114,6 +114,19 @@ class AppPreferences(context: Context) {
         _appLanguage.value = language
     }
 
+    private val _lastBackupAt = MutableStateFlow(prefs.getLong(KEY_LAST_BACKUP_AT, 0L))
+    val lastBackupAt: StateFlow<Long> = _lastBackupAt.asStateFlow()
+
+    fun setLastBackupAt(millis: Long) {
+        prefs.edit().putLong(KEY_LAST_BACKUP_AT, millis).apply()
+        _lastBackupAt.value = millis
+    }
+
+    /** Clears the session without touching the database (no reminder reschedule). */
+    fun clearSessionRaw() {
+        prefs.edit().remove(KEY_USER_ID).commit()
+    }
+
     var currentUserId: Long?
         get() = prefs.getLong(KEY_USER_ID, NO_USER).takeIf { it != NO_USER }
         set(value) {
@@ -221,6 +234,7 @@ class AppPreferences(context: Context) {
         const val DEFAULT_READING_REMINDER_MINUTE = 20 * 60
         const val KEY_LEGACY_FOCUS_ALARM_SOUND_URI = "focus_alarm_sound_uri"
         const val KEY_FOCUS_VIBRATION_ENABLED = "focus_vibration_enabled"
+        const val KEY_LAST_BACKUP_AT = "last_backup_at"
         const val NO_USER = -1L
     }
 }

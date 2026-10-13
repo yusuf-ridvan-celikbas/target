@@ -13,7 +13,7 @@ A personal, **fully offline** Android app: the user defines exams, organizes stu
 - Managing `ExamType` (add/rename/delete) — deferred.
 - Lecture-notes features, pace estimation from the pre-reset model (see git "Full reset"); don't resurrect the old model.
 - A combined multi-course mock exam (one "deneme" across all courses) — a separate, bigger feature to plan first.
-- Search/tags beyond what exists, any sync/cloud. Full-database backup/restore isn't built yet (planned).
+- Search/tags beyond what exists, any sync/cloud. Preferences are not part of backup/restore (see Backup).
 
 ## Tech stack
 
@@ -102,3 +102,6 @@ A personal, **fully offline** Android app: the user defines exams, organizes stu
 - Workflow per feature: implement → verify on device → commit (descriptive, one feature per commit) → push → add a **short** note here (current behavior only, no test narrative).
 - **Parallel sessions**: several Claude sessions may work at once. Each works on its own worktree branch. Session `cross-session-visibility` ("Compass") coordinates: message it before any commit to main, push, `installDebug` or adb use, say "done" after; claim the next schema version with it before writing a migration; announce edits to shared files (`Migrations.kt`, `TargetDatabase`, `TargetNavHost.kt`, `Routes.kt`, `AppShell.kt`, `HubScreens.kt`, `strings.xml`, this file). Nothing merges to `main` without the developer's OK.
 - Token budget is tight: keep replies short, avoid needless screenshots and subagents.
+
+## Backup
+Settings > Backup card: `data/backup/BackupManager.kt` writes the whole Room DB (WAL checkpointed first) to a user-picked file (`CreateDocument`, `Target-backup-YYYY-MM-DD.db`) and stores `AppPreferences.lastBackupAt`. Restore (`OpenDocument`, binary virtual-document fallback) stages the file in cacheDir, validates it with `BackupValidator` (SQLite header, required tables, user_version <= 27; unit-tested), warns, saves a safety copy to `filesDir/backups/`, closes the DB, replaces target.db (deletes -wal/-shm), clears the session if the signed-in user isn't in the restored DB, relaunches and exits the process. Older backups migrate normally on next open. Preferences are never included.
