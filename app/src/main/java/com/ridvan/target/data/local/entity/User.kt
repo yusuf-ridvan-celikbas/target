@@ -22,4 +22,6 @@ data class User(
     val createdAt: Long = System.currentTimeMillis(),
     /** Comma-separated AppModule names; null = every module on. */
     val enabledModules: String? = null,
+    val recoveryHash: String? = null,
+    val recoverySalt: String? = null,
 )

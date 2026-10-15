@@ -32,7 +32,7 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
         preferredNameSource: PreferredNameSource,
         preferredNameCustomText: String,
         password: String,
-        onSuccess: () -> Unit,
+        onSuccess: (recoveryCode: String) -> Unit,
     ) {
         val trimmedFirst = firstName.trim()
         val trimmedMiddle = middleName.trim()
@@ -68,9 +68,10 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
                 passwordSalt = salt,
             )
             val id = userDao.insert(user)
+            val recoveryCode = RecoveryCodes.issue(userDao, id)
             preferences.currentUserId = id
             _errorMessage.value = null
-            onSuccess()
+            onSuccess(recoveryCode)
         }
     }
 }

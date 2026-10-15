@@ -9,6 +9,9 @@ object LoginRoute
 object RegisterRoute
 
 @Serializable
+object ResetPasswordRoute
+
+@Serializable
 object HomeRoute
 
 /** Bottom-bar tab roots that list their pages (the other three tabs open a real page directly). */

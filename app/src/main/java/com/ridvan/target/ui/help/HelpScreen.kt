@@ -42,6 +42,9 @@ fun HelpScreen(shellNavigation: ShellNavigation) {
             }
             HelpSection(R.string.help_shortcuts_title, R.string.help_shortcuts_body)
             HelpSection(R.string.help_backup_title, R.string.help_backup_body)
+            HelpSection(R.string.help_modules_title, R.string.help_modules_body)
+            HelpSection(R.string.help_recovery_title, R.string.help_recovery_body)
+            HelpSection(R.string.help_dbbackup_title, R.string.help_dbbackup_body)
             HelpSection(R.string.help_settings_title, R.string.help_settings_body, isLast = true)
         }
     }

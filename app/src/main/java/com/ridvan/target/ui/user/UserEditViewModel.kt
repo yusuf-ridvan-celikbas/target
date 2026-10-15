@@ -30,6 +30,23 @@ class UserEditViewModel(application: Application) : AndroidViewModel(application
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage.asStateFlow()
 
+    /** Requires the current password; replaces any existing recovery code and returns the new one. */
+    fun createRecoveryCode(password: String, onCode: (String) -> Unit) {
+        viewModelScope.launch {
+            val current = user.value ?: return@launch
+            if (password.isEmpty()) {
+                _errorMessage.value = ErrorMessage.ENTER_PASSWORD
+                return@launch
+            }
+            if (!PasswordHasher.verify(password, current.passwordSalt, current.passwordHash)) {
+                _errorMessage.value = ErrorMessage.INCORRECT_PASSWORD
+                return@launch
+            }
+            _errorMessage.value = null
+            onCode(com.ridvan.target.ui.auth.RecoveryCodes.issue(userDao, current.id))
+        }
+    }
+
     fun save(
         firstName: String,
         middleName: String,

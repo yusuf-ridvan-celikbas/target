@@ -52,6 +52,12 @@ fun UserEditScreen(
     var newPassword by remember { mutableStateOf("") }
     var confirmNewPassword by remember { mutableStateOf("") }
     var initialized by remember { mutableStateOf(false) }
+    var recoveryPassword by remember { mutableStateOf("") }
+    var newRecoveryCode by remember { mutableStateOf<String?>(null) }
+
+    newRecoveryCode?.let {
+        com.ridvan.target.ui.auth.RecoveryCodeDialog(code = it, onDone = { newRecoveryCode = null })
+    }
 
     LaunchedEffect(user) {
         val current = user
@@ -164,6 +170,36 @@ fun UserEditScreen(
                 modifier = Modifier.padding(top = 16.dp),
             ) {
                 Text(stringResource(R.string.common_save))
+            }
+
+            Spacer(Modifier.height(24.dp))
+            Text(stringResource(R.string.recovery_row_title), style = MaterialTheme.typography.labelSmall)
+            Text(
+                stringResource(R.string.recovery_row_hint),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            OutlinedTextField(
+                value = recoveryPassword,
+                onValueChange = { recoveryPassword = it },
+                label = { Text(stringResource(R.string.user_edit_current_password)) },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
+            TextButton(
+                onClick = {
+                    viewModel.createRecoveryCode(recoveryPassword) {
+                        recoveryPassword = ""
+                        newRecoveryCode = it
+                    }
+                },
+            ) {
+                Text(
+                    stringResource(
+                        if (user?.recoveryHash == null) R.string.recovery_create else R.string.recovery_create_new,
+                    ),
+                )
             }
         }
     }

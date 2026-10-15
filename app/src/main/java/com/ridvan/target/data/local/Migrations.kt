@@ -679,3 +679,11 @@ val MIGRATION_28_29 = object : Migration(28, 29) {
         db.execSQL("ALTER TABLE users ADD COLUMN enabledModules TEXT")
     }
 }
+
+/** Offline password reset: salted hash of the account recovery code (NULL = none set). */
+val MIGRATION_29_30 = object : Migration(29, 30) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN recoveryHash TEXT")
+        db.execSQL("ALTER TABLE users ADD COLUMN recoverySalt TEXT")
+    }
+}

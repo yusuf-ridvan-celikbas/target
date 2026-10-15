@@ -14,6 +14,9 @@ enum class ErrorMessage {
     NEW_PASSWORDS_DONT_MATCH,
     ENTER_PASSWORD,
     INCORRECT_PASSWORD,
+    UNKNOWN_USER,
+    WRONG_RECOVERY_CODE,
+    NO_RECOVERY_CODE,
 }
 
 @Composable
@@ -27,4 +30,7 @@ fun ErrorMessage.text(): String = when (this) {
     ErrorMessage.NEW_PASSWORDS_DONT_MATCH -> stringResource(R.string.error_new_passwords_dont_match)
     ErrorMessage.ENTER_PASSWORD -> stringResource(R.string.error_enter_password)
     ErrorMessage.INCORRECT_PASSWORD -> stringResource(R.string.error_incorrect_password)
+    ErrorMessage.UNKNOWN_USER -> stringResource(R.string.error_unknown_user)
+    ErrorMessage.WRONG_RECOVERY_CODE -> stringResource(R.string.error_wrong_recovery_code)
+    ErrorMessage.NO_RECOVERY_CODE -> stringResource(R.string.error_no_recovery_code)
 }

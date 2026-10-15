@@ -31,6 +31,12 @@ interface UserDao {
     @Query("UPDATE users SET enabledModules = :modules WHERE id = :userId")
     suspend fun setEnabledModules(userId: Long, modules: String?)
 
+    @Query("UPDATE users SET recoveryHash = :hash, recoverySalt = :salt WHERE id = :userId")
+    suspend fun setRecovery(userId: Long, hash: String, salt: String)
+
+    @Query("UPDATE users SET passwordHash = :hash, passwordSalt = :salt WHERE id = :userId")
+    suspend fun setPassword(userId: Long, hash: String, salt: String)
+
     @Query("SELECT COUNT(*) FROM users WHERE username = :username")
     suspend fun countByUsername(username: String): Int
 }

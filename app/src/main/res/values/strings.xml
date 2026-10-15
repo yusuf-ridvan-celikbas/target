@@ -431,7 +431,7 @@
 
     <!-- Help (ui/help/HelpScreen.kt) -->
     <string name="help_getting_started_title">Getting Started</string>
-    <string name="help_getting_started_body">Register creates a new account with your name and a password; Login signs into an existing one. You can add more accounts anytime and switch between them from the account icon at the top right (My Account → Switch Account) without losing any data.</string>
+    <string name="help_getting_started_body">Use the bottom tabs: Home, Study, Plan, Focus and Stats; the profile icon at the top right opens My Account, Settings and Help. Register creates a new account with your name and a password (and shows a recovery code to save); Login signs into an existing one. You can add more accounts anytime and switch between them from the account icon at the top right (My Account → Switch Account) without losing any data.</string>
     <string name="help_exams_title">Exams</string>
     <string name="help_exams_body">Add an exam from the Exams screen, choosing its type (University Entrance, High School Entrance, Language, or Vocational). If the exam has sections (like TYT/AYT), courses are picked per section instead of one flat list. A Language Exam has a single language field instead of a course pool.</string>
     <string name="help_courses_title">Courses</string>
@@ -1038,4 +1038,27 @@
     <string name="modules_onboarding_hint">Pick what you need. You can change this anytime in Settings.</string>
     <string name="action_continue">Continue</string>
     <string name="settings_modules_hint">Choose which parts of Target you use</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="reset_title">Reset password</string>
+    <string name="reset_action">Reset password</string>
+    <string name="reset_back">Back to login</string>
+    <string name="reset_success">Your password was changed. Here is your new recovery code; the old one no longer works.</string>
+    <string name="field_recovery_code">Recovery code</string>
+    <string name="error_unknown_user">No account with that username.</string>
+    <string name="error_wrong_recovery_code">That recovery code is not correct.</string>
+    <string name="error_no_recovery_code">This account has no recovery code. Sign in and create one in My Account.</string>
+    <string name="recovery_save_title">Save your recovery code</string>
+    <string name="recovery_save_warning">This is the only way to reset a forgotten password. Target works fully offline, so nobody can recover your account for you. It is shown only once; store it somewhere safe.</string>
+    <string name="recovery_copy">Copy</string>
+    <string name="recovery_saved">I saved it</string>
+    <string name="recovery_row_title">Recovery code</string>
+    <string name="recovery_row_hint">Lets you reset a forgotten password. Enter your current password to create one.</string>
+    <string name="recovery_create">Create recovery code</string>
+    <string name="recovery_create_new">Create a new recovery code</string>
+    <string name="help_modules_title">Modules</string>
+    <string name="help_modules_body">Target is split into modules (Exams and Study, Planner, Focus, Reading, Trips and more). Choose the ones you use in Settings > Modules; hidden modules disappear from the tabs and Home, and your data is kept.</string>
+    <string name="help_recovery_title">Recovery code</string>
+    <string name="help_recovery_body">When you register, Target shows a recovery code once. On the login screen, Forgot password? uses it to set a new password. You can make a new code anytime in My Account > Edit profile; the old one then stops working.</string>
+    <string name="help_dbbackup_title">Backup and restore</string>
+    <string name="help_dbbackup_body">Settings > Backup saves everything to one file you choose (keep a copy outside the phone). Restore replaces all data with that file. Settings and preferences are not included.</string>
 </resources>

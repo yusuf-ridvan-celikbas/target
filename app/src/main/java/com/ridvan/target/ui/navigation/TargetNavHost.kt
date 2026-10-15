@@ -126,7 +126,11 @@ fun TargetNavHost() {
             LoginScreen(
                 onLoginSuccess = { navController.navigate(HomeRoute) { popUpTo(0) } },
                 onNavigateToRegister = { navController.navigate(RegisterRoute) },
+                onForgotPassword = { navController.navigate(ResetPasswordRoute) },
             )
+        }
+        composable<ResetPasswordRoute> {
+            com.ridvan.target.ui.auth.ResetPasswordScreen(onDone = { navController.popBackStack() })
         }
         composable<RegisterRoute> {
             RegisterScreen(

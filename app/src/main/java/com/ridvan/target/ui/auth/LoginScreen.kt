@@ -32,6 +32,7 @@ import com.ridvan.target.ui.common.text
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onForgotPassword: () -> Unit,
     viewModel: LoginViewModel = viewModel(),
 ) {
     var username by remember { mutableStateOf("") }
@@ -68,6 +69,9 @@ fun LoginScreen(
                 modifier = Modifier.padding(top = 16.dp),
             ) {
                 Text(stringResource(R.string.login_title))
+            }
+            TextButton(onClick = onForgotPassword) {
+                Text(stringResource(R.string.login_forgot_password))
             }
             TextButton(onClick = onNavigateToRegister) {
                 Text(stringResource(R.string.login_register_prompt))

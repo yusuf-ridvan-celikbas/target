@@ -429,7 +429,7 @@
 
     <!-- Help (ui/help/HelpScreen.kt) -->
     <string name="help_getting_started_title">Başlarken</string>
-    <string name="help_getting_started_body">Kayıt Ol, adınız ve bir şifreyle yeni bir hesap oluşturur; Giriş Yap mevcut bir hesaba girer. İstediğiniz zaman yeni hesaplar ekleyebilir ve sağ üstteki hesap simgesinden (Hesabım → Hesap Değiştir) veri kaybı olmadan hesaplar arasında geçiş yapabilirsiniz.</string>
+    <string name="help_getting_started_body">Alttaki sekmeleri kullanın: Ana Sayfa, Çalışma, Plan, Odak ve İstatistik; sağ üstteki profil simgesi Hesabım, Ayarlar ve Yardım\'ı açar. Kayıt Ol, adınız ve bir şifreyle yeni bir hesap oluşturur (ve kaydetmeniz için bir kurtarma kodu gösterir); Giriş Yap mevcut bir hesaba girer. İstediğiniz zaman yeni hesaplar ekleyebilir ve sağ üstteki hesap simgesinden (Hesabım → Hesap Değiştir) veri kaybı olmadan hesaplar arasında geçiş yapabilirsiniz.</string>
     <string name="help_exams_title">Sınavlar</string>
     <string name="help_exams_body">Sınavlar ekranından türünü seçerek (Üniversiteye Giriş Sınavı, Lise Giriş Sınavı, Dil Sınavı veya Meslek Sınavı) bir sınav ekleyin. Sınavın bölümleri varsa (TYT/AYT gibi) dersler tek bir listeden değil, bölüm bazında seçilir. Dil Sınavlarında ders havuzu yerine tek bir dil alanı bulunur.</string>
     <string name="help_courses_title">Dersler</string>
@@ -1036,4 +1036,27 @@
     <string name="modules_onboarding_hint">İhtiyacın olanları seç. Bunu istediğin zaman Ayarlar bölümünden değiştirebilirsin.</string>
     <string name="action_continue">Devam</string>
     <string name="settings_modules_hint">Hangi bölümleri kullandığını seç</string>
+    <string name="login_forgot_password">Şifremi unuttum</string>
+    <string name="reset_title">Şifre sıfırla</string>
+    <string name="reset_action">Şifreyi sıfırla</string>
+    <string name="reset_back">Girişe dön</string>
+    <string name="reset_success">Şifreniz değiştirildi. İşte yeni kurtarma kodunuz; eskisi artık çalışmaz.</string>
+    <string name="field_recovery_code">Kurtarma kodu</string>
+    <string name="error_unknown_user">Bu kullanıcı adıyla bir hesap yok.</string>
+    <string name="error_wrong_recovery_code">Kurtarma kodu doğru değil.</string>
+    <string name="error_no_recovery_code">Bu hesabın kurtarma kodu yok. Giriş yapıp Hesabım bölümünden oluşturun.</string>
+    <string name="recovery_save_title">Kurtarma kodunuzu kaydedin</string>
+    <string name="recovery_save_warning">Unutulan bir şifreyi sıfırlamanın tek yolu budur. Target tamamen çevrimdışı çalışır, bu yüzden kimse hesabınızı sizin için kurtaramaz. Kod yalnızca bir kez gösterilir; güvenli bir yere kaydedin.</string>
+    <string name="recovery_copy">Kopyala</string>
+    <string name="recovery_saved">Kaydettim</string>
+    <string name="recovery_row_title">Kurtarma kodu</string>
+    <string name="recovery_row_hint">Unutulan şifreyi sıfırlamanızı sağlar. Oluşturmak için mevcut şifrenizi girin.</string>
+    <string name="recovery_create">Kurtarma kodu oluştur</string>
+    <string name="recovery_create_new">Yeni kurtarma kodu oluştur</string>
+    <string name="help_modules_title">Modüller</string>
+    <string name="help_modules_body">Target modüllere ayrılmıştır (Sınav ve Çalışma, Planlayıcı, Odak, Okuma, Geziler ve daha fazlası). Kullandıklarınızı Ayarlar > Modüller bölümünden seçin; gizlenen modüller sekmelerden ve Ana Sayfa kısmından kalkar, verileriniz korunur.</string>
+    <string name="help_recovery_title">Kurtarma kodu</string>
+    <string name="help_recovery_body">Kayıt olurken Target size bir kez kurtarma kodu gösterir. Giriş ekranındaki Şifremi unuttum bu kodla yeni şifre belirlemenizi sağlar. Hesabım > Profili düzenle bölümünden istediğiniz zaman yeni kod oluşturabilirsiniz; eskisi geçersiz olur.</string>
+    <string name="help_dbbackup_title">Yedekleme ve geri yükleme</string>
+    <string name="help_dbbackup_body">Ayarlar > Yedekleme tüm verilerinizi seçtiğiniz tek bir dosyaya kaydeder (bir kopyasını telefon dışında saklayın). Geri yükleme tüm verileri o dosyayla değiştirir. Ayarlar ve tercihler dahil değildir.</string>
 </resources>

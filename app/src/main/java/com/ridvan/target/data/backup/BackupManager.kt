@@ -15,7 +15,7 @@ import kotlin.system.exitProcess
 /** Whole-database backup/restore. Preferences are deliberately not part of it. */
 object BackupManager {
     private const val DB_NAME = "target.db"
-    private const val CURRENT_VERSION = 29
+    private const val CURRENT_VERSION = 30
 
     fun defaultFileName(): String =
         "Target-backup-" + SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()) + ".db"

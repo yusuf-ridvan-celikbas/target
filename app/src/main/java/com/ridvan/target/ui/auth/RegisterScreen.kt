@@ -48,6 +48,9 @@ fun RegisterScreen(
     var preferredNameCustomText by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    var recoveryCode by remember { mutableStateOf<String?>(null) }
+
+    recoveryCode?.let { RecoveryCodeDialog(code = it, onDone = onRegisterSuccess) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.register_title)) }) },
@@ -122,7 +125,7 @@ fun RegisterScreen(
                     viewModel.register(
                         firstName, middleName, lastName, username, email,
                         preferredNameSource, preferredNameCustomText, password,
-                        onRegisterSuccess,
+                        { recoveryCode = it },
                     )
                 },
                 modifier = Modifier.padding(top = 16.dp),
