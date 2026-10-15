@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.AvTimer
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Timer
@@ -97,6 +98,7 @@ fun FocusHubScreen(shellNavigation: ShellNavigation) {
     val modules = rememberEnabledModules()
     val focus = AppModule.FOCUS in modules
     val reading = AppModule.READING in modules
+    val sports = AppModule.SPORTS in modules
     HubPage(
         navigation = shellNavigation,
         destination = ShellDestination.FOCUS_HUB,
@@ -109,6 +111,7 @@ fun FocusHubScreen(shellNavigation: ShellNavigation) {
             ),
             listOfNotNull(
                 HubEntry(R.string.label_reading, R.string.hub_reading_hint, Icons.Filled.AutoStories, shellNavigation.onNavigateReading).takeIf { reading },
+                HubEntry(R.string.label_sports, R.string.hub_sports_hint, Icons.Filled.FitnessCenter, shellNavigation.onNavigateSports).takeIf { sports },
             ),
         ),
     )

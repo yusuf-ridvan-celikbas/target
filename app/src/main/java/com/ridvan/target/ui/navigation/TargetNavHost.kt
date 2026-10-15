@@ -105,6 +105,7 @@ fun TargetNavHost() {
         onNavigateFlowTimer = { push(FlowTimerRoute) },
         onNavigateStudyHistory = { push(FocusHistoryHomeRoute) },
         onNavigateReading = { push(ReadingRoute) },
+        onNavigateSports = { push(SportsRoute) },
         onNavigateHelp = { push(HelpRoute) },
         onNavigateMyAccount = { push(MyAccountRoute) },
         onNavigateSettings = { push(SettingsRoute) },
@@ -159,6 +160,19 @@ fun TargetNavHost() {
         }
         composable<PlanHubRoute> {
             PlanHubScreen(shellNavigation = shellNavigation)
+        }
+        composable<SportsRoute> {
+            com.ridvan.target.ui.sports.SportsScreen(
+                shellNavigation = shellNavigation,
+                onStartLive = { navController.navigate(LiveWorkoutRoute) },
+                onWorkoutClick = { id -> navController.navigate(WorkoutDetailRoute(id)) },
+            )
+        }
+        composable<LiveWorkoutRoute> {
+            com.ridvan.target.ui.sports.LiveWorkoutScreen(shellNavigation = shellNavigation)
+        }
+        composable<WorkoutDetailRoute> {
+            com.ridvan.target.ui.sports.WorkoutDetailScreen(onBack = { navController.popBackStack() })
         }
         composable<TripListRoute> {
             TripListScreen(
@@ -382,6 +396,7 @@ fun TargetNavHost() {
                 onPracticeSessionClick = { id -> navController.navigate(TopicProgressRoute(id)) },
                 onTripClick = { tripId -> navController.navigate(TripDetailRoute(tripId)) },
                 onRoutineClick = { routineId, dateMillis -> navController.navigate(RoutineDetailRoute(routineId, dateMillis)) },
+                onWorkoutClick = { id -> navController.navigate(WorkoutDetailRoute(id)) },
             )
         }
         composable<FocusTimerRoute> {

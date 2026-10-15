@@ -49,6 +49,15 @@ class AppModuleTest {
         assertEquals(listOf(ShellTab.HOME, ShellTab.FOCUS), visibleTabs(setOf(AppModule.FOCUS)))
         assertEquals(listOf(ShellTab.HOME, ShellTab.PLAN), visibleTabs(setOf(AppModule.PLANNER_ROUTINES)))
         assertEquals(listOf(ShellTab.HOME, ShellTab.STUDY, ShellTab.STATS), visibleTabs(setOf(AppModule.EXAMS_STUDY)))
+        assertEquals(listOf(ShellTab.HOME, ShellTab.FOCUS), visibleTabs(setOf(AppModule.SPORTS)))
+    }
+
+    @Test
+    fun sportsModuleIsOnByDefaultAndGatesItsAgendaGroup() {
+        assertTrue(AppModule.SPORTS in parseModules(null))
+        assertTrue(agendaGroupVisible(AgendaGroup.SPORTS, setOf(AppModule.SPORTS)))
+        assertFalse(agendaGroupVisible(AgendaGroup.SPORTS, setOf(AppModule.FOCUS)))
+        assertEquals(setOf(AppModule.SPORTS), parseModules(serializeModules(setOf(AppModule.SPORTS))))
     }
 
     @Test

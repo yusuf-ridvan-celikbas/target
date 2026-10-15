@@ -12,7 +12,7 @@ fun ShellTab.isVisible(modules: Set<AppModule>): Boolean = when (this) {
     ShellTab.HOME -> true
     ShellTab.STUDY -> AppModule.EXAMS_STUDY in modules
     ShellTab.PLAN -> AppModule.PLANNER_ROUTINES in modules || AppModule.TRIPS in modules
-    ShellTab.FOCUS -> AppModule.FOCUS in modules || AppModule.READING in modules
+    ShellTab.FOCUS -> AppModule.FOCUS in modules || AppModule.READING in modules || AppModule.SPORTS in modules
     ShellTab.STATS -> AppModule.EXAMS_STUDY in modules || AppModule.READING in modules
 }
 
@@ -28,7 +28,7 @@ fun availableStatsSources(modules: Set<AppModule>): List<StatsSource> = buildLis
 }
 
 /** Planner agenda groups that belong to a module. */
-enum class AgendaGroup { EXAMS, PRACTICE, FOCUS, READING, TRIPS, ROUTINES }
+enum class AgendaGroup { EXAMS, PRACTICE, FOCUS, READING, TRIPS, ROUTINES, SPORTS }
 
 fun agendaGroupVisible(group: AgendaGroup, modules: Set<AppModule>): Boolean = when (group) {
     AgendaGroup.EXAMS, AgendaGroup.PRACTICE -> AppModule.EXAMS_STUDY in modules
@@ -36,6 +36,7 @@ fun agendaGroupVisible(group: AgendaGroup, modules: Set<AppModule>): Boolean = w
     AgendaGroup.READING -> AppModule.READING in modules
     AgendaGroup.TRIPS -> AppModule.TRIPS in modules
     AgendaGroup.ROUTINES -> AppModule.PLANNER_ROUTINES in modules
+    AgendaGroup.SPORTS -> AppModule.SPORTS in modules
 }
 
 @Composable

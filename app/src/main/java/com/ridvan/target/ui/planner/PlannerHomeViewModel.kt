@@ -54,6 +54,7 @@ private data class PlannerRawData(
     val routines: List<Routine>,
     val routineSteps: List<RoutineStep>,
     val routineCompletions: List<RoutineStepCompletion>,
+    val workouts: List<com.ridvan.target.data.local.entity.Workout>,
 )
 
 class PlannerHomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -82,7 +83,8 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
     private val studiedData = combine(
         userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
-    ) { focus, practice -> focus to practice }
+        userId?.let { database.workoutDao().getByUserId(it) } ?: flowOf(emptyList()),
+    ) { focus, practice, workouts -> Triple(focus, practice, workouts) }
 
     private val examData = combine(
         userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
@@ -110,10 +112,10 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
         examData,
         studiedData,
         tripAndRoutineData,
-    ) { events, completions, (exams, sections), (focus, practice), (trip, routine) ->
+    ) { events, completions, (exams, sections), (focus, practice, workouts), (trip, routine) ->
         val (trips, activities, bookings) = trip
         val (routines, routineSteps, routineCompletions) = routine
-        PlannerRawData(events, completions, exams, sections, focus, practice, trips, activities, bookings, routines, routineSteps, routineCompletions)
+        PlannerRawData(events, completions, exams, sections, focus, practice, trips, activities, bookings, routines, routineSteps, routineCompletions, workouts)
     }
 
     private val modeAndDate = combine(_viewMode, _anchorDate) { mode, date -> mode to date }
@@ -226,8 +228,18 @@ private fun buildAgendaItems(raw: PlannerRawData, range: ClosedRange<LocalDate>)
 
     val studiedItems = studiedItemsInRange(raw.focusSessions, raw.practiceLogs, range)
 
-    return (eventItems + examItems + sectionItems + studiedItems + tripItemsInRange(raw, range) + routineItemsInRange(raw, range))
+    return (eventItems + examItems + sectionItems + studiedItems + tripItemsInRange(raw, range) + routineItemsInRange(raw, range) + workoutItemsInRange(raw, range))
         .sortedBy { it.date }
+}
+
+/** Workouts starting inside [range]; Week/Month only, so a busy year doesn't flood the Year list. */
+private fun workoutItemsInRange(raw: PlannerRawData, range: ClosedRange<LocalDate>): List<PlannerAgendaItem> {
+    if (raw.workouts.isEmpty() || range.endInclusive.toEpochDay() - range.start.toEpochDay() > 60) return emptyList()
+    return raw.workouts.mapNotNull { workout ->
+        val started = Instant.ofEpochMilli(workout.startedAt).atZone(ZoneId.systemDefault())
+        val date = started.toLocalDate()
+        if (date !in range) null else PlannerAgendaItem.WorkoutEntry(workout, date, started.hour * 60 + started.minute)
+    }
 }
 
 /** Each active routine on each of its days inside [range], with that day's ticked-step count. */
@@ -295,6 +307,7 @@ internal fun studiedItemsInRange(
 private fun PlannerAgendaItem.agendaGroup(): AgendaGroup? = when (this) {
     is PlannerAgendaItem.EventOccurrence -> null
     is PlannerAgendaItem.RoutineEntry -> AgendaGroup.ROUTINES
+    is PlannerAgendaItem.WorkoutEntry -> AgendaGroup.SPORTS
     is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
     is PlannerAgendaItem.TripDayEntry, is PlannerAgendaItem.TripActivityEntry, is PlannerAgendaItem.TripBookingEntry -> AgendaGroup.TRIPS
     is PlannerAgendaItem.FocusSessionEntry -> if (isReading) AgendaGroup.READING else AgendaGroup.FOCUS

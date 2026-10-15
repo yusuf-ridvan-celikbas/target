@@ -32,6 +32,13 @@ sealed interface PlannerAgendaItem {
         override val date: LocalDate,
     ) : PlannerAgendaItem
 
+    /** A logged workout on the day it started; [minuteOfDay] orders the day's rows. */
+    data class WorkoutEntry(
+        val workout: com.ridvan.target.data.local.entity.Workout,
+        override val date: LocalDate,
+        val minuteOfDay: Int,
+    ) : PlannerAgendaItem
+
     data class ExamEntry(
         val examId: Long,
         val label: String,

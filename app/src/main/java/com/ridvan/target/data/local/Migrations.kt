@@ -699,3 +699,17 @@ val MIGRATION_30_31 = object : Migration(30, 31) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_trip_packing_template_items_templateId` ON `trip_packing_template_items` (`templateId`)")
     }
 }
+
+/** Sports: workouts, gym exercises/sets and weekly/monthly goals. */
+val MIGRATION_31_32 = object : Migration(31, 32) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `workouts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `sport` TEXT NOT NULL, `startedAt` INTEGER NOT NULL, `durationSeconds` INTEGER NOT NULL, `distanceMeters` INTEGER, `notes` TEXT, `effort` INTEGER, `isLive` INTEGER NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workouts_userId` ON `workouts` (`userId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `workout_exercises` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `workoutId` INTEGER NOT NULL, `name` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, FOREIGN KEY(`workoutId`) REFERENCES `workouts`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_exercises_workoutId` ON `workout_exercises` (`workoutId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `workout_sets` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `exerciseId` INTEGER NOT NULL, `orderIndex` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `weightKg` REAL NOT NULL, FOREIGN KEY(`exerciseId`) REFERENCES `workout_exercises`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_sets_exerciseId` ON `workout_sets` (`exerciseId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `sport_goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `sport` TEXT, `period` TEXT NOT NULL, `targetType` TEXT NOT NULL, `targetValue` REAL NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_sport_goals_userId` ON `sport_goals` (`userId`)")
+    }
+}

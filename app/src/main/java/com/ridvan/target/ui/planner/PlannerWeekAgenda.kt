@@ -11,6 +11,10 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.FitnessCenter
+import com.ridvan.target.ui.sports.icon
+import com.ridvan.target.ui.sports.label
+import com.ridvan.target.ui.sports.workoutSummary
 import com.ridvan.target.ui.routines.RoutineIcon
 import com.ridvan.target.ui.routines.RoutineProgress
 import com.ridvan.target.ui.routines.routineProgressText
@@ -155,12 +159,14 @@ private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
     FOCUS(R.string.planner_group_focus, Icons.Filled.Timer),
     READING(R.string.planner_group_reading, Icons.Filled.AutoStories),
     PRACTICE(R.string.planner_group_practice, Icons.Filled.Quiz),
+    SPORTS(R.string.planner_group_sports, Icons.Filled.FitnessCenter),
 }
 
 private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
     is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
     is PlannerAgendaItem.EventOccurrence -> AgendaGroup.PLANS
     is PlannerAgendaItem.RoutineEntry -> AgendaGroup.ROUTINES
+    is PlannerAgendaItem.WorkoutEntry -> AgendaGroup.SPORTS
     is PlannerAgendaItem.TripDayEntry, is PlannerAgendaItem.TripActivityEntry, is PlannerAgendaItem.TripBookingEntry -> AgendaGroup.TRIPS
     is PlannerAgendaItem.FocusSessionEntry -> if (item.isReading) AgendaGroup.READING else AgendaGroup.FOCUS
     is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE
@@ -213,6 +219,7 @@ private fun sortMinute(item: PlannerAgendaItem): Int = when (item) {
     is PlannerAgendaItem.EventOccurrence -> item.event.startMinuteOfDay ?: Int.MAX_VALUE
     is PlannerAgendaItem.RoutineEntry -> item.routine.startMinuteOfDay ?: Int.MAX_VALUE
     is PlannerAgendaItem.Studied -> item.minuteOfDay
+    is PlannerAgendaItem.WorkoutEntry -> item.minuteOfDay
     is PlannerAgendaItem.TripDayEntry -> -1
     is PlannerAgendaItem.TripActivityEntry -> item.item.activity.startMinuteOfDay ?: Int.MAX_VALUE
     is PlannerAgendaItem.TripBookingEntry -> item.item.booking.startMinuteOfDay ?: Int.MAX_VALUE
@@ -272,6 +279,20 @@ private fun AgendaRow(
                             item.routine.startMinuteOfDay?.let { minuteLabel(it) },
                             routineProgressText(RoutineProgress(item.done, item.total)),
                         ).joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                },
+            )
+        }
+        is PlannerAgendaItem.WorkoutEntry -> {
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onItemClick(item) },
+                leadingContent = { Icon(item.workout.sport.icon(), contentDescription = null, tint = MaterialTheme.colorScheme.tertiary) },
+                headlineContent = { Text(item.workout.sport.label()) },
+                supportingContent = {
+                    Text(
+                        listOf(formatTime(item.workout.startedAt), workoutSummary(item.workout)).joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 },

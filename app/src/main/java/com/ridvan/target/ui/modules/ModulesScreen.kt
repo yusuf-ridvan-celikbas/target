@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
@@ -51,6 +52,7 @@ private val moduleInfos = listOf(
     ModuleInfo(AppModule.FOCUS, R.string.module_focus, R.string.module_focus_hint, Icons.Filled.Timer),
     ModuleInfo(AppModule.READING, R.string.module_reading, R.string.module_reading_hint, Icons.Filled.AutoStories),
     ModuleInfo(AppModule.TRIPS, R.string.module_trips, R.string.module_trips_hint, Icons.Filled.Luggage),
+    ModuleInfo(AppModule.SPORTS, R.string.module_sports, R.string.module_sports_hint, Icons.Filled.FitnessCenter),
 )
 
 /**

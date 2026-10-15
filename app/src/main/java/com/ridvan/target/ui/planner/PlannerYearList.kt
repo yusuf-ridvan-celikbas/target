@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseDisplayName
+import com.ridvan.target.ui.sports.label
 import com.ridvan.target.ui.focustimer.focusSessionTitle
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -106,6 +107,7 @@ private fun YearItemRow(item: PlannerAgendaItem, onItemClick: (PlannerAgendaItem
     val label = when (item) {
         is PlannerAgendaItem.EventOccurrence -> item.event.title
         is PlannerAgendaItem.RoutineEntry -> item.routine.name
+        is PlannerAgendaItem.WorkoutEntry -> item.workout.sport.label()
         is PlannerAgendaItem.ExamEntry -> item.label
         is PlannerAgendaItem.SectionEntry -> item.label
         is PlannerAgendaItem.TripDayEntry -> item.tripName

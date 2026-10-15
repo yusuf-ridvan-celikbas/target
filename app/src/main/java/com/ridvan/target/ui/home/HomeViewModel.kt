@@ -1,5 +1,7 @@
 package com.ridvan.target.ui.home
 
+import com.ridvan.target.ui.sports.goalProgress
+import com.ridvan.target.ui.sports.minutesOf
 import com.ridvan.target.ui.planner.currentBook
 import com.ridvan.target.ui.reading.BookProgress
 import com.ridvan.target.ui.reading.DailyGoal
@@ -35,6 +37,11 @@ import kotlinx.coroutines.launch
 /** Home's reading line; the page counts come from [StudiedPreview]'s week window. */
 /** [goal] is today's share of the current book's finish goal, when it has one; [pagesPerHour] estimates its time. */
 data class HomeReading(val currentBook: BookProgress?, val goal: DailyGoal? = null, val pagesPerHour: Double? = null)
+
+/** [todayCount]/[todayMinutes] cover today's workouts; [goals] are every Sports goal with its progress. */
+data class HomeSports(val todayCount: Int, val todayMinutes: Int, val goals: List<HomeGoalLine>)
+
+data class HomeGoalLine(val goal: com.ridvan.target.data.local.entity.SportGoal, val progress: com.ridvan.target.ui.sports.GoalProgress)
 
 data class TodayRoutine(val routine: com.ridvan.target.data.local.entity.Routine, val progress: RoutineProgress)
 
@@ -134,6 +141,19 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
     ) { focus, practice -> studiedPreview(focus, practice) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudiedPreview(emptyList(), 0, 0))
+
+    private val workoutDao = targetApplication.database.workoutDao()
+
+    /** Today's workouts and every goal's progress; null when there is nothing to show. */
+    val sports: StateFlow<HomeSports?> = combine(
+        userId?.let { workoutDao.getByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { workoutDao.getGoals(it) } ?: flowOf(emptyList()),
+    ) { workouts, goals ->
+        val now = System.currentTimeMillis()
+        val today = workouts.filter { it.startedAt >= startOfTodayMillis() && it.startedAt < startOfTodayMillis() + 24L * 60 * 60 * 1000 }
+        val lines = goals.map { HomeGoalLine(it, goalProgress(it, workouts, now)) }
+        if (today.isEmpty() && lines.isEmpty()) null else HomeSports(today.size, minutesOf(today.sumOf { it.durationSeconds }), lines)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val workOnNext: StateFlow<List<WorkOnNextItem>> =
         (userId?.let { targetApplication.database.studyResourceTopicDao().getWorkOnNextRows(it) } ?: flowOf(emptyList()))

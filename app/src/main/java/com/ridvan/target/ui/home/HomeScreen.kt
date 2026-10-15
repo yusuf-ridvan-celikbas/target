@@ -60,6 +60,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.ui.common.countText
+import com.ridvan.target.ui.sports.goalProgressText
+import com.ridvan.target.ui.sports.label
 import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.daysUntil
@@ -99,6 +101,8 @@ fun HomeScreen(
     val plannerOn = com.ridvan.target.data.modules.AppModule.PLANNER_ROUTINES in modules
     val focusOn = com.ridvan.target.data.modules.AppModule.FOCUS in modules
     val readingOn = com.ridvan.target.data.modules.AppModule.READING in modules
+    val sportsState by viewModel.sports.collectAsStateWithLifecycle()
+    val shownSports = sportsState.takeIf { com.ridvan.target.data.modules.AppModule.SPORTS in modules }
 
     val prefix = stringResource(R.string.home_welcome_prefix)
     val suffix = stringResource(R.string.home_welcome_suffix)
@@ -164,11 +168,13 @@ fun HomeScreen(
             }
             val hasStudied = (focusOn || examsOn) && (studied.todayMinutes > 0 || studied.weekMinutes > 0 || studied.today.isNotEmpty())
             val shownReading = reading.takeIf { readingOn }
-            if (hasStudied || shownReading != null) {
+            if (hasStudied || shownReading != null || shownSports != null) {
                 HomeSpacer()
                 TodaySoFarCard(
                     studied = studied,
                     reading = shownReading,
+                    sports = shownSports,
+                    onOpenSports = shellNavigation.onNavigateSports,
                     showStudied = hasStudied,
                     onBookClick = onBookClick,
                     onOpenReading = onOpenReading,
@@ -261,6 +267,8 @@ private fun RoutinesCard(routines: List<TodayRoutine>, onRoutineClick: (Long) ->
 private fun TodaySoFarCard(
     studied: StudiedPreview,
     reading: HomeReading?,
+    sports: HomeSports?,
+    onOpenSports: () -> Unit,
     showStudied: Boolean,
     onBookClick: (Long) -> Unit,
     onOpenReading: () -> Unit,
@@ -271,6 +279,37 @@ private fun TodaySoFarCard(
             Text(stringResource(R.string.home_today_so_far), style = MaterialTheme.typography.titleMedium)
             if (showStudied) StudiedSection(studied, onStudiedClick)
             reading?.let { ReadingSection(studied, it, onBookClick, onOpenReading, onStudiedClick) }
+            sports?.let { SportsSection(it, onOpenSports) }
+        }
+    }
+}
+
+/** Today's workout time, then each Sports goal as "Running: 12 / 20 km this week". */
+@Composable
+private fun SportsSection(sports: HomeSports, onOpenSports: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenSports).padding(top = 12.dp)) {
+        if (sports.todayCount > 0) {
+            Text(
+                stringResource(
+                    R.string.home_sports_today,
+                    countText(R.plurals.count_workouts, sports.todayCount),
+                    durationText(sports.todayMinutes.coerceAtLeast(1)),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        sports.goals.take(3).forEach { line ->
+            val goal = line.goal
+            Text(
+                stringResource(
+                    if (goal.period == com.ridvan.target.data.local.entity.GoalPeriod.WEEK) R.string.home_sports_goal_week else R.string.home_sports_goal_month,
+                    goal.sport?.label() ?: stringResource(R.string.sports_goal_any),
+                    goalProgressText(goal, line.progress),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (line.progress.reached) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
         }
     }
 }
