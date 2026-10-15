@@ -8,6 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
@@ -23,6 +27,24 @@ import com.ridvan.target.ui.common.FormDialogProperties
 @Composable
 fun RecoveryCodeDialog(code: String, onDone: () -> Unit, extraMessage: String? = null) {
     val clipboard = LocalClipboardManager.current
+    var confirming by rememberSaveable { mutableStateOf(false) }
+    if (confirming) {
+        AlertDialog(
+            onDismissRequest = {},
+            properties = FormDialogProperties,
+            title = { Text(stringResource(R.string.recovery_confirm_title)) },
+            text = { Text(stringResource(R.string.recovery_confirm_message)) },
+            dismissButton = {
+                TextButton(onClick = { confirming = false }) {
+                    Text(stringResource(R.string.recovery_confirm_back))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDone) { Text(stringResource(R.string.recovery_confirm_yes)) }
+            },
+        )
+        return
+    }
     AlertDialog(
         onDismissRequest = {},
         properties = FormDialogProperties,
@@ -51,7 +73,7 @@ fun RecoveryCodeDialog(code: String, onDone: () -> Unit, extraMessage: String? =
             }
         },
         confirmButton = {
-            TextButton(onClick = onDone) { Text(stringResource(R.string.recovery_saved)) }
+            TextButton(onClick = { confirming = true }) { Text(stringResource(R.string.recovery_saved)) }
         },
     )
 }

@@ -1061,4 +1061,8 @@
     <string name="help_recovery_body">When you register, Target shows a recovery code once. On the login screen, Forgot password? uses it to set a new password. You can make a new code anytime in My Account > Edit profile; the old one then stops working.</string>
     <string name="help_dbbackup_title">Backup and restore</string>
     <string name="help_dbbackup_body">Settings > Backup saves everything to one file you choose (keep a copy outside the phone). Restore replaces all data with that file. Settings and preferences are not included.</string>
+    <string name="recovery_confirm_title">Did you really save it?</string>
+    <string name="recovery_confirm_message">You will not see this code again. Without it, a forgotten password cannot be reset. Make sure you took a screenshot, copied it or wrote it down.</string>
+    <string name="recovery_confirm_back">Show the code again</string>
+    <string name="recovery_confirm_yes">Yes, I saved it</string>
 </resources>
