@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.languagelist
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -109,6 +110,7 @@ private fun LanguageCourseRow(language: Language, onClick: () -> Unit) {
 private fun LanguageNameDialog(title: String, initialName: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf(initialName) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

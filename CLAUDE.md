@@ -80,6 +80,7 @@ A personal, **fully offline** Android app: the user defines exams, organizes stu
 - Shared components — use them, don't re-copy: `SegmentedToggle`, `AddFab`, `GroupedCard` (animates size), `HelpTooltip` (tap to show), `DropdownField` (`ui/common/`), `countText()` plurals (`CountText.kt`), `formatDuration()` ("38m", "1h 5m"), `formatRate()` (no trailing ".0").
 - `ListItem` inside a `GroupedCard` needs `ListItemDefaults.colors(containerColor = Color.Transparent)` or it hides the card tint.
 - Multi-field forms need `Modifier.imePadding()`; long bodies/dialog lists need `verticalScroll`.
+- Form dialogs (any input) pass `properties = FormDialogProperties` (`ui/common`) so an outside tap does not dismiss; Back still cancels. Plain confirmations may keep the default.
 - Theme: custom `AppShapes`; `BannerColor` pref picks the accent (Blue = dynamic color, others = `pinnedColorScheme`); White/Blue launcher icon via two `<activity-alias>` entries.
 
 ## Localization (EN default, TR)

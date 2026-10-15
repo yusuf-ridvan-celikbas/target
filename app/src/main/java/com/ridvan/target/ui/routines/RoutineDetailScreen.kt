@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.routines
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -199,6 +200,7 @@ fun RoutineDetailScreen(onBack: () -> Unit, viewModel: RoutineDetailViewModel = 
     stepDialog?.let { step ->
         var name by remember(step) { mutableStateOf(step.name) }
         AlertDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { stepDialog = null },
             title = { Text(stringResource(if (step.id == 0L) R.string.routine_add_step else R.string.routine_edit_step)) },
             text = {

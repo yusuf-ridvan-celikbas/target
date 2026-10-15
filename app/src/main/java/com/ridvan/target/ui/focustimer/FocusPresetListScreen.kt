@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.material3.Checkbox
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
@@ -144,6 +145,7 @@ private fun PresetDialog(
     val canSave = name.isNotBlank() && work > 0 && brk > 0
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

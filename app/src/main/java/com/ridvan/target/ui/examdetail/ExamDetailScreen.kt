@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.examdetail
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -411,6 +412,7 @@ private fun AddCourseDialog(
     var name by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_add_course_title)) },
         text = {
@@ -467,6 +469,7 @@ private fun AddSectionDialog(onConfirm: (name: String, date: Long?) -> Unit, onD
     var showDatePicker by remember { mutableStateOf(false) }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_add_section_title)) },
         text = {
@@ -494,6 +497,7 @@ private fun AddSectionDialog(onConfirm: (name: String, date: Long?) -> Unit, onD
     if (showDatePicker) {
         val state = rememberDatePickerState(initialSelectedDateMillis = date)
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {

@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.topiclist
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -107,6 +108,7 @@ private fun TopicRow(topic: TopicWithTotals, onClick: () -> Unit) {
 private fun AddTopicDialog(onConfirm: (name: String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf("") }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_add_topic_title)) },
         text = {

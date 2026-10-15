@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.planner
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -157,6 +158,7 @@ fun PlannerEventFormDialog(
     val isValid = title.isNotBlank() && (category != PlannerEventCategory.STUDY || selectedCourseId != null)
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (initial == null) R.string.planner_dialog_new_title else R.string.planner_dialog_edit_title)) },
         text = {
@@ -370,6 +372,7 @@ fun PlannerEventFormDialog(
     if (showDatePicker) {
         val state = rememberDatePickerState(initialSelectedDateMillis = date.toUtcMillis())
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
@@ -386,6 +389,7 @@ fun PlannerEventFormDialog(
     if (showEndDatePicker) {
         val state = rememberDatePickerState(initialSelectedDateMillis = endDate?.toUtcMillis())
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { showEndDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {

@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import com.ridvan.target.ui.reading.ReadingPagesDialog
 import com.ridvan.target.ui.reading.isReading
 import androidx.compose.foundation.clickable
@@ -353,6 +354,7 @@ private fun LinkSessionDialog(
     }.collectAsStateWithLifecycle(initialValue = emptyList())
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.focus_session_link_dialog_title)) },
         text = {
@@ -436,6 +438,7 @@ internal fun NotesDialog(
 ) {
     var text by remember { mutableStateOf(initial) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

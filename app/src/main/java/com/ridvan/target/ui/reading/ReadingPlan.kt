@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.reading
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import com.ridvan.target.ui.common.formatRate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -163,6 +164,7 @@ private fun ReadingGoalDialog(
     val pagesPerDay = pagesText.toIntOrNull()?.takeIf { it > 0 }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.reading_goal_dialog_title)) },
         text = {
@@ -257,6 +259,7 @@ private fun ReadingGoalDialog(
             },
         )
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {

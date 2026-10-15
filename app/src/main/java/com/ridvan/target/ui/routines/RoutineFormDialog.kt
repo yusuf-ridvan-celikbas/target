@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.routines
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ fun RoutineFormDialog(initial: Routine?, onConfirm: (Routine) -> Unit, onDismiss
     val timeState = rememberTimePickerState(initialHour = startMinute / 60, initialMinute = startMinute % 60, is24Hour = true)
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (initial == null) R.string.routine_new_title else R.string.routine_edit_title)) },
         text = {

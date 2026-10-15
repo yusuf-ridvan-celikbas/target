@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.topicprogress
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -224,6 +225,7 @@ private fun EditTargetCountsDialog(
     var questionCountText by remember { mutableStateOf(initialQuestionCount.toString()) }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_edit_target_counts_title)) },
         text = {
@@ -280,6 +282,7 @@ private fun LogSessionDialog(
     val canSave = sessionQuestionCount > 0
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (initial == null) R.string.dialog_log_session_title else R.string.dialog_edit_session_title)) },
         text = {

@@ -58,6 +58,7 @@ fun AddOrEditExamDialog(
     val isLanguageExam = examTypes.firstOrNull { it.id == selectedTypeId }?.name == LANGUAGE_EXAM_TYPE_NAME
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (initial == null) R.string.exam_dialog_new_title else R.string.exam_dialog_edit_title)) },
         text = {
@@ -147,6 +148,7 @@ fun AddOrEditExamDialog(
     if (showExamDatePicker) {
         val state = rememberDatePickerState(initialSelectedDateMillis = examDate)
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { showExamDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
@@ -165,6 +167,7 @@ fun AddOrEditExamDialog(
     if (showStudyStartDatePicker) {
         val state = rememberDatePickerState(initialSelectedDateMillis = studyStartDate)
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { showStudyStartDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {

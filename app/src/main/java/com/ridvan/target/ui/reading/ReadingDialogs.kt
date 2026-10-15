@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.reading
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,6 +60,7 @@ fun BookDialog(
     var rating by remember { mutableStateOf(initial?.rating) }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (initial == null) R.string.reading_add_book else R.string.reading_edit_book)) },
         text = {
@@ -195,6 +197,7 @@ fun ReadingPagesDialog(
     val valid = end != null && end >= start && end <= cap && start <= cap
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = {
             Text(stringResource(if (startEditable) R.string.reading_edit_pages_title else R.string.reading_page_reached_title))

@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.studyresource
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -146,6 +147,7 @@ internal fun StudyResourceFormDialog(
     var publisher by remember { mutableStateOf(initialPublisher) }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

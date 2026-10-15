@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.practiceexam
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -216,6 +217,7 @@ private fun EditEntryResultDialog(
     val maxQuestions = entry.questionCount
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_edit_entry_result_title)) },
         text = {
@@ -295,6 +297,7 @@ private fun AddTopicResultDialog(
 ) {
     var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.action_add_topic_breakdown)) },
         text = {
@@ -345,6 +348,7 @@ private fun EditTopicResultDialog(
     var wrongText by remember { mutableStateOf(topicResult.wrongCount.toString()) }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(topicResultWithTopic.topicName) },
         text = {

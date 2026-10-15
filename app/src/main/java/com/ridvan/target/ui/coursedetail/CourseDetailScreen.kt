@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.coursedetail
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -282,6 +283,7 @@ private fun CourseEditDialog(
     var category by remember { mutableStateOf(initialCategory) }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_edit_course_title)) },
         text = {

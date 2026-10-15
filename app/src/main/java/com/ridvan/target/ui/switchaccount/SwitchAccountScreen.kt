@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.switchaccount
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -147,6 +148,7 @@ private fun PasswordConfirmDialog(
 ) {
     var password by remember { mutableStateOf("") }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.switch_account_login_as, user.preferredName)) },
         text = {

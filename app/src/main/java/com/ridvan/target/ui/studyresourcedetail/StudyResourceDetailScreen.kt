@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.studyresourcedetail
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -263,6 +264,7 @@ private fun AddEntryDialog(
     var questionCountText by remember { mutableStateOf("") }
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_add_entry_title)) },
         text = {
@@ -466,6 +468,7 @@ private fun AddTopicDialog(
     var name by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_add_topic_title)) },
         text = {

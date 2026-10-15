@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.settings
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import com.ridvan.target.R
 fun ReadingReminderTimeDialog(initialMinute: Int, onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
     val state = rememberTimePickerState(initialHour = initialMinute / 60, initialMinute = initialMinute % 60, is24Hour = true)
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings_reading_reminder_time)) },
         text = { TimeInput(state = state) },

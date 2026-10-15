@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import com.ridvan.target.ui.reading.BookProgress
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -166,6 +167,7 @@ fun FocusManualSessionDialog(
     val isValid = workMinutes > 0 && if (reading) pagesValid else linkComplete
 
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = {
             Text(stringResource(if (initial == null) R.string.focus_manual_add_title else R.string.focus_manual_edit_title))
@@ -300,6 +302,7 @@ fun FocusManualSessionDialog(
         // Material3's DatePicker speaks UTC-midnight millis; convert to/from the local day here.
         val state = rememberDatePickerState(initialSelectedDateMillis = localDayToUtcMillis(dayStartMillis))
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {

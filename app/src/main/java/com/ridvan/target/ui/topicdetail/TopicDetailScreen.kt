@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.topicdetail
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -146,6 +147,7 @@ private fun ContributionRow(contribution: StudyResourceTopicWithStudyResource, o
 private fun TopicEditDialog(initialName: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf(initialName) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.cd_dialog_edit_topic)) },
         text = {

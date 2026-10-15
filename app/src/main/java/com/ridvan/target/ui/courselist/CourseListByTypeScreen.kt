@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.courselist
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -170,6 +171,7 @@ private fun CourseDialog(
     var name by remember { mutableStateOf(initialName) }
     var icon by remember { mutableStateOf(initialIcon) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

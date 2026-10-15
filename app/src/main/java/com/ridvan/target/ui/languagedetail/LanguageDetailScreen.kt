@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.languagedetail
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -138,6 +139,7 @@ fun LanguageDetailScreen(
 private fun LanguageEditDialog(initialName: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf(initialName) }
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_edit_language_title)) },
         text = {

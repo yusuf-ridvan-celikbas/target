@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.focustimer
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import com.ridvan.target.ui.reading.BookDialog
 import com.ridvan.target.ui.reading.BookProgress
 import com.ridvan.target.ui.reading.ReadingPagesDialog
@@ -718,6 +719,7 @@ private fun CustomTimeDialog(onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
     var subtract by remember { mutableStateOf(false) }
     val minutes = text.toIntOrNull()
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.focustimer_add_custom_title)) },
         text = {

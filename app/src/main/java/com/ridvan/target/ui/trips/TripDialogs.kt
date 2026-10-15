@@ -1,5 +1,6 @@
 package com.ridvan.target.ui.trips
 
+import com.ridvan.target.ui.common.FormDialogProperties
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -73,6 +74,7 @@ private fun TripFormDialog(
     content: @Composable () -> Unit,
 ) {
     AlertDialog(
+        properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
@@ -146,6 +148,7 @@ private fun DayField(label: String, day: Long, onDayChange: (Long) -> Unit, rang
             },
         )
         DatePickerDialog(
+            properties = FormDialogProperties,
             onDismissRequest = { open = false },
             confirmButton = {
                 TextButton(onClick = {
