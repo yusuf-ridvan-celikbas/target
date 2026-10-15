@@ -40,6 +40,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
+import com.ridvan.target.data.modules.AppModule
+import com.ridvan.target.ui.shell.rememberEnabledModules
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.shell.AppShell
 import com.ridvan.target.ui.shell.ShellDestination
@@ -56,12 +58,12 @@ fun StudyHubScreen(shellNavigation: ShellNavigation) {
         destination = ShellDestination.STUDY_HUB,
         title = stringResource(R.string.label_study_group),
         groups = listOf(
-            listOf(
+            listOfNotNull(
                 HubEntry(R.string.label_exams, R.string.hub_exams_hint, Icons.AutoMirrored.Filled.Assignment, shellNavigation.onNavigateExams),
                 HubEntry(R.string.label_courses, R.string.hub_courses_hint, Icons.AutoMirrored.Filled.MenuBook, shellNavigation.onNavigateCourses),
                 HubEntry(R.string.label_languages, R.string.hub_languages_hint, Icons.Filled.Translate, shellNavigation.onNavigateLanguages),
             ),
-            listOf(
+            listOfNotNull(
                 HubEntry(R.string.label_study_resources, R.string.hub_study_resources_hint, Icons.Filled.Bookmark, shellNavigation.onNavigateStudyResources),
                 HubEntry(R.string.label_topics, R.string.hub_topics_hint, Icons.Filled.Topic, shellNavigation.onNavigateTopics),
             ),
@@ -72,15 +74,18 @@ fun StudyHubScreen(shellNavigation: ShellNavigation) {
 /** The Plan tab's first page — the Planner and trips. */
 @Composable
 fun PlanHubScreen(shellNavigation: ShellNavigation) {
+    val modules = rememberEnabledModules()
+    val planner = AppModule.PLANNER_ROUTINES in modules
+    val trips = AppModule.TRIPS in modules
     HubPage(
         navigation = shellNavigation,
         destination = ShellDestination.PLAN_HUB,
         title = stringResource(R.string.tab_plan),
         groups = listOf(
-            listOf(
-                HubEntry(R.string.label_planner, R.string.hub_planner_hint, Icons.Filled.CalendarMonth, shellNavigation.onNavigatePlanner),
-                HubEntry(R.string.label_trips, R.string.hub_trips_hint, Icons.Filled.Luggage, shellNavigation.onNavigateTrips),
-                HubEntry(R.string.label_routines, R.string.hub_routines_hint, Icons.Filled.Checklist, shellNavigation.onNavigateRoutines),
+            listOfNotNull(
+                HubEntry(R.string.label_planner, R.string.hub_planner_hint, Icons.Filled.CalendarMonth, shellNavigation.onNavigatePlanner).takeIf { planner },
+                HubEntry(R.string.label_trips, R.string.hub_trips_hint, Icons.Filled.Luggage, shellNavigation.onNavigateTrips).takeIf { trips },
+                HubEntry(R.string.label_routines, R.string.hub_routines_hint, Icons.Filled.Checklist, shellNavigation.onNavigateRoutines).takeIf { planner },
             ),
         ),
     )
@@ -89,18 +94,21 @@ fun PlanHubScreen(shellNavigation: ShellNavigation) {
 /** The Focus tab's first page — timers, their history, and reading. */
 @Composable
 fun FocusHubScreen(shellNavigation: ShellNavigation) {
+    val modules = rememberEnabledModules()
+    val focus = AppModule.FOCUS in modules
+    val reading = AppModule.READING in modules
     HubPage(
         navigation = shellNavigation,
         destination = ShellDestination.FOCUS_HUB,
         title = stringResource(R.string.label_focus_group),
         groups = listOf(
-            listOf(
-                HubEntry(R.string.label_focus_timer, R.string.hub_focus_timer_hint, Icons.Filled.Timer, shellNavigation.onNavigateFocusTimer),
-                HubEntry(R.string.label_flow_timer, R.string.hub_flow_timer_hint, Icons.Filled.AvTimer, shellNavigation.onNavigateFlowTimer),
-                HubEntry(R.string.focustimer_history_page_title, R.string.hub_study_history_hint, Icons.Filled.History, shellNavigation.onNavigateStudyHistory),
+            listOfNotNull(
+                HubEntry(R.string.label_focus_timer, R.string.hub_focus_timer_hint, Icons.Filled.Timer, shellNavigation.onNavigateFocusTimer).takeIf { focus },
+                HubEntry(R.string.label_flow_timer, R.string.hub_flow_timer_hint, Icons.Filled.AvTimer, shellNavigation.onNavigateFlowTimer).takeIf { focus },
+                HubEntry(R.string.focustimer_history_page_title, R.string.hub_study_history_hint, Icons.Filled.History, shellNavigation.onNavigateStudyHistory).takeIf { focus },
             ),
-            listOf(
-                HubEntry(R.string.label_reading, R.string.hub_reading_hint, Icons.Filled.AutoStories, shellNavigation.onNavigateReading),
+            listOfNotNull(
+                HubEntry(R.string.label_reading, R.string.hub_reading_hint, Icons.Filled.AutoStories, shellNavigation.onNavigateReading).takeIf { reading },
             ),
         ),
     )
@@ -122,7 +130,7 @@ private fun HubPage(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            groups.forEach { entries ->
+            groups.filter { it.isNotEmpty() }.forEach { entries ->
                 GroupedCard {
                     entries.forEachIndexed { index, entry ->
                         if (index > 0) HorizontalDivider(modifier = Modifier.padding(start = 72.dp))

@@ -94,6 +94,11 @@ fun HomeScreen(
     val studied by viewModel.studied.collectAsStateWithLifecycle()
     val reading by viewModel.reading.collectAsStateWithLifecycle()
     val workOnNext by viewModel.workOnNext.collectAsStateWithLifecycle()
+    val modules = com.ridvan.target.ui.shell.rememberEnabledModules()
+    val examsOn = com.ridvan.target.data.modules.AppModule.EXAMS_STUDY in modules
+    val plannerOn = com.ridvan.target.data.modules.AppModule.PLANNER_ROUTINES in modules
+    val focusOn = com.ridvan.target.data.modules.AppModule.FOCUS in modules
+    val readingOn = com.ridvan.target.data.modules.AppModule.READING in modules
 
     val prefix = stringResource(R.string.home_welcome_prefix)
     val suffix = stringResource(R.string.home_welcome_suffix)
@@ -131,7 +136,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             val shown = upcomingEvents.take(HOME_COUNTDOWNS_MAX)
-            if (shown.isNotEmpty()) {
+            if (examsOn && shown.isNotEmpty()) {
                 UpcomingEventsCard(
                     events = shown,
                     showSeeAll = upcomingEvents.size > shown.size,
@@ -144,7 +149,7 @@ fun HomeScreen(
             // Today's plans, or tomorrow's when today has none.
             val todays = upcomingPlannerEvents.filter { daysUntil(it.occurrenceDateMillis) == 0L }
             val plans = todays.ifEmpty { upcomingPlannerEvents.filter { daysUntil(it.occurrenceDateMillis) == 1L } }
-            if (plans.isNotEmpty()) {
+            if (plannerOn && plans.isNotEmpty()) {
                 HomeSpacer()
                 PlansCard(
                     title = stringResource(if (todays.isEmpty()) R.string.home_plans_tomorrow else R.string.home_plans_today),
@@ -153,16 +158,17 @@ fun HomeScreen(
                     onOpenPlanner = shellNavigation.onNavigatePlanner,
                 )
             }
-            if (todaysRoutines.isNotEmpty()) {
+            if (plannerOn && todaysRoutines.isNotEmpty()) {
                 HomeSpacer()
                 RoutinesCard(todaysRoutines, onRoutineClick)
             }
-            val hasStudied = studied.todayMinutes > 0 || studied.weekMinutes > 0 || studied.today.isNotEmpty()
-            if (hasStudied || reading != null) {
+            val hasStudied = (focusOn || examsOn) && (studied.todayMinutes > 0 || studied.weekMinutes > 0 || studied.today.isNotEmpty())
+            val shownReading = reading.takeIf { readingOn }
+            if (hasStudied || shownReading != null) {
                 HomeSpacer()
                 TodaySoFarCard(
                     studied = studied,
-                    reading = reading,
+                    reading = shownReading,
                     showStudied = hasStudied,
                     onBookClick = onBookClick,
                     onOpenReading = onOpenReading,
@@ -174,14 +180,16 @@ fun HomeScreen(
                     },
                 )
             }
-            if (workOnNext.isNotEmpty()) {
+            if (examsOn && workOnNext.isNotEmpty()) {
                 HomeSpacer()
                 WorkOnNextCard(workOnNext, onItemClick = { item ->
                     if (item.studyResourceTopicId != null) onPracticeSessionClick(item.studyResourceTopicId) else onTopicClick(item.topicId)
                 })
             }
-            HomeSpacer()
-            QuickStartCard(shellNavigation.onNavigateFocusTimer, shellNavigation.onNavigateFlowTimer)
+            if (focusOn) {
+                HomeSpacer()
+                QuickStartCard(shellNavigation.onNavigateFocusTimer, shellNavigation.onNavigateFlowTimer)
+            }
         }
     }
 }

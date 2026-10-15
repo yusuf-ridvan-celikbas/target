@@ -108,6 +108,7 @@ fun TargetNavHost() {
         onNavigateHelp = { push(HelpRoute) },
         onNavigateMyAccount = { push(MyAccountRoute) },
         onNavigateSettings = { push(SettingsRoute) },
+        onNavigateModules = { push(ModulesRoute()) },
         onNavigateProfile = { navController.navigate(UserEditRoute) },
         onLogOut = signOut,
         onSwitchAccount = { navController.navigate(SwitchAccountRoute) },
@@ -129,7 +130,7 @@ fun TargetNavHost() {
         }
         composable<RegisterRoute> {
             RegisterScreen(
-                onRegisterSuccess = { navController.navigate(HomeRoute) { popUpTo(0) } },
+                onRegisterSuccess = { navController.navigate(ModulesRoute(onboarding = true)) { popUpTo(0) } },
                 onNavigateToLogin = { navController.navigate(LoginRoute) },
             )
         }
@@ -341,6 +342,14 @@ fun TargetNavHost() {
             UserEditScreen(
                 shellNavigation = shellNavigation,
                 onSaved = { navController.navigateToShellDestination(HomeRoute) },
+            )
+        }
+        composable<ModulesRoute> { entry ->
+            val onboarding = entry.toRoute<ModulesRoute>().onboarding
+            com.ridvan.target.ui.modules.ModulesScreen(
+                onboarding = onboarding,
+                onDone = { if (onboarding) navController.navigate(HomeRoute) { popUpTo(0) } else navController.popBackStack() },
+                onBack = { navController.popBackStack() },
             )
         }
         composable<SettingsRoute> {

@@ -20,4 +20,6 @@ data class User(
     val passwordHash: String,
     val passwordSalt: String,
     val createdAt: Long = System.currentTimeMillis(),
+    /** Comma-separated AppModule names; null = every module on. */
+    val enabledModules: String? = null,
 )

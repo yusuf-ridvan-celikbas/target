@@ -1020,4 +1020,20 @@
         <item quantity="one">%d adım</item>
         <item quantity="other">%d adım</item>
     </plurals>
+    <string name="module_exams_study">Sınavlar ve çalışma</string>
+    <string name="module_exams_study_hint">Sınavlar, dersler, diller, çalışma kaynakları, konular ve alıştırma sonuçları</string>
+    <string name="module_planner_routines">Planlayıcı ve rutinler</string>
+    <string name="module_planner_routines_hint">Takvim planları, hatırlatıcılar ve günlük rutin listeleri</string>
+    <string name="module_focus">Odak zamanlayıcıları</string>
+    <string name="module_focus_hint">Odak Zamanlayıcı, Akış Zamanlayıcı ve çalışma geçmişin</string>
+    <string name="module_reading">Okuma</string>
+    <string name="module_reading_hint">Kütüphane, kitaplar, okuma hedefleri ve okuma istatistikleri</string>
+    <string name="module_trips">Geziler</string>
+    <string name="module_trips_hint">Gezi planları, rezervasyonlar, bavul listeleri ve bütçeler</string>
+    <string name="modules_title">Modüller</string>
+    <string name="modules_hint">Hangi bölümleri kullanacağını seç. Gizlenen bölümlerin verileri saklanır ve yeniden açtığında geri gelir. En az biri açık kalmalı.</string>
+    <string name="modules_onboarding_title">Target uygulamasını ne için kullanacaksın?</string>
+    <string name="modules_onboarding_hint">İhtiyacın olanları seç. Bunu istediğin zaman Ayarlar bölümünden değiştirebilirsin.</string>
+    <string name="action_continue">Devam</string>
+    <string name="settings_modules_hint">Hangi bölümleri kullandığını seç</string>
 </resources>

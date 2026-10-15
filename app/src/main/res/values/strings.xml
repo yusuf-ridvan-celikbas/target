@@ -1022,4 +1022,20 @@
         <item quantity="one">%d step</item>
         <item quantity="other">%d steps</item>
     </plurals>
+    <string name="module_exams_study">Exams and study</string>
+    <string name="module_exams_study_hint">Exams, courses, languages, study resources, topics and practice results</string>
+    <string name="module_planner_routines">Planner and routines</string>
+    <string name="module_planner_routines_hint">Calendar plans, reminders and daily routine checklists</string>
+    <string name="module_focus">Focus timers</string>
+    <string name="module_focus_hint">Focus Timer, Flow Timer and your study history</string>
+    <string name="module_reading">Reading</string>
+    <string name="module_reading_hint">Your library, books, reading goals and reading statistics</string>
+    <string name="module_trips">Trips</string>
+    <string name="module_trips_hint">Trip plans, bookings, packing lists and budgets</string>
+    <string name="modules_title">Modules</string>
+    <string name="modules_hint">Choose which parts of Target you use. Hidden parts keep their data and come back when you switch them on again. At least one has to stay on.</string>
+    <string name="modules_onboarding_title">What will you use Target for?</string>
+    <string name="modules_onboarding_hint">Pick what you need. You can change this anytime in Settings.</string>
+    <string name="action_continue">Continue</string>
+    <string name="settings_modules_hint">Choose which parts of Target you use</string>
 </resources>

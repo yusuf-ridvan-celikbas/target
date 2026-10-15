@@ -14,6 +14,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.ridvan.target.R
 import com.ridvan.target.TargetApplication
+import com.ridvan.target.data.modules.AppModule
+import com.ridvan.target.data.modules.parseModules
 import com.ridvan.target.data.local.AppLanguage
 import com.ridvan.target.ui.common.examDisplayLabel
 import com.ridvan.target.ui.planner.occurrencesInRange
@@ -199,9 +201,14 @@ object NotificationScheduler {
             )
         }
 
-        return eventCandidates + examCandidates + sectionCandidates + readingCandidates(app, userId, today, zone, strings) +
-            tripCandidates(app, userId, today, horizonEnd, leadMinutes, zone, strings) +
-            routineCandidates(app, userId, today, leadMinutes, zone, strings)
+        // Disabled modules stay silent (read from the row, not the flow, which can lag an account switch).
+        val modules = parseModules(database.userDao().getById(userId).first()?.enabledModules)
+        val planner = AppModule.PLANNER_ROUTINES in modules
+        return (if (planner) eventCandidates else emptyList()) +
+            (if (AppModule.EXAMS_STUDY in modules) examCandidates + sectionCandidates else emptyList()) +
+            (if (AppModule.READING in modules) readingCandidates(app, userId, today, zone, strings) else emptyList()) +
+            (if (AppModule.TRIPS in modules) tripCandidates(app, userId, today, horizonEnd, leadMinutes, zone, strings) else emptyList()) +
+            (if (planner) routineCandidates(app, userId, today, leadMinutes, zone, strings) else emptyList())
     }
 
     /**

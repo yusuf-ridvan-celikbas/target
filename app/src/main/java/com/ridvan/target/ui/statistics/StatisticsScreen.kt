@@ -64,7 +64,10 @@ fun StatisticsScreen(
     val selectedCourseId by viewModel.selectedCourseId.collectAsStateWithLifecycle()
     val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
     val period by viewModel.period.collectAsStateWithLifecycle()
-    val source by viewModel.source.collectAsStateWithLifecycle()
+    val storedSource by viewModel.source.collectAsStateWithLifecycle()
+    val statsSources = com.ridvan.target.ui.shell.availableStatsSources(com.ridvan.target.ui.shell.rememberEnabledModules())
+    val source = if (storedSource in statsSources) storedSource else statsSources.firstOrNull() ?: storedSource
+    androidx.compose.runtime.LaunchedEffect(source) { if (source != storedSource) viewModel.setSource(source) }
     val summary by viewModel.summary.collectAsStateWithLifecycle()
     val chartBuckets by viewModel.chartBuckets.collectAsStateWithLifecycle()
     val breakdown by viewModel.breakdown.collectAsStateWithLifecycle()
@@ -87,7 +90,7 @@ fun StatisticsScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            SourceToggle(source = source, onSelect = viewModel::setSource)
+            if (statsSources.size > 1) SourceToggle(source = source, sources = statsSources, onSelect = viewModel::setSource)
 
             // Exams/courses/topics don't apply to reading — its breakdown is by book instead.
             if (source != StatsSource.READING) {
@@ -210,17 +213,24 @@ private fun WeakTopicRow(entry: WeakTopicEntry, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SourceToggle(source: StatsSource, onSelect: (StatsSource) -> Unit, modifier: Modifier = Modifier) {
+private fun SourceToggle(source: StatsSource, sources: List<StatsSource>, onSelect: (StatsSource) -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
             HelpTooltip(R.string.help_tooltip_stats_source, R.string.cd_help_stats_source)
         }
         SegmentedToggle(
-            options = listOf(
-                SegmentedToggleOption(StatsSource.PRACTICE_SESSIONS, stringResource(R.string.stats_source_practice_sessions)),
-                SegmentedToggleOption(StatsSource.PRACTICE_EXAMS, stringResource(R.string.stats_source_practice_exams)),
-                SegmentedToggleOption(StatsSource.READING, stringResource(R.string.label_reading)),
-            ),
+            options = sources.map {
+                SegmentedToggleOption(
+                    it,
+                    stringResource(
+                        when (it) {
+                            StatsSource.PRACTICE_SESSIONS -> R.string.stats_source_practice_sessions
+                            StatsSource.PRACTICE_EXAMS -> R.string.stats_source_practice_exams
+                            StatsSource.READING -> R.string.label_reading
+                        },
+                    ),
+                )
+            },
             selected = source,
             onSelect = onSelect,
             textStyle = MaterialTheme.typography.labelSmall,

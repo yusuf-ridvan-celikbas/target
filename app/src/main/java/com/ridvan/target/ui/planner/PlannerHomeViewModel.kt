@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ridvan.target.TargetApplication
+import com.ridvan.target.ui.shell.AgendaGroup
+import com.ridvan.target.ui.shell.agendaGroupVisible
 import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
@@ -116,8 +118,8 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
 
     private val modeAndDate = combine(_viewMode, _anchorDate) { mode, date -> mode to date }
 
-    val agendaItems: StateFlow<List<PlannerAgendaItem>> = combine(rawData, modeAndDate) { raw, (mode, date) ->
-        buildAgendaItems(raw, visibleRange(mode, date))
+    val agendaItems: StateFlow<List<PlannerAgendaItem>> = combine(rawData, modeAndDate, targetApplication.modules.enabled) { raw, (mode, date), modules ->
+        buildAgendaItems(raw, visibleRange(mode, date)).filter { item -> item.agendaGroup()?.let { agendaGroupVisible(it, modules) } ?: true }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val courses: StateFlow<List<Course>> = (userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()))
@@ -287,4 +289,14 @@ internal fun studiedItemsInRange(
         PlannerAgendaItem.PracticeLogEntry(row, date, logged.hour * 60 + logged.minute)
     }
     return focusItems + practiceItems
+}
+
+/** Which module owns an agenda row; null for the planner's own events. */
+private fun PlannerAgendaItem.agendaGroup(): AgendaGroup? = when (this) {
+    is PlannerAgendaItem.EventOccurrence -> null
+    is PlannerAgendaItem.RoutineEntry -> AgendaGroup.ROUTINES
+    is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
+    is PlannerAgendaItem.TripDayEntry, is PlannerAgendaItem.TripActivityEntry, is PlannerAgendaItem.TripBookingEntry -> AgendaGroup.TRIPS
+    is PlannerAgendaItem.FocusSessionEntry -> if (isReading) AgendaGroup.READING else AgendaGroup.FOCUS
+    is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE
 }

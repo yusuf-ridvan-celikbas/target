@@ -15,6 +15,10 @@ class TargetApplication : Application() {
     val database: TargetDatabase by lazy { TargetDatabase.getInstance(this) }
     val preferences: AppPreferences by lazy { AppPreferences(this) }
 
+    val modules: com.ridvan.target.data.modules.ModuleRepository by lazy {
+        com.ridvan.target.data.modules.ModuleRepository(database.userDao(), preferences, applicationScope)
+    }
+
     /** Online helpers for trips — all off (the app is offline); see data/trips/TripLookups.kt. */
     val tripLookups: TripLookups = TripLookups.OFFLINE
 
@@ -35,7 +39,7 @@ class TargetApplication : Application() {
         // changes (login/logout/switch) aren't table writes, so those reschedule from
         // AppPreferences itself instead — see its currentUserId setter.
         database.invalidationTracker.addObserver(
-            object : InvalidationTracker.Observer("exams", "sections", "planner_events", "planner_event_completions", "books", "focus_sessions", "trips", "trip_activities", "trip_bookings", "routines", "routine_steps", "routine_step_completions") {
+            object : InvalidationTracker.Observer("users", "exams", "sections", "planner_events", "planner_event_completions", "books", "focus_sessions", "trips", "trip_activities", "trip_bookings", "routines", "routine_steps", "routine_step_completions") {
                 override fun onInvalidated(tables: Set<String>) {
                     applicationScope.launch { NotificationScheduler.reschedule(this@TargetApplication) }
                 }

@@ -62,6 +62,7 @@ data class ShellNavigation(
     val onNavigateHelp: () -> Unit,
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
+    val onNavigateModules: () -> Unit,
     val onNavigateProfile: () -> Unit,
     val onLogOut: () -> Unit,
     val onSwitchAccount: () -> Unit,
@@ -119,6 +120,10 @@ fun AppShell(
     var profileMenuExpanded by remember { mutableStateOf(false) }
     val currentTab = ShellTab.entries.firstOrNull { it.owns(currentDestination) }
     val isTabRoot = ShellTab.entries.any { it.root == currentDestination }
+    val tabs = visibleTabs(rememberEnabledModules())
+    androidx.compose.runtime.LaunchedEffect(currentTab, tabs) {
+        if (currentTab != null && currentTab !in tabs) navigation.onNavigateHome()
+    }
 
     Scaffold(
         topBar = {
@@ -156,7 +161,7 @@ fun AppShell(
         },
         bottomBar = {
             NavigationBar {
-                ShellTab.entries.forEach { tab ->
+                tabs.forEach { tab ->
                     val selected = tab == currentTab
                     val look = tab.look()
                     NavigationBarItem(

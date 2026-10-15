@@ -672,3 +672,10 @@ val MIGRATION_27_28 = object : Migration(27, 28) {
         )
     }
 }
+
+/** Per-account modules: NULL = every module on, so existing accounts keep everything. */
+val MIGRATION_28_29 = object : Migration(28, 29) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN enabledModules TEXT")
+    }
+}

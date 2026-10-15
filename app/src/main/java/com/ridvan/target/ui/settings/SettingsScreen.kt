@@ -200,6 +200,21 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             GroupedCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = shellNavigation.onNavigateModules)
+                        .padding(16.dp),
+                ) {
+                    Text(stringResource(R.string.modules_title), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.settings_modules_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            GroupedCard {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,

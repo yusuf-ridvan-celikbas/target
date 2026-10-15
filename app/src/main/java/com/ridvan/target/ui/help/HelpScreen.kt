@@ -32,11 +32,14 @@ fun HelpScreen(shellNavigation: ShellNavigation) {
                 .padding(16.dp),
         ) {
             HelpSection(R.string.help_getting_started_title, R.string.help_getting_started_body)
+            val examsOn = com.ridvan.target.data.modules.AppModule.EXAMS_STUDY in com.ridvan.target.ui.shell.rememberEnabledModules()
+            if (examsOn) {
             HelpSection(R.string.help_exams_title, R.string.help_exams_body)
             HelpSection(R.string.help_courses_title, R.string.help_courses_body)
             HelpSection(R.string.help_study_resources_title, R.string.help_study_resources_body)
             HelpSection(R.string.help_topics_title, R.string.help_topics_body)
             HelpSection(R.string.help_languages_title, R.string.help_languages_body)
+            }
             HelpSection(R.string.help_shortcuts_title, R.string.help_shortcuts_body)
             HelpSection(R.string.help_backup_title, R.string.help_backup_body)
             HelpSection(R.string.help_settings_title, R.string.help_settings_body, isLast = true)

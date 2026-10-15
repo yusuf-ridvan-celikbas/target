@@ -69,6 +69,10 @@ object UserEditRoute
 @Serializable
 object SettingsRoute
 
+/** Which parts of the app the account uses; [onboarding] is the screen shown right after Register. */
+@Serializable
+data class ModulesRoute(val onboarding: Boolean = false)
+
 @Serializable
 object MyAccountRoute
 

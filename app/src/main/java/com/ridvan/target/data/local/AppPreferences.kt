@@ -125,7 +125,13 @@ class AppPreferences(context: Context) {
     /** Clears the session without touching the database (no reminder reschedule). */
     fun clearSessionRaw() {
         prefs.edit().remove(KEY_USER_ID).commit()
+        _currentUserIdFlow.value = null
     }
+
+    private val _currentUserIdFlow = MutableStateFlow(prefs.getLong(KEY_USER_ID, NO_USER).takeIf { it != NO_USER })
+
+    /** Same value as [currentUserId], observable (for things that follow account switches). */
+    val currentUserIdFlow: StateFlow<Long?> = _currentUserIdFlow.asStateFlow()
 
     var currentUserId: Long?
         get() = prefs.getLong(KEY_USER_ID, NO_USER).takeIf { it != NO_USER }
@@ -133,6 +139,7 @@ class AppPreferences(context: Context) {
             prefs.edit().apply {
                 if (value == null) remove(KEY_USER_ID) else putLong(KEY_USER_ID, value)
             }.apply()
+            _currentUserIdFlow.value = value
             // Log Out / Switch Account / Login / Register all funnel through this setter, so
             // rescheduling here — rather than at each of those call sites — is enough to keep
             // the pending reminder alarm scoped to whichever account is actually signed in.
