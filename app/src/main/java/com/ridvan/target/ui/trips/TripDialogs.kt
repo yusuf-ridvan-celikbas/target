@@ -5,7 +5,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.IconButton
+import com.ridvan.target.data.local.entity.TripPackingTemplate
+import com.ridvan.target.ui.common.DateRangeField
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -197,6 +205,110 @@ private fun CheckRow(label: String, checked: Boolean, onChange: (Boolean) -> Uni
     }
 }
 
+/** Button showing the chosen currency ("EUR · Euro · €"); opens a searchable list of every currency. */
+@Composable
+private fun CurrencyField(code: String, onSelect: (String) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val options = remember { currencyOptions() }
+    OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) {
+        Text(options.firstOrNull { it.code == code }?.label ?: code)
+    }
+    if (open) {
+        var query by remember { mutableStateOf("") }
+        val shown = remember(query) { filterCurrencies(options, query) }
+        AlertDialog(
+            properties = FormDialogProperties,
+            onDismissRequest = { open = false },
+            title = { Text(stringResource(R.string.trip_field_currency)) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        label = { Text(stringResource(R.string.trip_currency_search)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    LazyColumn(modifier = Modifier.padding(top = 8.dp).heightIn(max = 320.dp)) {
+                        items(shown, key = { it.code }) { option ->
+                            Text(
+                                option.label,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (option.code == code) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.fillMaxWidth().clickable {
+                                    onSelect(option.code)
+                                    open = false
+                                }.padding(vertical = 12.dp),
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.common_cancel)) } },
+        )
+    }
+}
+
+/** Asks for a name; used for "Save as template". */
+@Composable
+fun TripTemplateNameDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by remember { mutableStateOf("") }
+    TripFormDialog(
+        title = stringResource(R.string.trip_template_save_title),
+        canSave = name.isNotBlank(),
+        onSave = { onConfirm(name.trim()) },
+        onDismiss = onDismiss,
+    ) { TextInput(name, { name = it }, stringResource(R.string.trip_template_name)) }
+}
+
+/** Lists saved templates; tap one to add its items, bin to delete it. */
+@Composable
+fun TripTemplatePickerDialog(
+    templates: List<TripPackingTemplate>,
+    onPick: (TripPackingTemplate) -> Unit,
+    onDelete: (TripPackingTemplate) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var deleting by remember { mutableStateOf<TripPackingTemplate?>(null) }
+    AlertDialog(
+        properties = FormDialogProperties,
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.trip_template_add_title)) },
+        text = {
+            if (templates.isEmpty()) {
+                Text(stringResource(R.string.trip_template_none))
+            } else {
+                LazyColumn(modifier = Modifier.heightIn(max = 320.dp)) {
+                    items(templates, key = { it.id }) { template ->
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onPick(template) }) {
+                            Text(template.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).padding(vertical = 12.dp))
+                            IconButton(onClick = { deleting = template }) {
+                                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.common_delete))
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+    )
+    deleting?.let { template ->
+        AlertDialog(
+            onDismissRequest = { deleting = null },
+            title = { Text(stringResource(R.string.trip_template_delete_title)) },
+            text = { Text(stringResource(R.string.trip_template_delete_message, template.name)) },
+            confirmButton = {
+                TextButton(onClick = { onDelete(template); deleting = null }) {
+                    Text(stringResource(R.string.common_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.common_cancel)) } },
+        )
+    }
+}
+
 @Composable
 fun TripDialog(initial: Trip?, onConfirm: (Trip) -> Unit, onDismiss: () -> Unit) {
     val today = remember { startOfTodayMillis() }
@@ -205,15 +317,22 @@ fun TripDialog(initial: Trip?, onConfirm: (Trip) -> Unit, onDismiss: () -> Unit)
     var startDate by remember { mutableStateOf(initial?.startDate ?: today) }
     var endDate by remember { mutableStateOf(initial?.endDate ?: addDays(today, 2)) }
     var currency by remember { mutableStateOf(initial?.currency ?: defaultCurrencyCode()) }
+    var hasHome by remember { mutableStateOf(initial?.homeCurrency != null) }
+    var homeCurrency by remember {
+        mutableStateOf(initial?.homeCurrency ?: defaultCurrencyCode().takeIf { it != currency } ?: "TRY")
+    }
+    var rate by remember { mutableStateOf(initial?.exchangeRate?.let { rateText(it) }.orEmpty()) }
     var budget by remember { mutableStateOf(initial?.budgetMinor?.let { amountInputText(it) }.orEmpty()) }
     var notes by remember { mutableStateOf(initial?.notes.orEmpty()) }
 
     val currencyCode = normalizedCurrencyCode(currency)
     val budgetMinor = budget.orNullIfBlank()?.let { parseAmountMinor(it) }
     val budgetValid = budget.isBlank() || budgetMinor != null
+    val rateValue = parseExchangeRate(rate)
+    val homeValid = !hasHome || (rateValue != null && homeCurrency != currency)
     TripFormDialog(
         title = stringResource(if (initial == null) R.string.trip_add_title else R.string.trip_edit_title),
-        canSave = name.isNotBlank() && currencyCode != null && budgetValid,
+        canSave = name.isNotBlank() && currencyCode != null && budgetValid && homeValid,
         onSave = {
             val base = initial ?: Trip(name = "", startDate = startDate, endDate = endDate, currency = currencyCode!!)
             onConfirm(
@@ -224,6 +343,8 @@ fun TripDialog(initial: Trip?, onConfirm: (Trip) -> Unit, onDismiss: () -> Unit)
                     endDate = endDate,
                     currency = currencyCode!!,
                     budgetMinor = budgetMinor,
+                    homeCurrency = if (hasHome) homeCurrency else null,
+                    exchangeRate = if (hasHome) rateValue else null,
                     notes = notes.orNullIfBlank(),
                 )
             )
@@ -232,14 +353,17 @@ fun TripDialog(initial: Trip?, onConfirm: (Trip) -> Unit, onDismiss: () -> Unit)
     ) {
         TextInput(name, { name = it }, stringResource(R.string.trip_field_name))
         TextInput(destination, { destination = it }, stringResource(R.string.trip_field_destination))
-        DayField(stringResource(R.string.trip_field_start), startDate, {
-            startDate = it
-            if (endDate < it) endDate = it
-        })
-        DayField(stringResource(R.string.trip_field_end), endDate, { endDate = it }, range = startDate..addDays(startDate, 365))
-        TextInput(currency, { currency = it.take(3).uppercase() }, stringResource(R.string.trip_field_currency))
-        if (currencyCode == null) {
-            Text(stringResource(R.string.trip_currency_hint), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+        DateRangeField(stringResource(R.string.trip_field_dates), startDate, endDate, { s, e -> startDate = s; endDate = e })
+        FieldLabel(stringResource(R.string.trip_field_currency))
+        CurrencyField(currency) { currency = it }
+        CheckRow(stringResource(R.string.trip_home_currency_toggle), hasHome) { hasHome = it }
+        if (hasHome) {
+            FieldLabel(stringResource(R.string.trip_field_home_currency))
+            CurrencyField(homeCurrency) { homeCurrency = it }
+            TextInput(rate, { rate = it }, stringResource(R.string.trip_field_rate, currency, homeCurrency), decimal = true)
+            if (homeCurrency == currency) {
+                Text(stringResource(R.string.trip_home_currency_same), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+            }
         }
         TextInput(budget, { budget = it }, stringResource(R.string.trip_field_budget, currencyCode ?: currency), decimal = true)
         TextInput(notes, { notes = it }, stringResource(R.string.trip_field_notes), singleLine = false)

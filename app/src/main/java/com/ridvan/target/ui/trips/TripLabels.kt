@@ -29,7 +29,12 @@ import com.ridvan.target.data.local.entity.TripExpenseCategory
 import com.ridvan.target.data.local.entity.TripPackingCategory
 
 @Composable
-fun tripBookingTypeLabel(type: TripBookingType): String = stringResource(
+fun tripBookingTypeLabel(type: TripBookingType): String = stringResource(tripBookingTypeRes(type))
+
+fun tripBookingTypeLabelText(context: android.content.Context, type: TripBookingType): String =
+    context.getString(tripBookingTypeRes(type))
+
+private fun tripBookingTypeRes(type: TripBookingType): Int =
     when (type) {
         TripBookingType.FLIGHT -> R.string.trip_booking_flight
         TripBookingType.TRAIN -> R.string.trip_booking_train
@@ -39,7 +44,6 @@ fun tripBookingTypeLabel(type: TripBookingType): String = stringResource(
         TripBookingType.HOTEL -> R.string.trip_booking_hotel
         TripBookingType.OTHER -> R.string.trip_category_other
     }
-)
 
 fun tripBookingTypeIcon(type: TripBookingType): ImageVector = when (type) {
     TripBookingType.FLIGHT -> Icons.Filled.Flight

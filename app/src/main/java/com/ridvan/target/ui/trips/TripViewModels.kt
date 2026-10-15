@@ -14,6 +14,8 @@ import com.ridvan.target.data.local.entity.TripBookingType
 import com.ridvan.target.data.local.entity.TripExpense
 import com.ridvan.target.data.local.entity.TripExpenseCategory
 import com.ridvan.target.data.local.entity.TripPackingItem
+import com.ridvan.target.data.local.entity.TripPackingTemplate
+import com.ridvan.target.data.local.entity.TripPackingTemplateItem
 import com.ridvan.target.ui.navigation.TripDetailRoute
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,6 +46,8 @@ class TripDetailViewModel(application: Application, savedStateHandle: SavedState
     private val bookingDao = database.tripBookingDao()
     private val packingDao = database.tripPackingItemDao()
     private val expenseDao = database.tripExpenseDao()
+    private val templateDao = database.tripPackingTemplateDao()
+    private val userId = (application as TargetApplication).preferences.currentUserId
     val tripId: Long = savedStateHandle.toRoute<TripDetailRoute>().tripId
 
     private fun <T> state(flow: Flow<T>, initial: T): StateFlow<T> =
@@ -120,6 +124,34 @@ class TripDetailViewModel(application: Application, savedStateHandle: SavedState
         val fresh = items.filter { it.name.lowercase() !in existing }
         if (fresh.isEmpty()) return
         viewModelScope.launch { packingDao.insertAll(fresh) }
+    }
+
+    val templates: StateFlow<List<TripPackingTemplate>> =
+        state(userId?.let { templateDao.getByUserId(it) } ?: flowOf(emptyList()), emptyList())
+
+    /** Re-inserts a just-deleted item (same id) for Undo. */
+    fun restorePackingItem(item: TripPackingItem) {
+        viewModelScope.launch { packingDao.insert(item) }
+    }
+
+    fun saveTemplate(name: String) {
+        val uid = userId ?: return
+        val items = packingItems.value.map { TripPackingTemplateItem(templateId = 0, name = it.name, category = it.category, quantity = it.quantity) }
+        viewModelScope.launch { templateDao.saveWithItems(TripPackingTemplate(userId = uid, name = name), items) }
+    }
+
+    fun deleteTemplate(template: TripPackingTemplate) {
+        viewModelScope.launch { templateDao.delete(template.id) }
+    }
+
+    /** Adds the template's items (fresh, unpacked), skipping names already on the list. */
+    fun addFromTemplate(template: TripPackingTemplate) {
+        viewModelScope.launch {
+            val existing = packingItems.value.map { it.name.lowercase() }.toSet()
+            val fresh = templateDao.getItems(template.id).filter { it.name.lowercase() !in existing }
+                .map { TripPackingItem(tripId = tripId, name = it.name, category = it.category, quantity = it.quantity) }
+            if (fresh.isNotEmpty()) packingDao.insertAll(fresh)
+        }
     }
 
     fun saveExpense(expense: TripExpense) {

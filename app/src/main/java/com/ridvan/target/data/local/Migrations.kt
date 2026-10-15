@@ -687,3 +687,15 @@ val MIGRATION_29_30 = object : Migration(29, 30) {
         db.execSQL("ALTER TABLE users ADD COLUMN recoverySalt TEXT")
     }
 }
+
+/** Trips: optional home currency + manual exchange rate; per-user reusable packing templates. */
+val MIGRATION_30_31 = object : Migration(30, 31) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE trips ADD COLUMN homeCurrency TEXT")
+        db.execSQL("ALTER TABLE trips ADD COLUMN exchangeRate REAL")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `trip_packing_templates` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `name` TEXT NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_trip_packing_templates_userId` ON `trip_packing_templates` (`userId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `trip_packing_template_items` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `templateId` INTEGER NOT NULL, `name` TEXT NOT NULL, `category` TEXT NOT NULL, `quantity` INTEGER NOT NULL, FOREIGN KEY(`templateId`) REFERENCES `trip_packing_templates`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_trip_packing_template_items_templateId` ON `trip_packing_template_items` (`templateId`)")
+    }
+}

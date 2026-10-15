@@ -31,5 +31,9 @@ data class Trip(
     /** In minor units (cents/kuruş), so sums never drift; null = no budget set. */
     val budgetMinor: Long? = null,
     val notes: String? = null,
+    /** Optional second (home) currency; with [exchangeRate] amounts also show converted. Both set or both null. */
+    val homeCurrency: String? = null,
+    /** Home-currency units per 1 unit of [currency] (1 EUR = 36.5 TRY gives 36.5). */
+    val exchangeRate: Double? = null,
     val createdAt: Long = System.currentTimeMillis(),
 )

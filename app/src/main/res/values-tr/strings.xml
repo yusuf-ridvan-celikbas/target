@@ -861,7 +861,7 @@
     <string name="trip_field_destination">Gidilecek yer (isteğe bağlı)</string>
     <string name="trip_field_start">İlk gün</string>
     <string name="trip_field_end">Son gün</string>
-    <string name="trip_field_currency">Para birimi (ör. EUR)</string>
+    <string name="trip_field_currency">Para birimi</string>
     <string name="trip_currency_hint">EUR, USD ya da TRY gibi 3 harfli bir kod gir.</string>
     <string name="trip_field_budget">%1$s cinsinden bütçe (isteğe bağlı)</string>
     <string name="trip_field_notes">Notlar (isteğe bağlı)</string>
@@ -1063,4 +1063,24 @@
     <string name="recovery_confirm_message">Bu kodu bir daha göremeyeceksin. Kod olmadan unutulan bir şifre sıfırlanamaz. Ekran görüntüsü aldığından, kopyaladığından ya da bir yere yazdığından emin ol.</string>
     <string name="recovery_confirm_back">Kodu tekrar göster</string>
     <string name="recovery_confirm_yes">Evet, kaydettim</string>
+    <string name="trip_field_dates">Tarihler</string>
+    <string name="trip_home_currency_toggle">Tutarları kendi para birimimle de göster</string>
+    <string name="trip_field_home_currency">Kendi para birimim</string>
+    <string name="trip_field_rate">Kur: 1 %1$s = ? %2$s</string>
+    <string name="trip_home_currency_same">Gezinin para biriminden farklı bir para birimi seç.</string>
+    <string name="trip_currency_search">Koda veya ada göre ara</string>
+    <string name="trip_template_save">Şablon olarak kaydet</string>
+    <string name="trip_template_add">Şablondan ekle</string>
+    <string name="trip_template_save_title">Bavul şablonunu kaydet</string>
+    <string name="trip_template_name">Şablon adı</string>
+    <string name="trip_template_add_title">Şablondan ekle</string>
+    <string name="trip_template_none">Henüz şablon yok. Önce bir bavul listesini şablon olarak kaydet.</string>
+    <string name="trip_template_delete_title">Şablon silinsin mi?</string>
+    <string name="trip_template_delete_message">\"%1$s\" şablonu silinecek. Öğelerini kullanan geziler etkilenmez.</string>
+    <string name="trip_packing_item_deleted">Öğe silindi</string>
+    <string name="trip_share">Gezi özetini paylaş</string>
+    <string name="trip_summary_day">%1$d. gün - %2$s</string>
+    <string name="trip_summary_spent">Harcanan</string>
+    <string name="trip_summary_budget">Bütçe</string>
+    <string name="trip_summary_remaining">Kalan</string>
 </resources>

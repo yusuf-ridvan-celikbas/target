@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,20 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+import kotlinx.coroutines.launch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -77,6 +92,27 @@ fun TripDetailScreen(onBack: () -> Unit, viewModel: TripDetailViewModel = viewMo
     val bookings by viewModel.bookings.collectAsStateWithLifecycle()
     val packing by viewModel.packingItems.collectAsStateWithLifecycle()
     val expenses by viewModel.expenses.collectAsStateWithLifecycle()
+    val templates by viewModel.templates.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var savingTemplate by remember { mutableStateOf(false) }
+    var pickingTemplate by remember { mutableStateOf(false) }
+    val itemDeletedText = stringResource(R.string.trip_packing_item_deleted)
+    val undoText = stringResource(R.string.common_undo)
+    val summaryLabels = SummaryLabels(
+        dayHeader = { i, d -> context.getString(R.string.trip_summary_day, i, d) },
+        nothingPlanned = context.getString(R.string.trip_day_empty),
+        bookings = context.getString(R.string.trip_tab_bookings),
+        confirmation = context.getString(R.string.trip_field_confirmation),
+        budget = context.getString(R.string.trip_tab_budget),
+        spent = context.getString(R.string.trip_summary_spent),
+        ofBudget = context.getString(R.string.trip_summary_budget),
+        remaining = context.getString(R.string.trip_summary_remaining),
+        arrival = context.getString(R.string.trip_field_arrival),
+        checkOut = context.getString(R.string.trip_field_check_out),
+        bookingType = { tripBookingTypeLabelText(context, it.type) },
+    )
 
     var tab by rememberSaveable { mutableStateOf(TripTab.ITINERARY) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -89,6 +125,7 @@ fun TripDetailScreen(onBack: () -> Unit, viewModel: TripDetailViewModel = viewMo
     val today = remember { startOfTodayMillis() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text(trip?.name.orEmpty(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -106,6 +143,22 @@ fun TripDetailScreen(onBack: () -> Unit, viewModel: TripDetailViewModel = viewMo
                             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.cd_more))
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(
+                                leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                                text = { Text(stringResource(R.string.trip_share)) },
+                                onClick = {
+                                    menuOpen = false
+                                    trip?.let { t ->
+                                        val text = tripSummaryText(t, activities, bookings, expenses, summaryLabels, ::formatDate)
+                                        val send = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_SUBJECT, t.name)
+                                            putExtra(Intent.EXTRA_TEXT, text)
+                                        }
+                                        context.startActivity(Intent.createChooser(send, null))
+                                    }
+                                },
+                            )
                             DropdownMenuItem(
                                 leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
                                 text = { Text(stringResource(R.string.trip_delete), color = MaterialTheme.colorScheme.error) },
@@ -174,6 +227,16 @@ fun TripDetailScreen(onBack: () -> Unit, viewModel: TripDetailViewModel = viewMo
                     onClick = { editingPacking = it },
                     onUnpackAll = viewModel::unpackAll,
                     onAddStarter = viewModel::addStarterItems,
+                    onSaveTemplate = { savingTemplate = true },
+                    onAddFromTemplate = { pickingTemplate = true },
+                    onDelete = { item ->
+                        viewModel.deletePackingItem(item)
+                        scope.launch {
+                            snackbar.currentSnackbarData?.dismiss()
+                            val result = snackbar.showSnackbar(itemDeletedText, actionLabel = undoText, duration = SnackbarDuration.Long)
+                            if (result == SnackbarResult.ActionPerformed) viewModel.restorePackingItem(item)
+                        }
+                    },
                 )
                 TripTab.BUDGET -> Budget(t, expenses, today) { editingExpense = it }
             }
@@ -224,6 +287,20 @@ fun TripDetailScreen(onBack: () -> Unit, viewModel: TripDetailViewModel = viewMo
             onConfirm = { viewModel.savePackingItem(it); editingPacking = null },
             onDismiss = { editingPacking = null },
             onDelete = if (item.id != 0L) ({ viewModel.deletePackingItem(item); editingPacking = null }) else null,
+        )
+    }
+    if (savingTemplate) {
+        TripTemplateNameDialog(
+            onConfirm = { viewModel.saveTemplate(it); savingTemplate = false },
+            onDismiss = { savingTemplate = false },
+        )
+    }
+    if (pickingTemplate) {
+        TripTemplatePickerDialog(
+            templates = templates,
+            onPick = { viewModel.addFromTemplate(it); pickingTemplate = false },
+            onDelete = viewModel::deleteTemplate,
+            onDismiss = { pickingTemplate = false },
         )
     }
     editingExpense?.let { expense ->
@@ -317,34 +394,37 @@ private fun Itinerary(
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.trip_activity_add_title))
             }
         }
-        val dayBookings = bookings.filter { it.startDate == day }
-        val checkOuts = bookings.filter { it.endDate == day && it.endDate != it.startDate }
-        val dayActivities = activities.filter { it.date == day }
+        val entries = dayTimeline(day, bookings, activities)
         GroupedCard {
-            if (dayBookings.isEmpty() && checkOuts.isEmpty() && dayActivities.isEmpty()) {
-                EmptyHint(stringResource(R.string.trip_day_empty))
-            }
-            dayBookings.forEach { b ->
-                SmallRow(
-                    tripBookingTypeIcon(b.type), b.title,
-                    listOf(listOfNotNull(tripBookingTypeLabel(b.type), b.place.name, b.arrivalPlace.name).joinToString(" · ")),
-                    onClick = { onBookingClick(b) }, trailing = bookingTime(b.startMinuteOfDay),
-                )
-            }
-            checkOuts.forEach { b ->
-                SmallRow(
-                    tripBookingTypeIcon(b.type), b.title,
-                    listOf(stringResource(if (b.type.isTransport) R.string.trip_field_arrival else R.string.trip_field_check_out)),
-                    onClick = { onBookingClick(b) }, trailing = bookingTime(b.endMinuteOfDay),
-                )
-            }
-            dayActivities.forEach { a ->
-                SmallRow(
-                    tripActivityCategoryIcon(a.category), a.title,
-                    listOfNotNull(timeRangeText(a.startMinuteOfDay, a.durationMinutes), a.place.label, a.notes),
-                    onClick = { onActivityClick(a) },
-                    leading = { Checkbox(checked = a.isDone, onCheckedChange = { onToggleDone(a, it) }) },
-                )
+            if (entries.isEmpty()) EmptyHint(stringResource(R.string.trip_day_empty))
+            entries.forEach { entry ->
+                when (entry) {
+                    is TimelineEntry.Booking -> {
+                        val b = entry.booking
+                        if (!entry.isEnd) {
+                            SmallRow(
+                                tripBookingTypeIcon(b.type), b.title,
+                                listOf(listOfNotNull(tripBookingTypeLabel(b.type), b.place.name, b.arrivalPlace.name).joinToString(" · ")),
+                                onClick = { onBookingClick(b) }, trailing = bookingTime(b.startMinuteOfDay),
+                            )
+                        } else {
+                            SmallRow(
+                                tripBookingTypeIcon(b.type), b.title,
+                                listOf(stringResource(if (b.type.isTransport) R.string.trip_field_arrival else R.string.trip_field_check_out)),
+                                onClick = { onBookingClick(b) }, trailing = bookingTime(b.endMinuteOfDay),
+                            )
+                        }
+                    }
+                    is TimelineEntry.Activity -> {
+                        val a = entry.activity
+                        SmallRow(
+                            tripActivityCategoryIcon(a.category), a.title,
+                            listOfNotNull(timeRangeText(a.startMinuteOfDay, a.durationMinutes), a.place.label, a.notes),
+                            onClick = { onActivityClick(a) },
+                            leading = { Checkbox(checked = a.isDone, onCheckedChange = { onToggleDone(a, it) }) },
+                        )
+                    }
+                }
             }
         }
     }
@@ -383,6 +463,9 @@ private fun PackingList(
     onClick: (TripPackingItem) -> Unit,
     onUnpackAll: () -> Unit,
     onAddStarter: (List<TripPackingItem>) -> Unit,
+    onSaveTemplate: () -> Unit,
+    onAddFromTemplate: () -> Unit,
+    onDelete: (TripPackingItem) -> Unit,
 ) {
     // "CATEGORY:Name" entries, translated per locale.
     val starter = stringArrayResource(R.array.trip_starter_items).mapNotNull { entry ->
@@ -403,6 +486,13 @@ private fun PackingList(
             TextButton(onClick = onUnpackAll) { Text(stringResource(R.string.trip_packing_unpack_all)) }
         }
     }
+    Row {
+        OutlinedButton(onClick = onAddFromTemplate) { Text(stringResource(R.string.trip_template_add)) }
+        if (items.isNotEmpty()) {
+            Spacer(Modifier.width(8.dp))
+            TextButton(onClick = onSaveTemplate) { Text(stringResource(R.string.trip_template_save)) }
+        }
+    }
     items.groupBy { it.category }.toSortedMap(compareBy { it.ordinal }).forEach { (category, list) ->
         Text(
             tripPackingCategoryLabel(category),
@@ -411,13 +501,35 @@ private fun PackingList(
         )
         GroupedCard {
             list.sortedBy { it.isPacked }.forEach { item ->
-                SmallRow(
-                    tripPackingCategoryIcon(category),
-                    if (item.quantity > 1) "${item.name} ×${item.quantity}" else item.name,
-                    emptyList(),
-                    onClick = { onClick(item) },
-                    leading = { Checkbox(checked = item.isPacked, onCheckedChange = { onToggle(item, it) }) },
-                )
+                key(item.id) {
+                    val state = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { value ->
+                            if (value == SwipeToDismissBoxValue.EndToStart) { onDelete(item); true } else false
+                        },
+                    )
+                    SwipeToDismissBox(
+                        state = state,
+                        enableDismissFromStartToEnd = false,
+                        backgroundContent = {
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 20.dp),
+                                contentAlignment = Alignment.CenterEnd,
+                            ) {
+                                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.common_delete), tint = MaterialTheme.colorScheme.onErrorContainer)
+                            }
+                        },
+                    ) {
+                        Box(Modifier.background(MaterialTheme.colorScheme.surfaceContainer)) {
+                            SmallRow(
+                                tripPackingCategoryIcon(category),
+                                if (item.quantity > 1) "${item.name} ×${item.quantity}" else item.name,
+                                emptyList(),
+                                onClick = { onClick(item) },
+                                leading = { Checkbox(checked = item.isPacked, onCheckedChange = { onToggle(item, it) }) },
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -426,7 +538,8 @@ private fun PackingList(
 @Composable
 private fun Budget(trip: Trip, expenses: List<TripExpense>, today: Long, onClick: (TripExpense) -> Unit) {
     val summary = budgetSummary(trip, expenses, today)
-    val money = { minor: Long -> formatMoney(minor, trip.currency) }
+    val plain = { minor: Long -> formatMoney(minor, trip.currency) }
+    val money = { minor: Long -> trip.moneyWithHome(minor) }
     GroupedCard {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -455,7 +568,7 @@ private fun Budget(trip: Trip, expenses: List<TripExpense>, today: Long, onClick
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
                     Icon(tripExpenseCategoryIcon(category), contentDescription = null, modifier = Modifier.size(18.dp))
                     Text(tripExpenseCategoryLabel(category), style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f).padding(start = 8.dp))
-                    Text(money(amount), style = MaterialTheme.typography.bodySmall)
+                    Text(plain(amount), style = MaterialTheme.typography.bodySmall)
                 }
                 LinearProgressIndicator(
                     progress = { amount.toFloat() / summary.spentMinor },
@@ -470,7 +583,7 @@ private fun Budget(trip: Trip, expenses: List<TripExpense>, today: Long, onClick
     }
     expenses.groupBy { it.date }.forEach { (day, list) ->
         Text(
-            "${dayHeader(day)} · ${money(list.sumOf { it.amountMinor })}",
+            "${dayHeader(day)} · ${plain(list.sumOf { it.amountMinor })}",
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
         )
@@ -479,7 +592,7 @@ private fun Budget(trip: Trip, expenses: List<TripExpense>, today: Long, onClick
                 SmallRow(
                     tripExpenseCategoryIcon(e.category), e.title,
                     listOfNotNull(tripExpenseCategoryLabel(e.category), e.notes),
-                    onClick = { onClick(e) }, trailing = money(e.amountMinor),
+                    onClick = { onClick(e) }, trailing = plain(e.amountMinor),
                 )
             }
         }

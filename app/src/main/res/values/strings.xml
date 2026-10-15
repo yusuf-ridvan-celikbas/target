@@ -863,7 +863,7 @@
     <string name="trip_field_destination">Destination (optional)</string>
     <string name="trip_field_start">First day</string>
     <string name="trip_field_end">Last day</string>
-    <string name="trip_field_currency">Currency (e.g. EUR)</string>
+    <string name="trip_field_currency">Currency</string>
     <string name="trip_currency_hint">Enter a 3-letter currency code like EUR, USD or TRY.</string>
     <string name="trip_field_budget">Budget in %1$s (optional)</string>
     <string name="trip_field_notes">Notes (optional)</string>
@@ -1065,4 +1065,24 @@
     <string name="recovery_confirm_message">You will not see this code again. Without it, a forgotten password cannot be reset. Make sure you took a screenshot, copied it or wrote it down.</string>
     <string name="recovery_confirm_back">Show the code again</string>
     <string name="recovery_confirm_yes">Yes, I saved it</string>
+    <string name="trip_field_dates">Dates</string>
+    <string name="trip_home_currency_toggle">Also show amounts in my home currency</string>
+    <string name="trip_field_home_currency">Home currency</string>
+    <string name="trip_field_rate">Exchange rate: 1 %1$s = ? %2$s</string>
+    <string name="trip_home_currency_same">Pick a different currency than the trip currency.</string>
+    <string name="trip_currency_search">Search by code or name</string>
+    <string name="trip_template_save">Save as template</string>
+    <string name="trip_template_add">Add from template</string>
+    <string name="trip_template_save_title">Save packing template</string>
+    <string name="trip_template_name">Template name</string>
+    <string name="trip_template_add_title">Add from template</string>
+    <string name="trip_template_none">No templates yet. Use Save as template on a packing list first.</string>
+    <string name="trip_template_delete_title">Delete template?</string>
+    <string name="trip_template_delete_message">The template \"%1$s\" will be deleted. Trips already using its items are not affected.</string>
+    <string name="trip_packing_item_deleted">Item deleted</string>
+    <string name="trip_share">Share trip summary</string>
+    <string name="trip_summary_day">Day %1$d - %2$s</string>
+    <string name="trip_summary_spent">Spent</string>
+    <string name="trip_summary_budget">Budget</string>
+    <string name="trip_summary_remaining">Remaining</string>
 </resources>
