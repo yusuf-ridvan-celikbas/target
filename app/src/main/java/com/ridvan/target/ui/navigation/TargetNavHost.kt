@@ -139,6 +139,7 @@ fun TargetNavHost() {
                 onPracticeSessionClick = { id -> navController.navigate(TopicProgressRoute(id)) },
                 onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
                 onOpenReading = shellNavigation.onNavigateReading,
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
             )
         }
         composable<StudyHubRoute> {

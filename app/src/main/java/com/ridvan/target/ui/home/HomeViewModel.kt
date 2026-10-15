@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -113,6 +114,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
     ) { focus, practice -> studiedPreview(focus, practice) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudiedPreview(emptyList(), 0, 0))
+
+    val workOnNext: StateFlow<List<WorkOnNextItem>> =
+        (userId?.let { targetApplication.database.studyResourceTopicDao().getWorkOnNextRows(it) } ?: flowOf(emptyList()))
+            .map { rankWorkOnNext(it) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun togglePlannerOccurrenceDone(occurrence: PlannerPreviewOccurrence) {
         viewModelScope.launch {

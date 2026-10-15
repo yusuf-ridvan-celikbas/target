@@ -109,3 +109,6 @@ Settings > Backup card: `data/backup/BackupManager.kt` writes the whole Room DB 
 
 - **Home top bar**: the greeting ("Welcome to Target, <bold name>!") and today's weekday/date live in the top bar (`AppShell` `titleContent` slot, single-line ellipsis each); the clock card is gone from Home's body.
 - **Swipe-to-delete with Undo**: `FocusHistoryRow(onDelete = ...)` wraps the row in a `SwipeToDismissBox` (end-to-start, red background); `rememberUndoDelete` deletes via the ViewModel and shows a "Session deleted / Undo" snackbar (`AppShell` `snackbarHost` param) that re-inserts the same row. Used on Focus/Flow Timer, Study/Work History and a book's sessions.
+
+- **Today Home** (`ui/home/`): cards in order, each hidden when empty: Countdowns (nearest 3 exam/section dates + See all to Exams), Today's plans (tomorrow's if none today, checkboxes + Open Planner), Today so far (studied today/week, reading + daily goal, up to 3 session rows), Work on next, and an always-shown Quick start (Focus/Flow Timer buttons).
+- **Work on next** (`WorkOnNext.kt`, `StudyResourceTopicDao.getWorkOnNextRows`): up to 3 topics merged across Question Banks; first those with >=10 answered and accuracy <85% (lowest first, "Accuracy N%"), then most questions left vs target ("N questions left"). Tap opens TopicProgressRoute when the topic is in one bank, else TopicDetailRoute.

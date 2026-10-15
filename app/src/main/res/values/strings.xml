@@ -977,4 +977,12 @@
     <string name="restore_failed">Restore failed. Your current data was not changed.</string>
     <string name="focus_session_deleted">Session deleted</string>
     <string name="common_undo">Undo</string>
+    <string name="home_countdowns_title">Countdowns</string>
+    <string name="home_plans_today">Today\'s plans</string>
+    <string name="home_plans_tomorrow">Tomorrow\'s plans</string>
+    <string name="home_today_so_far">Today so far</string>
+    <string name="home_work_next_title">Work on next</string>
+    <string name="home_work_accuracy">Accuracy %1$d%%</string>
+    <string name="home_work_left">%1$s left</string>
+    <string name="home_quick_start">Quick start</string>
 </resources>

@@ -32,6 +32,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -77,6 +80,7 @@ fun HomeScreen(
     onPracticeSessionClick: (Long) -> Unit,
     onBookClick: (Long) -> Unit,
     onOpenReading: () -> Unit,
+    onTopicClick: (Long) -> Unit,
     viewModel: HomeViewModel = viewModel(),
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
@@ -84,6 +88,7 @@ fun HomeScreen(
     val upcomingPlannerEvents by viewModel.upcomingPlannerEvents.collectAsStateWithLifecycle()
     val studied by viewModel.studied.collectAsStateWithLifecycle()
     val reading by viewModel.reading.collectAsStateWithLifecycle()
+    val workOnNext by viewModel.workOnNext.collectAsStateWithLifecycle()
 
     val prefix = stringResource(R.string.home_welcome_prefix)
     val suffix = stringResource(R.string.home_welcome_suffix)
@@ -120,56 +125,74 @@ fun HomeScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            if (upcomingEvents.isNotEmpty()) {
+            val shown = upcomingEvents.take(HOME_COUNTDOWNS_MAX)
+            if (shown.isNotEmpty()) {
                 UpcomingEventsCard(
-                    events = upcomingEvents,
+                    events = shown,
+                    showSeeAll = upcomingEvents.size > shown.size,
+                    onSeeAll = shellNavigation.onNavigateExams,
                     onEventClick = { event ->
                         if (event.sectionId != null) onSectionClick(event.sectionId) else onExamClick(event.examId)
                     },
                 )
             }
-            Spacer(Modifier.height(12.dp))
-            PlannerPreviewCard(
-                occurrences = upcomingPlannerEvents,
-                onToggleDone = viewModel::togglePlannerOccurrenceDone,
-                onOpenPlanner = shellNavigation.onNavigatePlanner,
-                studied = studied,
-                reading = reading,
-                onBookClick = onBookClick,
-                onOpenReading = onOpenReading,
-                onStudiedClick = { item ->
-                    when (item) {
-                        is PlannerAgendaItem.FocusSessionEntry -> onFocusSessionClick(item.item.session.id)
-                        is PlannerAgendaItem.PracticeLogEntry -> onPracticeSessionClick(item.row.practiceLog.studyResourceTopicId)
-                    }
-                },
-            )
+            // Today's plans, or tomorrow's when today has none.
+            val todays = upcomingPlannerEvents.filter { daysUntil(it.occurrenceDateMillis) == 0L }
+            val plans = todays.ifEmpty { upcomingPlannerEvents.filter { daysUntil(it.occurrenceDateMillis) == 1L } }
+            if (plans.isNotEmpty()) {
+                HomeSpacer()
+                PlansCard(
+                    title = stringResource(if (todays.isEmpty()) R.string.home_plans_tomorrow else R.string.home_plans_today),
+                    occurrences = plans.take(4),
+                    onToggleDone = viewModel::togglePlannerOccurrenceDone,
+                    onOpenPlanner = shellNavigation.onNavigatePlanner,
+                )
+            }
+            val hasStudied = studied.todayMinutes > 0 || studied.weekMinutes > 0 || studied.today.isNotEmpty()
+            if (hasStudied || reading != null) {
+                HomeSpacer()
+                TodaySoFarCard(
+                    studied = studied,
+                    reading = reading,
+                    showStudied = hasStudied,
+                    onBookClick = onBookClick,
+                    onOpenReading = onOpenReading,
+                    onStudiedClick = { item ->
+                        when (item) {
+                            is PlannerAgendaItem.FocusSessionEntry -> onFocusSessionClick(item.item.session.id)
+                            is PlannerAgendaItem.PracticeLogEntry -> onPracticeSessionClick(item.row.practiceLog.studyResourceTopicId)
+                        }
+                    },
+                )
+            }
+            if (workOnNext.isNotEmpty()) {
+                HomeSpacer()
+                WorkOnNextCard(workOnNext, onItemClick = { item ->
+                    if (item.studyResourceTopicId != null) onPracticeSessionClick(item.studyResourceTopicId) else onTopicClick(item.topicId)
+                })
+            }
+            HomeSpacer()
+            QuickStartCard(shellNavigation.onNavigateFocusTimer, shellNavigation.onNavigateFlowTimer)
         }
     }
 }
 
-/** A compact "what's in front of us" preview of the Planner — events only (Upcoming above
- *  already covers exam/section dates on its own) — always shown, unlike Upcoming, so Home
- *  also doubles as a quick entry point into the full Planner even with nothing logged yet. */
+private const val HOME_COUNTDOWNS_MAX = 3
+
 @Composable
-private fun PlannerPreviewCard(
+private fun HomeSpacer() = Spacer(Modifier.height(12.dp))
+
+@Composable
+private fun PlansCard(
+    title: String,
     occurrences: List<PlannerPreviewOccurrence>,
     onToggleDone: (PlannerPreviewOccurrence) -> Unit,
     onOpenPlanner: () -> Unit,
-    studied: StudiedPreview,
-    reading: HomeReading?,
-    onBookClick: (Long) -> Unit,
-    onOpenReading: () -> Unit,
-    onStudiedClick: (PlannerAgendaItem.Studied) -> Unit,
 ) {
     GroupedCard {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    stringResource(R.string.label_planner),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
+                Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 Text(
                     stringResource(R.string.home_open_planner),
                     style = MaterialTheme.typography.labelMedium,
@@ -178,24 +201,68 @@ private fun PlannerPreviewCard(
                     modifier = Modifier.clickable(onClick = onOpenPlanner),
                 )
             }
-            if (occurrences.isEmpty()) {
-                Text(
-                    stringResource(R.string.home_planner_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
-            } else {
-                occurrences.forEach { occurrence ->
-                    PlannerPreviewRow(
-                        occurrence = occurrence,
-                        onToggleDone = { onToggleDone(occurrence) },
-                        onOpenPlanner = onOpenPlanner,
+            occurrences.forEach { occurrence ->
+                PlannerPreviewRow(occurrence, onToggleDone = { onToggleDone(occurrence) }, onOpenPlanner = onOpenPlanner)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TodaySoFarCard(
+    studied: StudiedPreview,
+    reading: HomeReading?,
+    showStudied: Boolean,
+    onBookClick: (Long) -> Unit,
+    onOpenReading: () -> Unit,
+    onStudiedClick: (PlannerAgendaItem.Studied) -> Unit,
+) {
+    GroupedCard {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(stringResource(R.string.home_today_so_far), style = MaterialTheme.typography.titleMedium)
+            if (showStudied) StudiedSection(studied, onStudiedClick)
+            reading?.let { ReadingSection(studied, it, onBookClick, onOpenReading, onStudiedClick) }
+        }
+    }
+}
+
+@Composable
+private fun WorkOnNextCard(items: List<WorkOnNextItem>, onItemClick: (WorkOnNextItem) -> Unit) {
+    GroupedCard {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(stringResource(R.string.home_work_next_title), style = MaterialTheme.typography.titleMedium)
+            items.forEach { item ->
+                val owner = if (item.isCourse) courseDisplayName(item.ownerName) else item.ownerName
+                val reason = item.accuracyPercent?.let { stringResource(R.string.home_work_accuracy, it) }
+                    ?: stringResource(R.string.home_work_left, countText(R.plurals.count_questions, item.questionsLeft))
+                Column(modifier = Modifier.fillMaxWidth().clickable { onItemClick(item) }.padding(top = 10.dp)) {
+                    Text(item.topicName, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        "$owner · $reason",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (item.accuracyPercent != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
-            StudiedSection(studied, onStudiedClick)
-            reading?.let { ReadingSection(studied, it, onBookClick, onOpenReading, onStudiedClick) }
+        }
+    }
+}
+
+@Composable
+private fun QuickStartCard(onFocus: () -> Unit, onFlow: () -> Unit) {
+    GroupedCard {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(stringResource(R.string.home_quick_start), style = MaterialTheme.typography.titleMedium)
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = onFocus, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Filled.Timer, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.label_focus_timer), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 6.dp))
+                }
+                OutlinedButton(onClick = onFlow, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Filled.Timer, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.label_flow_timer), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 6.dp))
+                }
+            }
         }
     }
 }
@@ -245,10 +312,21 @@ private fun PlannerPreviewRow(occurrence: PlannerPreviewOccurrence, onToggleDone
 }
 
 @Composable
-private fun UpcomingEventsCard(events: List<UpcomingEvent>, onEventClick: (UpcomingEvent) -> Unit) {
+private fun UpcomingEventsCard(events: List<UpcomingEvent>, showSeeAll: Boolean, onSeeAll: () -> Unit, onEventClick: (UpcomingEvent) -> Unit) {
     GroupedCard {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Text(stringResource(R.string.home_upcoming_title), style = MaterialTheme.typography.titleMedium)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.home_countdowns_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                if (showSeeAll) {
+                    Text(
+                        stringResource(R.string.focustimer_history_see_all),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable(onClick = onSeeAll),
+                    )
+                }
+            }
             events.forEach { event ->
                 UpcomingEventRow(event = event, onClick = { onEventClick(event) })
             }
@@ -317,7 +395,7 @@ private fun StudiedSection(studied: StudiedPreview, onItemClick: (PlannerAgendaI
             modifier = Modifier.padding(top = 6.dp),
         )
     } else {
-        studied.today.forEach { item -> StudiedPreviewRow(item, onClick = { onItemClick(item) }) }
+        studied.today.take(3).forEach { item -> StudiedPreviewRow(item, onClick = { onItemClick(item) }) }
     }
 }
 
@@ -394,7 +472,7 @@ private fun ReadingSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
-    studied.todayReading.forEach { item -> StudiedPreviewRow(item, onClick = { onSessionClick(item) }) }
+    studied.todayReading.take(3).forEach { item -> StudiedPreviewRow(item, onClick = { onSessionClick(item) }) }
     val book = reading.currentBook
     if (book != null) {
         Row(

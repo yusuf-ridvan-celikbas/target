@@ -74,4 +74,35 @@ interface StudyResourceTopicDao {
         """
     )
     fun getTargetTotals(studyResourceIds: List<Long>): Flow<StudyResourceTargetTotals>
+
+    @Query(
+        """
+        SELECT study_resource_topics.id AS studyResourceTopicId, topics.id AS topicId, topics.name AS topicName,
+               courses.name AS courseName, languages.name AS languageName,
+               study_resource_topics.questionCount AS targetQuestions,
+               COALESCE(SUM(COALESCE(practice_logs.questionCount, practice_logs.solvedCount + practice_logs.unsolvedCount)), 0) AS loggedQuestions,
+               COALESCE(SUM(practice_logs.solvedCount), 0) AS correct,
+               COALESCE(SUM(practice_logs.unsolvedCount), 0) AS wrong
+        FROM study_resource_topics
+        JOIN topics ON topics.id = study_resource_topics.topicId
+        LEFT JOIN courses ON courses.id = topics.courseId
+        LEFT JOIN languages ON languages.id = topics.languageId
+        LEFT JOIN practice_logs ON practice_logs.studyResourceTopicId = study_resource_topics.id
+        WHERE (courses.userId = :userId) OR (languages.userId = :userId)
+        GROUP BY study_resource_topics.id
+        """
+    )
+    fun getWorkOnNextRows(userId: Long): Flow<List<WorkOnNextRow>>
 }
+
+data class WorkOnNextRow(
+    val studyResourceTopicId: Long,
+    val topicId: Long,
+    val topicName: String,
+    val courseName: String?,
+    val languageName: String?,
+    val targetQuestions: Int,
+    val loggedQuestions: Int,
+    val correct: Int,
+    val wrong: Int,
+)

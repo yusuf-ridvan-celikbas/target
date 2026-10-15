@@ -975,4 +975,12 @@
     <string name="restore_failed">Geri yükleme başarısız. Mevcut verilerin değişmedi.</string>
     <string name="focus_session_deleted">Oturum silindi</string>
     <string name="common_undo">Geri al</string>
+    <string name="home_countdowns_title">Geri sayım</string>
+    <string name="home_plans_today">Bugünün planları</string>
+    <string name="home_plans_tomorrow">Yarının planları</string>
+    <string name="home_today_so_far">Bugün şimdiye kadar</string>
+    <string name="home_work_next_title">Sıradaki çalışma</string>
+    <string name="home_work_accuracy">Doğruluk %%%1$d</string>
+    <string name="home_work_left">%1$s kaldı</string>
+    <string name="home_quick_start">Hızlı başlat</string>
 </resources>
