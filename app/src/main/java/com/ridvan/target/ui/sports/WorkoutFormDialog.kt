@@ -123,6 +123,24 @@ fun WorkoutFormDialog(
         if (sport == Sport.SWIMMING) value.toInt() else Math.round(value * 1000).toInt()
     }
     val isValid = totalMinutes > 0
+    val startedAtNow = dayStartMillis + (timeState.hour * 60 + timeState.minute) * MINUTE_MILLIS
+    val isFuture = startedAtNow > System.currentTimeMillis()
+    var confirmFuture by remember { mutableStateOf(false) }
+    fun submit() {
+        // Unchanged minutes keep the stopwatch's exact seconds.
+        val seconds = if (initial != null && totalMinutes == initialMinutes) initial.durationSeconds else totalMinutes * 60
+        onConfirm(
+            WorkoutForm(
+                sport = sport,
+                startedAt = startedAtNow,
+                durationSeconds = seconds,
+                distanceMeters = distanceMeters,
+                notes = notes.trim().ifEmpty { null },
+                effort = effort,
+                exercises = if (sport == Sport.GYM) drafts.toExercises() else emptyList(),
+            ),
+        )
+    }
 
     AlertDialog(
         properties = FormDialogProperties,
@@ -157,6 +175,13 @@ fun WorkoutFormDialog(
                     modifier = Modifier.padding(top = 12.dp),
                 )
                 TimeInput(state = timeState)
+                if (isFuture) {
+                    Text(
+                        stringResource(R.string.sports_future_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = hoursText,
@@ -203,26 +228,22 @@ fun WorkoutFormDialog(
         confirmButton = {
             TextButton(
                 enabled = isValid,
-                onClick = {
-                    val startedAt = dayStartMillis + (timeState.hour * 60 + timeState.minute) * MINUTE_MILLIS
-                    // Unchanged minutes keep the stopwatch's exact seconds.
-                    val seconds = if (initial != null && totalMinutes == initialMinutes) initial.durationSeconds else totalMinutes * 60
-                    onConfirm(
-                        WorkoutForm(
-                            sport = sport,
-                            startedAt = startedAt,
-                            durationSeconds = seconds,
-                            distanceMeters = distanceMeters,
-                            notes = notes.trim().ifEmpty { null },
-                            effort = effort,
-                            exercises = if (sport == Sport.GYM) drafts.toExercises() else emptyList(),
-                        ),
-                    )
-                },
+                onClick = { if (isFuture) confirmFuture = true else submit() },
             ) { Text(stringResource(R.string.common_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
+
+    if (confirmFuture) {
+        AlertDialog(
+            properties = FormDialogProperties,
+            onDismissRequest = { confirmFuture = false },
+            title = { Text(stringResource(R.string.sports_future_title)) },
+            text = { Text(stringResource(R.string.sports_future_message)) },
+            confirmButton = { TextButton(onClick = { confirmFuture = false; submit() }) { Text(stringResource(R.string.sports_future_save_anyway)) } },
+            dismissButton = { TextButton(onClick = { confirmFuture = false }) { Text(stringResource(R.string.sports_future_change_date)) } },
+        )
+    }
 
     if (showDatePicker) {
         val state = rememberDatePickerState(initialSelectedDateMillis = localDayToUtcMillis(dayStartMillis))

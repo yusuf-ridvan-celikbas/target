@@ -1188,4 +1188,15 @@
         <item quantity="one">%d workout</item>
         <item quantity="other">%d workouts</item>
     </plurals>
+    <string name="sports_see_all">History</string>
+    <string name="sports_history_title">Workout history</string>
+    <string name="sports_history_prev_month">Previous month</string>
+    <string name="sports_history_next_month">Next month</string>
+    <string name="sports_history_all_sports">All sports</string>
+    <string name="sports_history_empty">No workouts match this month and sport.</string>
+    <string name="sports_future_warning">This date is in the future</string>
+    <string name="sports_future_title">Save a workout in the future?</string>
+    <string name="sports_future_message">The date and time you chose have not happened yet.</string>
+    <string name="sports_future_save_anyway">Save anyway</string>
+    <string name="sports_future_change_date">Change date</string>
 </resources>

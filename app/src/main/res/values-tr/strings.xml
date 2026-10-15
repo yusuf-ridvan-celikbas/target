@@ -1186,4 +1186,15 @@
         <item quantity="one">%d antrenman</item>
         <item quantity="other">%d antrenman</item>
     </plurals>
+    <string name="sports_see_all">Geçmiş</string>
+    <string name="sports_history_title">Antrenman geçmişi</string>
+    <string name="sports_history_prev_month">Önceki ay</string>
+    <string name="sports_history_next_month">Sonraki ay</string>
+    <string name="sports_history_all_sports">Tüm sporlar</string>
+    <string name="sports_history_empty">Bu ay ve spor için antrenman yok.</string>
+    <string name="sports_future_warning">Bu tarih gelecekte</string>
+    <string name="sports_future_title">Gelecekteki bir antrenman kaydedilsin mi?</string>
+    <string name="sports_future_message">Seçtiğin tarih ve saat henüz gelmedi.</string>
+    <string name="sports_future_save_anyway">Yine de kaydet</string>
+    <string name="sports_future_change_date">Tarihi değiştir</string>
 </resources>

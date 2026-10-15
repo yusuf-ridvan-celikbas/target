@@ -89,6 +89,7 @@ private const val RECENT_PAGE = 10
 fun SportsScreen(
     shellNavigation: ShellNavigation,
     onStartLive: () -> Unit,
+    onHistory: () -> Unit,
     onWorkoutClick: (Long) -> Unit,
     viewModel: SportsViewModel = viewModel(),
 ) {
@@ -143,11 +144,16 @@ fun SportsScreen(
 
             GroupedCard {
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                    Text(
-                        stringResource(R.string.sports_recent),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp)) {
+                        Text(
+                            stringResource(R.string.sports_recent),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f).padding(vertical = 8.dp),
+                        )
+                        if (workouts.isNotEmpty()) {
+                            TextButton(onClick = onHistory) { Text(stringResource(R.string.sports_see_all)) }
+                        }
+                    }
                     if (workouts.isEmpty()) {
                         Text(
                             stringResource(R.string.sports_empty),
@@ -420,7 +426,7 @@ private fun StreaksCard(workouts: List<Workout>, now: Long) {
 
 /** A recent-workouts row; swipe end-to-start to delete (with Undo). */
 @Composable
-private fun WorkoutRow(workout: Workout, onClick: () -> Unit, onDelete: (Workout) -> Unit) {
+internal fun WorkoutRow(workout: Workout, onClick: () -> Unit, onDelete: (Workout) -> Unit) {
     key(workout.id) {
         val state = rememberSwipeToDismissBoxState(
             confirmValueChange = { value ->

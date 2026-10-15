@@ -12,3 +12,7 @@ object LiveWorkoutRoute
 
 @Serializable
 data class WorkoutDetailRoute(val workoutId: Long)
+
+/** Every logged workout by day, with a month switcher and sport filter. */
+@Serializable
+object SportsHistoryRoute

@@ -165,6 +165,13 @@ fun TargetNavHost() {
             com.ridvan.target.ui.sports.SportsScreen(
                 shellNavigation = shellNavigation,
                 onStartLive = { navController.navigate(LiveWorkoutRoute) },
+                onHistory = { navController.navigate(SportsHistoryRoute) },
+                onWorkoutClick = { id -> navController.navigate(WorkoutDetailRoute(id)) },
+            )
+        }
+        composable<SportsHistoryRoute> {
+            com.ridvan.target.ui.sports.SportsHistoryScreen(
+                onBack = { navController.popBackStack() },
                 onWorkoutClick = { id -> navController.navigate(WorkoutDetailRoute(id)) },
             )
         }
