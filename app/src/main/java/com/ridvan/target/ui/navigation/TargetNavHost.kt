@@ -38,6 +38,8 @@ import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
 import com.ridvan.target.ui.hub.FocusHubScreen
 import com.ridvan.target.ui.hub.PlanHubScreen
+import com.ridvan.target.ui.routines.RoutineDetailScreen
+import com.ridvan.target.ui.routines.RoutineListScreen
 import com.ridvan.target.ui.trips.TripDetailScreen
 import com.ridvan.target.ui.trips.TripListScreen
 import com.ridvan.target.ui.hub.StudyHubScreen
@@ -91,6 +93,7 @@ fun TargetNavHost() {
         onNavigateFocusHub = { navController.navigateToShellDestination(FocusHubRoute) },
         onNavigatePlanHub = { navController.navigateToShellDestination(PlanHubRoute) },
         onNavigateTrips = { push(TripListRoute) },
+        onNavigateRoutines = { push(RoutineListRoute) },
         onNavigateExams = { push(ExamListRoute) },
         onNavigateCourses = { push(CourseListRoute) },
         onNavigateStudyResources = { push(StudyResourceHomeRoute) },
@@ -140,6 +143,7 @@ fun TargetNavHost() {
                 onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
                 onOpenReading = shellNavigation.onNavigateReading,
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+                onRoutineClick = { routineId -> navController.navigate(RoutineDetailRoute(routineId)) },
             )
         }
         composable<StudyHubRoute> {
@@ -159,6 +163,15 @@ fun TargetNavHost() {
         }
         composable<TripDetailRoute> {
             TripDetailScreen(onBack = { navController.popBackStack() })
+        }
+        composable<RoutineListRoute> {
+            RoutineListScreen(
+                shellNavigation = shellNavigation,
+                onRoutineClick = { routineId -> navController.navigate(RoutineDetailRoute(routineId)) },
+            )
+        }
+        composable<RoutineDetailRoute> {
+            RoutineDetailScreen(onBack = { navController.popBackStack() })
         }
         composable<ExamListRoute> {
             ExamListScreen(
@@ -355,6 +368,7 @@ fun TargetNavHost() {
                 onFocusSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },
                 onPracticeSessionClick = { id -> navController.navigate(TopicProgressRoute(id)) },
                 onTripClick = { tripId -> navController.navigate(TripDetailRoute(tripId)) },
+                onRoutineClick = { routineId, dateMillis -> navController.navigate(RoutineDetailRoute(routineId, dateMillis)) },
             )
         }
         composable<FocusTimerRoute> {

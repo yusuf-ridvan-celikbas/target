@@ -625,3 +625,50 @@ val MIGRATION_26_27 = object : Migration(26, 27) {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_trip_expenses_tripId ON trip_expenses(tripId)")
     }
 }
+
+val MIGRATION_27_28 = object : Migration(27, 28) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Routines: a named, repeating group of ordered steps, ticked per step per day. Brand-new tables, no backfill.
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS routines (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                startMinuteOfDay INTEGER,
+                repeatDays TEXT NOT NULL,
+                notes TEXT,
+                isActive INTEGER NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_routines_userId ON routines(userId)")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS routine_steps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                routineId INTEGER NOT NULL REFERENCES routines(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                orderIndex INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_routine_steps_routineId ON routine_steps(routineId)")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS routine_step_completions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                routineStepId INTEGER NOT NULL REFERENCES routine_steps(id) ON DELETE CASCADE,
+                date INTEGER NOT NULL,
+                completedAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_routine_step_completions_routineStepId ON routine_step_completions(routineStepId)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_routine_step_completions_routineStepId_date ON routine_step_completions(routineStepId, date)"
+        )
+    }
+}

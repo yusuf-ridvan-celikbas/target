@@ -8,20 +8,21 @@ class BackupValidatorTest {
     private val tables = BackupValidator.REQUIRED_TABLES + "books"
 
     @Test fun acceptsValidAndOlder() {
-        assertEquals(BackupValidator.Result.OK, BackupValidator.validate(good, tables, 27, 27))
-        assertEquals(BackupValidator.Result.OK, BackupValidator.validate(good, tables, 20, 27))
+        assertEquals(BackupValidator.Result.OK, BackupValidator.validate(good, tables, 28, 28))
+        assertEquals(BackupValidator.Result.OK, BackupValidator.validate(good, tables, 27, 28))
+        assertEquals(BackupValidator.Result.OK, BackupValidator.validate(good, tables, 20, 28))
     }
 
     @Test fun rejectsNonSqlite() {
-        assertEquals(BackupValidator.Result.NOT_SQLITE, BackupValidator.validate("hello world, not sqlite".toByteArray(), tables, 27, 27))
-        assertEquals(BackupValidator.Result.NOT_SQLITE, BackupValidator.validate(ByteArray(3), tables, 27, 27))
+        assertEquals(BackupValidator.Result.NOT_SQLITE, BackupValidator.validate("hello world, not sqlite".toByteArray(), tables, 28, 28))
+        assertEquals(BackupValidator.Result.NOT_SQLITE, BackupValidator.validate(ByteArray(3), tables, 28, 28))
     }
 
     @Test fun rejectsOtherDatabase() {
-        assertEquals(BackupValidator.Result.NOT_TARGET, BackupValidator.validate(good, setOf("users"), 27, 27))
+        assertEquals(BackupValidator.Result.NOT_TARGET, BackupValidator.validate(good, setOf("users"), 28, 28))
     }
 
     @Test fun rejectsNewerVersion() {
-        assertEquals(BackupValidator.Result.TOO_NEW, BackupValidator.validate(good, tables, 28, 27))
+        assertEquals(BackupValidator.Result.TOO_NEW, BackupValidator.validate(good, tables, 29, 28))
     }
 }

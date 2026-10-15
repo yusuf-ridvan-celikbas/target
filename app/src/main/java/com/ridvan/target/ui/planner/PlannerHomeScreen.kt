@@ -48,6 +48,7 @@ fun PlannerHomeScreen(
     onFocusSessionClick: (Long) -> Unit,
     onPracticeSessionClick: (Long) -> Unit,
     onTripClick: (Long) -> Unit,
+    onRoutineClick: (Long, Long) -> Unit,
     viewModel: PlannerHomeViewModel = viewModel(),
 ) {
     val viewMode by viewModel.viewMode.collectAsStateWithLifecycle()
@@ -71,6 +72,7 @@ fun PlannerHomeScreen(
                 courseIdForTopics = item.event.courseId
                 editingEvent = item.event
             }
+            is PlannerAgendaItem.RoutineEntry -> onRoutineClick(item.routine.id, item.date.toStartOfDayMillis())
             is PlannerAgendaItem.ExamEntry -> onExamClick(item.examId)
             is PlannerAgendaItem.SectionEntry -> onSectionClick(item.sectionId)
             is PlannerAgendaItem.TripDayEntry -> onTripClick(item.tripId)

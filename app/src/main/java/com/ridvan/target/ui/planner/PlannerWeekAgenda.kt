@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Event
+import com.ridvan.target.ui.routines.RoutineIcon
+import com.ridvan.target.ui.routines.RoutineProgress
+import com.ridvan.target.ui.routines.routineProgressText
+import com.ridvan.target.ui.trips.minuteLabel
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Luggage
@@ -146,6 +151,7 @@ private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
     EXAMS(R.string.planner_group_exams, Icons.AutoMirrored.Filled.Assignment),
     TRIPS(R.string.planner_group_trips, Icons.Filled.Luggage),
     PLANS(R.string.planner_group_plans, Icons.Filled.Event),
+    ROUTINES(R.string.planner_group_routines, Icons.Filled.Checklist),
     FOCUS(R.string.planner_group_focus, Icons.Filled.Timer),
     READING(R.string.planner_group_reading, Icons.Filled.AutoStories),
     PRACTICE(R.string.planner_group_practice, Icons.Filled.Quiz),
@@ -154,6 +160,7 @@ private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
 private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
     is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
     is PlannerAgendaItem.EventOccurrence -> AgendaGroup.PLANS
+    is PlannerAgendaItem.RoutineEntry -> AgendaGroup.ROUTINES
     is PlannerAgendaItem.TripDayEntry, is PlannerAgendaItem.TripActivityEntry, is PlannerAgendaItem.TripBookingEntry -> AgendaGroup.TRIPS
     is PlannerAgendaItem.FocusSessionEntry -> if (item.isReading) AgendaGroup.READING else AgendaGroup.FOCUS
     is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE
@@ -204,6 +211,7 @@ private fun AgendaGroupHeader(
 
 private fun sortMinute(item: PlannerAgendaItem): Int = when (item) {
     is PlannerAgendaItem.EventOccurrence -> item.event.startMinuteOfDay ?: Int.MAX_VALUE
+    is PlannerAgendaItem.RoutineEntry -> item.routine.startMinuteOfDay ?: Int.MAX_VALUE
     is PlannerAgendaItem.Studied -> item.minuteOfDay
     is PlannerAgendaItem.TripDayEntry -> -1
     is PlannerAgendaItem.TripActivityEntry -> item.item.activity.startMinuteOfDay ?: Int.MAX_VALUE
@@ -250,6 +258,23 @@ private fun AgendaRow(
                         )
                     }
                 } else null,
+            )
+        }
+        is PlannerAgendaItem.RoutineEntry -> {
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onItemClick(item) },
+                leadingContent = { RoutineIcon(item.routine.category, tint = MaterialTheme.colorScheme.primary) },
+                headlineContent = { Text(item.routine.name) },
+                supportingContent = {
+                    Text(
+                        listOfNotNull(
+                            item.routine.startMinuteOfDay?.let { minuteLabel(it) },
+                            routineProgressText(RoutineProgress(item.done, item.total)),
+                        ).joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                },
             )
         }
         is PlannerAgendaItem.ExamEntry -> {

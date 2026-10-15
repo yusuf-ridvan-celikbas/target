@@ -16,6 +16,11 @@ import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import com.ridvan.target.data.local.entity.Section
+import com.ridvan.target.data.local.entity.Routine
+import com.ridvan.target.data.local.entity.RoutineStep
+import com.ridvan.target.data.local.entity.RoutineStepCompletion
+import com.ridvan.target.ui.routines.routineProgress
+import com.ridvan.target.ui.routines.runsOn
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.common.examDisplayLabel
 import java.time.Instant
@@ -44,6 +49,9 @@ private data class PlannerRawData(
     val trips: List<Trip>,
     val tripActivities: List<TripActivityWithTrip>,
     val tripBookings: List<TripBookingWithTrip>,
+    val routines: List<Routine>,
+    val routineSteps: List<RoutineStep>,
+    val routineCompletions: List<RoutineStepCompletion>,
 )
 
 class PlannerHomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -85,14 +93,25 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
         userId?.let { tripBookingDao.getAllWithTripByUserId(it) } ?: flowOf(emptyList()),
     ) { trips, activities, bookings -> Triple(trips, activities, bookings) }
 
+    private val routineDao = database.routineDao()
+    private val routineData = combine(
+        userId?.let { routineDao.getByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { routineDao.getAllStepsByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { routineDao.getAllCompletionsByUserId(it) } ?: flowOf(emptyList()),
+    ) { routines, steps, completions -> Triple(routines, steps, completions) }
+
+    private val tripAndRoutineData = combine(tripData, routineData) { trip, routine -> trip to routine }
+
     private val rawData = combine(
         userId?.let { plannerEventDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { plannerEventCompletionDao.getAllByUserId(it) } ?: flowOf(emptyList()),
         examData,
         studiedData,
-        tripData,
-    ) { events, completions, (exams, sections), (focus, practice), (trips, activities, bookings) ->
-        PlannerRawData(events, completions, exams, sections, focus, practice, trips, activities, bookings)
+        tripAndRoutineData,
+    ) { events, completions, (exams, sections), (focus, practice), (trip, routine) ->
+        val (trips, activities, bookings) = trip
+        val (routines, routineSteps, routineCompletions) = routine
+        PlannerRawData(events, completions, exams, sections, focus, practice, trips, activities, bookings, routines, routineSteps, routineCompletions)
     }
 
     private val modeAndDate = combine(_viewMode, _anchorDate) { mode, date -> mode to date }
@@ -205,7 +224,23 @@ private fun buildAgendaItems(raw: PlannerRawData, range: ClosedRange<LocalDate>)
 
     val studiedItems = studiedItemsInRange(raw.focusSessions, raw.practiceLogs, range)
 
-    return (eventItems + examItems + sectionItems + studiedItems + tripItemsInRange(raw, range)).sortedBy { it.date }
+    return (eventItems + examItems + sectionItems + studiedItems + tripItemsInRange(raw, range) + routineItemsInRange(raw, range))
+        .sortedBy { it.date }
+}
+
+/** Each active routine on each of its days inside [range], with that day's ticked-step count. */
+private fun routineItemsInRange(raw: PlannerRawData, range: ClosedRange<LocalDate>): List<PlannerAgendaItem> {
+    // Week/Month only — a daily routine would otherwise flood the Year list.
+    if (raw.routines.isEmpty() || range.endInclusive.toEpochDay() - range.start.toEpochDay() > 60) return emptyList()
+    val stepsBy = raw.routineSteps.groupBy { it.routineId }
+    val days = generateSequence(range.start) { it.plusDays(1) }.takeWhile { it <= range.endInclusive }.toList()
+    return days.flatMap { date ->
+        val millis = date.toStartOfDayMillis()
+        raw.routines.filter { it.runsOn(millis, date.dayOfWeek.value) }.map { routine ->
+            val progress = routineProgress(stepsBy[routine.id].orEmpty(), raw.routineCompletions, millis)
+            PlannerAgendaItem.RoutineEntry(routine, progress.done, progress.total, date)
+        }
+    }
 }
 
 /** Each day a trip covers inside [range], plus its activities and bookings (by departure / check-in day). */

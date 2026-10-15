@@ -24,6 +24,8 @@ import com.ridvan.target.ui.reading.dailyGoal
 import com.ridvan.target.ui.reading.isReading
 import com.ridvan.target.ui.reading.minutesFor
 import com.ridvan.target.ui.reading.readingPace
+import com.ridvan.target.ui.routines.routineProgress
+import com.ridvan.target.ui.routines.runsOn
 import com.ridvan.target.ui.trips.minuteLabel
 import com.ridvan.target.ui.trips.timeRangeText
 import java.time.Instant
@@ -62,6 +64,9 @@ object NotificationScheduler {
 
     /** How far ahead to look for the next occurrence — comfortably past a yearly recurrence. */
     private const val HORIZON_DAYS = 400L
+
+    /** Routines repeat weekly at most, so a week and a bit ahead always contains the next one. */
+    private const val ROUTINE_HORIZON_DAYS = 8L
 
     fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -195,7 +200,45 @@ object NotificationScheduler {
         }
 
         return eventCandidates + examCandidates + sectionCandidates + readingCandidates(app, userId, today, zone, strings) +
-            tripCandidates(app, userId, today, horizonEnd, leadMinutes, zone, strings)
+            tripCandidates(app, userId, today, horizonEnd, leadMinutes, zone, strings) +
+            routineCandidates(app, userId, today, leadMinutes, zone, strings)
+    }
+
+    /**
+     * One reminder per active, timed routine on each of its days over the next [ROUTINE_HORIZON_DAYS] days
+     * (the chain is recomputed whenever one fires); skipped for a day once every step is ticked.
+     */
+    private suspend fun routineCandidates(
+        app: TargetApplication,
+        userId: Long,
+        today: LocalDate,
+        leadMinutes: Int,
+        zone: ZoneId,
+        strings: Context,
+    ): List<ReminderCandidate> {
+        val dao = app.database.routineDao()
+        val routines = dao.getByUserId(userId).first().filter { it.isActive && it.startMinuteOfDay != null }
+        if (routines.isEmpty()) return emptyList()
+        val stepsBy = dao.getAllStepsByUserId(userId).first().groupBy { it.routineId }
+        val completions = dao.getAllCompletionsByUserId(userId).first()
+        return (0 until ROUTINE_HORIZON_DAYS).flatMap { offset ->
+            val date = today.plusDays(offset)
+            val millis = date.toStartOfDayMillis(zone)
+            routines.filter { it.runsOn(millis, date.dayOfWeek.value) }.mapNotNull { routine ->
+                val steps = stepsBy[routine.id].orEmpty()
+                val progress = routineProgress(steps, completions, millis)
+                if (steps.isNotEmpty() && progress.done == progress.total) return@mapNotNull null
+                ReminderCandidate(
+                    whenInstant = reminderInstant(date, routine.startMinuteOfDay, leadMinutes, zone),
+                    notificationId = notificationId("routine", routine.id, date.toEpochDay()),
+                    title = routine.name,
+                    body = strings.getString(
+                        R.string.notif_routine_body,
+                        strings.resources.getQuantityString(R.plurals.count_steps, steps.size, steps.size),
+                    ),
+                )
+            }
+        }
     }
 
     /**

@@ -105,6 +105,7 @@ private fun YearMonthHeader(month: YearMonth, count: Int, expanded: Boolean, onT
 private fun YearItemRow(item: PlannerAgendaItem, onItemClick: (PlannerAgendaItem) -> Unit) {
     val label = when (item) {
         is PlannerAgendaItem.EventOccurrence -> item.event.title
+        is PlannerAgendaItem.RoutineEntry -> item.routine.name
         is PlannerAgendaItem.ExamEntry -> item.label
         is PlannerAgendaItem.SectionEntry -> item.label
         is PlannerAgendaItem.TripDayEntry -> item.tripName

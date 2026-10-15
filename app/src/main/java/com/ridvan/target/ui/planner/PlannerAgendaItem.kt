@@ -24,6 +24,14 @@ sealed interface PlannerAgendaItem {
         val topicName: String? = null,
     ) : PlannerAgendaItem
 
+    /** A routine on one of its days, with how many of its steps were ticked that day. */
+    data class RoutineEntry(
+        val routine: com.ridvan.target.data.local.entity.Routine,
+        val done: Int,
+        val total: Int,
+        override val date: LocalDate,
+    ) : PlannerAgendaItem
+
     data class ExamEntry(
         val examId: Long,
         val label: String,

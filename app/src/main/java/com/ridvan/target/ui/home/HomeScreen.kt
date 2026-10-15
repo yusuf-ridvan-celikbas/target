@@ -15,6 +15,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.size
 import com.ridvan.target.ui.common.courseDisplayName
+import com.ridvan.target.ui.routines.RoutineIcon
+import com.ridvan.target.ui.routines.routineProgressText
+import com.ridvan.target.ui.trips.minuteLabel
 import com.ridvan.target.ui.common.formatTime
 import com.ridvan.target.ui.focustimer.focusSessionTitle
 import com.ridvan.target.ui.planner.PlannerAgendaItem
@@ -81,8 +84,10 @@ fun HomeScreen(
     onBookClick: (Long) -> Unit,
     onOpenReading: () -> Unit,
     onTopicClick: (Long) -> Unit,
+    onRoutineClick: (Long) -> Unit,
     viewModel: HomeViewModel = viewModel(),
 ) {
+    val todaysRoutines by viewModel.todaysRoutines.collectAsStateWithLifecycle()
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
     val upcomingEvents by viewModel.upcomingEvents.collectAsStateWithLifecycle()
     val upcomingPlannerEvents by viewModel.upcomingPlannerEvents.collectAsStateWithLifecycle()
@@ -148,6 +153,10 @@ fun HomeScreen(
                     onOpenPlanner = shellNavigation.onNavigatePlanner,
                 )
             }
+            if (todaysRoutines.isNotEmpty()) {
+                HomeSpacer()
+                RoutinesCard(todaysRoutines, onRoutineClick)
+            }
             val hasStudied = studied.todayMinutes > 0 || studied.weekMinutes > 0 || studied.today.isNotEmpty()
             if (hasStudied || reading != null) {
                 HomeSpacer()
@@ -203,6 +212,38 @@ private fun PlansCard(
             }
             occurrences.forEach { occurrence ->
                 PlannerPreviewRow(occurrence, onToggleDone = { onToggleDone(occurrence) }, onOpenPlanner = onOpenPlanner)
+            }
+        }
+    }
+}
+
+/** One row per routine on today: "Morning routine · 07:00 · 2/5 done"; tap opens its checklist. */
+@Composable
+private fun RoutinesCard(routines: List<TodayRoutine>, onRoutineClick: (Long) -> Unit) {
+    GroupedCard {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(stringResource(R.string.home_routines_title), style = MaterialTheme.typography.titleMedium)
+            routines.forEach { item ->
+                val routine = item.routine
+                val allDone = item.progress.total > 0 && item.progress.done == item.progress.total
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().clickable { onRoutineClick(routine.id) }.padding(top = 12.dp),
+                ) {
+                    RoutineIcon(
+                        routine.category,
+                        tint = if (allDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(
+                        listOfNotNull(routine.name, routine.startMinuteOfDay?.let { minuteLabel(it) }, routineProgressText(item.progress))
+                            .joinToString(" · "),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = if (allDone) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f).padding(start = 12.dp),
+                    )
+                }
             }
         }
     }

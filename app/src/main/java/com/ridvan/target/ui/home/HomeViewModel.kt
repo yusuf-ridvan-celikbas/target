@@ -17,6 +17,9 @@ import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import com.ridvan.target.data.local.entity.User
 import com.ridvan.target.ui.common.startOfTodayMillis
+import com.ridvan.target.ui.routines.RoutineProgress
+import com.ridvan.target.ui.routines.routineProgress
+import com.ridvan.target.ui.routines.runsOn
 import com.ridvan.target.ui.planner.PlannerPreviewOccurrence
 import com.ridvan.target.ui.planner.StudiedPreview
 import com.ridvan.target.ui.planner.studiedPreview
@@ -32,6 +35,8 @@ import kotlinx.coroutines.launch
 /** Home's reading line; the page counts come from [StudiedPreview]'s week window. */
 /** [goal] is today's share of the current book's finish goal, when it has one; [pagesPerHour] estimates its time. */
 data class HomeReading(val currentBook: BookProgress?, val goal: DailyGoal? = null, val pagesPerHour: Double? = null)
+
+data class TodayRoutine(val routine: com.ridvan.target.data.local.entity.Routine, val progress: RoutineProgress)
 
 data class UpcomingEvent(
     val examId: Long,
@@ -85,6 +90,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         userId?.let { plannerEventCompletionDao.getAllByUserId(it) } ?: flowOf(emptyList()),
     ) { events, completions ->
         upcomingEventOccurrences(events, completions, HOME_PLANNER_WINDOW_DAYS, HOME_PLANNER_MAX_ITEMS)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val routineDao = targetApplication.database.routineDao()
+
+    /** Active routines scheduled today, by start time, with how many steps are ticked. */
+    val todaysRoutines: StateFlow<List<TodayRoutine>> = if (userId == null) {
+        flowOf(emptyList<TodayRoutine>())
+    } else {
+        combine(routineDao.getByUserId(userId), routineDao.getAllStepsByUserId(userId), routineDao.getAllCompletionsByUserId(userId)) { routines, steps, completions ->
+            val today = startOfTodayMillis()
+            val stepsBy = steps.groupBy { it.routineId }
+            routines.filter { it.runsOn(today) }
+                .sortedWith(compareBy({ it.startMinuteOfDay ?: Int.MAX_VALUE }, { it.name.lowercase() }))
+                .map { TodayRoutine(it, routineProgress(stepsBy[it.id].orEmpty(), completions, today)) }
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val bookDao = targetApplication.database.bookDao()
