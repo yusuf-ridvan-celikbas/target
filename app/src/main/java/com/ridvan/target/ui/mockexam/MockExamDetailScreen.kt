@@ -68,10 +68,12 @@ fun MockExamDetailScreen(
     val mockExam by viewModel.mockExam.collectAsStateWithLifecycle()
     val parts by viewModel.parts.collectAsStateWithLifecycle()
     val topicResults by viewModel.topicResults.collectAsStateWithLifecycle()
+    val exam by viewModel.exam.collectAsStateWithLifecycle()
 
     var menuOpen by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showAlesDialog by remember { mutableStateOf(false) }
     var showStartConfirm by remember { mutableStateOf(false) }
     var editingPart by remember { mutableStateOf<MockExamPartWithCourse?>(null) }
     var addingTopicsTo by remember { mutableStateOf<MockExamPartWithCourse?>(null) }
@@ -94,6 +96,10 @@ fun MockExamDetailScreen(
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.mockexam_edit_info)) },
                             onClick = { menuOpen = false; showInfoDialog = true },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.mockexam_ales_settings)) },
+                            onClick = { menuOpen = false; showAlesDialog = true },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.common_delete)) },
@@ -172,6 +178,10 @@ fun MockExamDetailScreen(
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(top = 8.dp),
                     )
+                }
+                val currentExam = exam
+                if (current.status == MockExamStatus.FINISHED && currentExam != null && currentExam.alesScoring) {
+                    AlesScoreCard(currentExam, parts)
                 }
             }
 
@@ -297,6 +307,19 @@ fun MockExamDetailScreen(
                     showInfoDialog = false
                 },
                 onDismiss = { showInfoDialog = false },
+            )
+        }
+    }
+
+    if (showAlesDialog) {
+        exam?.let { current ->
+            AlesSettingsDialog(
+                exam = current,
+                onSave = { enabled, coefficients ->
+                    viewModel.updateAlesScoring(enabled, coefficients)
+                    showAlesDialog = false
+                },
+                onDismiss = { showAlesDialog = false },
             )
         }
     }

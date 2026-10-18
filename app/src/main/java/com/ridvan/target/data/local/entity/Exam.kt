@@ -1,5 +1,6 @@
 package com.ridvan.target.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -40,4 +41,13 @@ data class Exam(
     val languageId: Long? = null,
     val level: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
+    /** Mock exams of this exam get an ALES score card (courses split by Quantitative/Verbal category). */
+    @ColumnInfo(defaultValue = "0") val alesScoring: Boolean = false,
+    /** Optional per-term conversion typed in by the user: score ≈ base + coef × weighted net. */
+    val alesSayBase: Double? = null,
+    val alesSayCoef: Double? = null,
+    val alesSozBase: Double? = null,
+    val alesSozCoef: Double? = null,
+    val alesEaBase: Double? = null,
+    val alesEaCoef: Double? = null,
 )

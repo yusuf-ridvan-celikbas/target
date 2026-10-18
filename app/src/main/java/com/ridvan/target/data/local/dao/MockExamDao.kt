@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.MockExam
 import com.ridvan.target.data.local.entity.MockExamPart
 import com.ridvan.target.data.local.entity.MockExamTopicResult
@@ -16,6 +17,7 @@ data class MockExamPartWithCourse(
     @Embedded val part: MockExamPart,
     val courseName: String,
     val courseIcon: String?,
+    val courseCategory: CourseCategory?,
 )
 
 data class MockExamTopicResultWithTopic(
@@ -61,7 +63,7 @@ interface MockExamDao {
 
     @Query(
         """
-        SELECT mock_exam_parts.*, courses.name AS courseName, courses.icon AS courseIcon
+        SELECT mock_exam_parts.*, courses.name AS courseName, courses.icon AS courseIcon, courses.category AS courseCategory
         FROM mock_exam_parts JOIN courses ON courses.id = mock_exam_parts.courseId
         WHERE mockExamId = :mockExamId ORDER BY orderIndex
         """

@@ -8,13 +8,17 @@ import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.MockExamPartWithCourse
 import com.ridvan.target.data.local.dao.MockExamTopicResultWithTopic
+import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.MockExam
 import com.ridvan.target.data.local.entity.MockExamPart
 import com.ridvan.target.data.local.entity.MockExamStatus
 import com.ridvan.target.data.local.entity.MockExamTopicResult
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.navigation.MockExamDetailRoute
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -28,8 +32,14 @@ class MockExamDetailViewModel(
     private val database = (application as TargetApplication).database
     private val mockExamDao = database.mockExamDao()
     private val topicDao = database.topicDao()
+    private val examDao = database.examDao()
 
     val mockExam: StateFlow<MockExam?> = mockExamDao.getById(mockExamId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val exam: StateFlow<Exam?> = mockExam
+        .flatMapLatest { mock -> mock?.let { examDao.getById(it.examId) } ?: flowOf(null) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val parts: StateFlow<List<MockExamPartWithCourse>> = mockExamDao.getParts(mockExamId)
@@ -59,6 +69,24 @@ class MockExamDetailViewModel(
     fun updatePart(part: MockExamPart, questionCount: Int, correctCount: Int, wrongCount: Int) {
         viewModelScope.launch {
             mockExamDao.updatePart(part.copy(questionCount = questionCount, correctCount = correctCount, wrongCount = wrongCount))
+        }
+    }
+
+    /** Saved on the exam, so every mock exam of it shares the setting. Coefficients come as base/coef pairs. */
+    fun updateAlesScoring(enabled: Boolean, coefficients: Map<AlesScoreType, Pair<Double?, Double?>>) {
+        viewModelScope.launch {
+            val current = exam.value ?: return@launch
+            examDao.update(
+                current.copy(
+                    alesScoring = enabled,
+                    alesSayBase = coefficients[AlesScoreType.QUANTITATIVE]?.first,
+                    alesSayCoef = coefficients[AlesScoreType.QUANTITATIVE]?.second,
+                    alesSozBase = coefficients[AlesScoreType.VERBAL]?.first,
+                    alesSozCoef = coefficients[AlesScoreType.VERBAL]?.second,
+                    alesEaBase = coefficients[AlesScoreType.EQUAL_WEIGHT]?.first,
+                    alesEaCoef = coefficients[AlesScoreType.EQUAL_WEIGHT]?.second,
+                )
+            )
         }
     }
 

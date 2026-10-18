@@ -1240,6 +1240,22 @@
     <string name="mockexam_start_message">%1$s non-stop. A 10-second get-ready comes first.</string>
     <string name="mockexam_due_title">Time for %1$s. Start now?</string>
     <string name="mockexam_not_now">Not now</string>
+    <string name="mockexam_ales_settings">ALES scoring</string>
+    <string name="mockexam_ales_enable">Score as ALES</string>
+    <string name="mockexam_ales_enable_hint">Applies to every mock exam of this exam. Courses count as Quantitative or Verbal by their category.</string>
+    <string name="mockexam_ales_conversion_hint">Optional: a term\'s conversion. Estimate = base + coefficient × weighted net, kept within 50–100.</string>
+    <string name="mockexam_ales_base">Base</string>
+    <string name="mockexam_ales_coef">Coefficient</string>
+    <string name="mockexam_ales_type_quantitative">Quantitative (SAY)</string>
+    <string name="mockexam_ales_type_verbal">Verbal (SÖZ)</string>
+    <string name="mockexam_ales_type_equal">Equal Weight (EA)</string>
+    <string name="mockexam_ales_title">ALES score</string>
+    <string name="mockexam_ales_nets">Quantitative net %1$s · Verbal net %2$s</string>
+    <string name="mockexam_ales_weighted">Weighted net %1$s</string>
+    <string name="mockexam_ales_estimate">≈ %1$s</string>
+    <string name="mockexam_ales_no_conversion">Add a base and coefficient under ⋮ → ALES scoring to see an estimated 50–100 score.</string>
+    <string name="mockexam_ales_estimate_note">Estimate only: ÖSYM\'s real conversion changes every term.</string>
+    <string name="mockexam_ales_uncategorized">Not counted (no Quantitative/Verbal category): %1$s</string>
     <string name="notif_mock_exam_title">Mock exam time: %1$s</string>
     <string name="notif_mock_exam_body">Open Target to start it.</string>
 </resources>

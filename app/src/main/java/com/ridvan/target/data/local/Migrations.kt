@@ -738,3 +738,12 @@ val MIGRATION_33_34 = object : Migration(33, 34) {
         db.execSQL("UPDATE mock_exams SET status = 'RUNNING' WHERE finishedAt IS NULL")
     }
 }
+
+val MIGRATION_34_35 = object : Migration(34, 35) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE exams ADD COLUMN alesScoring INTEGER NOT NULL DEFAULT 0")
+        listOf("alesSayBase", "alesSayCoef", "alesSozBase", "alesSozCoef", "alesEaBase", "alesEaCoef").forEach {
+            db.execSQL("ALTER TABLE exams ADD COLUMN $it REAL")
+        }
+    }
+}
