@@ -38,6 +38,9 @@ import com.ridvan.target.R
 import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.ui.common.countText
 import com.ridvan.target.ui.common.formatDuration
+import com.ridvan.target.ui.common.formatDate
+import com.ridvan.target.ui.mockexam.formatNet
+import com.ridvan.target.ui.mockexam.scoreTypeLabel
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.Topic
@@ -55,6 +58,7 @@ fun StatisticsScreen(
     shellNavigation: ShellNavigation,
     onTopicClick: (Long) -> Unit,
     onBookClick: (Long) -> Unit,
+    onMockExamClick: (Long) -> Unit,
     viewModel: StatisticsViewModel = viewModel(),
 ) {
     val examGroups by viewModel.examGroups.collectAsStateWithLifecycle()
@@ -77,6 +81,9 @@ fun StatisticsScreen(
     val readingSummary by viewModel.readingSummary.collectAsStateWithLifecycle()
     val readingChartBuckets by viewModel.readingChartBuckets.collectAsStateWithLifecycle()
     val readingBooks by viewModel.readingBooks.collectAsStateWithLifecycle()
+    val mockExams by viewModel.mockExams.collectAsStateWithLifecycle()
+    val mockChartBuckets by viewModel.mockChartBuckets.collectAsStateWithLifecycle()
+    val mockTopics by viewModel.mockTopics.collectAsStateWithLifecycle()
 
     AppShell(
         navigation = shellNavigation,
@@ -105,6 +112,8 @@ fun StatisticsScreen(
 
             if (source == StatsSource.READING) {
                 ReadingStats(readingSummary, readingChartBuckets, readingBooks, onBookClick)
+            } else if (source == StatsSource.MOCK_EXAMS) {
+                MockExamStats(mockExams, mockChartBuckets, mockTopics, onMockExamClick, onTopicClick)
             } else if (source == StatsSource.PRACTICE_SESSIONS) {
                 if (summary.tests == 0 && summary.totalQuestions == 0) {
                     Text(stringResource(R.string.statistics_empty), modifier = Modifier.padding(top = 16.dp))
@@ -226,6 +235,7 @@ private fun SourceToggle(source: StatsSource, sources: List<StatsSource>, onSele
                         when (it) {
                             StatsSource.PRACTICE_SESSIONS -> R.string.stats_source_practice_sessions
                             StatsSource.PRACTICE_EXAMS -> R.string.stats_source_practice_exams
+                            StatsSource.MOCK_EXAMS -> R.string.stats_source_mock_exams
                             StatsSource.READING -> R.string.label_reading
                         },
                     ),
@@ -450,5 +460,70 @@ private fun ReadingStats(
                 HorizontalDivider()
             }
         }
+    }
+}
+
+@Composable
+private fun MockExamStats(
+    entries: List<MockExamStatEntry>,
+    buckets: List<ChartBucket>,
+    topics: List<MockTopicEntry>,
+    onMockExamClick: (Long) -> Unit,
+    onTopicClick: (Long) -> Unit,
+) {
+    if (entries.isEmpty()) {
+        Text(stringResource(R.string.stats_mock_empty), modifier = Modifier.padding(top = 16.dp))
+        return
+    }
+    Text(
+        stringResource(
+            R.string.stats_mock_summary,
+            countText(R.plurals.count_mock_exams, entries.size),
+            formatNet(entries.sumOf { it.net } / entries.size),
+            formatNet(entries.maxOf { it.net }),
+        ),
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    TrendBarChart(buckets = buckets, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
+
+    if (topics.isNotEmpty()) {
+        Text(
+            stringResource(R.string.stats_mock_topics_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+        topics.forEach { entry ->
+            val ownerLabel = if (entry.isCourse) courseDisplayName(entry.ownerName) else entry.ownerName
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.topic_with_course_title, entry.topicName, ownerLabel)) },
+                supportingContent = { Text(stringResource(R.string.mockexam_questions_topic_row, entry.wrong, entry.blank, entry.correct)) },
+                modifier = Modifier.clickable { onTopicClick(entry.topicId) },
+            )
+            HorizontalDivider()
+        }
+    }
+
+    Text(
+        stringResource(R.string.stats_mock_list_title),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    entries.forEach { entry ->
+        ListItem(
+            overlineContent = entry.sectionName?.let { { Text(it) } },
+            headlineContent = { Text(entry.name) },
+            supportingContent = {
+                Column {
+                    Text(stringResource(R.string.mockexam_row_summary, formatDate(entry.takenAt), formatNet(entry.net), formatDuration(entry.durationMinutes)))
+                    if (entry.scores.isNotEmpty()) {
+                        val labels = entry.scores.map { (type, value) -> scoreTypeLabel(type) to value }
+                        Text(labels.joinToString(" · ") { (label, value) -> "$label ${formatNet(value)}" }, color = MaterialTheme.colorScheme.tertiary)
+                    }
+                }
+            },
+            modifier = Modifier.clickable { onMockExamClick(entry.mockExamId) },
+        )
+        HorizontalDivider()
     }
 }

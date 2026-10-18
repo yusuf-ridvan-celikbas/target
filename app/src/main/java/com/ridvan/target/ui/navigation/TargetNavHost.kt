@@ -19,6 +19,7 @@ import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.coursedetail.CourseDetailScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.mockexam.MockExamDetailScreen
+import com.ridvan.target.ui.mockexam.MockExamQuestionsScreen
 import com.ridvan.target.ui.mockexam.MockExamDuePrompt
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.ridvan.target.ui.mockexam.MockExamTimerScreen
@@ -238,8 +239,19 @@ fun TargetNavHost() {
         composable<MockExamDetailRoute> {
             MockExamDetailScreen(
                 onOpenTimer = { id -> navController.navigate(MockExamTimerRoute(id)) },
+                onOpenQuestions = { partId -> navController.navigate(MockExamQuestionsRoute(partId)) },
                 onBack = { navController.popBackStack() },
             )
+        }
+        composable<StatsMockExamDetailRoute> {
+            MockExamDetailScreen(
+                onOpenTimer = { id -> navController.navigate(MockExamTimerRoute(id)) },
+                onOpenQuestions = { partId -> navController.navigate(MockExamQuestionsRoute(partId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<MockExamQuestionsRoute> {
+            MockExamQuestionsScreen(onBack = { navController.popBackStack() })
         }
         composable<SectionDetailRoute> {
             SectionDetailScreen(
@@ -389,6 +401,7 @@ fun TargetNavHost() {
                 onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
                 shellNavigation = shellNavigation,
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+                onMockExamClick = { id -> navController.navigate(StatsMockExamDetailRoute(id)) },
             )
         }
         composable<UserEditRoute> {

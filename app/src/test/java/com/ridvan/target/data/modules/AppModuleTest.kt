@@ -64,10 +64,10 @@ class AppModuleTest {
     fun statsSourcesAndAgendaGroups() {
         assertEquals(listOf(StatsSource.READING), availableStatsSources(setOf(AppModule.READING)))
         assertEquals(
-            listOf(StatsSource.PRACTICE_SESSIONS, StatsSource.PRACTICE_EXAMS),
+            listOf(StatsSource.PRACTICE_SESSIONS, StatsSource.PRACTICE_EXAMS, StatsSource.MOCK_EXAMS),
             availableStatsSources(setOf(AppModule.EXAMS_STUDY, AppModule.TRIPS)),
         )
-        assertEquals(3, availableStatsSources(ALL_MODULES).size)
+        assertEquals(4, availableStatsSources(ALL_MODULES).size)
         val trips = setOf(AppModule.TRIPS)
         assertTrue(agendaGroupVisible(AgendaGroup.TRIPS, trips))
         assertFalse(agendaGroupVisible(AgendaGroup.ROUTINES, trips))

@@ -72,7 +72,7 @@ private fun testLabel(test: ScoringTest): String = stringResource(
 )
 
 @Composable
-private fun scoreTypeLabel(type: ScoreType): String = stringResource(
+fun scoreTypeLabel(type: ScoreType): String = stringResource(
     when (type) {
         ScoreType.ALES_SAY, ScoreType.YKS_SAY -> R.string.score_type_say
         ScoreType.ALES_SOZ, ScoreType.YKS_SOZ -> R.string.score_type_soz

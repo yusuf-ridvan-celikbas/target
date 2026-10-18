@@ -813,6 +813,10 @@
         <item quantity="one">%d test</item>
         <item quantity="other">%d test</item>
     </plurals>
+    <plurals name="count_mock_exams">
+        <item quantity="one">%d deneme</item>
+        <item quantity="other">%d deneme</item>
+    </plurals>
     <plurals name="count_questions">
         <item quantity="one">%d soru</item>
         <item quantity="other">%d soru</item>
@@ -1239,6 +1243,27 @@
     <string name="mockexam_start_message">Ara vermeden %1$s. Önce 10 saniyelik hazırlık var.</string>
     <string name="mockexam_due_title">%1$s zamanı geldi. Şimdi başlatılsın mı?</string>
     <string name="mockexam_not_now">Şimdi değil</string>
+    <string name="mockexam_questions">Sorular</string>
+    <string name="mockexam_questions_title">%1$s soruları</string>
+    <string name="mockexam_questions_mode_result">Sonuç</string>
+    <string name="mockexam_questions_mode_topic">Konu</string>
+    <string name="question_result_correct">Doğru</string>
+    <string name="question_result_wrong">Yanlış</string>
+    <string name="question_result_blank">Boş</string>
+    <string name="mockexam_questions_clear">Temizle</string>
+    <string name="mockexam_questions_rest_correct">Kalanları doğru işaretle</string>
+    <string name="mockexam_questions_no_topic">Konu yok</string>
+    <string name="mockexam_questions_no_topics">Soruları etiketlemek için bu derse konu ekleyin.</string>
+    <string name="mockexam_questions_summary">Doğru %1$d · Yanlış %2$d · Boş %3$d · İşaretsiz %4$d</string>
+    <string name="mockexam_questions_hint">Bir fırça seçip sorulara dokunun. Bu kısmın toplamları ve konu sonuçları işaretlerinizden sayılır.</string>
+    <string name="mockexam_questions_by_topic">Konulara göre</string>
+    <string name="mockexam_questions_topic_row">Yanlış %1$d · Boş %2$d · Doğru %3$d</string>
+    <string name="mockexam_part_counted_from_questions">Doğru ve yanlış, işaretlenen sorulardan sayılır.</string>
+    <string name="stats_source_mock_exams">Denemeler</string>
+    <string name="stats_mock_empty">Bu dönemde bitmiş deneme yok.</string>
+    <string name="stats_mock_summary">%1$s · ortalama net %2$s · en iyi net %3$s</string>
+    <string name="stats_mock_topics_title">Puan kaybettiğin konular</string>
+    <string name="stats_mock_list_title">Denemeler</string>
     <string name="mockexam_part_name">Kısım</string>
     <string name="mockexam_add_part">+ Kısım ekle</string>
     <string name="mockexam_named_parts_hint">Her kısmı adlandırın (ör. Reading, Listening) ve soru sayısını girin.</string>

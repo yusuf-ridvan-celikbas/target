@@ -10,6 +10,9 @@ import androidx.room.Update
 import com.ridvan.target.data.local.entity.CourseCategory
 import com.ridvan.target.data.local.entity.MockExam
 import com.ridvan.target.data.local.entity.MockExamPart
+import com.ridvan.target.data.local.entity.MockExamQuestion
+import com.ridvan.target.data.local.entity.QuestionResult
+import com.ridvan.target.data.local.entity.ScoringSystem
 import com.ridvan.target.data.local.entity.MockExamTopicResult
 import kotlinx.coroutines.flow.Flow
 
@@ -31,6 +34,31 @@ data class MockExamSummary(
     @Embedded val mockExam: MockExam,
     val examName: String,
     val sectionName: String?,
+    val questionCount: Int,
+    val correctCount: Int,
+    val wrongCount: Int,
+)
+
+/** A finished deneme's part with its deneme's context, for Statistics. */
+data class MockExamPartStatRow(
+    @Embedded val part: MockExamPart,
+    val mockName: String,
+    val takenAt: Long,
+    val durationMinutes: Int,
+    val examId: Long,
+    val sectionName: String?,
+    val scoringSystem: ScoringSystem?,
+)
+
+/** A topic result of a finished deneme with names and context, for Statistics' topics to work on. */
+data class MockExamTopicStatRow(
+    val topicId: Long,
+    val topicName: String,
+    val courseName: String?,
+    val languageName: String?,
+    val partCourseId: Long?,
+    val examId: Long,
+    val takenAt: Long,
     val questionCount: Int,
     val correctCount: Int,
     val wrongCount: Int,
@@ -166,4 +194,105 @@ interface MockExamDao {
 
     @Delete
     suspend fun deleteTopicResult(result: MockExamTopicResult)
+
+    @Query(
+        """
+        SELECT mock_exam_parts.*, courses.name AS courseName, courses.icon AS courseIcon, courses.category AS courseCategory
+        FROM mock_exam_parts LEFT JOIN courses ON courses.id = mock_exam_parts.courseId
+        WHERE mock_exam_parts.id = :partId
+        """
+    )
+    fun getPartWithCourse(partId: Long): Flow<MockExamPartWithCourse?>
+
+    @Query("SELECT * FROM mock_exam_parts WHERE id = :partId")
+    suspend fun getPartOnce(partId: Long): MockExamPart?
+
+    @Query(
+        """
+        SELECT DISTINCT q.mockExamPartId FROM mock_exam_questions q JOIN mock_exam_parts p ON p.id = q.mockExamPartId
+        WHERE p.mockExamId = :mockExamId AND q.result IS NOT NULL
+        """
+    )
+    fun getCountedPartIds(mockExamId: Long): Flow<List<Long>>
+
+    @Query("SELECT * FROM mock_exam_questions WHERE mockExamPartId = :partId ORDER BY number")
+    fun getQuestions(partId: Long): Flow<List<MockExamQuestion>>
+
+    @Query("SELECT * FROM mock_exam_questions WHERE mockExamPartId = :partId ORDER BY number")
+    suspend fun getQuestionsOnce(partId: Long): List<MockExamQuestion>
+
+    @Query("SELECT * FROM mock_exam_topic_results WHERE mockExamPartId = :partId")
+    suspend fun getTopicResultsOnce(partId: Long): List<MockExamTopicResult>
+
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    suspend fun upsertQuestions(questions: List<MockExamQuestion>)
+
+    @Query("DELETE FROM mock_exam_questions WHERE mockExamPartId = :partId AND result IS NULL AND topicId IS NULL")
+    suspend fun deleteEmptyQuestions(partId: Long)
+
+    @Query("DELETE FROM mock_exam_topic_results WHERE mockExamPartId = :partId")
+    suspend fun deleteTopicResultsForPart(partId: Long)
+
+    /**
+     * Saves marked questions, then recounts the part from its questions (within its question count):
+     * correct/wrong once any question has a result, topic results once any question has a topic.
+     */
+    @Transaction
+    suspend fun saveQuestions(partId: Long, questions: List<MockExamQuestion>) {
+        upsertQuestions(questions)
+        deleteEmptyQuestions(partId)
+        val part = getPartOnce(partId) ?: return
+        val marked = getQuestionsOnce(partId).filter { it.number <= part.questionCount }
+        if (marked.any { it.result != null }) {
+            updatePart(
+                part.copy(
+                    correctCount = marked.count { it.result == QuestionResult.CORRECT },
+                    wrongCount = marked.count { it.result == QuestionResult.WRONG },
+                )
+            )
+        }
+        if (marked.any { it.topicId != null }) {
+            deleteTopicResultsForPart(partId)
+            marked.filter { it.topicId != null }.groupBy { it.topicId!! }.forEach { (topicId, list) ->
+                insertTopicResult(
+                    MockExamTopicResult(
+                        mockExamPartId = partId,
+                        topicId = topicId,
+                        questionCount = list.size,
+                        correctCount = list.count { it.result == QuestionResult.CORRECT },
+                        wrongCount = list.count { it.result == QuestionResult.WRONG },
+                    )
+                )
+            }
+        }
+    }
+
+    @Query(
+        """
+        SELECT p.*, m.name AS mockName, m.takenAt, m.durationMinutes, m.examId, s.name AS sectionName, m.scoringSystem
+        FROM mock_exam_parts p
+        JOIN mock_exams m ON m.id = p.mockExamId
+        JOIN exams e ON e.id = m.examId
+        LEFT JOIN sections s ON s.id = m.sectionId
+        WHERE e.userId = :userId AND m.status = 'FINISHED'
+        ORDER BY m.takenAt DESC, p.orderIndex
+        """
+    )
+    fun getFinishedPartsForUser(userId: Long): Flow<List<MockExamPartStatRow>>
+
+    @Query(
+        """
+        SELECT r.topicId, t.name AS topicName, c.name AS courseName, l.name AS languageName, p.courseId AS partCourseId,
+               m.examId, m.takenAt, r.questionCount, r.correctCount, r.wrongCount
+        FROM mock_exam_topic_results r
+        JOIN mock_exam_parts p ON p.id = r.mockExamPartId
+        JOIN mock_exams m ON m.id = p.mockExamId
+        JOIN exams e ON e.id = m.examId
+        JOIN topics t ON t.id = r.topicId
+        LEFT JOIN courses c ON c.id = t.courseId
+        LEFT JOIN languages l ON l.id = t.languageId
+        WHERE e.userId = :userId AND m.status = 'FINISHED'
+        """
+    )
+    fun getFinishedTopicResultsForUser(userId: Long): Flow<List<MockExamTopicStatRow>>
 }

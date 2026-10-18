@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.MockExamPartWithCourse
 import com.ridvan.target.data.local.dao.MockExamTopicResultWithTopic
@@ -15,7 +14,6 @@ import com.ridvan.target.data.local.entity.MockExamTopicResult
 import com.ridvan.target.data.local.entity.ScoringSystem
 import com.ridvan.target.data.local.entity.ScoringTest
 import com.ridvan.target.data.local.entity.Topic
-import com.ridvan.target.ui.navigation.MockExamDetailRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,7 +28,8 @@ class MockExamDetailViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
-    private val mockExamId: Long = savedStateHandle.toRoute<MockExamDetailRoute>().mockExamId
+    // By argument name: backs both MockExamDetailRoute and StatsMockExamDetailRoute.
+    private val mockExamId: Long = checkNotNull(savedStateHandle.get<Long>("mockExamId"))
     private val database = (application as TargetApplication).database
     private val mockExamDao = database.mockExamDao()
     private val topicDao = database.topicDao()
@@ -52,6 +51,11 @@ class MockExamDetailViewModel(
 
     val parts: StateFlow<List<MockExamPartWithCourse>> = mockExamDao.getParts(mockExamId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Parts whose totals are counted from marked questions. */
+    val countedPartIds: StateFlow<Set<Long>> = mockExamDao.getCountedPartIds(mockExamId)
+        .map { it.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     val topicResults: StateFlow<List<MockExamTopicResultWithTopic>> = mockExamDao.getTopicResults(mockExamId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

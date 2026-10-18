@@ -11,6 +11,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.ExamWithType
+import com.ridvan.target.data.local.dao.MockExamPartStatRow
+import com.ridvan.target.data.local.dao.MockExamTopicStatRow
+import com.ridvan.target.data.local.entity.ScoringSystem
+import com.ridvan.target.ui.mockexam.ScoreType
+import com.ridvan.target.ui.mockexam.mockExamNet
+import com.ridvan.target.ui.mockexam.netsByTest
+import com.ridvan.target.ui.mockexam.score
+import com.ridvan.target.ui.mockexam.scoreTypes
 import com.ridvan.target.data.local.dao.PracticeExamEntryWithContext
 import com.ridvan.target.data.local.dao.PracticeExamTopicAggregate
 import com.ridvan.target.data.local.dao.PracticeLogWithTopicContext
@@ -35,7 +43,7 @@ import java.util.Locale
 
 enum class StatsPeriod { DAILY, WEEKLY, MONTHLY, ALL_TIME }
 
-enum class StatsSource { PRACTICE_SESSIONS, PRACTICE_EXAMS, READING }
+enum class StatsSource { PRACTICE_SESSIONS, PRACTICE_EXAMS, MOCK_EXAMS, READING }
 
 data class ChartBucket(val label: String, val solved: Int, val unsolved: Int)
 
@@ -81,6 +89,36 @@ data class WeakTopicEntry(
     val accuracyPercent: Int get() = if (total == 0) 0 else correctCount * 100 / total
 }
 
+/** One finished deneme within the filters (course filter = only that course's parts). */
+data class MockExamStatEntry(
+    val mockExamId: Long,
+    val name: String,
+    val sectionName: String?,
+    val takenAt: Long,
+    val durationMinutes: Int,
+    val questions: Int,
+    val correct: Int,
+    val wrong: Int,
+    /** Score types and values when the deneme is scored as ALES or TYT (AYT needs a TYT deneme; left out). */
+    val scores: List<Pair<ScoreType, Double>>,
+) {
+    val net: Double get() = mockExamNet(correct, wrong)
+}
+
+/** A topic's results summed over finished denemes: wrong and blank are what to work on. */
+data class MockTopicEntry(
+    val topicId: Long,
+    val topicName: String,
+    val ownerName: String,
+    val isCourse: Boolean,
+    val questions: Int,
+    val correct: Int,
+    val wrong: Int,
+) {
+    val blank: Int get() = (questions - correct - wrong).coerceAtLeast(0)
+    val missed: Int get() = wrong + blank
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 /** Reading totals for the chosen period; [booksFinished] is all-time. */
 data class ReadingSummary(
@@ -113,6 +151,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     private val practiceExamEntryTopicResultDao = targetApplication.database.practiceExamEntryTopicResultDao()
     private val focusSessionDao = targetApplication.database.focusSessionDao()
     private val bookDao = targetApplication.database.bookDao()
+    private val mockExamDao = targetApplication.database.mockExamDao()
 
     // Reading — Focus Timer sessions on a book (the exam/course/topic filters don't apply here).
     private val readingSessions: StateFlow<List<FocusSession>> =
@@ -133,6 +172,14 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
 
     private val allWeakTopics: StateFlow<List<PracticeExamTopicAggregate>> =
         (userId?.let { practiceExamEntryTopicResultDao.getTopicAggregatesForUser(it) } ?: flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val allMockParts: StateFlow<List<MockExamPartStatRow>> =
+        (userId?.let { mockExamDao.getFinishedPartsForUser(it) } ?: flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val allMockTopics: StateFlow<List<MockExamTopicStatRow>> =
+        (userId?.let { mockExamDao.getFinishedTopicResultsForUser(it) } ?: flowOf(emptyList()))
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val examsWithType: StateFlow<List<ExamWithType>> =
@@ -286,6 +333,61 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 )
             }
             .sortedBy { it.accuracyPercent }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Finished denemes in the period, newest first, filtered by exam and course. */
+    val mockExams: StateFlow<List<MockExamStatEntry>> = combine(
+        allMockParts, _selectedExamId, _selectedCourseId, _period,
+    ) { parts, examId, courseId, period ->
+        val filtered = parts.filter { (examId == null || it.examId == examId) && (courseId == null || it.part.courseId == courseId) }
+        windowForPeriod(filtered, period) { it.takenAt }
+            .groupBy { it.part.mockExamId }
+            .map { (id, rows) ->
+                val first = rows.first()
+                val system = first.scoringSystem
+                // Scores only make sense for the whole deneme, so not when one course is picked.
+                val scores = if (system == null || system == ScoringSystem.AYT || courseId != null) emptyList()
+                else netsByTest(rows.map { it.part }).let { nets -> system.scoreTypes().map { it to score(it, nets) } }
+                MockExamStatEntry(
+                    mockExamId = id,
+                    name = first.mockName,
+                    sectionName = first.sectionName,
+                    takenAt = first.takenAt,
+                    durationMinutes = first.durationMinutes,
+                    questions = rows.sumOf { it.part.questionCount },
+                    correct = rows.sumOf { it.part.correctCount },
+                    wrong = rows.sumOf { it.part.wrongCount },
+                    scores = scores,
+                )
+            }
+            .sortedByDescending { it.takenAt }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val mockChartBuckets: StateFlow<List<ChartBucket>> = combine(mockExams, _period) { entries, period ->
+        if (entries.isEmpty()) emptyList() else buildBuckets(entries, period, { it.takenAt }, { it.correct }, { it.wrong })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Topics from deneme topic results / marked questions in the period, most missed (wrong + blank) first. */
+    val mockTopics: StateFlow<List<MockTopicEntry>> = combine(
+        allMockTopics, _selectedExamId, _selectedCourseId, _period,
+    ) { rows, examId, courseId, period ->
+        val filtered = rows.filter { (examId == null || it.examId == examId) && (courseId == null || it.partCourseId == courseId) }
+        windowForPeriod(filtered, period) { it.takenAt }
+            .groupBy { it.topicId }
+            .map { (topicId, list) ->
+                val first = list.first()
+                MockTopicEntry(
+                    topicId = topicId,
+                    topicName = first.topicName,
+                    ownerName = first.courseName ?: first.languageName.orEmpty(),
+                    isCourse = first.courseName != null,
+                    questions = list.sumOf { it.questionCount },
+                    correct = list.sumOf { it.correctCount },
+                    wrong = list.sumOf { it.wrongCount },
+                )
+            }
+            .filter { it.missed > 0 }
+            .sortedByDescending { it.missed }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val readingSummary: StateFlow<ReadingSummary> = combine(readingSessions, books, _period) { sessions, allBooks, period ->

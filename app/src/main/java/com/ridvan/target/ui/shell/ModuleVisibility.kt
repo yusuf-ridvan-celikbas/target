@@ -23,6 +23,7 @@ fun availableStatsSources(modules: Set<AppModule>): List<StatsSource> = buildLis
     if (AppModule.EXAMS_STUDY in modules) {
         add(StatsSource.PRACTICE_SESSIONS)
         add(StatsSource.PRACTICE_EXAMS)
+        add(StatsSource.MOCK_EXAMS)
     }
     if (AppModule.READING in modules) add(StatsSource.READING)
 }

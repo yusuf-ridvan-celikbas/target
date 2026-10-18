@@ -815,6 +815,10 @@
         <item quantity="one">%d test</item>
         <item quantity="other">%d tests</item>
     </plurals>
+    <plurals name="count_mock_exams">
+        <item quantity="one">%d mock exam</item>
+        <item quantity="other">%d mock exams</item>
+    </plurals>
     <plurals name="count_questions">
         <item quantity="one">%d question</item>
         <item quantity="other">%d questions</item>
@@ -1241,6 +1245,27 @@
     <string name="mockexam_start_message">%1$s non-stop. A 10-second get-ready comes first.</string>
     <string name="mockexam_due_title">Time for %1$s. Start now?</string>
     <string name="mockexam_not_now">Not now</string>
+    <string name="mockexam_questions">Questions</string>
+    <string name="mockexam_questions_title">%1$s questions</string>
+    <string name="mockexam_questions_mode_result">Result</string>
+    <string name="mockexam_questions_mode_topic">Topic</string>
+    <string name="question_result_correct">Correct</string>
+    <string name="question_result_wrong">Wrong</string>
+    <string name="question_result_blank">Blank</string>
+    <string name="mockexam_questions_clear">Clear</string>
+    <string name="mockexam_questions_rest_correct">Mark the rest correct</string>
+    <string name="mockexam_questions_no_topic">No topic</string>
+    <string name="mockexam_questions_no_topics">Add topics to this course to tag questions.</string>
+    <string name="mockexam_questions_summary">Correct %1$d · Wrong %2$d · Blank %3$d · Not marked %4$d</string>
+    <string name="mockexam_questions_hint">Pick a brush, then tap questions. This part\'s totals and topic results are counted from your marks.</string>
+    <string name="mockexam_questions_by_topic">By topic</string>
+    <string name="mockexam_questions_topic_row">Wrong %1$d · Blank %2$d · Correct %3$d</string>
+    <string name="mockexam_part_counted_from_questions">Correct and wrong are counted from the marked questions.</string>
+    <string name="stats_source_mock_exams">Mock exams</string>
+    <string name="stats_mock_empty">No finished mock exams in this period.</string>
+    <string name="stats_mock_summary">%1$s · average net %2$s · best net %3$s</string>
+    <string name="stats_mock_topics_title">Where you lose points</string>
+    <string name="stats_mock_list_title">Mock exams</string>
     <string name="mockexam_part_name">Part</string>
     <string name="mockexam_add_part">+ Add part</string>
     <string name="mockexam_named_parts_hint">Name each part (e.g. Reading, Listening) and give its question count.</string>

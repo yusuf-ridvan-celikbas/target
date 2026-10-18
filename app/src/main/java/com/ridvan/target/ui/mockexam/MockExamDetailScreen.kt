@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -62,6 +63,7 @@ import com.ridvan.target.ui.practiceexam.EditTopicResultDialog
 @Composable
 fun MockExamDetailScreen(
     onOpenTimer: (Long) -> Unit,
+    onOpenQuestions: (partId: Long) -> Unit,
     onBack: () -> Unit,
     viewModel: MockExamDetailViewModel = viewModel(),
 ) {
@@ -69,6 +71,7 @@ fun MockExamDetailScreen(
     val parts by viewModel.parts.collectAsStateWithLifecycle()
     val topicResults by viewModel.topicResults.collectAsStateWithLifecycle()
     val tytSource by viewModel.tytSource.collectAsStateWithLifecycle()
+    val countedPartIds by viewModel.countedPartIds.collectAsStateWithLifecycle()
 
     var menuOpen by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
@@ -211,6 +214,11 @@ fun MockExamDetailScreen(
                                 )
                             }
                         },
+                        trailingContent = {
+                            IconButton(onClick = { onOpenQuestions(p.id) }) {
+                                Icon(Icons.Filled.Apps, contentDescription = stringResource(R.string.mockexam_questions))
+                            }
+                        },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         modifier = Modifier.clickable { editingPart = part },
                     )
@@ -255,6 +263,7 @@ fun MockExamDetailScreen(
     editingPart?.let { part ->
         EditPartDialog(
             part = part,
+            countedFromQuestions = part.part.id in countedPartIds,
             onSave = { questions, correct, wrong ->
                 viewModel.updatePart(part.part, questions, correct, wrong)
                 editingPart = null
@@ -379,6 +388,7 @@ private fun NumberField(value: String, onValueChange: (String) -> Unit, label: S
 @Composable
 private fun EditPartDialog(
     part: MockExamPartWithCourse,
+    countedFromQuestions: Boolean,
     onSave: (questionCount: Int, correctCount: Int, wrongCount: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -397,13 +407,19 @@ private fun EditPartDialog(
         text = {
             Column(modifier = Modifier.imePadding().verticalScroll(rememberScrollState())) {
                 NumberField(questionsText, { questionsText = it }, stringResource(R.string.label_question_count))
-                NumberField(
+                if (countedFromQuestions) {
+                    Text(
+                        stringResource(R.string.mockexam_part_counted_from_questions),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                } else NumberField(
                     correctText,
                     { input -> correctText = minOf(input.toIntOrNull() ?: 0, (questions - wrong).coerceAtLeast(0)).toString().takeIf { input.isNotEmpty() }.orEmpty() },
                     stringResource(R.string.label_correct_count),
                     Modifier.padding(top = 8.dp),
                 )
-                NumberField(
+                if (!countedFromQuestions) NumberField(
                     wrongText,
                     { input -> wrongText = minOf(input.toIntOrNull() ?: 0, (questions - correct).coerceAtLeast(0)).toString().takeIf { input.isNotEmpty() }.orEmpty() },
                     stringResource(R.string.label_wrong_count),

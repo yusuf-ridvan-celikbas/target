@@ -803,3 +803,13 @@ val MIGRATION_35_36 = object : Migration(35, 36) {
         db.execSQL("DROP TABLE mock_exam_topic_results_keep")
     }
 }
+
+/** Per-question marks (result + topic) of deneme parts. */
+val MIGRATION_36_37 = object : Migration(36, 37) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `mock_exam_questions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mockExamPartId` INTEGER NOT NULL, `number` INTEGER NOT NULL, `result` TEXT, `topicId` INTEGER, FOREIGN KEY(`mockExamPartId`) REFERENCES `mock_exam_parts`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`topicId`) REFERENCES `topics`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_mock_exam_questions_mockExamPartId` ON `mock_exam_questions` (`mockExamPartId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_mock_exam_questions_topicId` ON `mock_exam_questions` (`topicId`)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_mock_exam_questions_mockExamPartId_number` ON `mock_exam_questions` (`mockExamPartId`, `number`)")
+    }
+}
