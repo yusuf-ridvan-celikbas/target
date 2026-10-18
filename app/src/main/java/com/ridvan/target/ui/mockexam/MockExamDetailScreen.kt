@@ -12,6 +12,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -77,6 +79,7 @@ fun MockExamDetailScreen(
     var showInfoDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showScoringDialog by remember { mutableStateOf(false) }
+    var expandedParts by remember { mutableStateOf(emptySet<Long>()) }
     var showStartConfirm by remember { mutableStateOf(false) }
     var editingPart by remember { mutableStateOf<MockExamPartWithCourse?>(null) }
     var addingTopicsTo by remember { mutableStateOf<MockExamPartWithCourse?>(null) }
@@ -228,16 +231,34 @@ fun MockExamDetailScreen(
                             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
-                                stringResource(R.string.topic_breakdown_section_title),
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier.weight(1f),
-                            )
+                            // Folded by default: a fully tagged part can have dozens of topics.
+                            val expanded = p.id in expandedParts
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable(enabled = partTopics.isNotEmpty()) {
+                                        expandedParts = if (expanded) expandedParts - p.id else expandedParts + p.id
+                                    },
+                            ) {
+                                Text(
+                                    if (partTopics.isEmpty()) stringResource(R.string.topic_breakdown_section_title)
+                                    else stringResource(R.string.mockexam_topics_toggle, partTopics.size),
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                                if (partTopics.isNotEmpty()) {
+                                    Icon(
+                                        if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
                             TextButton(onClick = { addingTopicsTo = part }) {
                                 Text(stringResource(R.string.action_add_topic_breakdown))
                             }
                         }
-                        partTopics.forEach { topic ->
+                        // Most missed (wrong + blank) first.
+                        if (p.id in expandedParts) partTopics.sortedByDescending { it.result.questionCount - it.result.correctCount }.forEach { topic ->
                             ListItem(
                                 headlineContent = { Text(topic.topicName) },
                                 supportingContent = {
