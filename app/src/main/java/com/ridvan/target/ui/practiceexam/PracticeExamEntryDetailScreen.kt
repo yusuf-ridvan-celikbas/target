@@ -290,7 +290,7 @@ private fun EditEntryResultDialog(
 }
 
 @Composable
-private fun AddTopicResultDialog(
+internal fun AddTopicResultDialog(
     availableTopics: List<Topic>,
     onConfirm: (selectedIds: Set<Long>) -> Unit,
     onDismiss: () -> Unit,
@@ -343,14 +343,42 @@ private fun EditTopicResultDialog(
     onDismiss: () -> Unit,
 ) {
     val topicResult = topicResultWithTopic.topicResult
-    var questionCountText by remember { mutableStateOf(topicResult.questionCount.toString()) }
-    var correctText by remember { mutableStateOf(topicResult.correctCount.toString()) }
-    var wrongText by remember { mutableStateOf(topicResult.wrongCount.toString()) }
+    EditTopicResultDialog(
+        topicName = topicResultWithTopic.topicName,
+        questionCount = topicResult.questionCount,
+        correctCount = topicResult.correctCount,
+        wrongCount = topicResult.wrongCount,
+        maxQuestionCount = maxQuestionCount,
+        maxCorrectCount = maxCorrectCount,
+        maxWrongCount = maxWrongCount,
+        onSave = onSave,
+        onRemove = onRemove,
+        onDismiss = onDismiss,
+    )
+}
+
+/** One topic's share of a practice exam (questions, correct, wrong), capped by what's left of the whole. */
+@Composable
+internal fun EditTopicResultDialog(
+    topicName: String,
+    questionCount: Int,
+    correctCount: Int,
+    wrongCount: Int,
+    maxQuestionCount: Int,
+    maxCorrectCount: Int,
+    maxWrongCount: Int,
+    onSave: (questionCount: Int, correctCount: Int, wrongCount: Int) -> Unit,
+    onRemove: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var questionCountText by remember { mutableStateOf(questionCount.toString()) }
+    var correctText by remember { mutableStateOf(correctCount.toString()) }
+    var wrongText by remember { mutableStateOf(wrongCount.toString()) }
 
     AlertDialog(
         properties = FormDialogProperties,
         onDismissRequest = onDismiss,
-        title = { Text(topicResultWithTopic.topicName) },
+        title = { Text(topicName) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(

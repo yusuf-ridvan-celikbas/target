@@ -61,6 +61,14 @@ import com.ridvan.target.data.local.entity.Section
 import com.ridvan.target.ui.common.AddOrEditExamDialog
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.GroupedCard
+import com.ridvan.target.data.local.dao.MockExamSummary
+import com.ridvan.target.ui.common.formatDuration
+import com.ridvan.target.ui.mockexam.MockExamDraft
+import com.ridvan.target.ui.mockexam.mockExamPlannedText
+import com.ridvan.target.data.local.entity.MockExamStatus
+import com.ridvan.target.ui.mockexam.NewMockExamDialog
+import com.ridvan.target.ui.mockexam.formatNet
+import com.ridvan.target.ui.mockexam.mockExamNet
 import com.ridvan.target.ui.common.HelpTooltip
 import com.ridvan.target.ui.common.courseCategoryGroupLabel
 import com.ridvan.target.ui.common.courseDisplayName
@@ -74,9 +82,15 @@ fun ExamDetailScreen(
     onSectionClick: (Long) -> Unit,
     onCourseClick: (Long) -> Unit,
     onLanguageClick: (Long) -> Unit,
+    onMockExamClick: (Long) -> Unit,
+    onMockExamTimerClick: (Long) -> Unit,
     onBack: () -> Unit,
     viewModel: ExamDetailViewModel = viewModel(),
 ) {
+    val mockExams by viewModel.mockExams.collectAsStateWithLifecycle()
+    var mockExamDraft by remember { mutableStateOf<MockExamDraft?>(null) }
+    var mockExamsExpanded by remember { mutableStateOf(true) }
+    val defaultMockExamName = stringResource(R.string.mockexam_default_name)
     val exam by viewModel.exam.collectAsStateWithLifecycle()
     val examTypes by viewModel.examTypes.collectAsStateWithLifecycle()
     val languages by viewModel.languages.collectAsStateWithLifecycle()
@@ -199,6 +213,34 @@ fun ExamDetailScreen(
                 }
             }
 
+            if (!isLanguageExam && currentExam != null && !currentExam.hasSections) {
+                item {
+                    GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                        SectionHeader(
+                            stringResource(R.string.mockexam_section_title),
+                            onAddClick = {
+                                viewModel.loadMockExamDraft({ n -> defaultMockExamName.format(n) }) { mockExamDraft = it }
+                            },
+                            expanded = mockExamsExpanded,
+                            onToggleExpand = { mockExamsExpanded = !mockExamsExpanded },
+                        )
+                        if (mockExamsExpanded) {
+                            if (mockExams.isEmpty()) {
+                                EmptyHint(stringResource(R.string.mockexam_empty))
+                            } else {
+                                mockExams.forEach { summary ->
+                                    MockExamRow(summary, onClick = {
+                                        val id = summary.mockExam.id
+                                        if (summary.mockExam.status == MockExamStatus.RUNNING) onMockExamTimerClick(id) else onMockExamClick(id)
+                                    })
+                                    HorizontalDivider()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             if (exam?.hasSections == true) {
                 item {
                     GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
@@ -234,6 +276,22 @@ fun ExamDetailScreen(
                 showEditDialog = false
             },
             onDismiss = { showEditDialog = false },
+        )
+    }
+
+    mockExamDraft?.let { draft ->
+        NewMockExamDialog(
+            courses = courses,
+            draft = draft,
+            onSave = { name, publisher, limit, counts, scheduledAt ->
+                mockExamDraft = null
+                viewModel.createMockExam(name, publisher, limit, counts, alreadyTaken = false, scheduledAt = scheduledAt, onCreated = onMockExamClick)
+            },
+            onAlreadyTaken = { name, publisher, limit, counts ->
+                mockExamDraft = null
+                viewModel.createMockExam(name, publisher, limit, counts, alreadyTaken = true, scheduledAt = null, onCreated = onMockExamClick)
+            },
+            onDismiss = { mockExamDraft = null },
         )
     }
 
@@ -387,6 +445,31 @@ private fun CourseRow(course: ExamCourseWithCourse, onClick: () -> Unit, onRemov
             IconButton(onClick = onRemove) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_course))
             }
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = Modifier.clickable(onClick = onClick),
+    )
+}
+
+@Composable
+private fun MockExamRow(summary: MockExamSummary, onClick: () -> Unit) {
+    val mock = summary.mockExam
+    ListItem(
+        headlineContent = { Text(mock.name) },
+        supportingContent = {
+            Text(
+                when (mock.status) {
+                    MockExamStatus.RUNNING -> stringResource(R.string.mockexam_in_progress)
+                    MockExamStatus.PLANNED -> mockExamPlannedText(mock.scheduledAt)
+                    MockExamStatus.FINISHED ->
+                    stringResource(
+                        R.string.mockexam_row_summary,
+                        formatDate(mock.takenAt),
+                        formatNet(mockExamNet(summary.correctCount, summary.wrongCount)),
+                        formatDuration(mock.durationMinutes),
+                    )
+                }
+            )
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(onClick = onClick),

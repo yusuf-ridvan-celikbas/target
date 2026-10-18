@@ -21,6 +21,11 @@ import com.ridvan.target.data.local.entity.ExamCourse
 import com.ridvan.target.data.local.entity.ExamType
 import com.ridvan.target.data.local.entity.Language
 import com.ridvan.target.data.local.entity.Section
+import com.ridvan.target.data.local.entity.MockExam
+import com.ridvan.target.data.local.entity.MockExamPart
+import com.ridvan.target.data.local.entity.MockExamStatus
+import com.ridvan.target.data.local.dao.MockExamSummary
+import com.ridvan.target.ui.mockexam.MockExamDraft
 import com.ridvan.target.ui.navigation.ExamDetailRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +56,64 @@ class ExamDetailViewModel(
     private val topicDao = database.topicDao()
     private val practiceLogDao = database.practiceLogDao()
     private val userId = targetApplication.preferences.currentUserId
+    private val mockExamDao = database.mockExamDao()
+
+    val mockExams: StateFlow<List<MockExamSummary>> = mockExamDao.getSummariesByExam(examId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Prefill for a new deneme: the last one's publisher, limit and question counts. */
+    fun loadMockExamDraft(defaultName: (Int) -> String, onResult: (MockExamDraft) -> Unit) {
+        viewModelScope.launch {
+            val latest = mockExamDao.getLatest(examId)
+            val counts = mockExamDao.getLatestParts(examId).associate { it.courseId to it.questionCount }
+            onResult(
+                MockExamDraft(
+                    name = defaultName(mockExams.value.size + 1),
+                    publisher = latest?.publisher.orEmpty(),
+                    timeLimitMinutes = latest?.timeLimitMinutes,
+                    questionCounts = counts,
+                )
+            )
+        }
+    }
+
+    /** Creates the deneme: planned (started later from its page, optionally at [scheduledAt]) or already taken. */
+    fun createMockExam(
+        name: String,
+        publisher: String,
+        timeLimitMinutes: Int,
+        counts: Map<Long, Int>,
+        alreadyTaken: Boolean,
+        scheduledAt: Long?,
+        onCreated: (Long) -> Unit,
+    ) {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty() || timeLimitMinutes <= 0 || counts.isEmpty()) return
+        viewModelScope.launch {
+            val now = System.currentTimeMillis()
+            val order = courses.value.map { it.examCourse.courseId }
+            val parts = counts.entries
+                .sortedBy { order.indexOf(it.key) }
+                .mapIndexed { index, (courseId, count) ->
+                    MockExamPart(mockExamId = 0, courseId = courseId, questionCount = count, orderIndex = index)
+                }
+            val id = mockExamDao.insertWithParts(
+                MockExam(
+                    examId = examId,
+                    name = trimmed,
+                    publisher = publisher.trim().ifEmpty { null },
+                    timeLimitMinutes = timeLimitMinutes,
+                    durationMinutes = if (alreadyTaken) timeLimitMinutes else 0,
+                    takenAt = now,
+                    finishedAt = if (alreadyTaken) now else null,
+                    status = if (alreadyTaken) MockExamStatus.FINISHED else MockExamStatus.PLANNED,
+                    scheduledAt = if (alreadyTaken) null else scheduledAt,
+                ),
+                parts,
+            )
+            onCreated(id)
+        }
+    }
 
     val exam: StateFlow<Exam?> = examDao.getById(examId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

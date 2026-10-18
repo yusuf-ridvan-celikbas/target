@@ -88,8 +88,11 @@ import com.ridvan.target.data.local.entity.User
         com.ridvan.target.data.local.entity.WorkoutExercise::class,
         com.ridvan.target.data.local.entity.WorkoutSet::class,
         com.ridvan.target.data.local.entity.SportGoal::class,
+        com.ridvan.target.data.local.entity.MockExam::class,
+        com.ridvan.target.data.local.entity.MockExamPart::class,
+        com.ridvan.target.data.local.entity.MockExamTopicResult::class,
     ],
-    version = 32,
+    version = 34,
     exportSchema = true,
 )
 abstract class TargetDatabase : RoomDatabase() {
@@ -120,6 +123,7 @@ abstract class TargetDatabase : RoomDatabase() {
     abstract fun tripPackingTemplateDao(): com.ridvan.target.data.local.dao.TripPackingTemplateDao
     abstract fun routineDao(): com.ridvan.target.data.local.dao.RoutineDao
     abstract fun workoutDao(): com.ridvan.target.data.local.dao.WorkoutDao
+    abstract fun mockExamDao(): com.ridvan.target.data.local.dao.MockExamDao
 
     companion object {
         @Volatile
@@ -131,7 +135,7 @@ abstract class TargetDatabase : RoomDatabase() {
                     context.applicationContext,
                     TargetDatabase::class.java,
                     "target.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34).build().also { INSTANCE = it }
             }
     }
 }

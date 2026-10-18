@@ -144,6 +144,8 @@ object NotificationScheduler {
         val notificationId: Int,
         val title: String,
         val body: String,
+        /** Tapping opens Target (where a due deneme asks to start). */
+        val opensApp: Boolean = false,
     )
 
     private suspend fun buildCandidates(app: TargetApplication, userId: Long): List<ReminderCandidate> {
@@ -205,7 +207,7 @@ object NotificationScheduler {
         val modules = parseModules(database.userDao().getById(userId).first()?.enabledModules)
         val planner = AppModule.PLANNER_ROUTINES in modules
         return (if (planner) eventCandidates else emptyList()) +
-            (if (AppModule.EXAMS_STUDY in modules) examCandidates + sectionCandidates else emptyList()) +
+            (if (AppModule.EXAMS_STUDY in modules) examCandidates + sectionCandidates + mockExamCandidates(app, userId, strings) else emptyList()) +
             (if (AppModule.READING in modules) readingCandidates(app, userId, today, zone, strings) else emptyList()) +
             (if (AppModule.TRIPS in modules) tripCandidates(app, userId, today, horizonEnd, leadMinutes, zone, strings) else emptyList()) +
             (if (planner) routineCandidates(app, userId, today, leadMinutes, zone, strings) else emptyList())
@@ -349,6 +351,19 @@ object NotificationScheduler {
         }
     }
 
+    /** A planned deneme rings at its exact start time (no lead time: the in-app prompt asks to start it). */
+    private suspend fun mockExamCandidates(app: TargetApplication, userId: Long, strings: Context): List<ReminderCandidate> =
+        app.database.mockExamDao().getScheduledForUser(userId).first().mapNotNull { mock ->
+            val at = mock.scheduledAt ?: return@mapNotNull null
+            ReminderCandidate(
+                whenInstant = Instant.ofEpochMilli(at),
+                notificationId = notificationId("mock_exam", mock.id, at / 60_000),
+                title = strings.getString(R.string.notif_mock_exam_title, mock.name),
+                body = strings.getString(R.string.notif_mock_exam_body),
+                opensApp = true,
+            )
+        }
+
     private fun reminderInstant(date: LocalDate, minuteOfDay: Int?, leadMinutes: Int, zone: ZoneId): Instant =
         if (minuteOfDay != null) {
             date.atStartOfDay(zone).plusMinutes(minuteOfDay.toLong()).minusMinutes(leadMinutes.toLong()).toInstant()
@@ -375,6 +390,15 @@ object NotificationScheduler {
             .setContentText(candidate.body)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .apply {
+                if (candidate.opensApp) {
+                    context.packageManager.getLaunchIntentForPackage(context.packageName)?.let { launch ->
+                        setContentIntent(
+                            PendingIntent.getActivity(context, candidate.notificationId, launch, PendingIntent.FLAG_IMMUTABLE)
+                        )
+                    }
+                }
+            }
             .build()
         NotificationManagerCompat.from(context).notify(candidate.notificationId, notification)
     }

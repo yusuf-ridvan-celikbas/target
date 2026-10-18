@@ -713,3 +713,28 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_sport_goals_userId` ON `sport_goals` (`userId`)")
     }
 }
+
+/** Combined mock exams ("deneme"): one timed sitting across an exam's courses, results per course and topic. */
+val MIGRATION_32_33 = object : Migration(32, 33) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `mock_exams` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `examId` INTEGER NOT NULL, `name` TEXT NOT NULL, `publisher` TEXT, `timeLimitMinutes` INTEGER NOT NULL, `durationMinutes` INTEGER NOT NULL, `takenAt` INTEGER NOT NULL, `finishedAt` INTEGER, FOREIGN KEY(`examId`) REFERENCES `exams`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_mock_exams_examId` ON `mock_exams` (`examId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `mock_exam_parts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mockExamId` INTEGER NOT NULL, `courseId` INTEGER NOT NULL, `questionCount` INTEGER NOT NULL, `correctCount` INTEGER NOT NULL, `wrongCount` INTEGER NOT NULL, `orderIndex` INTEGER NOT NULL, FOREIGN KEY(`mockExamId`) REFERENCES `mock_exams`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`courseId`) REFERENCES `courses`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_mock_exam_parts_mockExamId` ON `mock_exam_parts` (`mockExamId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_mock_exam_parts_courseId` ON `mock_exam_parts` (`courseId`)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_mock_exam_parts_mockExamId_courseId` ON `mock_exam_parts` (`mockExamId`, `courseId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `mock_exam_topic_results` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mockExamPartId` INTEGER NOT NULL, `topicId` INTEGER NOT NULL, `questionCount` INTEGER NOT NULL, `correctCount` INTEGER NOT NULL, `wrongCount` INTEGER NOT NULL, FOREIGN KEY(`mockExamPartId`) REFERENCES `mock_exam_parts`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`topicId`) REFERENCES `topics`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_mock_exam_topic_results_mockExamPartId` ON `mock_exam_topic_results` (`mockExamPartId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_mock_exam_topic_results_topicId` ON `mock_exam_topic_results` (`topicId`)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_mock_exam_topic_results_mockExamPartId_topicId` ON `mock_exam_topic_results` (`mockExamPartId`, `topicId`)")
+    }
+}
+
+/** Mock exams can be planned (optional start date/time) and started later from their page. */
+val MIGRATION_33_34 = object : Migration(33, 34) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE mock_exams ADD COLUMN status TEXT NOT NULL DEFAULT 'FINISHED'")
+        db.execSQL("ALTER TABLE mock_exams ADD COLUMN scheduledAt INTEGER")
+        db.execSQL("UPDATE mock_exams SET status = 'RUNNING' WHERE finishedAt IS NULL")
+    }
+}

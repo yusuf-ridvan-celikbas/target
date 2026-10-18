@@ -18,6 +18,10 @@ import com.ridvan.target.ui.courselist.CourseListByTypeScreen
 import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.coursedetail.CourseDetailScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
+import com.ridvan.target.ui.mockexam.MockExamDetailScreen
+import com.ridvan.target.ui.mockexam.MockExamDuePrompt
+import androidx.navigation.NavDestination.Companion.hasRoute
+import com.ridvan.target.ui.mockexam.MockExamTimerScreen
 import com.ridvan.target.ui.examlist.ExamListScreen
 import com.ridvan.target.ui.focustimer.FocusHistoryHomeScreen
 import com.ridvan.target.ui.focustimer.FocusHistoryScreen
@@ -210,6 +214,30 @@ fun TargetNavHost() {
                 onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
                 onCourseClick = { courseId -> navController.navigate(CourseDetailRoute(courseId)) },
                 onLanguageClick = { languageId -> navController.navigate(LanguageDetailRoute(languageId)) },
+                onMockExamClick = { id -> navController.navigate(MockExamDetailRoute(id)) },
+                onMockExamTimerClick = { id -> navController.navigate(MockExamTimerRoute(id)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<MockExamTimerRoute> {
+            MockExamTimerScreen(
+                onFinished = { id ->
+                    // Started from the deneme's own page: go back to it rather than stacking a second copy.
+                    val fromDetail = navController.previousBackStackEntry?.destination?.hasRoute<MockExamDetailRoute>() == true
+                    if (fromDetail) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(MockExamDetailRoute(id)) {
+                            popUpTo<MockExamTimerRoute> { inclusive = true }
+                        }
+                    }
+                },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<MockExamDetailRoute> {
+            MockExamDetailScreen(
+                onOpenTimer = { id -> navController.navigate(MockExamTimerRoute(id)) },
                 onBack = { navController.popBackStack() },
             )
         }
@@ -490,4 +518,6 @@ fun TargetNavHost() {
             )
         }
     }
+
+    MockExamDuePrompt(onStart = { id -> navController.navigate(MockExamTimerRoute(id)) })
 }
