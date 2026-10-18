@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.AddCard
 import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -87,6 +89,8 @@ private fun HomeShortcut.icon(): ImageVector = when (this) {
     HomeShortcut.TRIP -> Icons.Filled.Flight
     HomeShortcut.SPORTS -> Icons.Filled.FitnessCenter
     HomeShortcut.LIVE_WORKOUT -> Icons.AutoMirrored.Filled.DirectionsRun
+    HomeShortcut.MONEY -> Icons.Filled.AccountBalanceWallet
+    HomeShortcut.ADD_EXPENSE -> Icons.Filled.AddCard
 }
 
 @Composable
@@ -110,6 +114,8 @@ private fun shortcutName(shortcut: HomeShortcut): String = stringResource(
         HomeShortcut.TRIP -> R.string.home_shortcut_trip
         HomeShortcut.SPORTS -> R.string.home_shortcut_sports
         HomeShortcut.LIVE_WORKOUT -> R.string.home_shortcut_live_workout
+        HomeShortcut.MONEY -> R.string.label_money
+        HomeShortcut.ADD_EXPENSE -> R.string.home_shortcut_add_expense
     }
 )
 
@@ -122,6 +128,7 @@ private fun cardName(card: HomeCard): String = stringResource(
         HomeCard.TODAY_SO_FAR -> R.string.home_card_today_so_far
         HomeCard.WORK_ON_NEXT -> R.string.home_card_work_on_next
         HomeCard.QUICK_START -> R.string.home_card_quick_start
+        HomeCard.MONEY_MONTH -> R.string.home_card_money
     }
 )
 
@@ -263,6 +270,7 @@ private val SHORTCUT_GROUPS = listOf(
         HomeShortcut.PLANNER, HomeShortcut.ROUTINES, HomeShortcut.ROUTINE, HomeShortcut.TRIPS, HomeShortcut.TRIP,
     ),
     R.string.home_add_group_sports to listOf(HomeShortcut.SPORTS, HomeShortcut.LIVE_WORKOUT),
+    R.string.label_money to listOf(HomeShortcut.MONEY, HomeShortcut.ADD_EXPENSE),
 )
 
 /** Cards not on Home yet, then shortcuts by area; item shortcuts ask which item next. */

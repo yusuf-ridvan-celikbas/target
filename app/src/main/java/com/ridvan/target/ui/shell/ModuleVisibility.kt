@@ -11,7 +11,7 @@ import com.ridvan.target.ui.statistics.StatsSource
 fun ShellTab.isVisible(modules: Set<AppModule>): Boolean = when (this) {
     ShellTab.HOME -> true
     ShellTab.STUDY -> AppModule.EXAMS_STUDY in modules
-    ShellTab.PLAN -> AppModule.PLANNER_ROUTINES in modules || AppModule.TRIPS in modules
+    ShellTab.PLAN -> AppModule.PLANNER_ROUTINES in modules || AppModule.TRIPS in modules || AppModule.MONEY in modules
     ShellTab.FOCUS -> AppModule.FOCUS in modules || AppModule.READING in modules || AppModule.SPORTS in modules
     ShellTab.STATS -> AppModule.EXAMS_STUDY in modules || AppModule.READING in modules
 }

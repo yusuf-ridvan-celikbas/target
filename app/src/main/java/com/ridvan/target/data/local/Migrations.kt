@@ -820,3 +820,24 @@ val MIGRATION_37_38 = object : Migration(37, 38) {
         db.execSQL("ALTER TABLE users ADD COLUMN homeLayout TEXT")
     }
 }
+
+/** Money module: categories, entries, budgets, recurring items, savings goals; account currency. */
+val MIGRATION_38_39 = object : Migration(38, 39) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN moneyCurrency TEXT")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `money_categories` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `kind` TEXT NOT NULL, `systemKey` TEXT, `name` TEXT, `isHidden` INTEGER NOT NULL, `orderIndex` INTEGER NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_categories_userId` ON `money_categories` (`userId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `money_recurring` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `kind` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `categoryId` INTEGER, `note` TEXT, `dayOfMonth` INTEGER NOT NULL, `startMonth` INTEGER NOT NULL, `isActive` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`categoryId`) REFERENCES `money_categories`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_recurring_userId` ON `money_recurring` (`userId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_recurring_categoryId` ON `money_recurring` (`categoryId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `money_entries` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `kind` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, `categoryId` INTEGER, `note` TEXT, `date` INTEGER NOT NULL, `recurringId` INTEGER, `createdAt` INTEGER NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`categoryId`) REFERENCES `money_categories`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`recurringId`) REFERENCES `money_recurring`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_entries_userId` ON `money_entries` (`userId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_entries_categoryId` ON `money_entries` (`categoryId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_entries_recurringId` ON `money_entries` (`recurringId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `money_budgets` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `categoryId` INTEGER, `amountMinor` INTEGER NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`categoryId`) REFERENCES `money_categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_budgets_userId` ON `money_budgets` (`userId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_budgets_categoryId` ON `money_budgets` (`categoryId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `money_goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `name` TEXT NOT NULL, `targetMinor` INTEGER NOT NULL, `savedMinor` INTEGER NOT NULL, `deadline` INTEGER, `createdAt` INTEGER NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_goals_userId` ON `money_goals` (`userId`)")
+    }
+}

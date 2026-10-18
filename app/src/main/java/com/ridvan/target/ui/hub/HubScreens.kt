@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Topic
@@ -78,6 +79,7 @@ fun PlanHubScreen(shellNavigation: ShellNavigation) {
     val modules = rememberEnabledModules()
     val planner = AppModule.PLANNER_ROUTINES in modules
     val trips = AppModule.TRIPS in modules
+    val money = AppModule.MONEY in modules
     HubPage(
         navigation = shellNavigation,
         destination = ShellDestination.PLAN_HUB,
@@ -87,6 +89,7 @@ fun PlanHubScreen(shellNavigation: ShellNavigation) {
                 HubEntry(R.string.label_planner, R.string.hub_planner_hint, Icons.Filled.CalendarMonth, shellNavigation.onNavigatePlanner).takeIf { planner },
                 HubEntry(R.string.label_trips, R.string.hub_trips_hint, Icons.Filled.Luggage, shellNavigation.onNavigateTrips).takeIf { trips },
                 HubEntry(R.string.label_routines, R.string.hub_routines_hint, Icons.Filled.Checklist, shellNavigation.onNavigateRoutines).takeIf { planner },
+                HubEntry(R.string.label_money, R.string.hub_money_hint, Icons.Filled.AccountBalanceWallet, shellNavigation.onNavigateMoney).takeIf { money },
             ),
         ),
     )

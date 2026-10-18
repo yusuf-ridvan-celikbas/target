@@ -112,6 +112,7 @@ fun TargetNavHost() {
         onNavigateStudyHistory = { push(FocusHistoryHomeRoute) },
         onNavigateReading = { push(ReadingRoute) },
         onNavigateSports = { push(SportsRoute) },
+        onNavigateMoney = { push(MoneyRoute) },
         onNavigateHelp = { push(HelpRoute) },
         onNavigateMyAccount = { push(MyAccountRoute) },
         onNavigateSettings = { push(SettingsRoute) },
@@ -156,6 +157,7 @@ fun TargetNavHost() {
                 onOpenReading = shellNavigation.onNavigateReading,
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
                 onRoutineClick = { routineId -> navController.navigate(RoutineDetailRoute(routineId)) },
+                onOpenMoney = shellNavigation.onNavigateMoney,
                 onShortcut = { item ->
                     val id = item.targetId ?: 0L
                     when (item.shortcut) {
@@ -177,6 +179,8 @@ fun TargetNavHost() {
                         HomeShortcut.TRIP -> navController.navigate(TripDetailRoute(id))
                         HomeShortcut.SPORTS -> shellNavigation.onNavigateSports()
                         HomeShortcut.LIVE_WORKOUT -> navController.navigate(LiveWorkoutRoute)
+                        HomeShortcut.MONEY -> shellNavigation.onNavigateMoney()
+                        HomeShortcut.ADD_EXPENSE -> navController.navigate(MoneyRoute(addExpense = true))
                     }
                 },
             )
@@ -212,6 +216,12 @@ fun TargetNavHost() {
         }
         composable<TripListRoute> {
             TripListScreen(
+                shellNavigation = shellNavigation,
+                onTripClick = { tripId -> navController.navigate(TripDetailRoute(tripId)) },
+            )
+        }
+        composable<MoneyRoute> {
+            com.ridvan.target.ui.money.MoneyScreen(
                 shellNavigation = shellNavigation,
                 onTripClick = { tripId -> navController.navigate(TripDetailRoute(tripId)) },
             )

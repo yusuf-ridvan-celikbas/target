@@ -207,7 +207,7 @@ private fun CheckRow(label: String, checked: Boolean, onChange: (Boolean) -> Uni
 
 /** Button showing the chosen currency ("EUR · Euro · €"); opens a searchable list of every currency. */
 @Composable
-private fun CurrencyField(code: String, onSelect: (String) -> Unit) {
+fun CurrencyField(code: String, onSelect: (String) -> Unit) {
     var open by remember { mutableStateOf(false) }
     val options = remember { currencyOptions() }
     OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) {

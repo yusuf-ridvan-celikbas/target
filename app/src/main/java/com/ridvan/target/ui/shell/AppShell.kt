@@ -60,6 +60,7 @@ data class ShellNavigation(
     val onNavigateStudyHistory: () -> Unit,
     val onNavigateReading: () -> Unit,
     val onNavigateSports: () -> Unit,
+    val onNavigateMoney: () -> Unit,
     val onNavigateHelp: () -> Unit,
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -74,7 +75,7 @@ data class ShellNavigation(
 
 enum class ShellDestination {
     HOME, STUDY_HUB, FOCUS_HUB, PLAN_HUB, TRIPS, ROUTINES, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER,
-    FOCUS_TIMER, FLOW_TIMER, STUDY_HISTORY, READING, SPORTS, HELP, MY_ACCOUNT, SETTINGS, OTHER
+    FOCUS_TIMER, FLOW_TIMER, STUDY_HISTORY, READING, SPORTS, MONEY, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 /**
@@ -90,7 +91,7 @@ enum class ShellTab(val root: ShellDestination, val pages: Set<ShellDestination>
             ShellDestination.TOPICS, ShellDestination.LANGUAGES,
         ),
     ),
-    PLAN(ShellDestination.PLAN_HUB, setOf(ShellDestination.PLANNER, ShellDestination.TRIPS, ShellDestination.ROUTINES)),
+    PLAN(ShellDestination.PLAN_HUB, setOf(ShellDestination.PLANNER, ShellDestination.TRIPS, ShellDestination.ROUTINES, ShellDestination.MONEY)),
     FOCUS(
         ShellDestination.FOCUS_HUB,
         setOf(

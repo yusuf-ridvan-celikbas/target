@@ -26,4 +26,6 @@ data class User(
     val recoverySalt: String? = null,
     /** Home's cards and shortcuts in order (see HomeLayout.kt); null = the default Home. */
     val homeLayout: String? = null,
+    /** ISO currency of the Money module (null until chosen; the device currency is offered). */
+    val moneyCurrency: String? = null,
 )

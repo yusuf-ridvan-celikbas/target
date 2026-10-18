@@ -1,7 +1,7 @@
 package com.ridvan.target.data.modules
 
 /** The parts of the app an account can switch on or off. Home, Settings, Help and My Account are always on. */
-enum class AppModule { EXAMS_STUDY, PLANNER_ROUTINES, FOCUS, READING, TRIPS, SPORTS }
+enum class AppModule { EXAMS_STUDY, PLANNER_ROUTINES, FOCUS, READING, TRIPS, SPORTS, MONEY }
 
 val ALL_MODULES: Set<AppModule> = AppModule.entries.toSet()
 

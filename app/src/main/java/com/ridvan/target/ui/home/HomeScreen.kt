@@ -97,10 +97,12 @@ fun HomeScreen(
     onTopicClick: (Long) -> Unit,
     onRoutineClick: (Long) -> Unit,
     onShortcut: (HomeItem.Shortcut) -> Unit,
+    onOpenMoney: () -> Unit,
     viewModel: HomeViewModel = viewModel(),
 ) {
     val homeLayout by viewModel.homeLayout.collectAsStateWithLifecycle()
     val shortcutTargets by viewModel.shortcutTargets.collectAsStateWithLifecycle()
+    val money by viewModel.money.collectAsStateWithLifecycle()
     var editing by rememberSaveable { mutableStateOf(false) }
     val todaysRoutines by viewModel.todaysRoutines.collectAsStateWithLifecycle()
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
@@ -235,6 +237,7 @@ fun HomeScreen(
                         })
                     }
                     HomeCard.QUICK_START -> QuickStartCard(shellNavigation.onNavigateFocusTimer, shellNavigation.onNavigateFlowTimer)
+                    HomeCard.MONEY_MONTH -> money?.let { MoneyMonthCard(it, onOpenMoney) }
                 }
             }
         }
@@ -649,6 +652,34 @@ private fun ReadingSection(
                         modifier = Modifier.padding(top = 6.dp),
                     )
                 }
+            }
+        }
+    }
+}
+
+/** This month in Money: spent, income and (with a budget) what's left; tap opens Money. */
+@Composable
+private fun MoneyMonthCard(money: HomeMoney, onOpen: () -> Unit) {
+    GroupedCard {
+        Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onOpen).padding(16.dp)) {
+            Text(stringResource(R.string.home_card_money), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(
+                    R.string.home_money_line,
+                    com.ridvan.target.ui.trips.formatMoney(money.spentMinor, money.currency),
+                    com.ridvan.target.ui.trips.formatMoney(money.incomeMinor, money.currency),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            money.budgetMinor?.let { budget ->
+                val left = budget - money.spentMinor
+                Text(
+                    if (left >= 0) stringResource(R.string.money_budget_left, com.ridvan.target.ui.trips.formatMoney(left, money.currency), com.ridvan.target.ui.trips.formatMoney(budget, money.currency))
+                    else stringResource(R.string.money_budget_over, com.ridvan.target.ui.trips.formatMoney(-left, money.currency), com.ridvan.target.ui.trips.formatMoney(budget, money.currency)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (left < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }

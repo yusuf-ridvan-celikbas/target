@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -53,6 +54,7 @@ private val moduleInfos = listOf(
     ModuleInfo(AppModule.READING, R.string.module_reading, R.string.module_reading_hint, Icons.Filled.AutoStories),
     ModuleInfo(AppModule.TRIPS, R.string.module_trips, R.string.module_trips_hint, Icons.Filled.Luggage),
     ModuleInfo(AppModule.SPORTS, R.string.module_sports, R.string.module_sports_hint, Icons.Filled.FitnessCenter),
+    ModuleInfo(AppModule.MONEY, R.string.module_money, R.string.module_money_hint, Icons.Filled.AccountBalanceWallet),
 )
 
 /**

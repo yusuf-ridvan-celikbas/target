@@ -48,6 +48,9 @@ data class HomeSports(val todayCount: Int, val todayMinutes: Int, val goals: Lis
 
 data class HomeGoalLine(val goal: com.ridvan.target.data.local.entity.SportGoal, val progress: com.ridvan.target.ui.sports.GoalProgress)
 
+/** This month in Money (null when Money has no currency yet). */
+data class HomeMoney(val currency: String, val spentMinor: Long, val incomeMinor: Long, val budgetMinor: Long?)
+
 data class TodayRoutine(val routine: com.ridvan.target.data.local.entity.Routine, val progress: RoutineProgress)
 
 data class UpcomingEvent(
@@ -101,6 +104,28 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    val money: StateFlow<HomeMoney?> = run {
+        val dao = targetApplication.database.moneyDao()
+        if (userId == null) flowOf(null)
+        else combine(currentUser, dao.getEntries(userId), dao.getBudgets(userId), dao.getTripExpenses(userId)) { user, entries, budgets, trips ->
+            val code = user?.moneyCurrency ?: return@combine null
+            val key = com.ridvan.target.ui.money.monthKeyOf(System.currentTimeMillis())
+            val from = com.ridvan.target.ui.money.monthStart(key)
+            val to = com.ridvan.target.ui.money.monthStart(key + 1)
+            val inMonth = entries.filter { it.date in from until to }
+            val tripSpent = trips.filter { it.expense.date in from until to }.sumOf {
+                com.ridvan.target.ui.money.tripAmountInMoneyCurrency(it.expense.amountMinor, it.tripCurrency, it.homeCurrency, it.exchangeRate, code) ?: 0L
+            }
+            val categoryBudgets = budgets.filter { it.categoryId != null }.associate { it.categoryId!! to it.amountMinor }
+            HomeMoney(
+                currency = code,
+                spentMinor = inMonth.filter { it.kind == com.ridvan.target.data.local.entity.MoneyKind.EXPENSE }.sumOf { it.amountMinor } + tripSpent,
+                incomeMinor = inMonth.filter { it.kind == com.ridvan.target.data.local.entity.MoneyKind.INCOME }.sumOf { it.amountMinor },
+                budgetMinor = com.ridvan.target.ui.money.totalBudget(categoryBudgets, budgets.firstOrNull { it.categoryId == null }?.amountMinor),
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun saveHomeLayout(items: List<HomeItem>) {
         val id = userId ?: return
