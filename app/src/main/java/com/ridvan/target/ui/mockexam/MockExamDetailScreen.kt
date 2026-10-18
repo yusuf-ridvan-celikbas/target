@@ -278,8 +278,8 @@ fun MockExamDetailScreen(
         val added = topicResults.filter { it.result.mockExamPartId == part.part.id }.map { it.result.topicId }.toSet()
         AddTopicResultDialog(
             availableTopics = allTopics.filterNot { it.id in added },
-            onConfirm = { ids ->
-                viewModel.addTopicResults(part.part.id, ids)
+            onConfirm = { ids, newNames ->
+                viewModel.addTopicResults(part.part.id, part.part.courseId, ids, newNames)
                 addingTopicsTo = null
             },
             onDismiss = { addingTopicsTo = null },

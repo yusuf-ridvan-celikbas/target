@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.topicIdForName
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PracticeExamEntryDetailViewModel(
@@ -72,10 +73,14 @@ class PracticeExamEntryDetailViewModel(
         }
     }
 
-    fun addTopicResults(topicIds: Set<Long>) {
-        if (topicIds.isEmpty()) return
+    /** Adds topic rows for [topicIds] plus [newNames] (new topics of the resource's course or language). */
+    fun addTopicResults(topicIds: Set<Long>, newNames: List<String> = emptyList()) {
+        if (topicIds.isEmpty() && newNames.isEmpty()) return
         viewModelScope.launch {
-            topicIds.forEach { topicId ->
+            val resource = studyResource.value
+            val created = if (resource == null) emptyList()
+            else newNames.map { topicIdForName(topicDao, it, resource.courseId, resource.languageId) }
+            (topicIds + created).forEach { topicId ->
                 if (topicResults.value.none { it.topicResult.topicId == topicId }) {
                     practiceExamEntryTopicResultDao.insert(
                         PracticeExamEntryTopicResult(

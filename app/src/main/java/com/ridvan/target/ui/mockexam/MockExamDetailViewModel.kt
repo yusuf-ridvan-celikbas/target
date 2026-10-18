@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.topicIdForName
 
 class MockExamDetailViewModel(
     application: Application,
@@ -102,10 +103,12 @@ class MockExamDetailViewModel(
         }
     }
 
-    fun addTopicResults(partId: Long, topicIds: Set<Long>) {
+    /** Adds topic rows for [topicIds] plus [newNames] (new topics of the part's course). */
+    fun addTopicResults(partId: Long, courseId: Long?, topicIds: Set<Long>, newNames: List<String>) {
         viewModelScope.launch {
             val existing = topicResults.value.filter { it.result.mockExamPartId == partId }.map { it.result.topicId }.toSet()
-            topicIds.filterNot { it in existing }.forEach { topicId ->
+            val created = if (courseId == null) emptyList() else newNames.map { topicIdForName(topicDao, it, courseId, null) }
+            (topicIds + created).filterNot { it in existing }.forEach { topicId ->
                 mockExamDao.insertTopicResult(
                     MockExamTopicResult(mockExamPartId = partId, topicId = topicId, questionCount = 0, correctCount = 0, wrongCount = 0)
                 )

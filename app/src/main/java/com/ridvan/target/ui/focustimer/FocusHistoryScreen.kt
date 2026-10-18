@@ -323,7 +323,7 @@ private fun FocusHistoryBody(
 
     if (showManualDialog) {
         FocusManualSessionDialog(
-            linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
+            linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books, viewModel::createTopic),
             initialCourseId = viewModel.scopeCourseId,
             initialLanguageId = viewModel.scopeLanguageId,
             onConfirm = {

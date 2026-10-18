@@ -54,6 +54,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.TopicSearchChecklist
 import com.ridvan.target.ui.common.countText
 import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.StudyResourceTopicWithProgress
@@ -190,9 +191,8 @@ fun StudyResourceDetailScreen(
     if (showAddTopicDialog) {
         AddTopicDialog(
             availableTopics = availableTopicsToAdd,
-            onConfirm = { name, selectedIds ->
-                if (name.isNotBlank()) viewModel.addTopic(name)
-                if (selectedIds.isNotEmpty()) viewModel.addExistingTopics(selectedIds)
+            onConfirm = { newNames, selectedIds ->
+                viewModel.addTopics(newNames, selectedIds)
                 showAddTopicDialog = false
             },
             onDismiss = { showAddTopicDialog = false },
@@ -462,10 +462,10 @@ private fun TopicRow(
 @Composable
 private fun AddTopicDialog(
     availableTopics: List<Topic>,
-    onConfirm: (newName: String, selectedIds: Set<Long>) -> Unit,
+    onConfirm: (newNames: List<String>, selectedIds: Set<Long>) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var name by remember { mutableStateOf("") }
+    var newNames by remember { mutableStateOf(emptyList<String>()) }
     var selected by remember { mutableStateOf(emptySet<Long>()) }
     AlertDialog(
         properties = FormDialogProperties,
@@ -473,41 +473,20 @@ private fun AddTopicDialog(
         title = { Text(stringResource(R.string.dialog_add_topic_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.label_new_topic_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                TopicSearchChecklist(
+                    topics = availableTopics,
+                    selectedIds = selected,
+                    onToggle = { id -> selected = if (id in selected) selected - id else selected + id },
+                    newNames = newNames,
+                    onAddNew = { newNames = newNames + it },
+                    onRemoveNew = { newNames = newNames - it },
                 )
-                if (availableTopics.isNotEmpty()) {
-                    Text(
-                        stringResource(R.string.label_pick_existing_topics),
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
-                    )
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        availableTopics.forEach { topic ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selected = if (topic.id in selected) selected - topic.id else selected + topic.id
-                                    },
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Checkbox(checked = topic.id in selected, onCheckedChange = null)
-                                Text(topic.name)
-                            }
-                        }
-                    }
-                }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(name, selected) },
-                enabled = name.isNotBlank() || selected.isNotEmpty(),
+                onClick = { onConfirm(newNames, selected) },
+                enabled = newNames.isNotEmpty() || selected.isNotEmpty(),
             ) { Text(stringResource(R.string.common_add)) }
         },
         dismissButton = {

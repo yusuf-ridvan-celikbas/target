@@ -175,6 +175,14 @@ fun FlowTimerScreen(
                         topics = topics,
                         selectedTopicId = selectedTopicId,
                         onSelectTopic = { selectedTopicId = it },
+                        onCreateTopic = { name, done ->
+                            viewModel.createTopic(
+                                name,
+                                selectedCourseId.takeIf { linkMode == SessionLinkMode.COURSE },
+                                selectedLanguageId.takeIf { linkMode == SessionLinkMode.LANGUAGE },
+                                done,
+                            )
+                        },
                     )
                 }
                 Spacer(Modifier.height(16.dp))
@@ -218,7 +226,7 @@ fun FlowTimerScreen(
                     history = recentHistory,
                     onOpenHistory = onOpenHistory,
                     onSessionClick = onSessionClick,
-                    linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
+                    linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books, viewModel::createTopic),
                     onAddManual = viewModel::addManualSession,
                     onDeleteSession = undoDelete,
                 )

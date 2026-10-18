@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,7 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
 import com.ridvan.target.data.local.entity.QuestionResult
-import com.ridvan.target.ui.common.DropdownField
+import com.ridvan.target.ui.common.TopicSearchField
 import com.ridvan.target.ui.common.SegmentedToggle
 import com.ridvan.target.ui.common.SegmentedToggleOption
 
@@ -130,20 +129,14 @@ fun MockExamQuestionsScreen(
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 TextButton(onClick = viewModel::markRestCorrect) { Text(stringResource(R.string.mockexam_questions_rest_correct)) }
-            } else if (topics.isEmpty()) {
-                Text(stringResource(R.string.mockexam_questions_no_topics), modifier = Modifier.padding(top = 8.dp))
             } else {
-                val noTopic = stringResource(R.string.mockexam_questions_no_topic)
-                DropdownField(
-                    selectedLabel = topicBrush?.let { topicNames[it] } ?: noTopic,
-                    label = stringResource(R.string.label_topic),
+                TopicSearchField(
+                    topics = topics,
+                    selectedId = topicBrush,
+                    onSelect = { topicBrush = it },
+                    onCreate = viewModel::createTopic,
                     modifier = Modifier.padding(top = 8.dp),
-                ) { close ->
-                    DropdownMenuItem(text = { Text(noTopic) }, onClick = { topicBrush = null; close() })
-                    topics.forEach { topic ->
-                        DropdownMenuItem(text = { Text(topic.name) }, onClick = { topicBrush = topic.id; close() })
-                    }
-                }
+                )
             }
 
             FlowRow(

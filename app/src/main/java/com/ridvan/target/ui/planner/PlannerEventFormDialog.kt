@@ -47,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.TopicSearchField
 import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.PlannerEvent
@@ -117,6 +118,7 @@ fun PlannerEventFormDialog(
     courses: List<Course>,
     topicsForSelectedCourse: List<Topic>,
     onCourseSelected: (Long?) -> Unit,
+    onCreateTopic: (name: String, courseId: Long, onCreated: (Long) -> Unit) -> Unit,
     initial: PlannerEvent? = null,
     onConfirm: (PlannerEventFormResult) -> Unit,
     onDismiss: () -> Unit,
@@ -321,10 +323,14 @@ fun PlannerEventFormDialog(
                         },
                     )
                     if (selectedCourseId != null) {
-                        TopicField(
+                        val courseId = selectedCourseId
+                        TopicSearchField(
                             topics = topicsForSelectedCourse,
                             selectedId = selectedTopicId,
                             onSelect = { selectedTopicId = it },
+                            onCreate = courseId?.let { id -> { name, done -> onCreateTopic(name, id, done) } },
+                            label = stringResource(R.string.planner_field_topic),
+                            modifier = Modifier.padding(top = 4.dp),
                         )
                     }
                 }
@@ -470,22 +476,3 @@ private fun CourseField(courses: List<Course>, selectedId: Long?, onSelect: (Lon
     }
 }
 
-@Composable
-private fun TopicField(topics: List<Topic>, selectedId: Long?, onSelect: (Long?) -> Unit) {
-    DropdownField(
-        selectedLabel = topics.firstOrNull { it.id == selectedId }?.name ?: stringResource(R.string.common_not_set),
-        label = stringResource(R.string.planner_field_topic),
-        modifier = Modifier.padding(top = 4.dp),
-    ) { close ->
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.common_not_set)) },
-            onClick = { onSelect(null); close() },
-        )
-        topics.forEach { topic ->
-            DropdownMenuItem(
-                text = { Text(topic.name) },
-                onClick = { onSelect(topic.id); close() },
-            )
-        }
-    }
-}

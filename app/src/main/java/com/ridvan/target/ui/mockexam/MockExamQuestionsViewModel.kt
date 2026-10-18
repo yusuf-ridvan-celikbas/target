@@ -14,11 +14,13 @@ import com.ridvan.target.ui.navigation.MockExamQuestionsRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.topicIdForName
 
 class MockExamQuestionsViewModel(
     application: Application,
@@ -52,6 +54,18 @@ class MockExamQuestionsViewModel(
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Adds a topic to the part's course (or the language exam's language) and hands back its id. */
+    fun createTopic(name: String, onCreated: (Long) -> Unit) {
+        viewModelScope.launch {
+            val p = part.value?.part ?: return@launch
+            val languageId = if (p.courseId != null) null else {
+                val examId = mockExamDao.getById(p.mockExamId).first()?.examId ?: return@launch
+                database.examDao().getById(examId).first()?.languageId ?: return@launch
+            }
+            onCreated(topicIdForName(database.topicDao(), name, p.courseId, languageId))
+        }
+    }
 
     private fun question(number: Int) = questions.value[number] ?: MockExamQuestion(mockExamPartId = partId, number = number)
 

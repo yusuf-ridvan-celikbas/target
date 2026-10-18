@@ -1243,6 +1243,12 @@
     <string name="mockexam_start_message">Ara vermeden %1$s. Önce 10 saniyelik hazırlık var.</string>
     <string name="mockexam_due_title">%1$s zamanı geldi. Şimdi başlatılsın mı?</string>
     <string name="mockexam_not_now">Şimdi değil</string>
+    <string name="topic_search_placeholder">Konu ara</string>
+    <string name="topic_search_add">“%1$s” yeni konu olarak ekle</string>
+    <string name="topic_search_selected">Konu: %1$s</string>
+    <string name="topic_search_clear">Konuyu temizle</string>
+    <string name="topic_search_none_yet">Henüz konu yok.</string>
+    <string name="topic_search_new_label">%1$s (yeni)</string>
     <string name="mockexam_questions">Sorular</string>
     <string name="mockexam_questions_title">%1$s soruları</string>
     <string name="mockexam_questions_mode_result">Sonuç</string>
@@ -1252,8 +1258,6 @@
     <string name="question_result_blank">Boş</string>
     <string name="mockexam_questions_clear">Temizle</string>
     <string name="mockexam_questions_rest_correct">Kalanları doğru işaretle</string>
-    <string name="mockexam_questions_no_topic">Konu yok</string>
-    <string name="mockexam_questions_no_topics">Soruları etiketlemek için bu derse konu ekleyin.</string>
     <string name="mockexam_questions_summary">Doğru %1$d · Yanlış %2$d · Boş %3$d · İşaretsiz %4$d</string>
     <string name="mockexam_questions_hint">Bir fırça seçip sorulara dokunun. Bu kısmın toplamları ve konu sonuçları işaretlerinizden sayılır.</string>
     <string name="mockexam_questions_by_topic">Konulara göre</string>

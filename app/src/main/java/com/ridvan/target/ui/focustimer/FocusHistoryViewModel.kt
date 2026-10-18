@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.launchCreateTopic
 
 /**
  * The Focus Timer history; filtering beyond the optional owner scope happens in the screen.
@@ -71,6 +72,9 @@ class FocusHistoryViewModel(
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
+
+    fun createTopic(name: String, courseId: Long?, languageId: Long?, onCreated: (Long) -> Unit) =
+        viewModelScope.launchCreateTopic(topicDao, name, courseId, languageId, onCreated)
 
     val books: StateFlow<List<BookProgress>> = bookProgressFlow(bookDao, focusSessionDao, userId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

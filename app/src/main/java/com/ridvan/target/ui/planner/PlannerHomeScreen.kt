@@ -201,6 +201,7 @@ fun PlannerHomeScreen(
             courses = courses,
             topicsForSelectedCourse = topicsForSelectedCourse,
             onCourseSelected = { courseIdForTopics = it },
+            onCreateTopic = viewModel::createTopic,
             onConfirm = { form ->
                 viewModel.addEvent(form)
                 showAddDialog = false
@@ -214,6 +215,7 @@ fun PlannerHomeScreen(
             courses = courses,
             topicsForSelectedCourse = topicsForSelectedCourse,
             onCourseSelected = { courseIdForTopics = it },
+            onCreateTopic = viewModel::createTopic,
             initial = event,
             onConfirm = { form ->
                 viewModel.updateEvent(event, form)

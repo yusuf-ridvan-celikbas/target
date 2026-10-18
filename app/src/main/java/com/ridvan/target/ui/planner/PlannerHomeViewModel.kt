@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.launchCreateTopic
 
 enum class PlannerViewMode { WEEK, MONTH, YEAR }
 
@@ -66,6 +67,9 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
     private val sectionDao = database.sectionDao()
     private val courseDao = database.courseDao()
     private val topicDao = database.topicDao()
+
+    fun createTopic(name: String, courseId: Long, onCreated: (Long) -> Unit) =
+        viewModelScope.launchCreateTopic(topicDao, name, courseId, null, onCreated)
     private val focusSessionDao = database.focusSessionDao()
     private val practiceLogDao = database.practiceLogDao()
     private val tripDao = database.tripDao()

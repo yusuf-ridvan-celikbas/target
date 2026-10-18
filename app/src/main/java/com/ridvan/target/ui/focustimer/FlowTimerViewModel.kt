@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.launchCreateTopic
 
 /** What a Flow session is linked to, chosen before it starts (book for reading, else course/language + topic). */
 data class FlowSessionLink(
@@ -89,6 +90,9 @@ class FlowTimerViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
+
+    fun createTopic(name: String, courseId: Long?, languageId: Long?, onCreated: (Long) -> Unit) =
+        viewModelScope.launchCreateTopic(topicDao, name, courseId, languageId, onCreated)
 
     private val _runningSession = MutableStateFlow<RunningFlowSession?>(null)
     val runningSession: StateFlow<RunningFlowSession?> = _runningSession.asStateFlow()

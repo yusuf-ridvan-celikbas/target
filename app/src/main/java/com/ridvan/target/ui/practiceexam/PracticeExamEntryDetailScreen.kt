@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.TopicSearchChecklist
 import com.ridvan.target.ui.common.countText
 import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.dao.PracticeExamEntryTopicResultWithTopic
@@ -155,8 +156,8 @@ fun PracticeExamEntryDetailScreen(
     if (showAddTopicDialog) {
         AddTopicResultDialog(
             availableTopics = availableTopicsToAdd,
-            onConfirm = { selectedIds ->
-                viewModel.addTopicResults(selectedIds)
+            onConfirm = { selectedIds, newNames ->
+                viewModel.addTopicResults(selectedIds, newNames)
                 showAddTopicDialog = false
             },
             onDismiss = { showAddTopicDialog = false },
@@ -292,37 +293,31 @@ private fun EditEntryResultDialog(
 @Composable
 internal fun AddTopicResultDialog(
     availableTopics: List<Topic>,
-    onConfirm: (selectedIds: Set<Long>) -> Unit,
+    onConfirm: (selectedIds: Set<Long>, newNames: List<String>) -> Unit,
     onDismiss: () -> Unit,
+    allowNew: Boolean = true,
 ) {
     var selected by remember { mutableStateOf(emptySet<Long>()) }
+    var newNames by remember { mutableStateOf(emptyList<String>()) }
     AlertDialog(
         properties = FormDialogProperties,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.action_add_topic_breakdown)) },
         text = {
-            if (availableTopics.isEmpty()) {
-                Text(stringResource(R.string.topic_breakdown_no_more_topics))
-            } else {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    availableTopics.forEach { topic ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    selected = if (topic.id in selected) selected - topic.id else selected + topic.id
-                                },
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Checkbox(checked = topic.id in selected, onCheckedChange = null)
-                            Text(topic.name)
-                        }
-                    }
-                }
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                TopicSearchChecklist(
+                    topics = availableTopics,
+                    selectedIds = selected,
+                    onToggle = { id -> selected = if (id in selected) selected - id else selected + id },
+                    newNames = newNames,
+                    onAddNew = { newNames = newNames + it },
+                    onRemoveNew = { newNames = newNames - it },
+                    allowNew = allowNew,
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(selected) }, enabled = selected.isNotEmpty()) {
+            TextButton(onClick = { onConfirm(selected, newNames) }, enabled = selected.isNotEmpty() || newNames.isNotEmpty()) {
                 Text(stringResource(R.string.common_add))
             }
         },

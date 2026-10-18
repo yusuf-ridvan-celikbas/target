@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.TopicSearchField
 import com.ridvan.target.ui.common.formatDuration
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.FocusSession
@@ -96,6 +97,8 @@ data class ManualSessionLinkSource(
     val topicsForCourse: (Long) -> Flow<List<Topic>>,
     val topicsForLanguage: (Long) -> Flow<List<Topic>>,
     val books: List<BookProgress> = emptyList(),
+    /** Adds a topic to the course (or language) and reports its id, for the topic search's Add. */
+    val createTopic: (name: String, courseId: Long?, languageId: Long?, onCreated: (Long) -> Unit) -> Unit = { _, _, _, _ -> },
 )
 
 /**
@@ -369,11 +372,20 @@ private fun ManualLinkSection(
         SessionLinkMode.NONE -> Unit
     }
     if (courseId != null || languageId != null) {
-        PickerField(
-            label = stringResource(R.string.label_link_to_topic),
-            selectedLabel = topics.firstOrNull { it.id == topicId }?.name ?: stringResource(R.string.common_none),
-            options = listOf<Pair<Long?, String>>(null to stringResource(R.string.common_none)) + topics.map { it.id to it.name },
+        TopicSearchField(
+            topics = topics,
+            selectedId = topicId,
             onSelect = onTopicChange,
+            onCreate = { name, done ->
+                linkSource.createTopic(
+                    name,
+                    courseId.takeIf { mode == SessionLinkMode.COURSE },
+                    languageId.takeIf { mode == SessionLinkMode.LANGUAGE },
+                    done,
+                )
+            },
+            label = stringResource(R.string.label_link_to_topic),
+            modifier = Modifier.padding(top = 8.dp),
         )
     }
 }

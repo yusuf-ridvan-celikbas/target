@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.launchCreateTopic
 
 class FocusSessionDetailViewModel(
     application: Application,
@@ -58,6 +59,9 @@ class FocusSessionDetailViewModel(
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
+
+    fun createTopic(name: String, courseId: Long?, languageId: Long?, onCreated: (Long) -> Unit) =
+        viewModelScope.launchCreateTopic(topicDao, name, courseId, languageId, onCreated)
 
     /** Exactly one of courseId/languageId, or neither; topicId belongs to whichever is set. */
     fun updateLink(courseId: Long?, languageId: Long?, topicId: Long?) {

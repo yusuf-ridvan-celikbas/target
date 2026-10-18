@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.TopicSearchField
 import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.data.local.entity.Course
 import com.ridvan.target.data.local.entity.Language
@@ -54,6 +55,7 @@ internal fun SessionLinkCard(
     topics: List<Topic>,
     selectedTopicId: Long?,
     onSelectTopic: (Long?) -> Unit,
+    onCreateTopic: (name: String, onCreated: (Long) -> Unit) -> Unit,
 ) {
     GroupedCard {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -91,15 +93,14 @@ internal fun SessionLinkCard(
             }
 
             if (linkMode != SessionLinkMode.NONE && (selectedCourseId != null || selectedLanguageId != null)) {
-                Text(stringResource(R.string.label_link_to_topic), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 8.dp))
-                DropdownField(
-                    selectedLabel = topics.firstOrNull { it.id == selectedTopicId }?.name ?: stringResource(R.string.common_none),
-                ) { closeMenu ->
-                    DropdownMenuItem(text = { Text(stringResource(R.string.common_none)) }, onClick = { onSelectTopic(null); closeMenu() })
-                    topics.forEach { topic ->
-                        DropdownMenuItem(text = { Text(topic.name) }, onClick = { onSelectTopic(topic.id); closeMenu() })
-                    }
-                }
+                TopicSearchField(
+                    topics = topics,
+                    selectedId = selectedTopicId,
+                    onSelect = onSelectTopic,
+                    onCreate = onCreateTopic,
+                    label = stringResource(R.string.label_link_to_topic),
+                    modifier = Modifier.padding(top = 8.dp),
+                )
             }
         }
     }

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridvan.target.R
+import com.ridvan.target.ui.common.TopicSearchField
 import com.ridvan.target.ui.common.DropdownField
 import com.ridvan.target.ui.common.countText
 import com.ridvan.target.ui.common.formatDuration
@@ -391,11 +392,20 @@ private fun LinkSessionDialog(
                     SessionLinkMode.NONE -> Unit
                 }
                 if (courseId != null || languageId != null) {
-                    PickerField(
-                        label = stringResource(R.string.label_link_to_topic),
-                        selectedLabel = topics.firstOrNull { it.id == topicId }?.name ?: stringResource(R.string.common_none),
-                        options = listOf<Pair<Long?, String>>(null to stringResource(R.string.common_none)) + topics.map { it.id to it.name },
+                    TopicSearchField(
+                        topics = topics,
+                        selectedId = topicId,
                         onSelect = { topicId = it },
+                        onCreate = { name, done ->
+                            viewModel.createTopic(
+                                name,
+                                courseId.takeIf { mode == SessionLinkMode.COURSE },
+                                languageId.takeIf { mode == SessionLinkMode.LANGUAGE },
+                                done,
+                            )
+                        },
+                        label = stringResource(R.string.label_link_to_topic),
+                        modifier = Modifier.padding(top = 8.dp),
                     )
                 }
             }

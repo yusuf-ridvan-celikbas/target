@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.topicIdForName
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class StudyResourceDetailViewModel(
@@ -115,6 +116,24 @@ class StudyResourceDetailViewModel(
                 studyResourceTopicDao.insert(
                     StudyResourceTopic(studyResourceId = studyResourceId, topicId = topicId, orderIndex = nextOrderIndex)
                 )
+            }
+        }
+    }
+
+    /** Attaches [topicIds] plus [newNames] (found or added under the resource's course or language), in order. */
+    fun addTopics(newNames: List<String>, topicIds: Set<Long>) {
+        val resource = studyResource.value ?: return
+        if (newNames.isEmpty() && topicIds.isEmpty()) return
+        viewModelScope.launch {
+            val created = newNames.map { topicIdForName(topicDao, it, resource.courseId, resource.languageId) }
+            var nextOrderIndex = attachedTopics.value.size
+            (created + topicIds).distinct().forEach { topicId ->
+                if (attachedTopics.value.none { it.studyResourceTopic.topicId == topicId }) {
+                    studyResourceTopicDao.insert(
+                        StudyResourceTopic(studyResourceId = studyResourceId, topicId = topicId, orderIndex = nextOrderIndex)
+                    )
+                    nextOrderIndex++
+                }
             }
         }
     }

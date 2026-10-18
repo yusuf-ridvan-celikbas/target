@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.ridvan.target.ui.common.launchCreateTopic
 
 enum class FocusPhase { WORK, BREAK }
 
@@ -132,6 +133,9 @@ class FocusTimerViewModel(application: Application) : AndroidViewModel(applicati
 
     fun topicsForCourse(courseId: Long): Flow<List<Topic>> = topicDao.getByCourseId(courseId)
     fun topicsForLanguage(languageId: Long): Flow<List<Topic>> = topicDao.getByLanguageId(languageId)
+
+    fun createTopic(name: String, courseId: Long?, languageId: Long?, onCreated: (Long) -> Unit) =
+        viewModelScope.launchCreateTopic(topicDao, name, courseId, languageId, onCreated)
 
     private val _runningSession = MutableStateFlow<RunningFocusSession?>(null)
     val runningSession: StateFlow<RunningFocusSession?> = _runningSession.asStateFlow()

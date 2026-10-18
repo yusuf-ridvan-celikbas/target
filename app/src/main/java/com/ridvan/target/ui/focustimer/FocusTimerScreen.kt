@@ -205,6 +205,14 @@ fun FocusTimerScreen(
                     topics = topics,
                     selectedTopicId = selectedTopicId,
                     onSelectTopic = { selectedTopicId = it },
+                    onCreateTopic = { name, done ->
+                        viewModel.createTopic(
+                            name,
+                            selectedCourseId.takeIf { linkMode == SessionLinkMode.COURSE },
+                            selectedLanguageId.takeIf { linkMode == SessionLinkMode.LANGUAGE },
+                            done,
+                        )
+                    },
                     books = books,
                     selectedBookId = selectedBookId,
                     onSelectBook = { selectedBookId = it },
@@ -262,7 +270,7 @@ fun FocusTimerScreen(
                     history = recentHistory,
                     onOpenHistory = onOpenHistory,
                     onSessionClick = onSessionClick,
-                    linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books),
+                    linkSource = ManualSessionLinkSource(courses, languages, viewModel::topicsForCourse, viewModel::topicsForLanguage, books, viewModel::createTopic),
                     onAddManual = viewModel::addManualSession,
                     onDeleteSession = undoDelete,
                 )
@@ -328,6 +336,7 @@ private fun IdleContent(
     topics: List<Topic>,
     selectedTopicId: Long?,
     onSelectTopic: (Long?) -> Unit,
+    onCreateTopic: (name: String, onCreated: (Long) -> Unit) -> Unit,
     books: List<BookProgress>,
     selectedBookId: Long?,
     onSelectBook: (Long) -> Unit,
@@ -384,6 +393,7 @@ private fun IdleContent(
             topics = topics,
             selectedTopicId = selectedTopicId,
             onSelectTopic = onSelectTopic,
+            onCreateTopic = onCreateTopic,
         )
     }
     Spacer(Modifier.height(16.dp))
