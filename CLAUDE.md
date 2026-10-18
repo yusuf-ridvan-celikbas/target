@@ -18,7 +18,7 @@ A personal, **fully offline** Android app: the user defines exams, organizes stu
 
 - Kotlin, Jetpack Compose, Material 3 (+ `material-icons-extended`), MVVM: one `AndroidViewModel` + `StateFlow` per screen, no DI. Nav-scoped VMs read route args via `SavedStateHandle` (by argument name when one VM backs several routes, e.g. `CourseListByTypeViewModel`, `FocusHistoryViewModel`).
 - Navigation Compose with type-safe `kotlinx.serialization` routes (`ui/navigation/Routes.kt`, wired in `TargetNavHost.kt`). Start destination: `HomeRoute` if `AppPreferences.currentUserId` is set, else `LoginRoute`.
-- Room, **schema v37** (`data/local/Migrations.kt`, every version has a real `Migration`; no destructive fallback). Nullable enums are stored natively by name (no TypeConverter).
+- Room, **schema v39** (`data/local/Migrations.kt`, every version has a real `Migration`; no destructive fallback). Nullable enums are stored natively by name (no TypeConverter).
 - Tests: JVM `StringsConsistencyTest` checks EN/TR strings+plurals have the same names and format placeholders. Room schema JSON is exported to `app/schemas` (ksp `room.schemaLocation`); commit new versions so migrations can be tested against them.
 - Seeding: idempotent "insert if empty" DAO calls from `TargetApplication.onCreate()` (`ExamTypeDao.seedDefaultsIfEmpty()`), never `RoomDatabase.Callback.onCreate()` (doesn't fire reliably).
 - `java.time` (core library desugaring on) is used **only** in `ui/planner/` and `data/notifications/`. Everywhere else uses `Calendar`/`SimpleDateFormat` (`ui/common/DateFormatting.kt`).
