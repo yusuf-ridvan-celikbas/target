@@ -112,7 +112,7 @@ fun TargetNavHost() {
         onNavigateStudyHistory = { push(FocusHistoryHomeRoute) },
         onNavigateReading = { push(ReadingRoute) },
         onNavigateSports = { push(SportsRoute) },
-        onNavigateMoney = { push(MoneyRoute) },
+        onNavigateMoney = { push(MoneyRoute()) },
         onNavigateHelp = { push(HelpRoute) },
         onNavigateMyAccount = { push(MyAccountRoute) },
         onNavigateSettings = { push(SettingsRoute) },
@@ -157,30 +157,39 @@ fun TargetNavHost() {
                 onOpenReading = shellNavigation.onNavigateReading,
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
                 onRoutineClick = { routineId -> navController.navigate(RoutineDetailRoute(routineId)) },
-                onOpenMoney = shellNavigation.onNavigateMoney,
+                onOpenMoney = {
+                    navController.navigateToShellDestination(PlanHubRoute)
+                    push(MoneyRoute())
+                },
                 onShortcut = { item ->
                     val id = item.targetId ?: 0L
+                    // Open in the tab that owns the page: pushed onto Home's own stack, it would come
+                    // back every time Home is tapped (Home is the start destination).
+                    val inTab: (ShellTab, Any) -> Unit = { tab, route ->
+                        navController.navigateToShellDestination(tabRoutes.getValue(tab))
+                        push(route)
+                    }
                     when (item.shortcut) {
-                        HomeShortcut.EXAMS -> shellNavigation.onNavigateExams()
-                        HomeShortcut.COURSES -> shellNavigation.onNavigateCourses()
-                        HomeShortcut.STUDY_RESOURCES -> shellNavigation.onNavigateStudyResources()
+                        HomeShortcut.EXAMS -> inTab(ShellTab.STUDY, ExamListRoute)
+                        HomeShortcut.COURSES -> inTab(ShellTab.STUDY, CourseListRoute)
+                        HomeShortcut.STUDY_RESOURCES -> inTab(ShellTab.STUDY, StudyResourceHomeRoute)
                         HomeShortcut.STATISTICS -> shellNavigation.onNavigateStatistics()
-                        HomeShortcut.EXAM -> navController.navigate(ExamDetailRoute(id))
-                        HomeShortcut.NEW_MOCK_EXAM -> navController.navigate(ExamDetailRoute(id, openNewMockExam = true))
-                        HomeShortcut.FOCUS_TIMER -> shellNavigation.onNavigateFocusTimer()
-                        HomeShortcut.FLOW_TIMER -> shellNavigation.onNavigateFlowTimer()
-                        HomeShortcut.STUDY_HISTORY -> shellNavigation.onNavigateStudyHistory()
-                        HomeShortcut.LIBRARY -> shellNavigation.onNavigateReading()
-                        HomeShortcut.BOOK -> navController.navigate(BookDetailRoute(id))
-                        HomeShortcut.PLANNER -> shellNavigation.onNavigatePlanner()
-                        HomeShortcut.ROUTINES -> shellNavigation.onNavigateRoutines()
-                        HomeShortcut.ROUTINE -> navController.navigate(RoutineDetailRoute(id))
-                        HomeShortcut.TRIPS -> shellNavigation.onNavigateTrips()
-                        HomeShortcut.TRIP -> navController.navigate(TripDetailRoute(id))
-                        HomeShortcut.SPORTS -> shellNavigation.onNavigateSports()
-                        HomeShortcut.LIVE_WORKOUT -> navController.navigate(LiveWorkoutRoute)
-                        HomeShortcut.MONEY -> shellNavigation.onNavigateMoney()
-                        HomeShortcut.ADD_EXPENSE -> navController.navigate(MoneyRoute(addExpense = true))
+                        HomeShortcut.EXAM -> inTab(ShellTab.STUDY, ExamDetailRoute(id))
+                        HomeShortcut.NEW_MOCK_EXAM -> inTab(ShellTab.STUDY, ExamDetailRoute(id, openNewMockExam = true))
+                        HomeShortcut.FOCUS_TIMER -> inTab(ShellTab.FOCUS, FocusTimerRoute)
+                        HomeShortcut.FLOW_TIMER -> inTab(ShellTab.FOCUS, FlowTimerRoute)
+                        HomeShortcut.STUDY_HISTORY -> inTab(ShellTab.FOCUS, FocusHistoryHomeRoute)
+                        HomeShortcut.LIBRARY -> inTab(ShellTab.FOCUS, ReadingRoute)
+                        HomeShortcut.BOOK -> inTab(ShellTab.FOCUS, BookDetailRoute(id))
+                        HomeShortcut.PLANNER -> inTab(ShellTab.PLAN, PlannerRoute)
+                        HomeShortcut.ROUTINES -> inTab(ShellTab.PLAN, RoutineListRoute)
+                        HomeShortcut.ROUTINE -> inTab(ShellTab.PLAN, RoutineDetailRoute(id))
+                        HomeShortcut.TRIPS -> inTab(ShellTab.PLAN, TripListRoute)
+                        HomeShortcut.TRIP -> inTab(ShellTab.PLAN, TripDetailRoute(id))
+                        HomeShortcut.SPORTS -> inTab(ShellTab.FOCUS, SportsRoute)
+                        HomeShortcut.LIVE_WORKOUT -> inTab(ShellTab.FOCUS, LiveWorkoutRoute)
+                        HomeShortcut.MONEY -> inTab(ShellTab.PLAN, MoneyRoute())
+                        HomeShortcut.ADD_EXPENSE -> inTab(ShellTab.PLAN, MoneyRoute(addExpense = true))
                     }
                 },
             )
