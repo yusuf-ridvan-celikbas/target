@@ -28,6 +28,9 @@ interface UserDao {
     @Query("SELECT * FROM users ORDER BY preferredName ASC")
     fun getAll(): Flow<List<User>>
 
+    @Query("UPDATE users SET homeLayout = :layout WHERE id = :userId")
+    suspend fun setHomeLayout(userId: Long, layout: String?)
+
     @Query("UPDATE users SET enabledModules = :modules WHERE id = :userId")
     suspend fun setEnabledModules(userId: Long, modules: String?)
 

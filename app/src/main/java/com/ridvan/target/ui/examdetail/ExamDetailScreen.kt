@@ -98,6 +98,14 @@ fun ExamDetailScreen(
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val courses by viewModel.courses.collectAsStateWithLifecycle()
     val availableCoursesToAdd by viewModel.availableCoursesToAdd.collectAsStateWithLifecycle()
+    // Opened from a Home "New mock exam" shortcut: start the new-deneme form once the exam is loaded.
+    androidx.compose.runtime.LaunchedEffect(exam, examTypes) {
+        val current = exam ?: return@LaunchedEffect
+        if (examTypes.isEmpty() || !viewModel.consumeOpenNewMockExam()) return@LaunchedEffect
+        val isLanguage = examTypes.firstOrNull { it.id == current.examTypeId }?.name == LANGUAGE_EXAM_TYPE_NAME
+        if (current.hasSections) pickingMockSection = true
+        else viewModel.loadMockExamDraft(null, isLanguage, { n -> defaultMockExamName.format(n) }) { mockExamDraft = it }
+    }
     val context = LocalContext.current
     val exportHeaders = listOf(
         stringResource(R.string.csv_header_course),

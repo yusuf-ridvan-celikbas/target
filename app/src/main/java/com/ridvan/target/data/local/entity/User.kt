@@ -24,4 +24,6 @@ data class User(
     val enabledModules: String? = null,
     val recoveryHash: String? = null,
     val recoverySalt: String? = null,
+    /** Home's cards and shortcuts in order (see HomeLayout.kt); null = the default Home. */
+    val homeLayout: String? = null,
 )

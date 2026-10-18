@@ -25,7 +25,7 @@ object FocusHubRoute
 object ExamListRoute
 
 @Serializable
-data class ExamDetailRoute(val examId: Long)
+data class ExamDetailRoute(val examId: Long, val openNewMockExam: Boolean = false)
 
 @Serializable
 data class SectionDetailRoute(val sectionId: Long)

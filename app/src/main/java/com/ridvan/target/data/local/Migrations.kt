@@ -813,3 +813,10 @@ val MIGRATION_36_37 = object : Migration(36, 37) {
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_mock_exam_questions_mockExamPartId_number` ON `mock_exam_questions` (`mockExamPartId`, `number`)")
     }
 }
+
+/** Per-account Home layout (cards + shortcuts); NULL = default Home. */
+val MIGRATION_37_38 = object : Migration(37, 38) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN homeLayout TEXT")
+    }
+}

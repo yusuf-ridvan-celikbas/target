@@ -18,6 +18,11 @@ import com.ridvan.target.data.local.dao.ExamWithType
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
 import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import com.ridvan.target.data.local.entity.User
+import com.ridvan.target.data.home.DEFAULT_HOME_LAYOUT
+import com.ridvan.target.data.home.HomeItem
+import com.ridvan.target.data.home.ShortcutTarget
+import com.ridvan.target.data.home.parseHomeLayout
+import com.ridvan.target.data.home.serializeHomeLayout
 import com.ridvan.target.ui.common.startOfTodayMillis
 import com.ridvan.target.ui.routines.RoutineProgress
 import com.ridvan.target.ui.routines.routineProgress
@@ -72,6 +77,40 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val currentUser: StateFlow<User?> = run {
         if (userId != null) userDao.getById(userId) else flowOf(null)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** The account's Home cards and shortcuts, in order. */
+    val homeLayout: StateFlow<List<HomeItem>> = currentUser
+        .map { parseHomeLayout(it?.homeLayout) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_HOME_LAYOUT)
+
+    /** Names of what item shortcuts can point at (also what "Add shortcut" offers). */
+    val shortcutTargets: StateFlow<Map<ShortcutTarget, List<Pair<Long, String>>>> = run {
+        val db = targetApplication.database
+        if (userId == null) flowOf(emptyMap())
+        else combine(
+            examDao.getAllWithTypeByUserId(userId),
+            db.bookDao().getByUserId(userId),
+            db.routineDao().getByUserId(userId),
+            db.tripDao().getByUserId(userId),
+        ) { exams, books, routines, trips ->
+            mapOf(
+                ShortcutTarget.EXAM to exams.map { it.exam.id to it.exam.name },
+                ShortcutTarget.BOOK to books.map { it.id to it.title },
+                ShortcutTarget.ROUTINE to routines.map { it.id to it.name },
+                ShortcutTarget.TRIP to trips.map { it.id to it.name },
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    fun saveHomeLayout(items: List<HomeItem>) {
+        val id = userId ?: return
+        viewModelScope.launch { userDao.setHomeLayout(id, serializeHomeLayout(items)) }
+    }
+
+    fun resetHomeLayout() {
+        val id = userId ?: return
+        viewModelScope.launch { userDao.setHomeLayout(id, null) }
+    }
 
     val upcomingEvents: StateFlow<List<UpcomingEvent>> = combine(
         userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),

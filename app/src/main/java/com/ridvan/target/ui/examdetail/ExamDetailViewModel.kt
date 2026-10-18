@@ -46,7 +46,19 @@ class ExamDetailViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
-    private val examId: Long = savedStateHandle.toRoute<ExamDetailRoute>().examId
+    private val route = savedStateHandle.toRoute<ExamDetailRoute>()
+    private val examId: Long = route.examId
+
+    /** True once when opened from a Home "New mock exam" shortcut: the new-deneme form should open. */
+    private var pendingNewMockExam = route.openNewMockExam && savedStateHandle.get<Boolean>("newMockExamShown") != true
+    private val handle = savedStateHandle
+
+    fun consumeOpenNewMockExam(): Boolean {
+        if (!pendingNewMockExam) return false
+        pendingNewMockExam = false
+        handle["newMockExamShown"] = true
+        return true
+    }
     private val targetApplication = application as TargetApplication
     private val database = targetApplication.database
     private val examDao: ExamDao = database.examDao()
@@ -75,7 +87,7 @@ class ExamDetailViewModel(
                 namedParts -> emptyList()
                 sectionId != null -> database.sectionCourseDao().getBySectionId(sectionId).first()
                     .map { MockCourseOption(it.sectionCourse.courseId, it.courseName, it.courseIcon) }
-                else -> courses.value.map { MockCourseOption(it.examCourse.courseId, it.courseName, it.courseIcon) }
+                else -> examCourseDao.getByExamId(examId).first().map { MockCourseOption(it.examCourse.courseId, it.courseName, it.courseIcon) }
             }
             onResult(
                 MockExamDraft(

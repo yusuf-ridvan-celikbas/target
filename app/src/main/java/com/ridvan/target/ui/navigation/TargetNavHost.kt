@@ -19,6 +19,7 @@ import com.ridvan.target.ui.courselist.CourseListScreen
 import com.ridvan.target.ui.coursedetail.CourseDetailScreen
 import com.ridvan.target.ui.examdetail.ExamDetailScreen
 import com.ridvan.target.ui.mockexam.MockExamDetailScreen
+import com.ridvan.target.data.home.HomeShortcut
 import com.ridvan.target.ui.mockexam.MockExamQuestionsScreen
 import com.ridvan.target.ui.mockexam.MockExamDuePrompt
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -155,6 +156,29 @@ fun TargetNavHost() {
                 onOpenReading = shellNavigation.onNavigateReading,
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
                 onRoutineClick = { routineId -> navController.navigate(RoutineDetailRoute(routineId)) },
+                onShortcut = { item ->
+                    val id = item.targetId ?: 0L
+                    when (item.shortcut) {
+                        HomeShortcut.EXAMS -> shellNavigation.onNavigateExams()
+                        HomeShortcut.COURSES -> shellNavigation.onNavigateCourses()
+                        HomeShortcut.STUDY_RESOURCES -> shellNavigation.onNavigateStudyResources()
+                        HomeShortcut.STATISTICS -> shellNavigation.onNavigateStatistics()
+                        HomeShortcut.EXAM -> navController.navigate(ExamDetailRoute(id))
+                        HomeShortcut.NEW_MOCK_EXAM -> navController.navigate(ExamDetailRoute(id, openNewMockExam = true))
+                        HomeShortcut.FOCUS_TIMER -> shellNavigation.onNavigateFocusTimer()
+                        HomeShortcut.FLOW_TIMER -> shellNavigation.onNavigateFlowTimer()
+                        HomeShortcut.STUDY_HISTORY -> shellNavigation.onNavigateStudyHistory()
+                        HomeShortcut.LIBRARY -> shellNavigation.onNavigateReading()
+                        HomeShortcut.BOOK -> navController.navigate(BookDetailRoute(id))
+                        HomeShortcut.PLANNER -> shellNavigation.onNavigatePlanner()
+                        HomeShortcut.ROUTINES -> shellNavigation.onNavigateRoutines()
+                        HomeShortcut.ROUTINE -> navController.navigate(RoutineDetailRoute(id))
+                        HomeShortcut.TRIPS -> shellNavigation.onNavigateTrips()
+                        HomeShortcut.TRIP -> navController.navigate(TripDetailRoute(id))
+                        HomeShortcut.SPORTS -> shellNavigation.onNavigateSports()
+                        HomeShortcut.LIVE_WORKOUT -> navController.navigate(LiveWorkoutRoute)
+                    }
+                },
             )
         }
         composable<StudyHubRoute> {
