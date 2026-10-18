@@ -747,3 +747,59 @@ val MIGRATION_34_35 = object : Migration(34, 35) {
         }
     }
 }
+
+/**
+ * Postgraduate Exam type (ALES moves there); denemes per section with a score system;
+ * parts without a course (named, for language exams) and a per-part scored test.
+ * The exam-level ALES switch (v35) becomes ALES scoring on that exam's denemes.
+ */
+val MIGRATION_35_36 = object : Migration(35, 36) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("INSERT INTO exam_types (name) SELECT 'Postgraduate Exam' WHERE NOT EXISTS (SELECT 1 FROM exam_types WHERE name = 'Postgraduate Exam')")
+        db.execSQL("UPDATE exams SET examTypeId = (SELECT id FROM exam_types WHERE name = 'Postgraduate Exam') WHERE UPPER(TRIM(name)) = 'ALES'")
+
+        db.execSQL("ALTER TABLE mock_exams ADD COLUMN sectionId INTEGER REFERENCES sections(id) ON UPDATE NO ACTION ON DELETE CASCADE")
+        db.execSQL("ALTER TABLE mock_exams ADD COLUMN scoringSystem TEXT")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_mock_exams_sectionId ON mock_exams(sectionId)")
+        db.execSQL("UPDATE mock_exams SET scoringSystem = 'ALES' WHERE examId IN (SELECT id FROM exams WHERE alesScoring = 1)")
+
+        // Recreate parts with a nullable courseId; keep topic results in case the drop cascades.
+        db.execSQL("CREATE TABLE mock_exam_topic_results_keep AS SELECT * FROM mock_exam_topic_results")
+        db.execSQL(
+            """
+            CREATE TABLE mock_exam_parts_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                mockExamId INTEGER NOT NULL,
+                courseId INTEGER,
+                name TEXT,
+                questionCount INTEGER NOT NULL,
+                correctCount INTEGER NOT NULL,
+                wrongCount INTEGER NOT NULL,
+                orderIndex INTEGER NOT NULL,
+                scoringTest TEXT,
+                FOREIGN KEY(mockExamId) REFERENCES mock_exams(id) ON UPDATE NO ACTION ON DELETE CASCADE,
+                FOREIGN KEY(courseId) REFERENCES courses(id) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            INSERT INTO mock_exam_parts_new (id, mockExamId, courseId, name, questionCount, correctCount, wrongCount, orderIndex, scoringTest)
+            SELECT p.id, p.mockExamId, p.courseId, NULL, p.questionCount, p.correctCount, p.wrongCount, p.orderIndex,
+                CASE WHEN m.scoringSystem = 'ALES' THEN
+                    CASE c.category WHEN 'QUANTITATIVE' THEN 'ALES_QUANTITATIVE' WHEN 'VERBAL' THEN 'ALES_VERBAL' END
+                END
+            FROM mock_exam_parts p
+            JOIN mock_exams m ON m.id = p.mockExamId
+            LEFT JOIN courses c ON c.id = p.courseId
+            """.trimIndent()
+        )
+        db.execSQL("DROP TABLE mock_exam_parts")
+        db.execSQL("ALTER TABLE mock_exam_parts_new RENAME TO mock_exam_parts")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_mock_exam_parts_mockExamId ON mock_exam_parts(mockExamId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_mock_exam_parts_courseId ON mock_exam_parts(courseId)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_mock_exam_parts_mockExamId_courseId ON mock_exam_parts(mockExamId, courseId)")
+        db.execSQL("INSERT OR IGNORE INTO mock_exam_topic_results SELECT * FROM mock_exam_topic_results_keep")
+        db.execSQL("DROP TABLE mock_exam_topic_results_keep")
+    }
+}

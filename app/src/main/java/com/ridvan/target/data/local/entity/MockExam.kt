@@ -14,8 +14,9 @@ import androidx.room.PrimaryKey
     tableName = "mock_exams",
     foreignKeys = [
         ForeignKey(entity = Exam::class, parentColumns = ["id"], childColumns = ["examId"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = Section::class, parentColumns = ["id"], childColumns = ["sectionId"], onDelete = ForeignKey.CASCADE),
     ],
-    indices = [Index("examId")],
+    indices = [Index("examId"), Index("sectionId")],
 )
 data class MockExam(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -32,6 +33,10 @@ data class MockExam(
     @ColumnInfo(defaultValue = "FINISHED") val status: MockExamStatus = MockExamStatus.FINISHED,
     /** Optional planned start; when it comes, the app asks whether to start. */
     val scheduledAt: Long? = null,
+    /** For sectioned exams: the section (e.g. TYT or AYT) this deneme belongs to. */
+    val sectionId: Long? = null,
+    /** How results turn into a score; null = nets only. */
+    val scoringSystem: ScoringSystem? = null,
 )
 
 enum class MockExamStatus { PLANNED, RUNNING, FINISHED }
@@ -51,11 +56,16 @@ enum class MockExamStatus { PLANNED, RUNNING, FINISHED }
 data class MockExamPart(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val mockExamId: Long,
-    val courseId: Long,
+    /** The course this part covers; null for a named part (language exams). */
+    val courseId: Long?,
+    /** Name of a part without a course, e.g. "Reading". */
+    val name: String? = null,
     val questionCount: Int,
     val correctCount: Int = 0,
     val wrongCount: Int = 0,
     val orderIndex: Int = 0,
+    /** Which scored test this part counts as under its deneme's scoring system; null = not counted. */
+    val scoringTest: ScoringTest? = null,
 )
 
 @Entity(

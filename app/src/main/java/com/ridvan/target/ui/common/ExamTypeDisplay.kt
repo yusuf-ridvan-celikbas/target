@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.ridvan.target.R
 import com.ridvan.target.data.local.dao.LANGUAGE_EXAM_TYPE_NAME
+import com.ridvan.target.data.local.dao.POSTGRADUATE_EXAM_TYPE_NAME
 
 /**
  * Maps a seeded ExamType.name (always stored/compared in English — see LANGUAGE_EXAM_TYPE_NAME)
@@ -15,5 +16,6 @@ fun examTypeDisplayName(name: String): String = when (name) {
     "High School Entrance Exam" -> stringResource(R.string.exam_type_high_school_entrance)
     LANGUAGE_EXAM_TYPE_NAME -> stringResource(R.string.exam_type_language_exam)
     "Vocational Exam" -> stringResource(R.string.exam_type_vocational_exam)
+    POSTGRADUATE_EXAM_TYPE_NAME -> stringResource(R.string.exam_type_postgraduate_exam)
     else -> name
 }

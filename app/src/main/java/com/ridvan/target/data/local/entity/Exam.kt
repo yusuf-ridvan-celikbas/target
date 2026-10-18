@@ -41,7 +41,7 @@ data class Exam(
     val languageId: Long? = null,
     val level: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
-    /** Mock exams of this exam get an ALES score card (courses split by Quantitative/Verbal category). */
+    /** Unused since v36 (became mock_exams.scoringSystem = ALES); kept because the column exists. */
     @ColumnInfo(defaultValue = "0") val alesScoring: Boolean = false,
     /** Unused (v35 leftovers from typed-in coefficients); the conversion is built into AlesScoreType. */
     val alesSayBase: Double? = null,

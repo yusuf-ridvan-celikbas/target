@@ -8,12 +8,14 @@ import com.ridvan.target.data.local.entity.ExamType
 import kotlinx.coroutines.flow.Flow
 
 const val LANGUAGE_EXAM_TYPE_NAME = "Language Exam"
+const val POSTGRADUATE_EXAM_TYPE_NAME = "Postgraduate Exam"
 
 private val DEFAULT_EXAM_TYPE_NAMES = listOf(
     "University Entrance Exam",
     "High School Entrance Exam",
     LANGUAGE_EXAM_TYPE_NAME,
     "Vocational Exam",
+    POSTGRADUATE_EXAM_TYPE_NAME,
 )
 
 @Dao

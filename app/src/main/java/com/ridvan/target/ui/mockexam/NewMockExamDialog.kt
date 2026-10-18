@@ -15,6 +15,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,17 +27,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ridvan.target.R
-import com.ridvan.target.data.local.dao.ExamCourseWithCourse
 import com.ridvan.target.ui.common.CourseIconAvatar
 import com.ridvan.target.ui.common.FormDialogProperties
 import com.ridvan.target.ui.common.courseDisplayName
 
-/** What the new-deneme form starts from: the last deneme's limit and counts, if any. */
+/** A course the deneme can cover (the exam's pool, or a section's courses). */
+data class MockCourseOption(val courseId: Long, val courseName: String, val courseIcon: String?)
+
+/** One part of a new deneme: a course, or a free-named part (language exams). */
+data class NewMockPart(val courseId: Long?, val name: String?, val questionCount: Int)
+
+/** What the new-deneme form starts from: the last deneme's limit and counts (same exam/section), if any. */
 data class MockExamDraft(
     val name: String,
     val publisher: String,
     val timeLimitMinutes: Int?,
+    val sectionId: Long?,
+    val courses: List<MockCourseOption>,
+    val namedParts: Boolean,
     val questionCounts: Map<Long, Int>,
+    val namedCounts: List<Pair<String, Int>>,
 )
 
 /**
@@ -46,24 +56,43 @@ data class MockExamDraft(
  */
 @Composable
 fun NewMockExamDialog(
-    courses: List<ExamCourseWithCourse>,
     draft: MockExamDraft,
-    onSave: (name: String, publisher: String, timeLimitMinutes: Int, counts: Map<Long, Int>, scheduledAt: Long?) -> Unit,
-    onAlreadyTaken: (name: String, publisher: String, timeLimitMinutes: Int, counts: Map<Long, Int>) -> Unit,
+    onSave: (name: String, publisher: String, timeLimitMinutes: Int, parts: List<NewMockPart>, scheduledAt: Long?) -> Unit,
+    onAlreadyTaken: (name: String, publisher: String, timeLimitMinutes: Int, parts: List<NewMockPart>) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by remember { mutableStateOf(draft.name) }
     var publisher by remember { mutableStateOf(draft.publisher) }
     var scheduledAt by remember { mutableStateOf<Long?>(null) }
     var limitText by remember { mutableStateOf(draft.timeLimitMinutes?.toString().orEmpty()) }
+    val courses = draft.courses
     val countTexts = remember {
         mutableStateMapOf<Long, String>().apply {
-            courses.forEach { put(it.examCourse.courseId, draft.questionCounts[it.examCourse.courseId]?.toString().orEmpty()) }
+            courses.forEach { put(it.courseId, draft.questionCounts[it.courseId]?.toString().orEmpty()) }
         }
     }
-    val counts = countTexts.mapValues { it.value.toIntOrNull() ?: 0 }.filterValues { it > 0 }
+    // Named parts: (name, count) text pairs; starts from the last deneme's parts, or one empty row.
+    val named = remember {
+        mutableStateListOf<Pair<String, String>>().apply {
+            if (draft.namedParts) {
+                addAll(draft.namedCounts.map { (n, c) -> n to c.toString() })
+                if (isEmpty()) add("" to "")
+            }
+        }
+    }
+    val parts = if (draft.namedParts) {
+        named.mapNotNull { (n, c) ->
+            val count = c.toIntOrNull() ?: 0
+            if (n.isNotBlank() && count > 0) NewMockPart(null, n.trim(), count) else null
+        }
+    } else {
+        courses.mapNotNull { course ->
+            val count = countTexts[course.courseId]?.toIntOrNull() ?: 0
+            if (count > 0) NewMockPart(course.courseId, null, count) else null
+        }
+    }
     val limit = limitText.toIntOrNull() ?: 0
-    val valid = name.isNotBlank() && limit > 0 && counts.isNotEmpty()
+    val valid = name.isNotBlank() && limit > 0 && parts.isNotEmpty()
 
     AlertDialog(
         properties = FormDialogProperties,
@@ -103,11 +132,36 @@ fun NewMockExamDialog(
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(top = 16.dp),
                 )
-                if (courses.isEmpty()) {
+                if (!draft.namedParts && courses.isEmpty()) {
                     Text(stringResource(R.string.mockexam_no_courses), modifier = Modifier.padding(top = 4.dp))
                 }
+                named.forEachIndexed { index, (partName, countText) ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        OutlinedTextField(
+                            value = partName,
+                            onValueChange = { named[index] = it to countText },
+                            label = { Text(stringResource(R.string.mockexam_part_name)) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f).padding(end = 8.dp),
+                        )
+                        OutlinedTextField(
+                            value = countText,
+                            onValueChange = { input -> if (input.length <= 3 && input.all(Char::isDigit)) named[index] = partName to input },
+                            placeholder = { Text("0") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.width(88.dp),
+                        )
+                    }
+                }
+                if (draft.namedParts) {
+                    TextButton(onClick = { named.add("" to "") }) { Text(stringResource(R.string.mockexam_add_part)) }
+                }
                 courses.forEach { course ->
-                    val courseId = course.examCourse.courseId
+                    val courseId = course.courseId
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -128,21 +182,21 @@ fun NewMockExamDialog(
                     }
                 }
                 Text(
-                    stringResource(R.string.mockexam_question_counts_hint),
+                    stringResource(if (draft.namedParts) R.string.mockexam_named_parts_hint else R.string.mockexam_question_counts_hint),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(name, publisher, limit, counts, scheduledAt) }, enabled = valid) {
+            TextButton(onClick = { onSave(name, publisher, limit, parts, scheduledAt) }, enabled = valid) {
                 Text(stringResource(R.string.common_save))
             }
         },
         dismissButton = {
             Row {
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-                TextButton(onClick = { onAlreadyTaken(name, publisher, limit, counts) }, enabled = valid) {
+                TextButton(onClick = { onAlreadyTaken(name, publisher, limit, parts) }, enabled = valid) {
                     Text(stringResource(R.string.mockexam_already_taken))
                 }
             }

@@ -25,7 +25,9 @@ import com.ridvan.target.data.local.entity.MockExam
 import com.ridvan.target.data.local.entity.MockExamPart
 import com.ridvan.target.data.local.entity.MockExamStatus
 import com.ridvan.target.data.local.dao.MockExamSummary
+import com.ridvan.target.ui.mockexam.MockCourseOption
 import com.ridvan.target.ui.mockexam.MockExamDraft
+import com.ridvan.target.ui.mockexam.NewMockPart
 import com.ridvan.target.ui.navigation.ExamDetailRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -61,42 +63,68 @@ class ExamDetailViewModel(
     val mockExams: StateFlow<List<MockExamSummary>> = mockExamDao.getSummariesByExam(examId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** Prefill for a new deneme: the last one's publisher, limit and question counts. */
-    fun loadMockExamDraft(defaultName: (Int) -> String, onResult: (MockExamDraft) -> Unit) {
+    /**
+     * Prefill for a new deneme of the exam or of one section (sectioned exams): the last one's publisher,
+     * limit and question counts there. Language exams ([namedParts]) get free-named parts instead of courses.
+     */
+    fun loadMockExamDraft(sectionId: Long?, namedParts: Boolean, defaultName: (Int) -> String, onResult: (MockExamDraft) -> Unit) {
         viewModelScope.launch {
-            val latest = mockExamDao.getLatest(examId)
-            val counts = mockExamDao.getLatestParts(examId).associate { it.courseId to it.questionCount }
+            val latest = mockExamDao.getLatest(examId, sectionId)
+            val latestParts = mockExamDao.getLatestParts(examId, sectionId)
+            val options = when {
+                namedParts -> emptyList()
+                sectionId != null -> database.sectionCourseDao().getBySectionId(sectionId).first()
+                    .map { MockCourseOption(it.sectionCourse.courseId, it.courseName, it.courseIcon) }
+                else -> courses.value.map { MockCourseOption(it.examCourse.courseId, it.courseName, it.courseIcon) }
+            }
             onResult(
                 MockExamDraft(
-                    name = defaultName(mockExams.value.size + 1),
+                    name = defaultName(mockExams.value.count { it.mockExam.sectionId == sectionId } + 1),
                     publisher = latest?.publisher.orEmpty(),
                     timeLimitMinutes = latest?.timeLimitMinutes,
-                    questionCounts = counts,
+                    sectionId = sectionId,
+                    courses = options,
+                    namedParts = namedParts,
+                    questionCounts = latestParts.filter { it.courseId != null }.associate { it.courseId!! to it.questionCount },
+                    namedCounts = latestParts.filter { it.courseId == null }.map { it.name.orEmpty() to it.questionCount },
                 )
             )
         }
     }
 
-    /** Creates the deneme: planned (started later from its page, optionally at [scheduledAt]) or already taken. */
+    /**
+     * Creates the deneme: planned (started later from its page, optionally at [scheduledAt]) or already taken.
+     * Scoring carries over from the last deneme of the same exam/section, matched per course or part name.
+     */
     fun createMockExam(
+        draft: MockExamDraft,
         name: String,
         publisher: String,
         timeLimitMinutes: Int,
-        counts: Map<Long, Int>,
+        parts: List<NewMockPart>,
         alreadyTaken: Boolean,
         scheduledAt: Long?,
         onCreated: (Long) -> Unit,
     ) {
         val trimmed = name.trim()
-        if (trimmed.isEmpty() || timeLimitMinutes <= 0 || counts.isEmpty()) return
+        if (trimmed.isEmpty() || timeLimitMinutes <= 0 || parts.isEmpty()) return
         viewModelScope.launch {
             val now = System.currentTimeMillis()
-            val order = courses.value.map { it.examCourse.courseId }
-            val parts = counts.entries
-                .sortedBy { order.indexOf(it.key) }
-                .mapIndexed { index, (courseId, count) ->
-                    MockExamPart(mockExamId = 0, courseId = courseId, questionCount = count, orderIndex = index)
-                }
+            val latest = mockExamDao.getLatest(examId, draft.sectionId)
+            val latestParts = mockExamDao.getLatestParts(examId, draft.sectionId)
+            fun previousTest(part: NewMockPart) = latestParts.firstOrNull {
+                if (part.courseId != null) it.courseId == part.courseId else it.courseId == null && it.name == part.name
+            }?.scoringTest
+            val newParts = parts.mapIndexed { index, part ->
+                MockExamPart(
+                    mockExamId = 0,
+                    courseId = part.courseId,
+                    name = part.name,
+                    questionCount = part.questionCount,
+                    orderIndex = index,
+                    scoringTest = previousTest(part),
+                )
+            }
             val id = mockExamDao.insertWithParts(
                 MockExam(
                     examId = examId,
@@ -108,8 +136,10 @@ class ExamDetailViewModel(
                     finishedAt = if (alreadyTaken) now else null,
                     status = if (alreadyTaken) MockExamStatus.FINISHED else MockExamStatus.PLANNED,
                     scheduledAt = if (alreadyTaken) null else scheduledAt,
+                    sectionId = draft.sectionId,
+                    scoringSystem = latest?.scoringSystem,
                 ),
-                parts,
+                newParts,
             )
             onCreated(id)
         }

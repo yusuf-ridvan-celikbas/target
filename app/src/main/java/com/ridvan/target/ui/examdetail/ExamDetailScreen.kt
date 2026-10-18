@@ -89,6 +89,7 @@ fun ExamDetailScreen(
 ) {
     val mockExams by viewModel.mockExams.collectAsStateWithLifecycle()
     var mockExamDraft by remember { mutableStateOf<MockExamDraft?>(null) }
+    var pickingMockSection by remember { mutableStateOf(false) }
     var mockExamsExpanded by remember { mutableStateOf(true) }
     val defaultMockExamName = stringResource(R.string.mockexam_default_name)
     val exam by viewModel.exam.collectAsStateWithLifecycle()
@@ -213,13 +214,14 @@ fun ExamDetailScreen(
                 }
             }
 
-            if (!isLanguageExam && currentExam != null && !currentExam.hasSections) {
+            if (currentExam != null) {
                 item {
                     GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
                         SectionHeader(
                             stringResource(R.string.mockexam_section_title),
                             onAddClick = {
-                                viewModel.loadMockExamDraft({ n -> defaultMockExamName.format(n) }) { mockExamDraft = it }
+                                if (currentExam.hasSections) pickingMockSection = true
+                                else viewModel.loadMockExamDraft(null, isLanguageExam, { n -> defaultMockExamName.format(n) }) { mockExamDraft = it }
                             },
                             expanded = mockExamsExpanded,
                             onToggleExpand = { mockExamsExpanded = !mockExamsExpanded },
@@ -279,17 +281,42 @@ fun ExamDetailScreen(
         )
     }
 
+    if (pickingMockSection) {
+        AlertDialog(
+            onDismissRequest = { pickingMockSection = false },
+            title = { Text(stringResource(R.string.mockexam_pick_section)) },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    if (sections.isEmpty()) Text(stringResource(R.string.mockexam_no_sections))
+                    sections.forEach { section ->
+                        ListItem(
+                            headlineContent = { Text(section.name) },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            modifier = Modifier.clickable {
+                                pickingMockSection = false
+                                viewModel.loadMockExamDraft(section.id, false, { n -> defaultMockExamName.format(n) }) { mockExamDraft = it }
+                            },
+                        )
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { pickingMockSection = false }) { Text(stringResource(R.string.common_cancel)) }
+            },
+        )
+    }
+
     mockExamDraft?.let { draft ->
         NewMockExamDialog(
-            courses = courses,
             draft = draft,
-            onSave = { name, publisher, limit, counts, scheduledAt ->
+            onSave = { name, publisher, limit, parts, scheduledAt ->
                 mockExamDraft = null
-                viewModel.createMockExam(name, publisher, limit, counts, alreadyTaken = false, scheduledAt = scheduledAt, onCreated = onMockExamClick)
+                viewModel.createMockExam(draft, name, publisher, limit, parts, alreadyTaken = false, scheduledAt = scheduledAt, onCreated = onMockExamClick)
             },
-            onAlreadyTaken = { name, publisher, limit, counts ->
+            onAlreadyTaken = { name, publisher, limit, parts ->
                 mockExamDraft = null
-                viewModel.createMockExam(name, publisher, limit, counts, alreadyTaken = true, scheduledAt = null, onCreated = onMockExamClick)
+                viewModel.createMockExam(draft, name, publisher, limit, parts, alreadyTaken = true, scheduledAt = null, onCreated = onMockExamClick)
             },
             onDismiss = { mockExamDraft = null },
         )
@@ -455,6 +482,7 @@ private fun CourseRow(course: ExamCourseWithCourse, onClick: () -> Unit, onRemov
 private fun MockExamRow(summary: MockExamSummary, onClick: () -> Unit) {
     val mock = summary.mockExam
     ListItem(
+        overlineContent = summary.sectionName?.let { { Text(it) } },
         headlineContent = { Text(mock.name) },
         supportingContent = {
             Text(

@@ -128,7 +128,7 @@ fun MockExamTimerScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         CourseIconAvatar(part.courseIcon)
-                        Text(courseDisplayName(part.courseName), modifier = Modifier.weight(1f).padding(start = 8.dp))
+                        Text(partLabel(part), modifier = Modifier.weight(1f).padding(start = 8.dp))
                         Text(countText(R.plurals.count_questions, part.part.questionCount))
                     }
                 }

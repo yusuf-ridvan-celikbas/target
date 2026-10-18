@@ -68,12 +68,12 @@ fun MockExamDetailScreen(
     val mockExam by viewModel.mockExam.collectAsStateWithLifecycle()
     val parts by viewModel.parts.collectAsStateWithLifecycle()
     val topicResults by viewModel.topicResults.collectAsStateWithLifecycle()
-    val exam by viewModel.exam.collectAsStateWithLifecycle()
+    val tytSource by viewModel.tytSource.collectAsStateWithLifecycle()
 
     var menuOpen by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    var showAlesDialog by remember { mutableStateOf(false) }
+    var showScoringDialog by remember { mutableStateOf(false) }
     var showStartConfirm by remember { mutableStateOf(false) }
     var editingPart by remember { mutableStateOf<MockExamPartWithCourse?>(null) }
     var addingTopicsTo by remember { mutableStateOf<MockExamPartWithCourse?>(null) }
@@ -98,8 +98,8 @@ fun MockExamDetailScreen(
                             onClick = { menuOpen = false; showInfoDialog = true },
                         )
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.mockexam_ales_settings)) },
-                            onClick = { menuOpen = false; showAlesDialog = true },
+                            text = { Text(stringResource(R.string.mockexam_scoring)) },
+                            onClick = { menuOpen = false; showScoringDialog = true },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.common_delete)) },
@@ -179,9 +179,9 @@ fun MockExamDetailScreen(
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
-                val currentExam = exam
-                if (current.status == MockExamStatus.FINISHED && currentExam != null && currentExam.alesScoring) {
-                    AlesScoreCard(parts)
+                val system = current.scoringSystem
+                if (current.status == MockExamStatus.FINISHED && system != null) {
+                    ScoreCard(system, parts, tytSource)
                 }
             }
 
@@ -191,7 +191,7 @@ fun MockExamDetailScreen(
                 GroupedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
                     ListItem(
                         leadingContent = { CourseIconAvatar(part.courseIcon) },
-                        headlineContent = { Text(courseDisplayName(part.courseName)) },
+                        headlineContent = { Text(partLabel(part)) },
                         supportingContent = {
                             Column {
                                 Text(
@@ -214,36 +214,38 @@ fun MockExamDetailScreen(
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         modifier = Modifier.clickable { editingPart = part },
                     )
-                    HorizontalDivider()
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            stringResource(R.string.topic_breakdown_section_title),
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.weight(1f),
-                        )
-                        TextButton(onClick = { addingTopicsTo = part }) {
-                            Text(stringResource(R.string.action_add_topic_breakdown))
+                    if (p.courseId != null) {
+                        HorizontalDivider()
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(R.string.topic_breakdown_section_title),
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            TextButton(onClick = { addingTopicsTo = part }) {
+                                Text(stringResource(R.string.action_add_topic_breakdown))
+                            }
                         }
-                    }
-                    partTopics.forEach { topic ->
-                        ListItem(
-                            headlineContent = { Text(topic.topicName) },
-                            supportingContent = {
-                                Text(
-                                    stringResource(
-                                        R.string.topic_result_row_summary,
-                                        countText(R.plurals.count_questions, topic.result.questionCount),
-                                        topic.result.correctCount,
-                                        topic.result.wrongCount,
+                        partTopics.forEach { topic ->
+                            ListItem(
+                                headlineContent = { Text(topic.topicName) },
+                                supportingContent = {
+                                    Text(
+                                        stringResource(
+                                            R.string.topic_result_row_summary,
+                                            countText(R.plurals.count_questions, topic.result.questionCount),
+                                            topic.result.correctCount,
+                                            topic.result.wrongCount,
+                                        )
                                     )
-                                )
-                            },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier.clickable { editingTopic = topic },
-                        )
+                                },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                                modifier = Modifier.clickable { editingTopic = topic },
+                            )
+                        }
                     }
                 }
             }
@@ -262,7 +264,7 @@ fun MockExamDetailScreen(
     }
 
     addingTopicsTo?.let { part ->
-        val allTopics by remember(part.part.courseId) { viewModel.topicsForCourse(part.part.courseId) }
+        val allTopics by remember(part.part.courseId) { viewModel.topicsForCourse(part.part.courseId ?: 0) }
             .collectAsState(initial = emptyList())
         val added = topicResults.filter { it.result.mockExamPartId == part.part.id }.map { it.result.topicId }.toSet()
         AddTopicResultDialog(
@@ -311,15 +313,16 @@ fun MockExamDetailScreen(
         }
     }
 
-    if (showAlesDialog) {
-        exam?.let { current ->
-            AlesSettingsDialog(
-                enabled = current.alesScoring,
-                onSave = { enabled ->
-                    viewModel.updateAlesScoring(enabled)
-                    showAlesDialog = false
+    if (showScoringDialog) {
+        mockExam?.let { current ->
+            ScoringDialog(
+                current = current.scoringSystem,
+                parts = parts,
+                onSave = { system, tests ->
+                    viewModel.updateScoring(system, tests)
+                    showScoringDialog = false
                 },
-                onDismiss = { showAlesDialog = false },
+                onDismiss = { showScoringDialog = false },
             )
         }
     }
@@ -390,7 +393,7 @@ private fun EditPartDialog(
     AlertDialog(
         properties = FormDialogProperties,
         onDismissRequest = onDismiss,
-        title = { Text(courseDisplayName(part.courseName)) },
+        title = { Text(partLabel(part)) },
         text = {
             Column(modifier = Modifier.imePadding().verticalScroll(rememberScrollState())) {
                 NumberField(questionsText, { questionsText = it }, stringResource(R.string.label_question_count))

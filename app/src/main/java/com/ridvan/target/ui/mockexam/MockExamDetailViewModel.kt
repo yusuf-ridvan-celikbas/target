@@ -8,17 +8,19 @@ import androidx.navigation.toRoute
 import com.ridvan.target.TargetApplication
 import com.ridvan.target.data.local.dao.MockExamPartWithCourse
 import com.ridvan.target.data.local.dao.MockExamTopicResultWithTopic
-import com.ridvan.target.data.local.entity.Exam
 import com.ridvan.target.data.local.entity.MockExam
 import com.ridvan.target.data.local.entity.MockExamPart
 import com.ridvan.target.data.local.entity.MockExamStatus
 import com.ridvan.target.data.local.entity.MockExamTopicResult
+import com.ridvan.target.data.local.entity.ScoringSystem
+import com.ridvan.target.data.local.entity.ScoringTest
 import com.ridvan.target.data.local.entity.Topic
 import com.ridvan.target.ui.navigation.MockExamDetailRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -32,14 +34,20 @@ class MockExamDetailViewModel(
     private val database = (application as TargetApplication).database
     private val mockExamDao = database.mockExamDao()
     private val topicDao = database.topicDao()
-    private val examDao = database.examDao()
 
     val mockExam: StateFlow<MockExam?> = mockExamDao.getById(mockExamId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    /** For an AYT-scored deneme: the latest finished TYT deneme of the same exam and its nets by test. */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val exam: StateFlow<Exam?> = mockExam
-        .flatMapLatest { mock -> mock?.let { examDao.getById(it.examId) } ?: flowOf(null) }
+    val tytSource: StateFlow<Pair<MockExam, Map<ScoringTest, Double>>?> = mockExam
+        .flatMapLatest { mock ->
+            if (mock?.scoringSystem != ScoringSystem.AYT) flowOf(null)
+            else mockExamDao.getLatestFinishedTyt(mock.examId).flatMapLatest { tyt ->
+                if (tyt == null) flowOf(null)
+                else mockExamDao.getParts(tyt.id).map { parts -> tyt to netsByTest(parts.map { it.part }) }
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val parts: StateFlow<List<MockExamPartWithCourse>> = mockExamDao.getParts(mockExamId)
@@ -72,11 +80,14 @@ class MockExamDetailViewModel(
         }
     }
 
-    /** Saved on the exam, so every mock exam of it gets the ALES score card. */
-    fun updateAlesScoring(enabled: Boolean) {
+    /** Sets the score system and what each part counts as (part id -> test, missing = not counted). */
+    fun updateScoring(system: ScoringSystem?, tests: Map<Long, ScoringTest?>) {
         viewModelScope.launch {
-            val current = exam.value ?: return@launch
-            examDao.update(current.copy(alesScoring = enabled))
+            val current = mockExam.value ?: return@launch
+            mockExamDao.updateWithParts(
+                current.copy(scoringSystem = system),
+                parts.value.map { it.part.copy(scoringTest = if (system == null) null else tests[it.part.id]) },
+            )
         }
     }
 
