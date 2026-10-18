@@ -1,6 +1,5 @@
 package com.ridvan.target.ui.mockexam
 
-import com.ridvan.target.data.local.entity.Exam
 import java.util.Locale
 
 /** Turkish exam net: correct − wrong ÷ 4. */
@@ -10,32 +9,16 @@ fun mockExamBlank(questions: Int, correct: Int, wrong: Int): Int = (questions - 
 
 fun formatNet(net: Double): String = String.format(Locale.getDefault(), "%.2f", net)
 
-/** ALES score types and how much the Quantitative (Math) and Verbal nets weigh in each. */
-enum class AlesScoreType(val quantitativeWeight: Double, val verbalWeight: Double) {
-    QUANTITATIVE(0.75, 0.25),
-    VERBAL(0.25, 0.75),
-    EQUAL_WEIGHT(0.5, 0.5),
-}
-
-fun alesWeightedNet(type: AlesScoreType, quantitativeNet: Double, verbalNet: Double): Double =
-    type.quantitativeWeight * quantitativeNet + type.verbalWeight * verbalNet
-
 /**
- * ÖSYM converts weighted nets with term-specific means/deviations the app can't know offline,
- * so the estimate uses the user's own base + coefficient and is kept inside ALES's 50–100 range.
+ * ALES score types with ÖSYM's 2026-2 term conversion: score = base + Quantitative net × quantitative
+ * + Verbal net × verbal, capped at 100. Fitted to ales-puan.hesaplama.net (matches it to 4 decimals);
+ * the real conversion shifts a little every term.
  */
-fun alesEstimate(base: Double, coefficient: Double, weightedNet: Double): Double =
-    (base + coefficient * weightedNet).coerceIn(50.0, 100.0)
-
-/** Accepts "0,75" or "0.75"; null when blank or not a number. */
-fun parseDecimal(text: String): Double? = text.trim().replace(',', '.').toDoubleOrNull()
-
-/** The user's base/coefficient pair for a score type, or null while either is missing. */
-fun Exam.alesConversion(type: AlesScoreType): Pair<Double, Double>? {
-    val (base, coef) = when (type) {
-        AlesScoreType.QUANTITATIVE -> alesSayBase to alesSayCoef
-        AlesScoreType.VERBAL -> alesSozBase to alesSozCoef
-        AlesScoreType.EQUAL_WEIGHT -> alesEaBase to alesEaCoef
-    }
-    return if (base != null && coef != null) base to coef else null
+enum class AlesScoreType(val base: Double, val quantitative: Double, val verbal: Double) {
+    QUANTITATIVE(45.56100, 0.81185475, 0.31648600),
+    VERBAL(38.00059, 0.30187425, 1.05911925),
+    EQUAL_WEIGHT(43.31196, 0.56035075, 0.65532600),
 }
+
+fun alesScore(type: AlesScoreType, quantitativeNet: Double, verbalNet: Double): Double =
+    (type.base + type.quantitative * quantitativeNet + type.verbal * verbalNet).coerceIn(0.0, 100.0)

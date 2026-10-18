@@ -181,7 +181,7 @@ fun MockExamDetailScreen(
                 }
                 val currentExam = exam
                 if (current.status == MockExamStatus.FINISHED && currentExam != null && currentExam.alesScoring) {
-                    AlesScoreCard(currentExam, parts)
+                    AlesScoreCard(parts)
                 }
             }
 
@@ -314,9 +314,9 @@ fun MockExamDetailScreen(
     if (showAlesDialog) {
         exam?.let { current ->
             AlesSettingsDialog(
-                exam = current,
-                onSave = { enabled, coefficients ->
-                    viewModel.updateAlesScoring(enabled, coefficients)
+                enabled = current.alesScoring,
+                onSave = { enabled ->
+                    viewModel.updateAlesScoring(enabled)
                     showAlesDialog = false
                 },
                 onDismiss = { showAlesDialog = false },

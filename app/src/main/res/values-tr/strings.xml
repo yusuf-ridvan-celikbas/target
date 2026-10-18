@@ -1241,18 +1241,12 @@
     <string name="mockexam_ales_settings">ALES puanlama</string>
     <string name="mockexam_ales_enable">ALES olarak puanla</string>
     <string name="mockexam_ales_enable_hint">Bu sınavın tüm denemelerine uygulanır. Dersler kategorisine göre Sayısal veya Sözel sayılır.</string>
-    <string name="mockexam_ales_conversion_hint">İsteğe bağlı: bir dönemin dönüşümü. Tahmin = taban + katsayı × ağırlıklı net, 50–100 aralığında tutulur.</string>
-    <string name="mockexam_ales_base">Taban</string>
-    <string name="mockexam_ales_coef">Katsayı</string>
     <string name="mockexam_ales_type_quantitative">Sayısal (SAY)</string>
     <string name="mockexam_ales_type_verbal">Sözel (SÖZ)</string>
     <string name="mockexam_ales_type_equal">Eşit Ağırlık (EA)</string>
     <string name="mockexam_ales_title">ALES puanı</string>
     <string name="mockexam_ales_nets">Sayısal net %1$s · Sözel net %2$s</string>
-    <string name="mockexam_ales_weighted">Ağırlıklı net %1$s</string>
-    <string name="mockexam_ales_estimate">≈ %1$s</string>
-    <string name="mockexam_ales_no_conversion">Tahmini 50–100 puan için ⋮ → ALES puanlama bölümünden taban ve katsayı girin.</string>
-    <string name="mockexam_ales_estimate_note">Yalnızca tahmin: ÖSYM dönüşümü her dönem değişir.</string>
+    <string name="mockexam_ales_term_note">ÖSYM 2026-2 dönem dönüşümüyle hesaplanır; gerçek puan her dönem biraz değişir.</string>
     <string name="mockexam_ales_uncategorized">Sayılmadı (Sayısal/Sözel kategorisi yok): %1$s</string>
     <string name="notif_mock_exam_title">Deneme zamanı: %1$s</string>
     <string name="notif_mock_exam_body">Başlatmak için Target uygulamasını aç.</string>

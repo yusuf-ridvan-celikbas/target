@@ -43,7 +43,7 @@ data class Exam(
     val createdAt: Long = System.currentTimeMillis(),
     /** Mock exams of this exam get an ALES score card (courses split by Quantitative/Verbal category). */
     @ColumnInfo(defaultValue = "0") val alesScoring: Boolean = false,
-    /** Optional per-term conversion typed in by the user: score ≈ base + coef × weighted net. */
+    /** Unused (v35 leftovers from typed-in coefficients); the conversion is built into AlesScoreType. */
     val alesSayBase: Double? = null,
     val alesSayCoef: Double? = null,
     val alesSozBase: Double? = null,

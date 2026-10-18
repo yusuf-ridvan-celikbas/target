@@ -1,36 +1,26 @@
 package com.ridvan.target.ui.mockexam
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 class MockExamMathTest {
     @Test
     fun netSubtractsAQuarterOfWrong() {
-        assertEquals(37.0, mockExamNet(40, 12), 1e-9)
+        assertEquals(31.0, mockExamNet(33, 8), 1e-9)
     }
 
     @Test
-    fun weightedNetsFollowScoreTypeWeights() {
-        val q = 40.0
-        val v = 20.0
-        assertEquals(35.0, alesWeightedNet(AlesScoreType.QUANTITATIVE, q, v), 1e-9)
-        assertEquals(25.0, alesWeightedNet(AlesScoreType.VERBAL, q, v), 1e-9)
-        assertEquals(30.0, alesWeightedNet(AlesScoreType.EQUAL_WEIGHT, q, v), 1e-9)
+    fun scoresMatchTheReferenceCalculator() {
+        // ales-puan.hesaplama.net, term 2026-2
+        assertEquals(73.23287, alesScore(AlesScoreType.QUANTITATIVE, 22.0, 31.0), 1e-3)
+        assertEquals(77.47453, alesScore(AlesScoreType.VERBAL, 22.0, 31.0), 1e-3)
+        assertEquals(75.95478, alesScore(AlesScoreType.EQUAL_WEIGHT, 22.0, 31.0), 1e-3)
+        assertEquals(68.12782, alesScore(AlesScoreType.QUANTITATIVE, 20.0, 20.0), 1e-3)
+        assertEquals(75.81166, alesScore(AlesScoreType.VERBAL, 20.0, 30.0), 1e-3)
     }
 
     @Test
-    fun estimateIsClampedTo50To100() {
-        assertEquals(80.0, alesEstimate(50.0, 1.0, 30.0), 1e-9)
-        assertEquals(100.0, alesEstimate(50.0, 2.0, 30.0), 1e-9)
-        assertEquals(50.0, alesEstimate(45.0, 1.0, -5.0), 1e-9)
-    }
-
-    @Test
-    fun parseDecimalAcceptsCommaAndDot() {
-        assertEquals(0.75, parseDecimal("0,75")!!, 1e-9)
-        assertEquals(42.5, parseDecimal(" 42.5 ")!!, 1e-9)
-        assertNull(parseDecimal(""))
-        assertNull(parseDecimal("abc"))
+    fun scoreIsCappedAt100() {
+        assertEquals(100.0, alesScore(AlesScoreType.EQUAL_WEIGHT, 50.0, 50.0), 1e-9)
     }
 }

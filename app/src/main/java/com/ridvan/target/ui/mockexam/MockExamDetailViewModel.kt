@@ -72,21 +72,11 @@ class MockExamDetailViewModel(
         }
     }
 
-    /** Saved on the exam, so every mock exam of it shares the setting. Coefficients come as base/coef pairs. */
-    fun updateAlesScoring(enabled: Boolean, coefficients: Map<AlesScoreType, Pair<Double?, Double?>>) {
+    /** Saved on the exam, so every mock exam of it gets the ALES score card. */
+    fun updateAlesScoring(enabled: Boolean) {
         viewModelScope.launch {
             val current = exam.value ?: return@launch
-            examDao.update(
-                current.copy(
-                    alesScoring = enabled,
-                    alesSayBase = coefficients[AlesScoreType.QUANTITATIVE]?.first,
-                    alesSayCoef = coefficients[AlesScoreType.QUANTITATIVE]?.second,
-                    alesSozBase = coefficients[AlesScoreType.VERBAL]?.first,
-                    alesSozCoef = coefficients[AlesScoreType.VERBAL]?.second,
-                    alesEaBase = coefficients[AlesScoreType.EQUAL_WEIGHT]?.first,
-                    alesEaCoef = coefficients[AlesScoreType.EQUAL_WEIGHT]?.second,
-                )
-            )
+            examDao.update(current.copy(alesScoring = enabled))
         }
     }
 
