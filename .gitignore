@@ -17,3 +17,6 @@ local.properties
 *.jks
 *.keystore
 app/release/
+
+# Claude Code project notes (kept local)
+CLAUDE.md
