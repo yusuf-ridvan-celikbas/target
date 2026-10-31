@@ -5,6 +5,9 @@ import com.ridvan.target.ui.reading.pagesRead
 import com.ridvan.target.data.local.dao.FocusSessionWithLinks
 import com.ridvan.target.data.local.dao.PlannerEventWithLinks
 import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
+import com.ridvan.target.data.local.dao.MockExamSummary
+import java.time.Instant
+import java.time.ZoneId
 import com.ridvan.target.data.local.entity.PlannerEvent
 import com.ridvan.target.data.local.entity.PlannerEventCompletion
 import java.time.LocalDate
@@ -72,9 +75,17 @@ data class StudiedPreview(
 fun studiedPreview(
     focusSessions: List<FocusSessionWithLinks>,
     practiceLogs: List<PracticeLogPlannerRow>,
+    mockExams: List<MockExamSummary> = emptyList(),
 ): StudiedPreview {
     val today = LocalDate.now()
-    val (weekReading, weekStudy) = studiedItemsInRange(focusSessions, practiceLogs, mondayOf(today)..today)
+    val week = mondayOf(today)..today
+    val mockItems = mockExams.mapNotNull { summary ->
+        val at = Instant.ofEpochMilli(summary.mockExam.takenAt).atZone(ZoneId.systemDefault())
+        if (at.toLocalDate() !in week) return@mapNotNull null
+        val label = summary.sectionName?.let { "${summary.examName} – $it" } ?: summary.examName
+        PlannerAgendaItem.MockExamFinishedEntry(summary, label, at.toLocalDate(), at.hour * 60 + at.minute)
+    }
+    val (weekReading, weekStudy) = (studiedItemsInRange(focusSessions, practiceLogs, week) + mockItems)
         .partition { it.isReading }
     val todayStudy = weekStudy.filter { it.date == today }.sortedBy { it.minuteOfDay }
     val todayReading = weekReading.filter { it.date == today }.sortedBy { it.minuteOfDay }

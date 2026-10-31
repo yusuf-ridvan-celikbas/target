@@ -22,6 +22,9 @@ import com.ridvan.target.ui.common.formatTime
 import com.ridvan.target.ui.focustimer.focusSessionTitle
 import com.ridvan.target.ui.planner.PlannerAgendaItem
 import com.ridvan.target.ui.planner.StudiedPreview
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import com.ridvan.target.ui.mockexam.formatNet
+import com.ridvan.target.ui.mockexam.mockExamNet
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -90,6 +93,7 @@ fun HomeScreen(
     shellNavigation: ShellNavigation,
     onExamClick: (Long) -> Unit,
     onSectionClick: (Long) -> Unit,
+    onMockExamClick: (Long) -> Unit,
     onFocusSessionClick: (Long) -> Unit,
     onPracticeSessionClick: (Long) -> Unit,
     onBookClick: (Long) -> Unit,
@@ -191,7 +195,11 @@ fun HomeScreen(
                                 showSeeAll = upcomingEvents.size > shown.size,
                                 onSeeAll = shellNavigation.onNavigateExams,
                                 onEventClick = { event ->
-                                    if (event.sectionId != null) onSectionClick(event.sectionId) else onExamClick(event.examId)
+                                    when {
+                                        event.mockExamId != null -> onMockExamClick(event.mockExamId)
+                                        event.sectionId != null -> onSectionClick(event.sectionId)
+                                        else -> onExamClick(event.examId)
+                                    }
                                 },
                             )
                         }
@@ -226,6 +234,7 @@ fun HomeScreen(
                                     when (item) {
                                         is PlannerAgendaItem.FocusSessionEntry -> onFocusSessionClick(item.item.session.id)
                                         is PlannerAgendaItem.PracticeLogEntry -> onPracticeSessionClick(item.row.practiceLog.studyResourceTopicId)
+                                        is PlannerAgendaItem.MockExamFinishedEntry -> onMockExamClick(item.summary.mockExam.id)
                                     }
                                 },
                             )
@@ -542,6 +551,14 @@ private fun StudiedPreviewRow(item: PlannerAgendaItem.Studied, onClick: () -> Un
             listOfNotNull(item.row.courseName?.let { courseDisplayName(it) } ?: item.row.languageName, item.row.topicName)
                 .joinToString(" · "),
             item.row.practiceLog.loggedAt,
+        )
+        is PlannerAgendaItem.MockExamFinishedEntry -> Triple(
+            Icons.AutoMirrored.Filled.Assignment,
+            "${item.summary.mockExam.name} · " + stringResource(
+                R.string.mockexam_total_net,
+                formatNet(mockExamNet(item.summary.correctCount, item.summary.wrongCount)),
+            ),
+            item.summary.mockExam.takenAt,
         )
     }
     val interactionSource = remember { MutableInteractionSource() }

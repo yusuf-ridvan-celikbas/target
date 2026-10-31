@@ -45,6 +45,14 @@ sealed interface PlannerAgendaItem {
         override val date: LocalDate,
     ) : PlannerAgendaItem
 
+    /** A planned mock exam on its scheduled day; [label] is the exam (and section) it belongs to. */
+    data class MockExamPlannedEntry(
+        val mockExam: com.ridvan.target.data.local.entity.MockExam,
+        val label: String,
+        override val date: LocalDate,
+        val minuteOfDay: Int,
+    ) : PlannerAgendaItem
+
     data class SectionEntry(
         val examId: Long,
         val sectionId: Long,
@@ -89,6 +97,16 @@ sealed interface PlannerAgendaItem {
     ) : Studied {
         override val studiedMinutes: Int get() = item.session.totalWorkMinutes
         override val isReading: Boolean get() = item.session.isReading
+    }
+
+    /** A finished mock exam on the day it was taken, counted as studied time. */
+    data class MockExamFinishedEntry(
+        val summary: com.ridvan.target.data.local.dao.MockExamSummary,
+        val label: String,
+        override val date: LocalDate,
+        override val minuteOfDay: Int,
+    ) : Studied {
+        override val studiedMinutes: Int get() = summary.mockExam.durationMinutes
     }
 
     data class PracticeLogEntry(

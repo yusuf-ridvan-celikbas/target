@@ -12,6 +12,8 @@ import com.ridvan.target.data.local.dao.PracticeLogPlannerRow
 import com.ridvan.target.data.local.dao.PlannerEventWithLinks
 import com.ridvan.target.data.local.dao.TripActivityWithTrip
 import com.ridvan.target.data.local.dao.TripBookingWithTrip
+import com.ridvan.target.data.local.dao.MockExamSummary
+import com.ridvan.target.data.local.entity.MockExam
 import com.ridvan.target.data.local.entity.Trip
 import java.time.temporal.ChronoUnit
 import com.ridvan.target.data.local.entity.Course
@@ -47,6 +49,8 @@ private data class PlannerRawData(
     val completions: List<PlannerEventCompletion>,
     val exams: List<ExamWithType>,
     val sections: List<Section>,
+    val plannedMockExams: List<MockExam>,
+    val finishedMockExams: List<MockExamSummary>,
     val focusSessions: List<FocusSessionWithLinks>,
     val practiceLogs: List<PracticeLogPlannerRow>,
     val trips: List<Trip>,
@@ -56,6 +60,13 @@ private data class PlannerRawData(
     val routineSteps: List<RoutineStep>,
     val routineCompletions: List<RoutineStepCompletion>,
     val workouts: List<com.ridvan.target.data.local.entity.Workout>,
+)
+
+private data class ExamData(
+    val exams: List<ExamWithType>,
+    val sections: List<Section>,
+    val plannedMockExams: List<MockExam>,
+    val finishedMockExams: List<MockExamSummary>,
 )
 
 class PlannerHomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -90,10 +101,13 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
         userId?.let { database.workoutDao().getByUserId(it) } ?: flowOf(emptyList()),
     ) { focus, practice, workouts -> Triple(focus, practice, workouts) }
 
+    private val mockExamDao = database.mockExamDao()
     private val examData = combine(
         userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()),
-    ) { exams, sections -> exams to sections }
+        userId?.let { mockExamDao.getScheduledForUser(it) } ?: flowOf(emptyList()),
+        userId?.let { mockExamDao.getSummariesForUser(it) } ?: flowOf(emptyList()),
+    ) { exams, sections, planned, finished -> ExamData(exams, sections, planned, finished) }
 
     private val tripData = combine(
         userId?.let { tripDao.getByUserId(it) } ?: flowOf(emptyList()),
@@ -116,10 +130,10 @@ class PlannerHomeViewModel(application: Application) : AndroidViewModel(applicat
         examData,
         studiedData,
         tripAndRoutineData,
-    ) { events, completions, (exams, sections), (focus, practice, workouts), (trip, routine) ->
+    ) { events, completions, (exams, sections, planned, finished), (focus, practice, workouts), (trip, routine) ->
         val (trips, activities, bookings) = trip
         val (routines, routineSteps, routineCompletions) = routine
-        PlannerRawData(events, completions, exams, sections, focus, practice, trips, activities, bookings, routines, routineSteps, routineCompletions, workouts)
+        PlannerRawData(events, completions, exams, sections, planned, finished, focus, practice, trips, activities, bookings, routines, routineSteps, routineCompletions, workouts)
     }
 
     private val modeAndDate = combine(_viewMode, _anchorDate) { mode, date -> mode to date }
@@ -232,8 +246,29 @@ private fun buildAgendaItems(raw: PlannerRawData, range: ClosedRange<LocalDate>)
 
     val studiedItems = studiedItemsInRange(raw.focusSessions, raw.practiceLogs, range)
 
-    return (eventItems + examItems + sectionItems + studiedItems + tripItemsInRange(raw, range) + routineItemsInRange(raw, range) + workoutItemsInRange(raw, range))
+    return (eventItems + examItems + sectionItems + mockExamItemsInRange(raw, examLabels, range) + studiedItems + tripItemsInRange(raw, range) + routineItemsInRange(raw, range) + workoutItemsInRange(raw, range))
         .sortedBy { it.date }
+}
+
+/** Planned mock exams on their scheduled day (also in Year), finished ones on the day taken (Week/Month only, like workouts). */
+private fun mockExamItemsInRange(raw: PlannerRawData, examLabels: Map<Long, String>, range: ClosedRange<LocalDate>): List<PlannerAgendaItem> {
+    val sectionNames = raw.sections.associate { it.id to it.name }
+    fun label(mock: MockExam): String {
+        val exam = examLabels[mock.examId].orEmpty()
+        return mock.sectionId?.let { sectionNames[it] }?.let { "$exam – $it" } ?: exam
+    }
+    val planned = raw.plannedMockExams.mapNotNull { mock ->
+        val at = Instant.ofEpochMilli(mock.scheduledAt ?: return@mapNotNull null).atZone(ZoneId.systemDefault())
+        if (at.toLocalDate() !in range) null
+        else PlannerAgendaItem.MockExamPlannedEntry(mock, label(mock), at.toLocalDate(), at.hour * 60 + at.minute)
+    }
+    if (range.endInclusive.toEpochDay() - range.start.toEpochDay() > 60) return planned
+    val finished = raw.finishedMockExams.mapNotNull { summary ->
+        val at = Instant.ofEpochMilli(summary.mockExam.takenAt).atZone(ZoneId.systemDefault())
+        if (at.toLocalDate() !in range) null
+        else PlannerAgendaItem.MockExamFinishedEntry(summary, label(summary.mockExam), at.toLocalDate(), at.hour * 60 + at.minute)
+    }
+    return planned + finished
 }
 
 /** Workouts starting inside [range]; Week/Month only, so a busy year doesn't flood the Year list. */
@@ -312,7 +347,8 @@ private fun PlannerAgendaItem.agendaGroup(): AgendaGroup? = when (this) {
     is PlannerAgendaItem.EventOccurrence -> null
     is PlannerAgendaItem.RoutineEntry -> AgendaGroup.ROUTINES
     is PlannerAgendaItem.WorkoutEntry -> AgendaGroup.SPORTS
-    is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
+    is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry, is PlannerAgendaItem.MockExamPlannedEntry -> AgendaGroup.EXAMS
+    is PlannerAgendaItem.MockExamFinishedEntry -> AgendaGroup.PRACTICE
     is PlannerAgendaItem.TripDayEntry, is PlannerAgendaItem.TripActivityEntry, is PlannerAgendaItem.TripBookingEntry -> AgendaGroup.TRIPS
     is PlannerAgendaItem.FocusSessionEntry -> if (isReading) AgendaGroup.READING else AgendaGroup.FOCUS
     is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE

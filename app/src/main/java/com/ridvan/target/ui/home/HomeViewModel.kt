@@ -58,6 +58,8 @@ data class UpcomingEvent(
     val sectionId: Long?,
     val label: String,
     val date: Long,
+    /** Set for a planned mock exam (date = its scheduled start). */
+    val mockExamId: Long? = null,
 )
 
 /** How far ahead Home's Planner preview looks — enough to matter without turning into the
@@ -137,10 +139,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { userDao.setHomeLayout(id, null) }
     }
 
+    private val mockExamDao = targetApplication.database.mockExamDao()
+
     val upcomingEvents: StateFlow<List<UpcomingEvent>> = combine(
         userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()),
-    ) { exams, sections ->
+        userId?.let { mockExamDao.getScheduledForUser(it) } ?: flowOf(emptyList()),
+    ) { exams, sections, plannedMocks ->
         val today = startOfTodayMillis()
         val examEvents = exams
             .filter { !it.exam.hasSections && it.exam.examDate != null && it.exam.examDate >= today }
@@ -153,7 +158,16 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     UpcomingEvent(section.examId, section.id, "$examLabel – ${section.name}", section.date!!)
                 }
             }
-        (examEvents + sectionEvents).sortedBy { it.date }
+        val sectionNames = sections.associate { it.id to it.name }
+        val mockEvents = plannedMocks
+            .filter { it.scheduledAt != null && it.scheduledAt >= today }
+            .mapNotNull { mock ->
+                examLabels[mock.examId]?.let { examLabel ->
+                    val owner = mock.sectionId?.let { sectionNames[it] }?.let { "$examLabel – $it" } ?: examLabel
+                    UpcomingEvent(mock.examId, mock.sectionId, "${mock.name} · $owner", mock.scheduledAt!!, mockExamId = mock.id)
+                }
+            }
+        (examEvents + sectionEvents + mockEvents).sortedBy { it.date }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val upcomingPlannerEvents: StateFlow<List<PlannerPreviewOccurrence>> = combine(
@@ -203,7 +217,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val studied: StateFlow<StudiedPreview> = combine(
         userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
-    ) { focus, practice -> studiedPreview(focus, practice) }
+        userId?.let { mockExamDao.getSummariesForUser(it) } ?: flowOf(emptyList()),
+    ) { focus, practice, mocks -> studiedPreview(focus, practice, mocks) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudiedPreview(emptyList(), 0, 0))
 
     private val workoutDao = targetApplication.database.workoutDao()

@@ -151,6 +151,7 @@ fun TargetNavHost() {
                 shellNavigation = shellNavigation,
                 onExamClick = { examId -> navController.navigate(ExamDetailRoute(examId)) },
                 onSectionClick = { sectionId -> navController.navigate(SectionDetailRoute(sectionId)) },
+                onMockExamClick = { id -> navController.navigate(MockExamDetailRoute(id)) },
                 onFocusSessionClick = { sessionId -> navController.navigate(FocusSessionDetailRoute(sessionId)) },
                 onPracticeSessionClick = { id -> navController.navigate(TopicProgressRoute(id)) },
                 onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
@@ -488,6 +489,7 @@ fun TargetNavHost() {
                 onTripClick = { tripId -> navController.navigate(TripDetailRoute(tripId)) },
                 onRoutineClick = { routineId, dateMillis -> navController.navigate(RoutineDetailRoute(routineId, dateMillis)) },
                 onWorkoutClick = { id -> navController.navigate(WorkoutDetailRoute(id)) },
+                onMockExamClick = { id -> navController.navigate(MockExamDetailRoute(id)) },
             )
         }
         composable<FocusTimerRoute> {

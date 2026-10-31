@@ -49,6 +49,8 @@ import com.ridvan.target.data.local.entity.PlannerEventCategory
 import com.ridvan.target.ui.common.GroupedCard
 import com.ridvan.target.ui.common.courseDisplayName
 import com.ridvan.target.ui.common.formatTime
+import com.ridvan.target.ui.mockexam.formatNet
+import com.ridvan.target.ui.mockexam.mockExamNet
 import com.ridvan.target.ui.focustimer.focusSessionStatsLine
 import com.ridvan.target.ui.focustimer.focusSessionTitle
 import com.ridvan.target.ui.trips.timeRangeText
@@ -163,7 +165,8 @@ private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
 }
 
 private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
-    is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry -> AgendaGroup.EXAMS
+    is PlannerAgendaItem.ExamEntry, is PlannerAgendaItem.SectionEntry, is PlannerAgendaItem.MockExamPlannedEntry -> AgendaGroup.EXAMS
+    is PlannerAgendaItem.MockExamFinishedEntry -> AgendaGroup.PRACTICE
     is PlannerAgendaItem.EventOccurrence -> AgendaGroup.PLANS
     is PlannerAgendaItem.RoutineEntry -> AgendaGroup.ROUTINES
     is PlannerAgendaItem.WorkoutEntry -> AgendaGroup.SPORTS
@@ -220,6 +223,7 @@ private fun sortMinute(item: PlannerAgendaItem): Int = when (item) {
     is PlannerAgendaItem.RoutineEntry -> item.routine.startMinuteOfDay ?: Int.MAX_VALUE
     is PlannerAgendaItem.Studied -> item.minuteOfDay
     is PlannerAgendaItem.WorkoutEntry -> item.minuteOfDay
+    is PlannerAgendaItem.MockExamPlannedEntry -> item.minuteOfDay
     is PlannerAgendaItem.TripDayEntry -> -1
     is PlannerAgendaItem.TripActivityEntry -> item.item.activity.startMinuteOfDay ?: Int.MAX_VALUE
     is PlannerAgendaItem.TripBookingEntry -> item.item.booking.startMinuteOfDay ?: Int.MAX_VALUE
@@ -304,6 +308,38 @@ private fun AgendaRow(
                 modifier = Modifier.clickable { onItemClick(item) },
                 leadingContent = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) },
                 headlineContent = { Text(item.label) },
+            )
+        }
+        is PlannerAgendaItem.MockExamPlannedEntry -> {
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onItemClick(item) },
+                leadingContent = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) },
+                headlineContent = { Text(item.mockExam.name) },
+                supportingContent = {
+                    Text(listOf(minuteLabel(item.minuteOfDay), item.label).joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+                },
+            )
+        }
+        is PlannerAgendaItem.MockExamFinishedEntry -> {
+            val mock = item.summary.mockExam
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onItemClick(item) },
+                leadingContent = { StudiedIcon(Icons.AutoMirrored.Filled.Assignment) },
+                headlineContent = { Text(mock.name) },
+                supportingContent = {
+                    Column {
+                        Text(listOf(item.label, formatTime(mock.takenAt)).joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            listOf(
+                                stringResource(R.string.mockexam_total_net, formatNet(mockExamNet(item.summary.correctCount, item.summary.wrongCount))),
+                                formatDuration(mock.durationMinutes),
+                            ).joinToString(" · "),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                },
             )
         }
         is PlannerAgendaItem.TripDayEntry -> TripRow(
