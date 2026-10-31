@@ -94,7 +94,7 @@ fun LiveWorkoutScreen(shellNavigation: ShellNavigation, viewModel: LiveWorkoutVi
 
     AppShell(
         navigation = shellNavigation,
-        currentDestination = ShellDestination.SPORTS,
+        currentDestination = ShellDestination.LIVE_WORKOUT,
         title = stringResource(R.string.sports_live_title),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->

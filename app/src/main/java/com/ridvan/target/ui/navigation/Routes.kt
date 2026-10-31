@@ -19,7 +19,11 @@ object HomeRoute
 object StudyHubRoute
 
 @Serializable
-object FocusHubRoute
+object LifeHubRoute
+
+/** Statistics on the Reading source alone, from the Life tab (the study statistics live in Study). */
+@Serializable
+object ReadingStatisticsRoute
 
 @Serializable
 object ExamListRoute

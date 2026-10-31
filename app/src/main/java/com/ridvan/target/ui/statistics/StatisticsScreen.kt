@@ -59,6 +59,8 @@ fun StatisticsScreen(
     onTopicClick: (Long) -> Unit,
     onBookClick: (Long) -> Unit,
     onMockExamClick: (Long) -> Unit,
+    /** Life tab's Reading stats: the Reading source only. */
+    readingOnly: Boolean = false,
     viewModel: StatisticsViewModel = viewModel(),
 ) {
     val examGroups by viewModel.examGroups.collectAsStateWithLifecycle()
@@ -69,7 +71,7 @@ fun StatisticsScreen(
     val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
     val period by viewModel.period.collectAsStateWithLifecycle()
     val storedSource by viewModel.source.collectAsStateWithLifecycle()
-    val statsSources = com.ridvan.target.ui.shell.availableStatsSources(com.ridvan.target.ui.shell.rememberEnabledModules())
+    val statsSources = com.ridvan.target.ui.shell.availableStatsSources(com.ridvan.target.ui.shell.rememberEnabledModules(), readingOnly)
     val source = if (storedSource in statsSources) storedSource else statsSources.firstOrNull() ?: storedSource
     androidx.compose.runtime.LaunchedEffect(source) { if (source != storedSource) viewModel.setSource(source) }
     val summary by viewModel.summary.collectAsStateWithLifecycle()
@@ -87,8 +89,8 @@ fun StatisticsScreen(
 
     AppShell(
         navigation = shellNavigation,
-        currentDestination = ShellDestination.STATISTICS,
-        title = stringResource(R.string.statistics_title),
+        currentDestination = if (readingOnly) ShellDestination.READING_STATS else ShellDestination.STATISTICS,
+        title = stringResource(if (readingOnly) R.string.label_reading_stats else R.string.statistics_title),
     ) { innerPadding ->
         Column(
             modifier = Modifier

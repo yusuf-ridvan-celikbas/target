@@ -42,7 +42,7 @@ import com.ridvan.target.ui.planner.PlannerHomeScreen
 import com.ridvan.target.ui.practiceexam.PracticeExamEntryDetailScreen
 import com.ridvan.target.ui.sectiondetail.SectionDetailScreen
 import com.ridvan.target.ui.settings.SettingsScreen
-import com.ridvan.target.ui.hub.FocusHubScreen
+import com.ridvan.target.ui.hub.LifeHubScreen
 import com.ridvan.target.ui.hub.PlanHubScreen
 import com.ridvan.target.ui.routines.RoutineDetailScreen
 import com.ridvan.target.ui.routines.RoutineListScreen
@@ -90,13 +90,13 @@ fun TargetNavHost() {
         ShellTab.HOME to HomeRoute,
         ShellTab.STUDY to StudyHubRoute,
         ShellTab.PLAN to PlanHubRoute,
-        ShellTab.FOCUS to FocusHubRoute,
-        ShellTab.STATS to StatisticsRoute,
+        ShellTab.HEALTH to SportsRoute,
+        ShellTab.LIFE to LifeHubRoute,
     )
     val shellNavigation = ShellNavigation(
         onNavigateHome = { navController.navigateToShellDestination(HomeRoute) },
         onNavigateStudyHub = { navController.navigateToShellDestination(StudyHubRoute) },
-        onNavigateFocusHub = { navController.navigateToShellDestination(FocusHubRoute) },
+        onNavigateLifeHub = { navController.navigateToShellDestination(LifeHubRoute) },
         onNavigatePlanHub = { navController.navigateToShellDestination(PlanHubRoute) },
         onNavigateTrips = { push(TripListRoute) },
         onNavigateRoutines = { push(RoutineListRoute) },
@@ -104,14 +104,15 @@ fun TargetNavHost() {
         onNavigateCourses = { push(CourseListRoute) },
         onNavigateStudyResources = { push(StudyResourceHomeRoute) },
         onNavigateTopics = { push(TopicHomeRoute) },
-        onNavigateStatistics = { navController.navigateToShellDestination(StatisticsRoute) },
+        onNavigateStatistics = { push(StatisticsRoute) },
         onNavigateLanguages = { push(LanguageListRoute) },
         onNavigatePlanner = { push(PlannerRoute) },
         onNavigateFocusTimer = { push(FocusTimerRoute) },
         onNavigateFlowTimer = { push(FlowTimerRoute) },
         onNavigateStudyHistory = { push(FocusHistoryHomeRoute) },
         onNavigateReading = { push(ReadingRoute) },
-        onNavigateSports = { push(SportsRoute) },
+        onNavigateReadingStats = { push(ReadingStatisticsRoute) },
+        onNavigateSports = { navController.navigateToShellDestination(SportsRoute) },
         onNavigateMoney = { push(MoneyRoute()) },
         onNavigateHelp = { push(HelpRoute) },
         onNavigateMyAccount = { push(MyAccountRoute) },
@@ -159,7 +160,7 @@ fun TargetNavHost() {
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
                 onRoutineClick = { routineId -> navController.navigate(RoutineDetailRoute(routineId)) },
                 onOpenMoney = {
-                    navController.navigateToShellDestination(PlanHubRoute)
+                    navController.navigateToShellDestination(LifeHubRoute)
                     push(MoneyRoute())
                 },
                 onShortcut = { item ->
@@ -174,23 +175,23 @@ fun TargetNavHost() {
                         HomeShortcut.EXAMS -> inTab(ShellTab.STUDY, ExamListRoute)
                         HomeShortcut.COURSES -> inTab(ShellTab.STUDY, CourseListRoute)
                         HomeShortcut.STUDY_RESOURCES -> inTab(ShellTab.STUDY, StudyResourceHomeRoute)
-                        HomeShortcut.STATISTICS -> shellNavigation.onNavigateStatistics()
+                        HomeShortcut.STATISTICS -> inTab(ShellTab.STUDY, StatisticsRoute)
                         HomeShortcut.EXAM -> inTab(ShellTab.STUDY, ExamDetailRoute(id))
                         HomeShortcut.NEW_MOCK_EXAM -> inTab(ShellTab.STUDY, ExamDetailRoute(id, openNewMockExam = true))
-                        HomeShortcut.FOCUS_TIMER -> inTab(ShellTab.FOCUS, FocusTimerRoute)
-                        HomeShortcut.FLOW_TIMER -> inTab(ShellTab.FOCUS, FlowTimerRoute)
-                        HomeShortcut.STUDY_HISTORY -> inTab(ShellTab.FOCUS, FocusHistoryHomeRoute)
-                        HomeShortcut.LIBRARY -> inTab(ShellTab.FOCUS, ReadingRoute)
-                        HomeShortcut.BOOK -> inTab(ShellTab.FOCUS, BookDetailRoute(id))
+                        HomeShortcut.FOCUS_TIMER -> inTab(ShellTab.STUDY, FocusTimerRoute)
+                        HomeShortcut.FLOW_TIMER -> inTab(ShellTab.STUDY, FlowTimerRoute)
+                        HomeShortcut.STUDY_HISTORY -> inTab(ShellTab.STUDY, FocusHistoryHomeRoute)
+                        HomeShortcut.LIBRARY -> inTab(ShellTab.LIFE, ReadingRoute)
+                        HomeShortcut.BOOK -> inTab(ShellTab.LIFE, BookDetailRoute(id))
                         HomeShortcut.PLANNER -> inTab(ShellTab.PLAN, PlannerRoute)
                         HomeShortcut.ROUTINES -> inTab(ShellTab.PLAN, RoutineListRoute)
                         HomeShortcut.ROUTINE -> inTab(ShellTab.PLAN, RoutineDetailRoute(id))
-                        HomeShortcut.TRIPS -> inTab(ShellTab.PLAN, TripListRoute)
-                        HomeShortcut.TRIP -> inTab(ShellTab.PLAN, TripDetailRoute(id))
-                        HomeShortcut.SPORTS -> inTab(ShellTab.FOCUS, SportsRoute)
-                        HomeShortcut.LIVE_WORKOUT -> inTab(ShellTab.FOCUS, LiveWorkoutRoute)
-                        HomeShortcut.MONEY -> inTab(ShellTab.PLAN, MoneyRoute())
-                        HomeShortcut.ADD_EXPENSE -> inTab(ShellTab.PLAN, MoneyRoute(addExpense = true))
+                        HomeShortcut.TRIPS -> inTab(ShellTab.LIFE, TripListRoute)
+                        HomeShortcut.TRIP -> inTab(ShellTab.LIFE, TripDetailRoute(id))
+                        HomeShortcut.SPORTS -> shellNavigation.onNavigateSports()
+                        HomeShortcut.LIVE_WORKOUT -> inTab(ShellTab.HEALTH, LiveWorkoutRoute)
+                        HomeShortcut.MONEY -> inTab(ShellTab.LIFE, MoneyRoute())
+                        HomeShortcut.ADD_EXPENSE -> inTab(ShellTab.LIFE, MoneyRoute(addExpense = true))
                     }
                 },
             )
@@ -198,8 +199,8 @@ fun TargetNavHost() {
         composable<StudyHubRoute> {
             StudyHubScreen(shellNavigation = shellNavigation)
         }
-        composable<FocusHubRoute> {
-            FocusHubScreen(shellNavigation = shellNavigation)
+        composable<LifeHubRoute> {
+            LifeHubScreen(shellNavigation = shellNavigation)
         }
         composable<PlanHubRoute> {
             PlanHubScreen(shellNavigation = shellNavigation)
@@ -446,6 +447,15 @@ fun TargetNavHost() {
                 shellNavigation = shellNavigation,
                 onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
                 onMockExamClick = { id -> navController.navigate(StatsMockExamDetailRoute(id)) },
+            )
+        }
+        composable<ReadingStatisticsRoute> {
+            StatisticsScreen(
+                onBookClick = { bookId -> navController.navigate(BookDetailRoute(bookId)) },
+                shellNavigation = shellNavigation,
+                onTopicClick = { topicId -> navController.navigate(TopicDetailRoute(topicId)) },
+                onMockExamClick = { id -> navController.navigate(StatsMockExamDetailRoute(id)) },
+                readingOnly = true,
             )
         }
         composable<UserEditRoute> {

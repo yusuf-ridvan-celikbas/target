@@ -10,22 +10,19 @@ import com.ridvan.target.ui.statistics.StatsSource
 /** Whether a bottom tab shows for an account's enabled modules. Home is always visible. */
 fun ShellTab.isVisible(modules: Set<AppModule>): Boolean = when (this) {
     ShellTab.HOME -> true
-    ShellTab.STUDY -> AppModule.EXAMS_STUDY in modules
-    ShellTab.PLAN -> AppModule.PLANNER_ROUTINES in modules || AppModule.TRIPS in modules || AppModule.MONEY in modules
-    ShellTab.FOCUS -> AppModule.FOCUS in modules || AppModule.READING in modules || AppModule.SPORTS in modules
-    ShellTab.STATS -> AppModule.EXAMS_STUDY in modules || AppModule.READING in modules
+    ShellTab.STUDY -> AppModule.EXAMS_STUDY in modules || AppModule.FOCUS in modules
+    ShellTab.PLAN -> AppModule.PLANNER_ROUTINES in modules
+    ShellTab.HEALTH -> AppModule.SPORTS in modules
+    ShellTab.LIFE -> AppModule.READING in modules || AppModule.TRIPS in modules || AppModule.MONEY in modules
 }
 
 fun visibleTabs(modules: Set<AppModule>): List<ShellTab> = ShellTab.entries.filter { it.isVisible(modules) }
 
-/** Statistics sources an account can see; never empty for a Stats tab that is visible. */
-fun availableStatsSources(modules: Set<AppModule>): List<StatsSource> = buildList {
-    if (AppModule.EXAMS_STUDY in modules) {
-        add(StatsSource.PRACTICE_SESSIONS)
-        add(StatsSource.PRACTICE_EXAMS)
-        add(StatsSource.MOCK_EXAMS)
-    }
-    if (AppModule.READING in modules) add(StatsSource.READING)
+/** Statistics sources: the study ones (Study tab) or Reading alone (Life tab's Reading stats). */
+fun availableStatsSources(modules: Set<AppModule>, readingOnly: Boolean): List<StatsSource> = when {
+    readingOnly -> listOfNotNull(StatsSource.READING.takeIf { AppModule.READING in modules })
+    AppModule.EXAMS_STUDY in modules -> listOf(StatsSource.PRACTICE_SESSIONS, StatsSource.PRACTICE_EXAMS, StatsSource.MOCK_EXAMS)
+    else -> emptyList()
 }
 
 /** Planner agenda groups that belong to a module. */

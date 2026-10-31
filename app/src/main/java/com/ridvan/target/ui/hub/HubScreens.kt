@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.AvTimer
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.History
@@ -52,9 +52,12 @@ import com.ridvan.target.ui.shell.ShellNavigation
 /** One row on a hub page: an area of the app, with a line saying what's in it. */
 private class HubEntry(val titleRes: Int, val hintRes: Int, val icon: ImageVector, val onClick: () -> Unit)
 
-/** The Study tab's first page — every exam-prep area, one tap away. */
+/** The Study tab's first page — exam prep, the study timers and their statistics. */
 @Composable
 fun StudyHubScreen(shellNavigation: ShellNavigation) {
+    val modules = rememberEnabledModules()
+    val exams = AppModule.EXAMS_STUDY in modules
+    val focus = AppModule.FOCUS in modules
     HubPage(
         navigation = shellNavigation,
         destination = ShellDestination.STUDY_HUB,
@@ -64,57 +67,58 @@ fun StudyHubScreen(shellNavigation: ShellNavigation) {
                 HubEntry(R.string.label_exams, R.string.hub_exams_hint, Icons.AutoMirrored.Filled.Assignment, shellNavigation.onNavigateExams),
                 HubEntry(R.string.label_courses, R.string.hub_courses_hint, Icons.AutoMirrored.Filled.MenuBook, shellNavigation.onNavigateCourses),
                 HubEntry(R.string.label_languages, R.string.hub_languages_hint, Icons.Filled.Translate, shellNavigation.onNavigateLanguages),
-            ),
+            ).takeIf { exams }.orEmpty(),
             listOfNotNull(
                 HubEntry(R.string.label_study_resources, R.string.hub_study_resources_hint, Icons.Filled.Bookmark, shellNavigation.onNavigateStudyResources),
                 HubEntry(R.string.label_topics, R.string.hub_topics_hint, Icons.Filled.Topic, shellNavigation.onNavigateTopics),
-            ),
-        ),
-    )
-}
-
-/** The Plan tab's first page — the Planner and trips. */
-@Composable
-fun PlanHubScreen(shellNavigation: ShellNavigation) {
-    val modules = rememberEnabledModules()
-    val planner = AppModule.PLANNER_ROUTINES in modules
-    val trips = AppModule.TRIPS in modules
-    val money = AppModule.MONEY in modules
-    HubPage(
-        navigation = shellNavigation,
-        destination = ShellDestination.PLAN_HUB,
-        title = stringResource(R.string.tab_plan),
-        groups = listOf(
-            listOfNotNull(
-                HubEntry(R.string.label_planner, R.string.hub_planner_hint, Icons.Filled.CalendarMonth, shellNavigation.onNavigatePlanner).takeIf { planner },
-                HubEntry(R.string.label_trips, R.string.hub_trips_hint, Icons.Filled.Luggage, shellNavigation.onNavigateTrips).takeIf { trips },
-                HubEntry(R.string.label_routines, R.string.hub_routines_hint, Icons.Filled.Checklist, shellNavigation.onNavigateRoutines).takeIf { planner },
-                HubEntry(R.string.label_money, R.string.hub_money_hint, Icons.Filled.AccountBalanceWallet, shellNavigation.onNavigateMoney).takeIf { money },
-            ),
-        ),
-    )
-}
-
-/** The Focus tab's first page — timers, their history, and reading. */
-@Composable
-fun FocusHubScreen(shellNavigation: ShellNavigation) {
-    val modules = rememberEnabledModules()
-    val focus = AppModule.FOCUS in modules
-    val reading = AppModule.READING in modules
-    val sports = AppModule.SPORTS in modules
-    HubPage(
-        navigation = shellNavigation,
-        destination = ShellDestination.FOCUS_HUB,
-        title = stringResource(R.string.label_focus_group),
-        groups = listOf(
+            ).takeIf { exams }.orEmpty(),
             listOfNotNull(
                 HubEntry(R.string.label_focus_timer, R.string.hub_focus_timer_hint, Icons.Filled.Timer, shellNavigation.onNavigateFocusTimer).takeIf { focus },
                 HubEntry(R.string.label_flow_timer, R.string.hub_flow_timer_hint, Icons.Filled.AvTimer, shellNavigation.onNavigateFlowTimer).takeIf { focus },
                 HubEntry(R.string.focustimer_history_page_title, R.string.hub_study_history_hint, Icons.Filled.History, shellNavigation.onNavigateStudyHistory).takeIf { focus },
             ),
             listOfNotNull(
+                HubEntry(R.string.label_statistics, R.string.hub_statistics_hint, Icons.Filled.BarChart, shellNavigation.onNavigateStatistics).takeIf { exams },
+            ),
+        ),
+    )
+}
+
+/** The Plan tab's first page — the Planner and routines. */
+@Composable
+fun PlanHubScreen(shellNavigation: ShellNavigation) {
+    HubPage(
+        navigation = shellNavigation,
+        destination = ShellDestination.PLAN_HUB,
+        title = stringResource(R.string.tab_plan),
+        groups = listOf(
+            listOf(
+                HubEntry(R.string.label_planner, R.string.hub_planner_hint, Icons.Filled.CalendarMonth, shellNavigation.onNavigatePlanner),
+                HubEntry(R.string.label_routines, R.string.hub_routines_hint, Icons.Filled.Checklist, shellNavigation.onNavigateRoutines),
+            ),
+        ),
+    )
+}
+
+/** The Life tab's first page — reading, trips and money. */
+@Composable
+fun LifeHubScreen(shellNavigation: ShellNavigation) {
+    val modules = rememberEnabledModules()
+    val reading = AppModule.READING in modules
+    val trips = AppModule.TRIPS in modules
+    val money = AppModule.MONEY in modules
+    HubPage(
+        navigation = shellNavigation,
+        destination = ShellDestination.LIFE_HUB,
+        title = stringResource(R.string.tab_life),
+        groups = listOf(
+            listOfNotNull(
                 HubEntry(R.string.label_reading, R.string.hub_reading_hint, Icons.Filled.AutoStories, shellNavigation.onNavigateReading).takeIf { reading },
-                HubEntry(R.string.label_sports, R.string.hub_sports_hint, Icons.Filled.FitnessCenter, shellNavigation.onNavigateSports).takeIf { sports },
+                HubEntry(R.string.label_reading_stats, R.string.hub_reading_stats_hint, Icons.Filled.BarChart, shellNavigation.onNavigateReadingStats).takeIf { reading },
+            ),
+            listOfNotNull(
+                HubEntry(R.string.label_trips, R.string.hub_trips_hint, Icons.Filled.Luggage, shellNavigation.onNavigateTrips).takeIf { trips },
+                HubEntry(R.string.label_money, R.string.hub_money_hint, Icons.Filled.AccountBalanceWallet, shellNavigation.onNavigateMoney).takeIf { money },
             ),
         ),
     )

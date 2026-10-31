@@ -44,12 +44,13 @@ class AppModuleTest {
     @Test
     fun tabVisibilityFollowsModules() {
         assertEquals(ShellTab.entries.toList(), visibleTabs(ALL_MODULES))
-        assertEquals(listOf(ShellTab.HOME, ShellTab.FOCUS, ShellTab.STATS), visibleTabs(setOf(AppModule.READING)))
-        assertEquals(listOf(ShellTab.HOME, ShellTab.PLAN), visibleTabs(setOf(AppModule.TRIPS)))
-        assertEquals(listOf(ShellTab.HOME, ShellTab.FOCUS), visibleTabs(setOf(AppModule.FOCUS)))
+        assertEquals(listOf(ShellTab.HOME, ShellTab.LIFE), visibleTabs(setOf(AppModule.READING)))
+        assertEquals(listOf(ShellTab.HOME, ShellTab.LIFE), visibleTabs(setOf(AppModule.TRIPS)))
+        assertEquals(listOf(ShellTab.HOME, ShellTab.LIFE), visibleTabs(setOf(AppModule.MONEY)))
+        assertEquals(listOf(ShellTab.HOME, ShellTab.STUDY), visibleTabs(setOf(AppModule.FOCUS)))
         assertEquals(listOf(ShellTab.HOME, ShellTab.PLAN), visibleTabs(setOf(AppModule.PLANNER_ROUTINES)))
-        assertEquals(listOf(ShellTab.HOME, ShellTab.STUDY, ShellTab.STATS), visibleTabs(setOf(AppModule.EXAMS_STUDY)))
-        assertEquals(listOf(ShellTab.HOME, ShellTab.FOCUS), visibleTabs(setOf(AppModule.SPORTS)))
+        assertEquals(listOf(ShellTab.HOME, ShellTab.STUDY), visibleTabs(setOf(AppModule.EXAMS_STUDY)))
+        assertEquals(listOf(ShellTab.HOME, ShellTab.HEALTH), visibleTabs(setOf(AppModule.SPORTS)))
     }
 
     @Test
@@ -62,12 +63,13 @@ class AppModuleTest {
 
     @Test
     fun statsSourcesAndAgendaGroups() {
-        assertEquals(listOf(StatsSource.READING), availableStatsSources(setOf(AppModule.READING)))
+        assertEquals(listOf(StatsSource.READING), availableStatsSources(setOf(AppModule.READING), readingOnly = true))
+        assertEquals(emptyList<StatsSource>(), availableStatsSources(setOf(AppModule.READING), readingOnly = false))
         assertEquals(
             listOf(StatsSource.PRACTICE_SESSIONS, StatsSource.PRACTICE_EXAMS, StatsSource.MOCK_EXAMS),
-            availableStatsSources(setOf(AppModule.EXAMS_STUDY, AppModule.TRIPS)),
+            availableStatsSources(setOf(AppModule.EXAMS_STUDY, AppModule.TRIPS), readingOnly = false),
         )
-        assertEquals(4, availableStatsSources(ALL_MODULES).size)
+        assertEquals(3, availableStatsSources(ALL_MODULES, readingOnly = false).size)
         val trips = setOf(AppModule.TRIPS)
         assertTrue(agendaGroupVisible(AgendaGroup.TRIPS, trips))
         assertFalse(agendaGroupVisible(AgendaGroup.ROUTINES, trips))

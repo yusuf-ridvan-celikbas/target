@@ -24,7 +24,11 @@
     <!-- Navigation shell: bottom tabs + profile menu (ui/shell/AppShell.kt), hub pages (ui/hub/) -->
     <string name="tab_home">Ana Sayfa</string>
     <string name="tab_plan">Plan</string>
-    <string name="tab_stats">İstatistik</string>
+    <string name="tab_health">Sağlık</string>
+    <string name="tab_life">Yaşam</string>
+    <string name="hub_statistics_hint">Çalışma oturumları, deneme sınavları ve denemeler</string>
+    <string name="label_reading_stats">Okuma istatistikleri</string>
+    <string name="hub_reading_stats_hint">Güne, haftaya ve aya göre sayfa ve okuma süresi</string>
     <string name="cd_profile_menu">Hesap ve ayarlar</string>
     <string name="hub_exams_hint">Sınavlarınız, oturumları ve geri sayımlar</string>
     <string name="hub_courses_hint">Sınav türüne göre gruplanmış dersler</string>

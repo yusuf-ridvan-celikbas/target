@@ -7,17 +7,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.SelfImprovement
+import androidx.compose.material.icons.outlined.Interests
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +44,7 @@ import com.ridvan.target.R
 data class ShellNavigation(
     val onNavigateHome: () -> Unit,
     val onNavigateStudyHub: () -> Unit,
-    val onNavigateFocusHub: () -> Unit,
+    val onNavigateLifeHub: () -> Unit,
     val onNavigatePlanHub: () -> Unit,
     val onNavigateTrips: () -> Unit,
     val onNavigateRoutines: () -> Unit,
@@ -59,6 +59,7 @@ data class ShellNavigation(
     val onNavigateFlowTimer: () -> Unit,
     val onNavigateStudyHistory: () -> Unit,
     val onNavigateReading: () -> Unit,
+    val onNavigateReadingStats: () -> Unit,
     val onNavigateSports: () -> Unit,
     val onNavigateMoney: () -> Unit,
     val onNavigateHelp: () -> Unit,
@@ -74,8 +75,8 @@ data class ShellNavigation(
 )
 
 enum class ShellDestination {
-    HOME, STUDY_HUB, FOCUS_HUB, PLAN_HUB, TRIPS, ROUTINES, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER,
-    FOCUS_TIMER, FLOW_TIMER, STUDY_HISTORY, READING, SPORTS, MONEY, HELP, MY_ACCOUNT, SETTINGS, OTHER
+    HOME, STUDY_HUB, LIFE_HUB, PLAN_HUB, TRIPS, ROUTINES, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER,
+    FOCUS_TIMER, FLOW_TIMER, STUDY_HISTORY, READING, READING_STATS, SPORTS, LIVE_WORKOUT, MONEY, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 /**
@@ -89,17 +90,17 @@ enum class ShellTab(val root: ShellDestination, val pages: Set<ShellDestination>
         setOf(
             ShellDestination.EXAMS, ShellDestination.COURSES, ShellDestination.STUDY_RESOURCES,
             ShellDestination.TOPICS, ShellDestination.LANGUAGES,
-        ),
-    ),
-    PLAN(ShellDestination.PLAN_HUB, setOf(ShellDestination.PLANNER, ShellDestination.TRIPS, ShellDestination.ROUTINES, ShellDestination.MONEY)),
-    FOCUS(
-        ShellDestination.FOCUS_HUB,
-        setOf(
             ShellDestination.FOCUS_TIMER, ShellDestination.FLOW_TIMER, ShellDestination.STUDY_HISTORY,
-            ShellDestination.READING, ShellDestination.SPORTS,
+            ShellDestination.STATISTICS,
         ),
     ),
-    STATS(ShellDestination.STATISTICS, emptySet()),
+    PLAN(ShellDestination.PLAN_HUB, setOf(ShellDestination.PLANNER, ShellDestination.ROUTINES)),
+    /** Sports is the only health page so far, so the tab opens it directly. */
+    HEALTH(ShellDestination.SPORTS, setOf(ShellDestination.LIVE_WORKOUT)),
+    LIFE(
+        ShellDestination.LIFE_HUB,
+        setOf(ShellDestination.READING, ShellDestination.READING_STATS, ShellDestination.TRIPS, ShellDestination.MONEY),
+    ),
     ;
 
     fun owns(destination: ShellDestination) = destination == root || destination in pages
@@ -184,8 +185,8 @@ private fun ShellNavigation.open(tab: ShellTab) = when (tab) {
     ShellTab.HOME -> onNavigateHome()
     ShellTab.STUDY -> onNavigateStudyHub()
     ShellTab.PLAN -> onNavigatePlanHub()
-    ShellTab.FOCUS -> onNavigateFocusHub()
-    ShellTab.STATS -> onNavigateStatistics()
+    ShellTab.HEALTH -> onNavigateSports()
+    ShellTab.LIFE -> onNavigateLifeHub()
 }
 
 private class TabLook(val labelRes: Int, val icon: ImageVector, val selectedIcon: ImageVector)
@@ -194,8 +195,8 @@ private fun ShellTab.look() = when (this) {
     ShellTab.HOME -> TabLook(R.string.tab_home, Icons.Outlined.Home, Icons.Filled.Home)
     ShellTab.STUDY -> TabLook(R.string.label_study_group, Icons.Outlined.School, Icons.Filled.School)
     ShellTab.PLAN -> TabLook(R.string.tab_plan, Icons.Outlined.CalendarMonth, Icons.Filled.CalendarMonth)
-    ShellTab.FOCUS -> TabLook(R.string.label_focus_group, Icons.Outlined.SelfImprovement, Icons.Filled.SelfImprovement)
-    ShellTab.STATS -> TabLook(R.string.tab_stats, Icons.Outlined.BarChart, Icons.Filled.BarChart)
+    ShellTab.HEALTH -> TabLook(R.string.tab_health, Icons.Outlined.FitnessCenter, Icons.Filled.FitnessCenter)
+    ShellTab.LIFE -> TabLook(R.string.tab_life, Icons.Outlined.Interests, Icons.Filled.Interests)
 }
 
 @Composable

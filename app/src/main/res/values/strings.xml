@@ -24,7 +24,11 @@
     <!-- Navigation shell: bottom tabs + profile menu (ui/shell/AppShell.kt), hub pages (ui/hub/) -->
     <string name="tab_home">Home</string>
     <string name="tab_plan">Plan</string>
-    <string name="tab_stats">Stats</string>
+    <string name="tab_health">Health</string>
+    <string name="tab_life">Life</string>
+    <string name="hub_statistics_hint">Practice, practice exams and mock exams over time</string>
+    <string name="label_reading_stats">Reading stats</string>
+    <string name="hub_reading_stats_hint">Pages and reading time by day, week and month</string>
     <string name="cd_profile_menu">Account and settings</string>
     <string name="hub_exams_hint">Your exams, sections and countdowns</string>
     <string name="hub_courses_hint">Subjects grouped by exam type</string>
