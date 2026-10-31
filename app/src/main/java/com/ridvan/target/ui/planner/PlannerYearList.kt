@@ -110,6 +110,7 @@ private fun YearItemRow(item: PlannerAgendaItem, onItemClick: (PlannerAgendaItem
         is PlannerAgendaItem.WorkoutEntry -> item.workout.sport.label()
         is PlannerAgendaItem.ExamEntry -> item.label
         is PlannerAgendaItem.SectionEntry -> item.label
+        is PlannerAgendaItem.GoalDeadlineEntry -> item.goal.name
         is PlannerAgendaItem.MockExamPlannedEntry -> "${item.mockExam.name} · ${item.label}"
         is PlannerAgendaItem.MockExamFinishedEntry -> "${item.summary.mockExam.name} · ${item.label}"
         is PlannerAgendaItem.TripDayEntry -> item.tripName

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.AddCard
@@ -91,6 +92,8 @@ private fun HomeShortcut.icon(): ImageVector = when (this) {
     HomeShortcut.LIVE_WORKOUT -> Icons.AutoMirrored.Filled.DirectionsRun
     HomeShortcut.MONEY -> Icons.Filled.AccountBalanceWallet
     HomeShortcut.ADD_EXPENSE -> Icons.Filled.AddCard
+    HomeShortcut.GOALS -> Icons.Filled.Flag
+    HomeShortcut.GOAL -> Icons.Filled.Flag
 }
 
 @Composable
@@ -116,6 +119,8 @@ private fun shortcutName(shortcut: HomeShortcut): String = stringResource(
         HomeShortcut.LIVE_WORKOUT -> R.string.home_shortcut_live_workout
         HomeShortcut.MONEY -> R.string.label_money
         HomeShortcut.ADD_EXPENSE -> R.string.home_shortcut_add_expense
+        HomeShortcut.GOALS -> R.string.label_goals
+        HomeShortcut.GOAL -> R.string.home_shortcut_goal
     }
 )
 
@@ -129,6 +134,7 @@ private fun cardName(card: HomeCard): String = stringResource(
         HomeCard.WORK_ON_NEXT -> R.string.home_card_work_on_next
         HomeCard.QUICK_START -> R.string.home_card_quick_start
         HomeCard.MONEY_MONTH -> R.string.home_card_money
+        HomeCard.GOALS -> R.string.label_goals
     }
 )
 
@@ -271,6 +277,7 @@ private val SHORTCUT_GROUPS = listOf(
     ),
     R.string.home_add_group_sports to listOf(HomeShortcut.SPORTS, HomeShortcut.LIVE_WORKOUT),
     R.string.label_money to listOf(HomeShortcut.MONEY, HomeShortcut.ADD_EXPENSE),
+    R.string.label_goals to listOf(HomeShortcut.GOALS, HomeShortcut.GOAL),
 )
 
 /** Cards not on Home yet, then shortcuts by area; item shortcuts ask which item next. */

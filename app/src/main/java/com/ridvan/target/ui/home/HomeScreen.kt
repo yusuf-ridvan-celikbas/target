@@ -102,8 +102,10 @@ fun HomeScreen(
     onRoutineClick: (Long) -> Unit,
     onShortcut: (HomeItem.Shortcut) -> Unit,
     onOpenMoney: () -> Unit,
+    onGoalClick: (Long) -> Unit,
     viewModel: HomeViewModel = viewModel(),
 ) {
+    val goals by viewModel.goals.collectAsStateWithLifecycle()
     val homeLayout by viewModel.homeLayout.collectAsStateWithLifecycle()
     val shortcutTargets by viewModel.shortcutTargets.collectAsStateWithLifecycle()
     val money by viewModel.money.collectAsStateWithLifecycle()
@@ -247,6 +249,21 @@ fun HomeScreen(
                     }
                     HomeCard.QUICK_START -> QuickStartCard(shellNavigation.onNavigateFocusTimer, shellNavigation.onNavigateFlowTimer)
                     HomeCard.MONEY_MONTH -> money?.let { MoneyMonthCard(it, onOpenMoney) }
+                    HomeCard.GOALS -> if (goals.isNotEmpty()) {
+                        com.ridvan.target.ui.common.GroupedCard {
+                            androidx.compose.material3.Text(
+                                stringResource(R.string.label_goals),
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
+                            )
+                            goals.forEach { item ->
+                                com.ridvan.target.ui.goals.GoalSummary(
+                                    item,
+                                    Modifier.clickable { onGoalClick(item.goal.id) }.padding(horizontal = 16.dp, vertical = 10.dp),
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

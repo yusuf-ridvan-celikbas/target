@@ -62,6 +62,7 @@ data class ShellNavigation(
     val onNavigateReadingStats: () -> Unit,
     val onNavigateSports: () -> Unit,
     val onNavigateMoney: () -> Unit,
+    val onNavigateGoals: () -> Unit,
     val onNavigateHelp: () -> Unit,
     val onNavigateMyAccount: () -> Unit,
     val onNavigateSettings: () -> Unit,
@@ -76,7 +77,7 @@ data class ShellNavigation(
 
 enum class ShellDestination {
     HOME, STUDY_HUB, LIFE_HUB, PLAN_HUB, TRIPS, ROUTINES, EXAMS, COURSES, STUDY_RESOURCES, TOPICS, STATISTICS, LANGUAGES, PLANNER,
-    FOCUS_TIMER, FLOW_TIMER, STUDY_HISTORY, READING, READING_STATS, SPORTS, LIVE_WORKOUT, MONEY, HELP, MY_ACCOUNT, SETTINGS, OTHER
+    FOCUS_TIMER, FLOW_TIMER, STUDY_HISTORY, READING, READING_STATS, SPORTS, LIVE_WORKOUT, MONEY, GOALS, HELP, MY_ACCOUNT, SETTINGS, OTHER
 }
 
 /**
@@ -94,7 +95,7 @@ enum class ShellTab(val root: ShellDestination, val pages: Set<ShellDestination>
             ShellDestination.STATISTICS,
         ),
     ),
-    PLAN(ShellDestination.PLAN_HUB, setOf(ShellDestination.PLANNER, ShellDestination.ROUTINES)),
+    PLAN(ShellDestination.PLAN_HUB, setOf(ShellDestination.PLANNER, ShellDestination.ROUTINES, ShellDestination.GOALS)),
     /** Sports is the only health page so far, so the tab opens it directly. */
     HEALTH(ShellDestination.SPORTS, setOf(ShellDestination.LIVE_WORKOUT)),
     LIFE(

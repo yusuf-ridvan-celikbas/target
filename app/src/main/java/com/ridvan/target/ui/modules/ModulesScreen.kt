@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
@@ -55,6 +56,7 @@ private val moduleInfos = listOf(
     ModuleInfo(AppModule.TRIPS, R.string.module_trips, R.string.module_trips_hint, Icons.Filled.Luggage),
     ModuleInfo(AppModule.SPORTS, R.string.module_sports, R.string.module_sports_hint, Icons.Filled.FitnessCenter),
     ModuleInfo(AppModule.MONEY, R.string.module_money, R.string.module_money_hint, Icons.Filled.AccountBalanceWallet),
+    ModuleInfo(AppModule.GOALS, R.string.module_goals, R.string.module_goals_hint, Icons.Filled.Flag),
 )
 
 /**

@@ -11,7 +11,7 @@ import com.ridvan.target.ui.statistics.StatsSource
 fun ShellTab.isVisible(modules: Set<AppModule>): Boolean = when (this) {
     ShellTab.HOME -> true
     ShellTab.STUDY -> AppModule.EXAMS_STUDY in modules || AppModule.FOCUS in modules
-    ShellTab.PLAN -> AppModule.PLANNER_ROUTINES in modules
+    ShellTab.PLAN -> AppModule.PLANNER_ROUTINES in modules || AppModule.GOALS in modules
     ShellTab.HEALTH -> AppModule.SPORTS in modules
     ShellTab.LIFE -> AppModule.READING in modules || AppModule.TRIPS in modules || AppModule.MONEY in modules
 }
@@ -26,7 +26,7 @@ fun availableStatsSources(modules: Set<AppModule>, readingOnly: Boolean): List<S
 }
 
 /** Planner agenda groups that belong to a module. */
-enum class AgendaGroup { EXAMS, PRACTICE, FOCUS, READING, TRIPS, ROUTINES, SPORTS }
+enum class AgendaGroup { EXAMS, PRACTICE, FOCUS, READING, TRIPS, ROUTINES, SPORTS, GOALS }
 
 fun agendaGroupVisible(group: AgendaGroup, modules: Set<AppModule>): Boolean = when (group) {
     AgendaGroup.EXAMS, AgendaGroup.PRACTICE -> AppModule.EXAMS_STUDY in modules
@@ -35,6 +35,7 @@ fun agendaGroupVisible(group: AgendaGroup, modules: Set<AppModule>): Boolean = w
     AgendaGroup.TRIPS -> AppModule.TRIPS in modules
     AgendaGroup.ROUTINES -> AppModule.PLANNER_ROUTINES in modules
     AgendaGroup.SPORTS -> AppModule.SPORTS in modules
+    AgendaGroup.GOALS -> AppModule.GOALS in modules
 }
 
 @Composable

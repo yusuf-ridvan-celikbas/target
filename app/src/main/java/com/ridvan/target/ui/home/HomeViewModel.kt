@@ -100,17 +100,24 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             db.bookDao().getByUserId(userId),
             db.routineDao().getByUserId(userId),
             db.tripDao().getByUserId(userId),
-        ) { exams, books, routines, trips ->
+            db.goalDao().getByUserId(userId),
+        ) { exams, books, routines, trips, goals ->
             mapOf(
                 ShortcutTarget.EXAM to exams.map { it.exam.id to it.exam.name },
                 ShortcutTarget.BOOK to books.map { it.id to it.title },
                 ShortcutTarget.ROUTINE to routines.map { it.id to it.name },
                 ShortcutTarget.TRIP to trips.map { it.id to it.name },
+                ShortcutTarget.GOAL to goals.map { it.id to it.name },
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     val money: StateFlow<HomeMoney?> = data.money.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Open goals for Home's Goals card (nearest deadline first, at most 3). */
+    val goals: StateFlow<List<com.ridvan.target.ui.goals.GoalItem>> = com.ridvan.target.ui.goals.goalItemsFlow(targetApplication, userId)
+        .map { items -> items.filter { it.goal.completedAt == null }.take(3) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun saveHomeLayout(items: List<HomeItem>) {
         val id = userId ?: return

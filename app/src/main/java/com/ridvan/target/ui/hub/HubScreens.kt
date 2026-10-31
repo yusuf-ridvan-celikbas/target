@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.AvTimer
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -134,6 +135,10 @@ fun StudyHubScreen(shellNavigation: ShellNavigation, viewModel: HubViewModel = v
 /** The Plan tab's first page — today's plans and routines, then the Planner and Routines. */
 @Composable
 fun PlanHubScreen(shellNavigation: ShellNavigation, viewModel: HubViewModel = viewModel()) {
+    val modules = rememberEnabledModules()
+    val planner = AppModule.PLANNER_ROUTINES in modules
+    val goalsOn = AppModule.GOALS in modules
+    val goals by viewModel.openGoals.collectAsStateWithLifecycle()
     val plans by viewModel.plannerEvents.collectAsStateWithLifecycle()
     val routines by viewModel.todaysRoutines.collectAsStateWithLifecycle()
     val today = startOfTodayMillis()
@@ -151,7 +156,7 @@ fun PlanHubScreen(shellNavigation: ShellNavigation, viewModel: HubViewModel = vi
         navigation = shellNavigation,
         destination = ShellDestination.PLAN_HUB,
         title = stringResource(R.string.tab_plan),
-        header = if (plansToday > 0 || routinesLine != null) {
+        header = if (planner && (plansToday > 0 || routinesLine != null)) {
             {
                 Text(countText(R.plurals.count_plans_today, plansToday), style = MaterialTheme.typography.titleMedium)
                 routinesLine?.let { Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp)) }
@@ -161,6 +166,12 @@ fun PlanHubScreen(shellNavigation: ShellNavigation, viewModel: HubViewModel = vi
             listOf(
                 HubEntry(R.string.label_planner, R.string.hub_planner_hint, Icons.Filled.CalendarMonth, shellNavigation.onNavigatePlanner, nextPlan),
                 HubEntry(R.string.label_routines, R.string.hub_routines_hint, Icons.Filled.Checklist, shellNavigation.onNavigateRoutines, routinesLine),
+            ).takeIf { planner }.orEmpty(),
+            listOfNotNull(
+                HubEntry(
+                    R.string.label_goals, R.string.hub_goals_hint, Icons.Filled.Flag, shellNavigation.onNavigateGoals,
+                    goals.takeIf { it.isNotEmpty() }?.let { countText(R.plurals.count_open_goals, it.size) },
+                ).takeIf { goalsOn },
             ),
         ),
     )

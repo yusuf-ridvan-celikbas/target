@@ -841,3 +841,14 @@ val MIGRATION_38_39 = object : Migration(38, 39) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_money_goals_userId` ON `money_goals` (`userId`)")
     }
 }
+
+val MIGRATION_39_40 = object : Migration(39, 40) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` INTEGER NOT NULL, `name` TEXT NOT NULL, `kind` TEXT NOT NULL, `unit` TEXT, `targetValue` REAL, `startValue` REAL, `period` TEXT, `source` TEXT, `startDate` INTEGER NOT NULL, `deadline` INTEGER, `notes` TEXT, `completedAt` INTEGER, `createdAt` INTEGER NOT NULL, FOREIGN KEY(`userId`) REFERENCES `users`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_goals_userId` ON `goals` (`userId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `goal_logs` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `goalId` INTEGER NOT NULL, `date` INTEGER NOT NULL, `amount` REAL NOT NULL, `note` TEXT, `createdAt` INTEGER NOT NULL, FOREIGN KEY(`goalId`) REFERENCES `goals`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_goal_logs_goalId` ON `goal_logs` (`goalId`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `goal_milestones` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `goalId` INTEGER NOT NULL, `name` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `doneAt` INTEGER, FOREIGN KEY(`goalId`) REFERENCES `goals`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_goal_milestones_goalId` ON `goal_milestones` (`goalId`)")
+    }
+}

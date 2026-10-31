@@ -98,7 +98,7 @@ private fun CategoryField(categories: List<MoneyCategory>, kind: MoneyKind, sele
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DayField(label: String, day: Long?, onChange: (Long?) -> Unit, allowClear: Boolean = false) {
+internal fun DayField(label: String, day: Long?, onChange: (Long?) -> Unit, allowClear: Boolean = false) {
     var open by remember { mutableStateOf(false) }
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
         OutlinedButton(onClick = { open = true }, modifier = Modifier.weight(1f)) {

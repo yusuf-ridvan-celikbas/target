@@ -210,7 +210,8 @@ object NotificationScheduler {
             (if (AppModule.EXAMS_STUDY in modules) examCandidates + sectionCandidates + mockExamCandidates(app, userId, strings) else emptyList()) +
             (if (AppModule.READING in modules) readingCandidates(app, userId, today, zone, strings) else emptyList()) +
             (if (AppModule.TRIPS in modules) tripCandidates(app, userId, today, horizonEnd, leadMinutes, zone, strings) else emptyList()) +
-            (if (planner) routineCandidates(app, userId, today, leadMinutes, zone, strings) else emptyList())
+            (if (planner) routineCandidates(app, userId, today, leadMinutes, zone, strings) else emptyList()) +
+            (if (AppModule.GOALS in modules) goalCandidates(app, userId, today, horizonEnd, zone, strings) else emptyList())
     }
 
     /**
@@ -255,6 +256,24 @@ object NotificationScheduler {
      * [leadMinutes] early like timed Planner events, untimed bookings at the all-day hour. Untimed activities
      * get none, or a busy day would ring nine times at 9:00.
      */
+    /** 09:00 on the deadline day of each open goal. */
+    private suspend fun goalCandidates(
+        app: TargetApplication,
+        userId: Long,
+        today: LocalDate,
+        horizonEnd: LocalDate,
+        zone: ZoneId,
+        strings: Context,
+    ): List<ReminderCandidate> = app.database.goalDao().getOpenWithDeadline(userId).mapNotNull { goal ->
+        val date = goal.deadline?.toLocalDate(zone)?.takeIf { it in today..horizonEnd } ?: return@mapNotNull null
+        ReminderCandidate(
+            whenInstant = reminderInstant(date, null, 0, zone),
+            notificationId = notificationId("goal", goal.id, date.toEpochDay()),
+            title = strings.getString(R.string.notif_goal_due),
+            body = goal.name,
+        )
+    }
+
     private suspend fun tripCandidates(
         app: TargetApplication,
         userId: Long,

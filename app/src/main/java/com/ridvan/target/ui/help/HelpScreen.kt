@@ -40,6 +40,9 @@ fun HelpScreen(shellNavigation: ShellNavigation) {
             HelpSection(R.string.help_topics_title, R.string.help_topics_body)
             HelpSection(R.string.help_languages_title, R.string.help_languages_body)
             }
+            if (com.ridvan.target.data.modules.AppModule.GOALS in com.ridvan.target.ui.shell.rememberEnabledModules()) {
+                HelpSection(R.string.help_goals_title, R.string.help_goals_body)
+            }
             HelpSection(R.string.help_shortcuts_title, R.string.help_shortcuts_body)
             HelpSection(R.string.help_backup_title, R.string.help_backup_body)
             HelpSection(R.string.help_modules_title, R.string.help_modules_body)

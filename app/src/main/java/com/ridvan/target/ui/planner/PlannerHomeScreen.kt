@@ -51,6 +51,7 @@ fun PlannerHomeScreen(
     onRoutineClick: (Long, Long) -> Unit,
     onWorkoutClick: (Long) -> Unit,
     onMockExamClick: (Long) -> Unit,
+    onGoalClick: (Long) -> Unit,
     viewModel: PlannerHomeViewModel = viewModel(),
 ) {
     val viewMode by viewModel.viewMode.collectAsStateWithLifecycle()
@@ -78,6 +79,7 @@ fun PlannerHomeScreen(
             is PlannerAgendaItem.WorkoutEntry -> onWorkoutClick(item.workout.id)
             is PlannerAgendaItem.ExamEntry -> onExamClick(item.examId)
             is PlannerAgendaItem.SectionEntry -> onSectionClick(item.sectionId)
+            is PlannerAgendaItem.GoalDeadlineEntry -> onGoalClick(item.goal.id)
             is PlannerAgendaItem.MockExamPlannedEntry -> onMockExamClick(item.mockExam.id)
             is PlannerAgendaItem.MockExamFinishedEntry -> onMockExamClick(item.summary.mockExam.id)
             is PlannerAgendaItem.TripDayEntry -> onTripClick(item.tripId)

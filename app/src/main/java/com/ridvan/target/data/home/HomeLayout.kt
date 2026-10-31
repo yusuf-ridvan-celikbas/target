@@ -11,10 +11,11 @@ enum class HomeCard(val modules: Set<AppModule>) {
     WORK_ON_NEXT(setOf(AppModule.EXAMS_STUDY)),
     QUICK_START(setOf(AppModule.FOCUS)),
     MONEY_MONTH(setOf(AppModule.MONEY)),
+    GOALS(setOf(AppModule.GOALS)),
 }
 
 /** What a shortcut can point at besides a fixed page. */
-enum class ShortcutTarget { EXAM, BOOK, ROUTINE, TRIP }
+enum class ShortcutTarget { EXAM, BOOK, ROUTINE, TRIP, GOAL }
 
 /** Shortcut tiles; [target] ones point at one item (an exam, book, routine or trip). */
 enum class HomeShortcut(val module: AppModule, val target: ShortcutTarget? = null) {
@@ -38,6 +39,8 @@ enum class HomeShortcut(val module: AppModule, val target: ShortcutTarget? = nul
     LIVE_WORKOUT(AppModule.SPORTS),
     MONEY(AppModule.MONEY),
     ADD_EXPENSE(AppModule.MONEY),
+    GOALS(AppModule.GOALS),
+    GOAL(AppModule.GOALS, ShortcutTarget.GOAL),
 }
 
 sealed interface HomeItem {

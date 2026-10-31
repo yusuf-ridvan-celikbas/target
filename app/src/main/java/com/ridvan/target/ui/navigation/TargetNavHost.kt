@@ -114,6 +114,7 @@ fun TargetNavHost() {
         onNavigateReadingStats = { push(ReadingStatisticsRoute) },
         onNavigateSports = { navController.navigateToShellDestination(SportsRoute) },
         onNavigateMoney = { push(MoneyRoute()) },
+        onNavigateGoals = { push(GoalsRoute) },
         onNavigateHelp = { push(HelpRoute) },
         onNavigateMyAccount = { push(MyAccountRoute) },
         onNavigateSettings = { push(SettingsRoute) },
@@ -163,6 +164,10 @@ fun TargetNavHost() {
                     navController.navigateToShellDestination(LifeHubRoute)
                     push(MoneyRoute())
                 },
+                onGoalClick = { id ->
+                    navController.navigateToShellDestination(PlanHubRoute)
+                    push(GoalDetailRoute(id))
+                },
                 onShortcut = { item ->
                     val id = item.targetId ?: 0L
                     // Open in the tab that owns the page: pushed onto Home's own stack, it would come
@@ -192,6 +197,8 @@ fun TargetNavHost() {
                         HomeShortcut.LIVE_WORKOUT -> inTab(ShellTab.HEALTH, LiveWorkoutRoute)
                         HomeShortcut.MONEY -> inTab(ShellTab.LIFE, MoneyRoute())
                         HomeShortcut.ADD_EXPENSE -> inTab(ShellTab.LIFE, MoneyRoute(addExpense = true))
+                        HomeShortcut.GOALS -> inTab(ShellTab.PLAN, GoalsRoute)
+                        HomeShortcut.GOAL -> inTab(ShellTab.PLAN, GoalDetailRoute(id))
                     }
                 },
             )
@@ -500,7 +507,17 @@ fun TargetNavHost() {
                 onRoutineClick = { routineId, dateMillis -> navController.navigate(RoutineDetailRoute(routineId, dateMillis)) },
                 onWorkoutClick = { id -> navController.navigate(WorkoutDetailRoute(id)) },
                 onMockExamClick = { id -> navController.navigate(MockExamDetailRoute(id)) },
+                onGoalClick = { id -> navController.navigate(GoalDetailRoute(id)) },
             )
+        }
+        composable<GoalsRoute> {
+            com.ridvan.target.ui.goals.GoalsScreen(
+                shellNavigation = shellNavigation,
+                onGoalClick = { id -> navController.navigate(GoalDetailRoute(id)) },
+            )
+        }
+        composable<GoalDetailRoute> {
+            com.ridvan.target.ui.goals.GoalDetailScreen(onBack = { navController.popBackStack() })
         }
         composable<FocusTimerRoute> {
             FocusTimerScreen(

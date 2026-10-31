@@ -53,6 +53,12 @@ sealed interface PlannerAgendaItem {
         val minuteOfDay: Int,
     ) : PlannerAgendaItem
 
+    /** A goal on its deadline day. */
+    data class GoalDeadlineEntry(
+        val goal: com.ridvan.target.data.local.entity.Goal,
+        override val date: LocalDate,
+    ) : PlannerAgendaItem
+
     data class SectionEntry(
         val examId: Long,
         val sectionId: Long,

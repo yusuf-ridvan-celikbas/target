@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Checklist
@@ -162,6 +163,7 @@ private enum class AgendaGroup(val labelRes: Int, val icon: ImageVector) {
     READING(R.string.planner_group_reading, Icons.Filled.AutoStories),
     PRACTICE(R.string.planner_group_practice, Icons.Filled.Quiz),
     SPORTS(R.string.planner_group_sports, Icons.Filled.FitnessCenter),
+    GOALS(R.string.label_goals, Icons.Filled.Flag),
 }
 
 private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
@@ -170,6 +172,7 @@ private fun agendaGroupOf(item: PlannerAgendaItem): AgendaGroup = when (item) {
     is PlannerAgendaItem.EventOccurrence -> AgendaGroup.PLANS
     is PlannerAgendaItem.RoutineEntry -> AgendaGroup.ROUTINES
     is PlannerAgendaItem.WorkoutEntry -> AgendaGroup.SPORTS
+    is PlannerAgendaItem.GoalDeadlineEntry -> AgendaGroup.GOALS
     is PlannerAgendaItem.TripDayEntry, is PlannerAgendaItem.TripActivityEntry, is PlannerAgendaItem.TripBookingEntry -> AgendaGroup.TRIPS
     is PlannerAgendaItem.FocusSessionEntry -> if (item.isReading) AgendaGroup.READING else AgendaGroup.FOCUS
     is PlannerAgendaItem.PracticeLogEntry -> AgendaGroup.PRACTICE
@@ -308,6 +311,15 @@ private fun AgendaRow(
                 modifier = Modifier.clickable { onItemClick(item) },
                 leadingContent = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = null) },
                 headlineContent = { Text(item.label) },
+            )
+        }
+        is PlannerAgendaItem.GoalDeadlineEntry -> {
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onItemClick(item) },
+                leadingContent = { Icon(Icons.Filled.Flag, contentDescription = null) },
+                headlineContent = { Text(item.goal.name) },
+                supportingContent = { Text(stringResource(R.string.goal_field_deadline), style = MaterialTheme.typography.bodySmall) },
             )
         }
         is PlannerAgendaItem.MockExamPlannedEntry -> {

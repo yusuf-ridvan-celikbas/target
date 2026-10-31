@@ -36,6 +36,10 @@ class HubViewModel(application: Application) : AndroidViewModel(application) {
     val studied = data.studied.state(StudiedPreview(emptyList(), 0, 0))
     val money = data.money.state(null)
 
+    val openGoals: StateFlow<List<com.ridvan.target.ui.goals.GoalItem>> = com.ridvan.target.ui.goals.goalItemsFlow(app, userId)
+        .map { items -> items.filter { it.goal.completedAt == null } }
+        .state(emptyList())
+
     val courseCount: StateFlow<Int> = userFlow { db.courseDao().getByUserId(it) }.map { it.size }.state(0)
     val languageCount: StateFlow<Int> = userFlow { db.languageDao().getByUserId(it) }.map { it.size }.state(0)
 
