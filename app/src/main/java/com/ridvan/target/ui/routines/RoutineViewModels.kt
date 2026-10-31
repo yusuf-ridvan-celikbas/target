@@ -67,6 +67,14 @@ class RoutineDetailViewModel(application: Application, savedStateHandle: SavedSt
         emptySet(),
     )
 
+    /** Streak up to today (not [dayMillis]): scheduled days in a row with every step ticked. */
+    val streak: StateFlow<com.ridvan.target.ui.common.Streak> = state(
+        kotlinx.coroutines.flow.combine(dao.getById(routineId), dao.getSteps(routineId), dao.getCompletions(routineId)) { r, s, c ->
+            r?.let { com.ridvan.target.ui.common.routineStreak(it, s, c, startOfTodayMillis()) } ?: com.ridvan.target.ui.common.Streak.NONE
+        },
+        com.ridvan.target.ui.common.Streak.NONE,
+    )
+
     fun setStepDone(step: RoutineStep, done: Boolean) {
         viewModelScope.launch {
             if (done) dao.insertCompletion(RoutineStepCompletion(routineStepId = step.id, date = dayMillis))

@@ -25,6 +25,17 @@
     <string name="tab_home">Ana Sayfa</string>
     <string name="tab_plan">Plan</string>
     <string name="tab_health">Sağlık</string>
+    <string name="streak_study">🔥 Çalışma serisi: %1$s</string>
+    <string name="streak_reading">🔥 Okuma serisi: %1$s</string>
+    <string name="streak_routine">🔥 Seri: %1$s</string>
+    <string name="streak_short">🔥 %1$d</string>
+    <string name="streak_keep_study">devam etmesi için bugün çalış</string>
+    <string name="streak_keep_reading">devam etmesi için bugün oku</string>
+    <string name="streak_keep_routine">devam etmesi için bugün tamamla</string>
+    <string name="streak_best">en iyi %1$s</string>
+    <string name="settings_study_streak_min">Çalışma serisi: günlük en az</string>
+    <string name="settings_study_streak_min_off">Herhangi</string>
+    <string name="settings_study_streak_min_hint">Bu kadar çalıştığın gün çalışma serine sayılır (odak, akış, çalışma ve denemeler; okuma dahil değil).</string>
     <string name="tab_life">Yaşam</string>
     <string name="hub_statistics_hint">Çalışma oturumları, deneme sınavları ve denemeler</string>
     <string name="label_reading_stats">Okuma istatistikleri</string>

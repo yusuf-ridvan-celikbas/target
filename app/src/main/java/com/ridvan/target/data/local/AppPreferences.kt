@@ -227,6 +227,15 @@ class AppPreferences(context: Context) {
         _focusVibrationEnabled.value = enabled
     }
 
+    /** Minutes of study a day needs to count toward the study streak; 0 = any session counts. */
+    private val _studyStreakMinMinutes = MutableStateFlow(prefs.getInt(KEY_STUDY_STREAK_MIN_MINUTES, 0))
+    val studyStreakMinMinutes: StateFlow<Int> = _studyStreakMinMinutes.asStateFlow()
+
+    fun setStudyStreakMinMinutes(minutes: Int) {
+        prefs.edit().putInt(KEY_STUDY_STREAK_MIN_MINUTES, minutes).apply()
+        _studyStreakMinMinutes.value = minutes
+    }
+
     private companion object {
         const val PREFS_NAME = "target_prefs"
         const val KEY_DARK_MODE = "dark_mode"
@@ -242,6 +251,7 @@ class AppPreferences(context: Context) {
         const val KEY_LEGACY_FOCUS_ALARM_SOUND_URI = "focus_alarm_sound_uri"
         const val KEY_FOCUS_VIBRATION_ENABLED = "focus_vibration_enabled"
         const val KEY_LAST_BACKUP_AT = "last_backup_at"
+        const val KEY_STUDY_STREAK_MIN_MINUTES = "study_streak_min_minutes"
         const val NO_USER = -1L
     }
 }

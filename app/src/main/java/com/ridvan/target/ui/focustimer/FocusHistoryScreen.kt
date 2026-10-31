@@ -166,6 +166,7 @@ private fun FocusHistoryBody(
 ) {
     val undoDelete = rememberUndoDelete(snackbarHostState, viewModel::deleteSession, viewModel::restoreSession)
     val history by viewModel.history.collectAsStateWithLifecycle()
+    val studyStreak by viewModel.studyStreak.collectAsStateWithLifecycle()
 
     var query by rememberSaveable { mutableStateOf("") }
     var period by rememberSaveable { mutableStateOf(FocusHistoryPeriod.ALL) }
@@ -231,6 +232,12 @@ private fun FocusHistoryBody(
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
+        if (studyStreak.best > 0) {
+            com.ridvan.target.ui.common.StreakLine(
+                studyStreak, R.string.streak_study, R.string.streak_keep_study, showBest = true,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },

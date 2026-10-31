@@ -27,6 +27,10 @@ class ReadingViewModel(application: Application) : AndroidViewModel(application)
         .map { items -> items.map { it.session }.filter { it.isReading } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val readingStreak: StateFlow<com.ridvan.target.ui.common.Streak> =
+        com.ridvan.target.ui.common.studyReadingStreaksFlow(targetApplication, userId).map { it.reading }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), com.ridvan.target.ui.common.Streak.NONE)
+
     fun addBook(book: Book) {
         val uid = userId ?: return
         viewModelScope.launch { bookDao.insert(book.copy(userId = uid)) }

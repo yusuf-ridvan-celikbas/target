@@ -25,6 +25,17 @@
     <string name="tab_home">Home</string>
     <string name="tab_plan">Plan</string>
     <string name="tab_health">Health</string>
+    <string name="streak_study">🔥 Study streak: %1$s</string>
+    <string name="streak_reading">🔥 Reading streak: %1$s</string>
+    <string name="streak_routine">🔥 Streak: %1$s</string>
+    <string name="streak_short">🔥 %1$d</string>
+    <string name="streak_keep_study">study today to keep it</string>
+    <string name="streak_keep_reading">read today to keep it</string>
+    <string name="streak_keep_routine">finish today to keep it</string>
+    <string name="streak_best">best %1$s</string>
+    <string name="settings_study_streak_min">Study streak: daily minimum</string>
+    <string name="settings_study_streak_min_off">Any</string>
+    <string name="settings_study_streak_min_hint">A day counts toward your study streak once you study this long (focus, flow, practice and mock exams; reading not included).</string>
     <string name="tab_life">Life</string>
     <string name="hub_statistics_hint">Practice, practice exams and mock exams over time</string>
     <string name="label_reading_stats">Reading stats</string>

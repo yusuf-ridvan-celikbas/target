@@ -71,6 +71,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     val notificationLeadTime: StateFlow<NotificationLeadTime> = preferences.notificationLeadTime
 
+    val studyStreakMinMinutes: StateFlow<Int> = preferences.studyStreakMinMinutes
+
+    fun setStudyStreakMinMinutes(minutes: Int) = preferences.setStudyStreakMinMinutes(minutes)
+
     fun setNotificationLeadTime(leadTime: NotificationLeadTime) {
         preferences.setNotificationLeadTime(leadTime)
     }

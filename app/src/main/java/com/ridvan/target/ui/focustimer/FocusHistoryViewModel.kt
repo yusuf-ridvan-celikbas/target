@@ -64,6 +64,11 @@ class FocusHistoryViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Only shown on the all-sessions page, not a course's Work History. */
+    val studyStreak: StateFlow<com.ridvan.target.ui.common.Streak> =
+        (if (isScoped) flowOf(com.ridvan.target.ui.common.Streak.NONE) else com.ridvan.target.ui.common.studyReadingStreaksFlow(targetApplication, userId).map { it.study })
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), com.ridvan.target.ui.common.Streak.NONE)
+
     val courses: StateFlow<List<Course>> = (userId?.let { courseDao.getByUserId(it) } ?: flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 

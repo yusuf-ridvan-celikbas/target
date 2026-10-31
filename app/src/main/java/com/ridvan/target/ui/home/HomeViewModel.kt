@@ -51,7 +51,11 @@ data class HomeGoalLine(val goal: com.ridvan.target.data.local.entity.SportGoal,
 /** This month in Money (null when Money has no currency yet). */
 data class HomeMoney(val currency: String, val spentMinor: Long, val incomeMinor: Long, val budgetMinor: Long?)
 
-data class TodayRoutine(val routine: com.ridvan.target.data.local.entity.Routine, val progress: RoutineProgress)
+data class TodayRoutine(
+    val routine: com.ridvan.target.data.local.entity.Routine,
+    val progress: RoutineProgress,
+    val streak: com.ridvan.target.ui.common.Streak = com.ridvan.target.ui.common.Streak.NONE,
+)
 
 data class UpcomingEvent(
     val examId: Long,
@@ -188,7 +192,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             val stepsBy = steps.groupBy { it.routineId }
             routines.filter { it.runsOn(today) }
                 .sortedWith(compareBy({ it.startMinuteOfDay ?: Int.MAX_VALUE }, { it.name.lowercase() }))
-                .map { TodayRoutine(it, routineProgress(stepsBy[it.id].orEmpty(), completions, today)) }
+                .map {
+                    val routineSteps = stepsBy[it.id].orEmpty()
+                    TodayRoutine(it, routineProgress(routineSteps, completions, today), com.ridvan.target.ui.common.routineStreak(it, routineSteps, completions, today))
+                }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -218,7 +225,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
         userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
         userId?.let { mockExamDao.getSummariesForUser(it) } ?: flowOf(emptyList()),
-    ) { focus, practice, mocks -> studiedPreview(focus, practice, mocks) }
+        com.ridvan.target.ui.common.studyReadingStreaksFlow(targetApplication, userId),
+    ) { focus, practice, mocks, streaks ->
+        studiedPreview(focus, practice, mocks).copy(studyStreak = streaks.study, readingStreak = streaks.reading)
+    }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudiedPreview(emptyList(), 0, 0))
 
     private val workoutDao = targetApplication.database.workoutDao()

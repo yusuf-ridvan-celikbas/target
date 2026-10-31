@@ -98,6 +98,7 @@ fun SettingsScreen(
     val bannerColor by viewModel.bannerColor.collectAsStateWithLifecycle()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val notificationLeadTime by viewModel.notificationLeadTime.collectAsStateWithLifecycle()
+    val studyStreakMinMinutes by viewModel.studyStreakMinMinutes.collectAsStateWithLifecycle()
     val readingReminderEnabled by viewModel.readingReminderEnabled.collectAsStateWithLifecycle()
     val readingReminderMinute by viewModel.readingReminderMinute.collectAsStateWithLifecycle()
     var showReadingReminderTime by remember { mutableStateOf(false) }
@@ -382,6 +383,29 @@ fun SettingsScreen(
             GroupedCard(modifier = Modifier.onGloballyPositioned { focusSectionY = it.positionInParent().y.toInt() }) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     Text(stringResource(R.string.settings_focus_timer_preferences), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.settings_study_streak_min),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                    )
+                    SegmentedToggle(
+                        options = listOf(0, 15, 30, 60, 120).map { minutes ->
+                            SegmentedToggleOption(
+                                minutes,
+                                if (minutes == 0) stringResource(R.string.settings_study_streak_min_off) else com.ridvan.target.ui.common.formatDuration(minutes),
+                            )
+                        },
+                        selected = studyStreakMinMinutes.takeIf { it in listOf(0, 15, 30, 60, 120) } ?: 0,
+                        onSelect = viewModel::setStudyStreakMinMinutes,
+                        textStyle = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        stringResource(R.string.settings_study_streak_min_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
                     Text(
                         stringResource(R.string.settings_focus_sounds),
                         style = MaterialTheme.typography.bodySmall,

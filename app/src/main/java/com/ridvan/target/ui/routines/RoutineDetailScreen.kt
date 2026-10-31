@@ -56,6 +56,7 @@ fun RoutineDetailScreen(onBack: () -> Unit, viewModel: RoutineDetailViewModel = 
     val routine by viewModel.routine.collectAsStateWithLifecycle()
     val steps by viewModel.steps.collectAsStateWithLifecycle()
     val doneIds by viewModel.doneStepIds.collectAsStateWithLifecycle()
+    val streak by viewModel.streak.collectAsStateWithLifecycle()
 
     var menuOpen by remember { mutableStateOf(false) }
     var editRoutine by remember { mutableStateOf(false) }
@@ -120,6 +121,7 @@ fun RoutineDetailScreen(onBack: () -> Unit, viewModel: RoutineDetailViewModel = 
                         }
                     }
                     Text(routineScheduleLine(r), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 6.dp))
+                    com.ridvan.target.ui.common.StreakLine(streak, R.string.streak_routine, R.string.streak_keep_routine, showBest = true)
                     r.notes?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp)) }
                 }
             }

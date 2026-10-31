@@ -219,7 +219,7 @@ fun HomeScreen(
                     }
                     HomeCard.ROUTINES -> if (todaysRoutines.isNotEmpty()) RoutinesCard(todaysRoutines, onRoutineClick)
                     HomeCard.TODAY_SO_FAR -> {
-                        val hasStudied = (focusOn || examsOn) && (studied.todayMinutes > 0 || studied.weekMinutes > 0 || studied.today.isNotEmpty())
+                        val hasStudied = (focusOn || examsOn) && (studied.todayMinutes > 0 || studied.weekMinutes > 0 || studied.today.isNotEmpty() || studied.studyStreak.current > 0)
                         val shownReading = reading.takeIf { readingOn }
                         if (hasStudied || shownReading != null || shownSports != null) {
                             TodaySoFarCard(
@@ -301,7 +301,12 @@ private fun RoutinesCard(routines: List<TodayRoutine>, onRoutineClick: (Long) ->
                         modifier = Modifier.size(20.dp),
                     )
                     Text(
-                        listOfNotNull(routine.name, routine.startMinuteOfDay?.let { minuteLabel(it) }, routineProgressText(item.progress))
+                        listOfNotNull(
+                            routine.name,
+                            routine.startMinuteOfDay?.let { minuteLabel(it) },
+                            routineProgressText(item.progress),
+                            item.streak.current.takeIf { it > 0 }?.let { stringResource(R.string.streak_short, it) },
+                        )
                             .joinToString(" · "),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -526,6 +531,7 @@ private fun StudiedSection(studied: StudiedPreview, onItemClick: (PlannerAgendaI
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+    com.ridvan.target.ui.common.StreakLine(studied.studyStreak, R.string.streak_study, R.string.streak_keep_study)
     if (studied.today.isEmpty()) {
         Text(
             stringResource(R.string.home_studied_empty),
@@ -619,6 +625,7 @@ private fun ReadingSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+    com.ridvan.target.ui.common.StreakLine(studied.readingStreak, R.string.streak_reading, R.string.streak_keep_reading)
     studied.todayReading.take(3).forEach { item -> StudiedPreviewRow(item, onClick = { onSessionClick(item) }) }
     val book = reading.currentBook
     if (book != null) {

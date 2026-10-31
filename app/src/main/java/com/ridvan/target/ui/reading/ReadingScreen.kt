@@ -66,6 +66,7 @@ fun ReadingScreen(
 ) {
     val books by viewModel.books.collectAsStateWithLifecycle()
     val sessions by viewModel.readingSessions.collectAsStateWithLifecycle()
+    val readingStreak by viewModel.readingStreak.collectAsStateWithLifecycle()
     var period by rememberSaveable { mutableStateOf(ReadingPeriod.DAYS_7) }
     var showAddBook by remember { mutableStateOf(false) }
 
@@ -94,6 +95,9 @@ fun ReadingScreen(
                 textStyle = MaterialTheme.typography.bodySmall,
             )
 
+            if (readingStreak.best > 0) {
+                com.ridvan.target.ui.common.StreakLine(readingStreak, R.string.streak_reading, R.string.streak_keep_reading, showBest = true)
+            }
             val windowStart = periodStart(period)
             val inPeriod = sessions.filter { windowStart == null || it.startedAt >= windowStart }
             SummaryCard(inPeriod, finishedBooks = books.count { it.book.isFinished })

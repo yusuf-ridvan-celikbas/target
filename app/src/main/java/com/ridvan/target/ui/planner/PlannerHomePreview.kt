@@ -70,6 +70,8 @@ data class StudiedPreview(
     val weekReadingMinutes: Int = 0,
     val todayPages: Int = 0,
     val weekPages: Int = 0,
+    val studyStreak: com.ridvan.target.ui.common.Streak = com.ridvan.target.ui.common.Streak.NONE,
+    val readingStreak: com.ridvan.target.ui.common.Streak = com.ridvan.target.ui.common.Streak.NONE,
 )
 
 fun studiedPreview(
