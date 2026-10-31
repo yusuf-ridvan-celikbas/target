@@ -31,6 +31,7 @@ import com.ridvan.target.ui.planner.PlannerPreviewOccurrence
 import com.ridvan.target.ui.planner.StudiedPreview
 import com.ridvan.target.ui.planner.studiedPreview
 import com.ridvan.target.ui.planner.upcomingEventOccurrences
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -73,13 +74,11 @@ private const val HOME_PLANNER_MAX_ITEMS = 6
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val targetApplication = application as TargetApplication
+    private val data = HomeData(targetApplication, targetApplication.preferences.currentUserId)
     private val userDao = targetApplication.database.userDao()
     private val examDao = targetApplication.database.examDao()
-    private val sectionDao = targetApplication.database.sectionDao()
     private val plannerEventDao = targetApplication.database.plannerEventDao()
     private val plannerEventCompletionDao = targetApplication.database.plannerEventCompletionDao()
-    private val focusSessionDao = targetApplication.database.focusSessionDao()
-    private val practiceLogDao = targetApplication.database.practiceLogDao()
     private val preferences = targetApplication.preferences
     private val userId = preferences.currentUserId
 
@@ -111,27 +110,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    val money: StateFlow<HomeMoney?> = run {
-        val dao = targetApplication.database.moneyDao()
-        if (userId == null) flowOf(null)
-        else combine(currentUser, dao.getEntries(userId), dao.getBudgets(userId), dao.getTripExpenses(userId)) { user, entries, budgets, trips ->
-            val code = user?.moneyCurrency ?: return@combine null
-            val key = com.ridvan.target.ui.money.monthKeyOf(System.currentTimeMillis())
-            val from = com.ridvan.target.ui.money.monthStart(key)
-            val to = com.ridvan.target.ui.money.monthStart(key + 1)
-            val inMonth = entries.filter { it.date in from until to }
-            val tripSpent = trips.filter { it.expense.date in from until to }.sumOf {
-                com.ridvan.target.ui.money.tripAmountInMoneyCurrency(it.expense.amountMinor, it.tripCurrency, it.homeCurrency, it.exchangeRate, code) ?: 0L
-            }
-            val categoryBudgets = budgets.filter { it.categoryId != null }.associate { it.categoryId!! to it.amountMinor }
-            HomeMoney(
-                currency = code,
-                spentMinor = inMonth.filter { it.kind == com.ridvan.target.data.local.entity.MoneyKind.EXPENSE }.sumOf { it.amountMinor } + tripSpent,
-                incomeMinor = inMonth.filter { it.kind == com.ridvan.target.data.local.entity.MoneyKind.INCOME }.sumOf { it.amountMinor },
-                budgetMinor = com.ridvan.target.ui.money.totalBudget(categoryBudgets, budgets.firstOrNull { it.categoryId == null }?.amountMinor),
-            )
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    val money: StateFlow<HomeMoney?> = data.money.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun saveHomeLayout(items: List<HomeItem>) {
         val id = userId ?: return
@@ -143,93 +122,20 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { userDao.setHomeLayout(id, null) }
     }
 
-    private val mockExamDao = targetApplication.database.mockExamDao()
 
-    val upcomingEvents: StateFlow<List<UpcomingEvent>> = combine(
-        userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
-        userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()),
-        userId?.let { mockExamDao.getScheduledForUser(it) } ?: flowOf(emptyList()),
-    ) { exams, sections, plannedMocks ->
-        val today = startOfTodayMillis()
-        val examEvents = exams
-            .filter { !it.exam.hasSections && it.exam.examDate != null && it.exam.examDate >= today }
-            .map { UpcomingEvent(it.exam.id, null, homeExamLabel(it), it.exam.examDate!!) }
-        val examLabels = exams.associate { it.exam.id to homeExamLabel(it) }
-        val sectionEvents = sections
-            .filter { it.date != null && it.date >= today }
-            .mapNotNull { section ->
-                examLabels[section.examId]?.let { examLabel ->
-                    UpcomingEvent(section.examId, section.id, "$examLabel – ${section.name}", section.date!!)
-                }
-            }
-        val sectionNames = sections.associate { it.id to it.name }
-        val mockEvents = plannedMocks
-            .filter { it.scheduledAt != null && it.scheduledAt >= today }
-            .mapNotNull { mock ->
-                examLabels[mock.examId]?.let { examLabel ->
-                    val owner = mock.sectionId?.let { sectionNames[it] }?.let { "$examLabel – $it" } ?: examLabel
-                    UpcomingEvent(mock.examId, mock.sectionId, "${mock.name} · $owner", mock.scheduledAt!!, mockExamId = mock.id)
-                }
-            }
-        (examEvents + sectionEvents + mockEvents).sortedBy { it.date }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val upcomingEvents: StateFlow<List<UpcomingEvent>> = data.upcomingEvents.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val upcomingPlannerEvents: StateFlow<List<PlannerPreviewOccurrence>> = combine(
-        userId?.let { plannerEventDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
-        userId?.let { plannerEventCompletionDao.getAllByUserId(it) } ?: flowOf(emptyList()),
-    ) { events, completions ->
-        upcomingEventOccurrences(events, completions, HOME_PLANNER_WINDOW_DAYS, HOME_PLANNER_MAX_ITEMS)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val upcomingPlannerEvents: StateFlow<List<PlannerPreviewOccurrence>> = data.upcomingPlannerEvents.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val routineDao = targetApplication.database.routineDao()
 
     /** Active routines scheduled today, by start time, with how many steps are ticked. */
-    val todaysRoutines: StateFlow<List<TodayRoutine>> = if (userId == null) {
-        flowOf(emptyList<TodayRoutine>())
-    } else {
-        combine(routineDao.getByUserId(userId), routineDao.getAllStepsByUserId(userId), routineDao.getAllCompletionsByUserId(userId)) { routines, steps, completions ->
-            val today = startOfTodayMillis()
-            val stepsBy = steps.groupBy { it.routineId }
-            routines.filter { it.runsOn(today) }
-                .sortedWith(compareBy({ it.startMinuteOfDay ?: Int.MAX_VALUE }, { it.name.lowercase() }))
-                .map {
-                    val routineSteps = stepsBy[it.id].orEmpty()
-                    TodayRoutine(it, routineProgress(routineSteps, completions, today), com.ridvan.target.ui.common.routineStreak(it, routineSteps, completions, today))
-                }
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val todaysRoutines: StateFlow<List<TodayRoutine>> = data.todaysRoutines.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val bookDao = targetApplication.database.bookDao()
 
     /** Hidden (null) until there's a book or a reading session to talk about. */
-    val reading: StateFlow<HomeReading?> = combine(
-        bookProgressFlow(bookDao, focusSessionDao, userId),
-        userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
-    ) { books, sessions ->
-        if (books.isEmpty() && sessions.none { it.session.bookId != null }) {
-            null
-        } else {
-            val book = currentBook(books, sessions)
-            val today = dayStart(System.currentTimeMillis())
-            val reading = sessions.map { it.session }.filter { it.isReading }
-            val own = reading.filter { it.bookId == book?.book?.id }
-            HomeReading(
-                currentBook = book,
-                goal = book?.let { dailyGoal(it.book, own, today) },
-                pagesPerHour = readingPace(own, reading, today).pagesPerHour,
-            )
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    val reading: StateFlow<HomeReading?> = data.reading.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val studied: StateFlow<StudiedPreview> = combine(
-        userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
-        userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
-        userId?.let { mockExamDao.getSummariesForUser(it) } ?: flowOf(emptyList()),
-        com.ridvan.target.ui.common.studyReadingStreaksFlow(targetApplication, userId),
-    ) { focus, practice, mocks, streaks ->
-        studiedPreview(focus, practice, mocks).copy(studyStreak = streaks.study, readingStreak = streaks.reading)
-    }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudiedPreview(emptyList(), 0, 0))
+    val studied: StateFlow<StudiedPreview> = data.studied.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudiedPreview(emptyList(), 0, 0))
 
     private val workoutDao = targetApplication.database.workoutDao()
 
@@ -276,4 +182,123 @@ private fun homeExamLabel(item: ExamWithType): String {
         item.exam.level?.trim()?.takeIf { it.isNotEmpty() },
         item.languageName,
     ).joinToString(" - ")
+}
+
+/**
+ * Home's live data as cold flows, shared with the hub pages (each ViewModel turns what it shows into
+ * StateFlows).
+ */
+class HomeData(private val targetApplication: TargetApplication, private val userId: Long?) {
+    private val db = targetApplication.database
+    private val examDao = db.examDao()
+    private val sectionDao = db.sectionDao()
+    private val mockExamDao = db.mockExamDao()
+    private val plannerEventDao = db.plannerEventDao()
+    private val plannerEventCompletionDao = db.plannerEventCompletionDao()
+    private val routineDao = db.routineDao()
+    private val bookDao = db.bookDao()
+    private val focusSessionDao = db.focusSessionDao()
+    private val practiceLogDao = db.practiceLogDao()
+    private val currentUser: Flow<User?> = if (userId != null) db.userDao().getById(userId) else flowOf(null)
+
+    val money: Flow<HomeMoney?> = run {
+        val dao = targetApplication.database.moneyDao()
+        if (userId == null) flowOf(null)
+        else combine(currentUser, dao.getEntries(userId), dao.getBudgets(userId), dao.getTripExpenses(userId)) { user, entries, budgets, trips ->
+            val code = user?.moneyCurrency ?: return@combine null
+            val key = com.ridvan.target.ui.money.monthKeyOf(System.currentTimeMillis())
+            val from = com.ridvan.target.ui.money.monthStart(key)
+            val to = com.ridvan.target.ui.money.monthStart(key + 1)
+            val inMonth = entries.filter { it.date in from until to }
+            val tripSpent = trips.filter { it.expense.date in from until to }.sumOf {
+                com.ridvan.target.ui.money.tripAmountInMoneyCurrency(it.expense.amountMinor, it.tripCurrency, it.homeCurrency, it.exchangeRate, code) ?: 0L
+            }
+            val categoryBudgets = budgets.filter { it.categoryId != null }.associate { it.categoryId!! to it.amountMinor }
+            HomeMoney(
+                currency = code,
+                spentMinor = inMonth.filter { it.kind == com.ridvan.target.data.local.entity.MoneyKind.EXPENSE }.sumOf { it.amountMinor } + tripSpent,
+                incomeMinor = inMonth.filter { it.kind == com.ridvan.target.data.local.entity.MoneyKind.INCOME }.sumOf { it.amountMinor },
+                budgetMinor = com.ridvan.target.ui.money.totalBudget(categoryBudgets, budgets.firstOrNull { it.categoryId == null }?.amountMinor),
+            )
+        }
+    }
+
+    val upcomingEvents: Flow<List<UpcomingEvent>> = combine(
+        userId?.let { examDao.getAllWithTypeByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { sectionDao.getByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { mockExamDao.getScheduledForUser(it) } ?: flowOf(emptyList()),
+    ) { exams, sections, plannedMocks ->
+        val today = startOfTodayMillis()
+        val examEvents = exams
+            .filter { !it.exam.hasSections && it.exam.examDate != null && it.exam.examDate >= today }
+            .map { UpcomingEvent(it.exam.id, null, homeExamLabel(it), it.exam.examDate!!) }
+        val examLabels = exams.associate { it.exam.id to homeExamLabel(it) }
+        val sectionEvents = sections
+            .filter { it.date != null && it.date >= today }
+            .mapNotNull { section ->
+                examLabels[section.examId]?.let { examLabel ->
+                    UpcomingEvent(section.examId, section.id, "$examLabel – ${section.name}", section.date!!)
+                }
+            }
+        val sectionNames = sections.associate { it.id to it.name }
+        val mockEvents = plannedMocks
+            .filter { it.scheduledAt != null && it.scheduledAt >= today }
+            .mapNotNull { mock ->
+                examLabels[mock.examId]?.let { examLabel ->
+                    val owner = mock.sectionId?.let { sectionNames[it] }?.let { "$examLabel – $it" } ?: examLabel
+                    UpcomingEvent(mock.examId, mock.sectionId, "${mock.name} · $owner", mock.scheduledAt!!, mockExamId = mock.id)
+                }
+            }
+        (examEvents + sectionEvents + mockEvents).sortedBy { it.date }
+    }
+
+    val upcomingPlannerEvents: Flow<List<PlannerPreviewOccurrence>> = combine(
+        userId?.let { plannerEventDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { plannerEventCompletionDao.getAllByUserId(it) } ?: flowOf(emptyList()),
+    ) { events, completions ->
+        upcomingEventOccurrences(events, completions, HOME_PLANNER_WINDOW_DAYS, HOME_PLANNER_MAX_ITEMS)
+    }
+
+    val todaysRoutines: Flow<List<TodayRoutine>> = if (userId == null) {
+        flowOf(emptyList<TodayRoutine>())
+    } else {
+        combine(routineDao.getByUserId(userId), routineDao.getAllStepsByUserId(userId), routineDao.getAllCompletionsByUserId(userId)) { routines, steps, completions ->
+            val today = startOfTodayMillis()
+            val stepsBy = steps.groupBy { it.routineId }
+            routines.filter { it.runsOn(today) }
+                .sortedWith(compareBy({ it.startMinuteOfDay ?: Int.MAX_VALUE }, { it.name.lowercase() }))
+                .map {
+                    val routineSteps = stepsBy[it.id].orEmpty()
+                    TodayRoutine(it, routineProgress(routineSteps, completions, today), com.ridvan.target.ui.common.routineStreak(it, routineSteps, completions, today))
+                }
+        }
+    }
+
+    val reading: Flow<HomeReading?> = combine(
+        bookProgressFlow(bookDao, focusSessionDao, userId),
+        userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
+    ) { books, sessions ->
+        if (books.isEmpty() && sessions.none { it.session.bookId != null }) {
+            null
+        } else {
+            val book = currentBook(books, sessions)
+            val today = dayStart(System.currentTimeMillis())
+            val reading = sessions.map { it.session }.filter { it.isReading }
+            val own = reading.filter { it.bookId == book?.book?.id }
+            HomeReading(
+                currentBook = book,
+                goal = book?.let { dailyGoal(it.book, own, today) },
+                pagesPerHour = readingPace(own, reading, today).pagesPerHour,
+            )
+        }
+    }
+
+    val studied: Flow<StudiedPreview> = combine(
+        userId?.let { focusSessionDao.getAllWithLinksByUserId(it) } ?: flowOf(emptyList()),
+        userId?.let { practiceLogDao.getAllForPlanner(it) } ?: flowOf(emptyList()),
+        userId?.let { mockExamDao.getSummariesForUser(it) } ?: flowOf(emptyList()),
+        com.ridvan.target.ui.common.studyReadingStreaksFlow(targetApplication, userId),
+    ) { focus, practice, mocks, streaks ->
+        studiedPreview(focus, practice, mocks).copy(studyStreak = streaks.study, readingStreak = streaks.reading)
+    }
 }

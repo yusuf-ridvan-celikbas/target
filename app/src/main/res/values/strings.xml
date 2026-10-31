@@ -37,6 +37,27 @@
     <string name="settings_study_streak_min_off">Any</string>
     <string name="settings_study_streak_min_hint">A day counts toward your study streak once you study this long (focus, flow, practice and mock exams; reading not included).</string>
     <string name="tab_life">Life</string>
+    <string name="hub_next">Next: %1$s · %2$s</string>
+    <string name="hub_today_week">Today %1$s · this week %2$s</string>
+    <string name="hub_last_mock_net">Last mock exam: net %1$s</string>
+    <string name="hub_routines_today">%1$d of %2$d routines done today</string>
+    <string name="hub_book_progress">%1$s · page %2$d of %3$d</string>
+    <string name="hub_book_page">%1$s · page %2$d</string>
+    <string name="hub_this_week">This week: %1$s</string>
+    <string name="hub_money_spent_of">Spent %1$s of %2$s this month</string>
+    <string name="hub_money_spent">Spent %1$s this month</string>
+    <plurals name="count_courses">
+        <item quantity="one">%d course</item>
+        <item quantity="other">%d courses</item>
+    </plurals>
+    <plurals name="count_languages">
+        <item quantity="one">%d language</item>
+        <item quantity="other">%d languages</item>
+    </plurals>
+    <plurals name="count_plans_today">
+        <item quantity="one">%d plan today</item>
+        <item quantity="other">%d plans today</item>
+    </plurals>
     <string name="hub_statistics_hint">Practice, practice exams and mock exams over time</string>
     <string name="label_reading_stats">Reading stats</string>
     <string name="hub_reading_stats_hint">Pages and reading time by day, week and month</string>

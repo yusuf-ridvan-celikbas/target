@@ -37,6 +37,27 @@
     <string name="settings_study_streak_min_off">Herhangi</string>
     <string name="settings_study_streak_min_hint">Bu kadar çalıştığın gün çalışma serine sayılır (odak, akış, çalışma ve denemeler; okuma dahil değil).</string>
     <string name="tab_life">Yaşam</string>
+    <string name="hub_next">Sıradaki: %1$s · %2$s</string>
+    <string name="hub_today_week">Bugün %1$s · bu hafta %2$s</string>
+    <string name="hub_last_mock_net">Son deneme: net %1$s</string>
+    <string name="hub_routines_today">Bugün %2$d rutinden %1$d tamamlandı</string>
+    <string name="hub_book_progress">%1$s · sayfa %2$d / %3$d</string>
+    <string name="hub_book_page">%1$s · sayfa %2$d</string>
+    <string name="hub_this_week">Bu hafta: %1$s</string>
+    <string name="hub_money_spent_of">Bu ay %2$s bütçenin %1$s kadarı harcandı</string>
+    <string name="hub_money_spent">Bu ay %1$s harcandı</string>
+    <plurals name="count_courses">
+        <item quantity="one">%d ders</item>
+        <item quantity="other">%d ders</item>
+    </plurals>
+    <plurals name="count_languages">
+        <item quantity="one">%d dil</item>
+        <item quantity="other">%d dil</item>
+    </plurals>
+    <plurals name="count_plans_today">
+        <item quantity="one">Bugün %d plan</item>
+        <item quantity="other">Bugün %d plan</item>
+    </plurals>
     <string name="hub_statistics_hint">Çalışma oturumları, deneme sınavları ve denemeler</string>
     <string name="label_reading_stats">Okuma istatistikleri</string>
     <string name="hub_reading_stats_hint">Güne, haftaya ve aya göre sayfa ve okuma süresi</string>
