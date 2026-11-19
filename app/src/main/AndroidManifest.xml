@@ -8,6 +8,11 @@
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Lilies Lib extension: package visibility for the install check and its book picker (Android 11+). -->
+    <queries>
+        <package android:name="com.anonymous.eighteeneleven" />
+    </queries>
+
     <application
         android:name=".TargetApplication"
         android:allowBackup="true"

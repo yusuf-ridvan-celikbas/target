@@ -24,4 +24,10 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         val uid = userId ?: return
         viewModelScope.launch { bookDao.insert(book.copy(userId = uid)) }
     }
+
+    /** Adds a book picked in Lilies Lib; [onAlreadyAdded] when this account already has it. */
+    fun addFromLilies(picked: com.ridvan.target.data.extensions.PickedBook, onAlreadyAdded: () -> Unit) {
+        val uid = userId ?: return
+        viewModelScope.launch { if (!bookDao.addPickedBook(uid, picked)) onAlreadyAdded() }
+    }
 }

@@ -19,6 +19,10 @@ class TargetApplication : Application() {
         com.ridvan.target.data.modules.ModuleRepository(database.userDao(), preferences, applicationScope)
     }
 
+    val extensions: com.ridvan.target.data.extensions.ExtensionRepository by lazy {
+        com.ridvan.target.data.extensions.ExtensionRepository(database.userDao(), preferences, applicationScope)
+    }
+
     /** Online helpers for trips — all off (the app is offline); see data/trips/TripLookups.kt. */
     val tripLookups: TripLookups = TripLookups.OFFLINE
 

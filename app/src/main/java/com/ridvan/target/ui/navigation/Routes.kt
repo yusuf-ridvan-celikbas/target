@@ -80,6 +80,10 @@ object SettingsRoute
 @Serializable
 data class ModulesRoute(val onboarding: Boolean = false)
 
+/** Settings → Extensions (optional companion apps such as Lilies Lib). */
+@Serializable
+object ExtensionsRoute
+
 @Serializable
 object MyAccountRoute
 

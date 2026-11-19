@@ -34,6 +34,9 @@ interface UserDao {
     @Query("UPDATE users SET homeLayout = :layout WHERE id = :userId")
     suspend fun setHomeLayout(userId: Long, layout: String?)
 
+    @Query("UPDATE users SET enabledExtensions = :extensions WHERE id = :userId")
+    suspend fun setEnabledExtensions(userId: Long, extensions: String?)
+
     @Query("UPDATE users SET enabledModules = :modules WHERE id = :userId")
     suspend fun setEnabledModules(userId: Long, modules: String?)
 

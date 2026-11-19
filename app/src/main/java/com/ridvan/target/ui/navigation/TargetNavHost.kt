@@ -480,7 +480,10 @@ fun TargetNavHost() {
             )
         }
         composable<SettingsRoute> {
-            SettingsScreen(shellNavigation = shellNavigation)
+            SettingsScreen(shellNavigation = shellNavigation, onOpenExtensions = { navController.navigate(ExtensionsRoute) })
+        }
+        composable<ExtensionsRoute> {
+            com.ridvan.target.ui.extensions.ExtensionsScreen(onBack = { navController.popBackStack() })
         }
         composable<MyAccountRoute> {
             MyAccountScreen(shellNavigation = shellNavigation)
@@ -548,7 +551,7 @@ fun TargetNavHost() {
             )
         }
         composable<FocusTimerSettingsRoute> {
-            SettingsScreen(shellNavigation = shellNavigation, scrollToFocusTimer = true)
+            SettingsScreen(shellNavigation = shellNavigation, scrollToFocusTimer = true, onOpenExtensions = { navController.navigate(ExtensionsRoute) })
         }
         composable<FocusHistoryHomeRoute> {
             FocusHistoryHomeScreen(

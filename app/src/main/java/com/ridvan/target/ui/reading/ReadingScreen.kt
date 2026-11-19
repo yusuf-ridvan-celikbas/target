@@ -112,6 +112,12 @@ fun ReadingScreen(
         }
     }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val pickFromLilies = rememberLiliesBookPicker { picked ->
+        viewModel.addFromLilies(picked) {
+            android.widget.Toast.makeText(context, com.ridvan.target.R.string.reading_lilies_already_added, android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
     if (showAddBook) {
         BookDialog(
             initial = null,
@@ -120,6 +126,7 @@ fun ReadingScreen(
                 showAddBook = false
             },
             onDismiss = { showAddBook = false },
+            onAddFromLilies = pickFromLilies?.let { pick -> { showAddBook = false; pick() } },
         )
     }
 }

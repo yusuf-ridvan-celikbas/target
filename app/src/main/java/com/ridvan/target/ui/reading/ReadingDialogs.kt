@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +50,8 @@ fun BookDialog(
     onConfirm: (Book) -> Unit,
     onDismiss: () -> Unit,
     onDelete: (() -> Unit)? = null,
+    /** Adding only: shown as "Add from Lilies Lib" when the extension can be used (see rememberLiliesBookPicker). */
+    onAddFromLilies: (() -> Unit)? = null,
 ) {
     var title by remember { mutableStateOf(initial?.title.orEmpty()) }
     var author by remember { mutableStateOf(initial?.author.orEmpty()) }
@@ -65,6 +68,12 @@ fun BookDialog(
         title = { Text(stringResource(if (initial == null) R.string.reading_add_book else R.string.reading_edit_book)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                if (initial == null && onAddFromLilies != null) {
+                    androidx.compose.material3.OutlinedButton(onClick = onAddFromLilies, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                        Icon(Icons.Filled.LocalLibrary, contentDescription = null)
+                        Text(stringResource(R.string.reading_add_from_lilies), modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },

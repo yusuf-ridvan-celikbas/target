@@ -852,3 +852,12 @@ val MIGRATION_39_40 = object : Migration(39, 40) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_goal_milestones_goalId` ON `goal_milestones` (`goalId`)")
     }
 }
+
+/** Extensions: per-account enabled list; books picked from a companion app (Lilies Lib) remember its id. */
+val MIGRATION_40_41 = object : Migration(40, 41) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN enabledExtensions TEXT")
+        db.execSQL("ALTER TABLE books ADD COLUMN externalSource TEXT")
+        db.execSQL("ALTER TABLE books ADD COLUMN externalId TEXT")
+    }
+}

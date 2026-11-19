@@ -1560,4 +1560,19 @@
     <string name="scoring_test_ayt_religion">Din Kültürü</string>
     <string name="notif_mock_exam_title">Deneme zamanı: %1$s</string>
     <string name="notif_mock_exam_body">Başlatmak için Target uygulamasını aç.</string>
+    <string name="extensions_title">Eklentiler</string>
+    <string name="settings_extensions_hint">Bu telefondaki diğer uygulamalara bağlan</string>
+    <string name="extensions_intro">Eklentiler Target\'ı bu telefondaki diğer uygulamalara bağlar. İnternete hiçbir şey gitmez; Target onlarsız da aynı çalışır.</string>
+    <string name="extensions_lilies_lib">Lilies Lib</string>
+    <string name="extensions_lilies_lib_hint">Lilies Lib ev kütüphanendeki kitapları Okuma\'ya ekle.</string>
+    <string name="extensions_installed">Yüklü</string>
+    <string name="extensions_not_installed">Yüklü değil</string>
+    <string name="extensions_use">Target\'ta kullan</string>
+    <string name="extensions_get_lilies_lib">Lilies Lib\'i indir</string>
+    <string name="extensions_get_hint">İndirme bağlantısı tarayıcıda açılır.</string>
+    <string name="extensions_no_browser">Bağlantıyı açacak tarayıcı bulunamadı.</string>
+    <string name="extensions_needs_reading">Kullanmak için Okuma modülünü aç.</string>
+    <string name="reading_add_from_lilies">Lilies Lib\'den ekle</string>
+    <string name="reading_lilies_already_added">Bu kitap zaten kütüphanende</string>
+    <string name="reading_lilies_no_picker">Bu Lilies Lib sürümü henüz kitap paylaşamıyor. Güncelleyip tekrar dene.</string>
 </resources>

@@ -1562,4 +1562,19 @@
     <string name="scoring_test_ayt_religion">Religious Culture</string>
     <string name="notif_mock_exam_title">Mock exam time: %1$s</string>
     <string name="notif_mock_exam_body">Open Target to start it.</string>
+    <string name="extensions_title">Extensions</string>
+    <string name="settings_extensions_hint">Connect other apps on this phone</string>
+    <string name="extensions_intro">Extensions link Target with other apps on this phone. Nothing goes over the internet, and Target works the same without them.</string>
+    <string name="extensions_lilies_lib">Lilies Lib</string>
+    <string name="extensions_lilies_lib_hint">Add books to Reading from your Lilies Lib home library.</string>
+    <string name="extensions_installed">Installed</string>
+    <string name="extensions_not_installed">Not installed</string>
+    <string name="extensions_use">Use in Target</string>
+    <string name="extensions_get_lilies_lib">Get Lilies Lib</string>
+    <string name="extensions_get_hint">Opens the download link in your browser.</string>
+    <string name="extensions_no_browser">No browser found to open the link.</string>
+    <string name="extensions_needs_reading">Turn on the Reading module to use it.</string>
+    <string name="reading_add_from_lilies">Add from Lilies Lib</string>
+    <string name="reading_lilies_already_added">This book is already in your library</string>
+    <string name="reading_lilies_no_picker">This version of Lilies Lib can\'t share books yet. Update it and try again.</string>
 </resources>

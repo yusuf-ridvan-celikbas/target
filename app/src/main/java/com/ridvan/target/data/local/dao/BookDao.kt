@@ -26,6 +26,10 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE userId = :userId ORDER BY isFinished ASC, title COLLATE NOCASE ASC")
     fun getByUserId(userId: Long): Flow<List<Book>>
 
+    /** The account's book already linked to [externalId] in [source], if any. */
+    @Query("SELECT * FROM books WHERE userId = :userId AND externalSource = :source AND externalId = :externalId LIMIT 1")
+    suspend fun findExternal(userId: Long, source: String, externalId: String): Book?
+
     @Query("UPDATE books SET isFinished = 1 WHERE id = :id")
     suspend fun markFinished(id: Long)
 

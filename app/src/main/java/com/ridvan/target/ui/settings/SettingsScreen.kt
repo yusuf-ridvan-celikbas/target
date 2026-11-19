@@ -90,6 +90,7 @@ fun SettingsScreen(
     shellNavigation: ShellNavigation,
     /** True when opened from Focus Timer's settings icon — scrolls straight to Focus Timer Preferences. */
     scrollToFocusTimer: Boolean = false,
+    onOpenExtensions: () -> Unit,
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val isDarkMode by viewModel.isDarkMode.collectAsStateWithLifecycle()
@@ -210,6 +211,21 @@ fun SettingsScreen(
                     Text(stringResource(R.string.modules_title), style = MaterialTheme.typography.titleMedium)
                     Text(
                         stringResource(R.string.settings_modules_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            GroupedCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onOpenExtensions)
+                        .padding(16.dp),
+                ) {
+                    Text(stringResource(R.string.extensions_title), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.settings_extensions_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

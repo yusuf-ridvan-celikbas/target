@@ -42,4 +42,8 @@ data class Book(
     val coverColor: Int = 0,
     /** Optional "finish by" day (start-of-day millis) — the daily page goal is derived from it (ui/reading/ReadingForecast.kt). */
     val goalDate: Long? = null,
+    /** Which companion app the book was picked from (e.g. "lilies_lib", see data/extensions); null = added in Target. */
+    val externalSource: String? = null,
+    /** The book's id in [externalSource] (text, whatever that app uses). Key for any later sync back. */
+    val externalId: String? = null,
 )

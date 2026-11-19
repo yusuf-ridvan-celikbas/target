@@ -28,4 +28,6 @@ data class User(
     val homeLayout: String? = null,
     /** ISO currency of the Money module (null until chosen; the device currency is offered). */
     val moneyCurrency: String? = null,
+    /** Comma-separated TargetExtension names (data/extensions); null = none enabled. */
+    val enabledExtensions: String? = null,
 )

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only: a stand-in for Lilies Lib's book picker, used when the real app doesn't answer PICK_BOOK. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".debug.FakeLiliesPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Target">
+            <intent-filter>
+                <action android:name="com.ridvan.target.action.PICK_BOOK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
