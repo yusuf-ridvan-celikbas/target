@@ -49,6 +49,10 @@ class FakeLiliesPickerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val asked = intent.getIntExtra(C.EXTRA_CONTRACT_VERSION, -1)
+        if (intent.action == C.ACTION_ADD_BOOK) {
+            showAddBook(asked)
+            return
+        }
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -60,6 +64,39 @@ class FakeLiliesPickerActivity : ComponentActivity() {
                         Text("Target asked for contract v$asked", style = MaterialTheme.typography.bodySmall)
                         fakes.forEach { fake ->
                             Button(onClick = { answer(fake.extras) }, modifier = Modifier.fillMaxWidth()) { Text(fake.label) }
+                        }
+                        OutlinedButton(onClick = { setResult(Activity.RESULT_CANCELED); finish() }, modifier = Modifier.fillMaxWidth()) {
+                            Text("Cancel")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** ADD_BOOK: shows what Target sent; Add answers a new fake id, Cancel answers nothing. */
+    private fun showAddBook(asked: Int) {
+        val sent = intent.extras?.keySet().orEmpty().sorted().joinToString("\n") { key ->
+            @Suppress("DEPRECATION")
+            "$key = ${intent.extras?.get(key)}"
+        }
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier.safeDrawingPadding().padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text("Fake Lilies Lib: add this book? (debug, v$asked)", style = MaterialTheme.typography.titleLarge)
+                        Text(sent, style = MaterialTheme.typography.bodySmall)
+                        Button(onClick = {
+                            answer(Bundle().apply {
+                                putInt(C.EXTRA_CONTRACT_VERSION, 1)
+                                putString(C.EXTRA_BOOK_ID, "fake-sent-${System.currentTimeMillis()}")
+                            })
+                        }, modifier = Modifier.fillMaxWidth()) { Text("Add to library") }
+                        Button(onClick = { answer(Bundle().apply { putString(C.EXTRA_BOOK_ID, "fake-1") }) }, modifier = Modifier.fillMaxWidth()) {
+                            Text("Answer an id already linked (fake-1)")
                         }
                         OutlinedButton(onClick = { setResult(Activity.RESULT_CANCELED); finish() }, modifier = Modifier.fillMaxWidth()) {
                             Text("Cancel")

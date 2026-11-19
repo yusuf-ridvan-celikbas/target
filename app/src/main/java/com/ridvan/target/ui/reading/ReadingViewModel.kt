@@ -31,6 +31,10 @@ class ReadingViewModel(application: Application) : AndroidViewModel(application)
         com.ridvan.target.ui.common.studyReadingStreaksFlow(targetApplication, userId).map { it.reading }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), com.ridvan.target.ui.common.Streak.NONE)
 
+    init {
+        viewModelScope.autoSyncLilies(targetApplication, bookDao, userId)
+    }
+
     fun addBook(book: Book) {
         val uid = userId ?: return
         viewModelScope.launch { bookDao.insert(book.copy(userId = uid)) }

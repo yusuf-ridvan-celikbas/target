@@ -36,6 +36,29 @@ object LiliesLib {
             .firstOrNull { it.resolveActivity(context.packageManager) != null }
     }
 
+    /** "Send to Lilies Lib" for [book], or null when nothing answers ACTION_ADD_BOOK (debug: the fake picker does). */
+    fun addBookIntent(context: Context, book: com.ridvan.target.data.local.entity.Book): Intent? =
+        listOf(LiliesLibContract.PACKAGE, context.packageName)
+            .map { pkg ->
+                Intent(LiliesLibContract.ACTION_ADD_BOOK).setPackage(pkg)
+                    .putExtra(LiliesLibContract.EXTRA_CONTRACT_VERSION, LiliesLibContract.CONTRACT_VERSION)
+                    .putExtra(LiliesLibContract.EXTRA_TITLE, book.title)
+                    .apply {
+                        book.author?.let { putExtra(LiliesLibContract.EXTRA_AUTHOR, it) }
+                        book.totalPages?.let { putExtra(LiliesLibContract.EXTRA_PAGE_COUNT, it) }
+                        book.publisher?.let { putExtra(LiliesLibContract.EXTRA_PUBLISHER, it) }
+                        book.publishedYear?.let { putExtra(LiliesLibContract.EXTRA_PUBLISHED_YEAR, it) }
+                    }
+            }
+            .firstOrNull { it.resolveActivity(context.packageManager) != null }
+
+    fun parseAddResult(resultCode: Int, data: Intent?): String? {
+        if (resultCode != Activity.RESULT_OK) return null
+        val extras = data?.extras ?: return null
+        @Suppress("DEPRECATION")
+        return parseAddedBookId { key -> extras.get(key) }
+    }
+
     fun parseResult(resultCode: Int, data: Intent?): PickedBook? {
         if (resultCode != Activity.RESULT_OK) return null
         val extras = data?.extras ?: return null

@@ -1575,4 +1575,16 @@
     <string name="reading_add_from_lilies">Lilies Lib\'den ekle</string>
     <string name="reading_lilies_already_added">Bu kitap zaten kütüphanende</string>
     <string name="reading_lilies_no_picker">Bu Lilies Lib sürümü henüz kitap paylaşamıyor. Güncelleyip tekrar dene.</string>
+    <string name="extensions_auto_sync">Otomatik eşitle</string>
+    <string name="extensions_auto_sync_hint">Okuma\'yı açtığında Lilies Lib\'den eklediğin kitapların adı, yazarı, sayfası, yayınevi ve yılı güncellenir. Durum, puan, notlar ve oturumlar olduğu gibi kalır.</string>
+    <string name="extensions_sync_needs_permission">Eşitleme için Target\'ın Lilies Lib kütüphaneni okumasına izin ver.</string>
+    <string name="extensions_sync_unsupported">Bu Lilies Lib sürümü henüz kütüphanesini paylaşamıyor. Güncelleyip tekrar dene.</string>
+    <string name="reading_lilies_refresh">Lilies Lib\'den yenile</string>
+    <string name="reading_lilies_refreshed">Lilies Lib\'den güncellendi</string>
+    <string name="reading_lilies_up_to_date">Zaten güncel</string>
+    <string name="reading_lilies_missing">Bu kitap artık Lilies Lib\'de yok</string>
+    <string name="reading_lilies_send">Lilies Lib\'e gönder</string>
+    <string name="reading_lilies_sent">Lilies Lib\'e eklendi ve bağlandı</string>
+    <string name="reading_lilies_send_unsupported">Bu Lilies Lib sürümü henüz kitap alamıyor. Güncelleyip tekrar dene.</string>
+    <string name="reading_lilies_already_linked">Buradaki başka bir kitap zaten o Lilies Lib kitabına bağlı</string>
 </resources>

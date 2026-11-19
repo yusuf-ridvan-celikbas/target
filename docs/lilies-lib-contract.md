@@ -70,14 +70,57 @@ Target finds the package via a `<queries><package android:name="com.anonymous.ei
   with a version it doesn't know (`> 1` today).
 - The action name stays the same across versions.
 
-## Planned, not built: v2 (progress back to Lilies Lib)
+## Library provider: sync and "Refresh from Lilies Lib"
 
-Design only, so v1 doesn't paint us into a corner:
+Target keeps books it picked up to date (only those: it never imports other Lilies Lib books). Runs when Reading or
+the Library opens if Settings → Extensions → Lilies Lib → "Sync automatically" is on, and on demand with the
+refresh icon on a linked book's page. Read-only: Target never writes to Lilies Lib through it.
 
-- The link key is `book_id` ↔ Target's `books.externalId` (with `externalSource = "lilies_lib"`).
-- Direction Target → Lilies Lib, e.g. current page / finished. Likely an exported `ContentProvider` in Lilies Lib
-  (authority e.g. `com.anonymous.eighteeneleven.target`) that Target writes to with `ContentResolver.update`, or an
-  explicit broadcast/activity intent `com.ridvan.target.action.READING_PROGRESS` carrying `contract_version`,
-  `book_id`, `current_page`, `finished` (Boolean), `updated_at` (epoch ms). Since the keys differ, protect it with a
-  user-visible confirmation in Lilies Lib or a normal-level custom permission rather than a signature permission.
-- Whichever is chosen will be `contract_version = 2`; v1 picking keeps working unchanged.
+Lilies Lib needs:
+
+```xml
+<permission
+    android:name="com.anonymous.eighteeneleven.permission.READ_LIBRARY"
+    android:protectionLevel="dangerous"
+    android:label="read your Lilies Lib library" />
+
+<provider
+    android:name=".TargetLibraryProvider"
+    android:authorities="com.anonymous.eighteeneleven.target"
+    android:exported="true"
+    android:readPermission="com.anonymous.eighteeneleven.permission.READ_LIBRARY" />
+```
+
+`dangerous` means Android shows the user an "Allow" dialog the first time Target turns sync on. This works across
+different signing keys (unlike `signature`). Target declares `<uses-permission>` for it.
+
+`query(content://com.anonymous.eighteeneleven.target/books)` returns **one row per book**, all books (Target picks
+the ids it has linked). Columns use the picker's names: `contract_version` (1), `book_id`, `title`, `author`,
+`page_count`, `publisher`, `published_year`. Same types and leniency as the picker; a missing column = empty.
+Insert/update/delete: not supported (return null/0).
+
+Merge rule in Target: Lilies Lib wins for title, author, pages, publisher, year, but an empty Lilies field never
+erases what Target has. Target-only things (status, rating, notes, goal, cover, sessions) are never touched. A
+linked book that no longer exists in Lilies Lib is left alone ("This book is no longer in Lilies Lib").
+
+## Send a Target book to Lilies Lib (manual)
+
+Book page in Target → "Send to Lilies Lib" icon (only books not linked yet). Never automatic.
+
+| | |
+|---|---|
+| action | `com.ridvan.target.action.ADD_BOOK` (explicit package, `startActivityForResult`) |
+| extras | `contract_version`, `title` (always), `author`, `page_count`, `publisher`, `published_year` (when set) |
+
+Lilies Lib needs an exported activity with that action + `DEFAULT` category. It shows the book and asks the user to
+confirm (it may detect that it already has the book). Answer:
+- `RESULT_OK` with extras `contract_version` = 1 and `book_id` = the new (or the matching existing) Lilies Lib book's id.
+  Target then links its book to that id, so sync works for it from then on. If another Target book is already linked
+  to that id, Target says so and doesn't link.
+- `RESULT_CANCELED`: nothing happens.
+
+## Planned, not built: progress back to Lilies Lib
+
+- Link key: `book_id` ↔ Target's `books.externalId` (with `externalSource = "lilies_lib"`).
+- Target → Lilies Lib current page / finished, e.g. an explicit intent `com.ridvan.target.action.READING_PROGRESS`
+  with `contract_version`, `book_id`, `current_page`, `finished`, `updated_at` (epoch ms), confirmed in Lilies Lib.

@@ -42,6 +42,26 @@ class BookDetailViewModel(
     /** [goalDate] is a day start, or null to remove the goal. */
     fun setGoal(book: Book, goalDate: Long?) = updateBook(book.copy(goalDate = goalDate))
 
+    /** Links this book to the Lilies Lib book it was just sent as; false when another book already has that id. */
+    fun linkToLilies(book: Book, externalId: String, onDone: (Boolean) -> Unit) {
+        val uid = userId ?: return
+        viewModelScope.launch {
+            val other = bookDao.findExternal(uid, com.ridvan.target.data.extensions.LiliesLibContract.SOURCE, externalId)
+            if (other != null && other.id != book.id) {
+                onDone(false)
+            } else {
+                bookDao.update(book.copy(externalSource = com.ridvan.target.data.extensions.LiliesLibContract.SOURCE, externalId = externalId))
+                onDone(true)
+            }
+        }
+    }
+
+    /** "Refresh from Lilies Lib" for this one book. */
+    fun refreshFromLilies(onResult: (com.ridvan.target.data.extensions.LiliesSyncResult) -> Unit) {
+        val uid = userId ?: return
+        viewModelScope.launch { onResult(com.ridvan.target.data.extensions.LiliesSync.sync(targetApplication, bookDao, uid, bookId)) }
+    }
+
     fun updateBook(book: Book) {
         viewModelScope.launch { bookDao.update(book) }
     }

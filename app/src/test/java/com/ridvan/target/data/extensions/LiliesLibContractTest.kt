@@ -40,6 +40,24 @@ class LiliesLibContractTest {
     }
 
     @Test
+    fun syncLiliesWinsButEmptyNeverErases() {
+        val book = com.ridvan.target.data.local.entity.Book(
+            id = 5, title = "Old", author = "A", totalPages = 300, publisher = "P", publishedYear = 2000,
+            rating = 4, notes = "mine", isWantToRead = true, externalSource = C.SOURCE, externalId = "x",
+        )
+        val synced = book.refreshedFrom(PickedBook("x", "New", null, 412, "Q", null))
+        assertEquals(book.copy(title = "New", totalPages = 412, publisher = "Q"), synced)
+    }
+
+    @Test
+    fun addAnswerGivesTheNewId() {
+        assertEquals("abc", parseAddedBookId(mapOf<String, Any?>(C.EXTRA_CONTRACT_VERSION to 1, C.EXTRA_BOOK_ID to "abc")::get))
+        assertEquals("42", parseAddedBookId(mapOf<String, Any?>(C.EXTRA_BOOK_ID to 42.0)::get))
+        assertNull(parseAddedBookId(mapOf<String, Any?>(C.EXTRA_CONTRACT_VERSION to 1)::get))
+        assertNull(parseAddedBookId(mapOf<String, Any?>(C.EXTRA_CONTRACT_VERSION to 2, C.EXTRA_BOOK_ID to "abc")::get))
+    }
+
+    @Test
     fun extensionListRoundTrip() {
         assertEquals(emptySet<TargetExtension>(), parseExtensions(null))
         assertEquals(setOf(TargetExtension.LILIES_LIB), parseExtensions("FOO,LILIES_LIB"))

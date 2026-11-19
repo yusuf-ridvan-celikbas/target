@@ -1577,4 +1577,16 @@
     <string name="reading_add_from_lilies">Add from Lilies Lib</string>
     <string name="reading_lilies_already_added">This book is already in your library</string>
     <string name="reading_lilies_no_picker">This version of Lilies Lib can\'t share books yet. Update it and try again.</string>
+    <string name="extensions_auto_sync">Sync automatically</string>
+    <string name="extensions_auto_sync_hint">When you open Reading, books you added from Lilies Lib get its latest title, author, pages, publisher and year. Your status, rating, notes and sessions stay as they are.</string>
+    <string name="extensions_sync_needs_permission">Allow Target to read your Lilies Lib library to sync.</string>
+    <string name="extensions_sync_unsupported">This version of Lilies Lib can\'t share its library yet. Update it and try again.</string>
+    <string name="reading_lilies_refresh">Refresh from Lilies Lib</string>
+    <string name="reading_lilies_refreshed">Updated from Lilies Lib</string>
+    <string name="reading_lilies_up_to_date">Already up to date</string>
+    <string name="reading_lilies_missing">This book is no longer in Lilies Lib</string>
+    <string name="reading_lilies_send">Send to Lilies Lib</string>
+    <string name="reading_lilies_sent">Added to Lilies Lib and linked</string>
+    <string name="reading_lilies_send_unsupported">This version of Lilies Lib can\'t receive books yet. Update it and try again.</string>
+    <string name="reading_lilies_already_linked">Another book here is already linked to that Lilies Lib book</string>
 </resources>

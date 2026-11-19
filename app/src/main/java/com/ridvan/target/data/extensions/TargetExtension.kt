@@ -14,7 +14,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Optional companion apps Target can talk to on the phone (never over the network). Off by default. */
-enum class TargetExtension { LILIES_LIB }
+enum class TargetExtension {
+    LILIES_LIB,
+
+    /** Option of LILIES_LIB, not an extension of its own: refresh picked books when Reading opens. */
+    LILIES_LIB_AUTO_SYNC,
+}
 
 /** `users.enabledExtensions` is a comma list of [TargetExtension] names; null/blank = none. Unknown names are ignored. */
 fun parseExtensions(raw: String?): Set<TargetExtension> =

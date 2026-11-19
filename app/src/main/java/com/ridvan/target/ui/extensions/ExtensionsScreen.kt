@@ -60,6 +60,15 @@ fun ExtensionsScreen(onBack: () -> Unit) {
         onPauseOrDispose { }
     }
 
+    fun setAutoSync(on: Boolean) {
+        val uid = application.preferences.currentUserId ?: return
+        scope.launch {
+            application.extensions.setEnabled(uid, TargetExtension.LILIES_LIB_AUTO_SYNC, on)
+            if (on) com.ridvan.target.data.extensions.LiliesSync.sync(application, application.database.bookDao(), uid)
+        }
+    }
+    val turnOnAutoSync = com.ridvan.target.ui.reading.rememberLiliesAccess { setAutoSync(true) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -112,6 +121,20 @@ fun ExtensionsScreen(onBack: () -> Unit) {
                                 val uid = application.preferences.currentUserId ?: return@Switch
                                 scope.launch { application.extensions.setEnabled(uid, TargetExtension.LILIES_LIB, on) }
                             },
+                        )
+                    }
+                    if (TargetExtension.LILIES_LIB in enabled) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.extensions_auto_sync), modifier = Modifier.weight(1f))
+                            Switch(
+                                checked = TargetExtension.LILIES_LIB_AUTO_SYNC in enabled,
+                                onCheckedChange = { on -> if (on) turnOnAutoSync() else setAutoSync(false) },
+                            )
+                        }
+                        Text(
+                            stringResource(R.string.extensions_auto_sync_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     if (!readingOn) {

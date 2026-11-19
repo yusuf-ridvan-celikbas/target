@@ -22,6 +22,8 @@ import com.ridvan.target.data.extensions.TargetExtension
 import com.ridvan.target.data.local.dao.BookDao
 import com.ridvan.target.data.local.entity.Book
 import kotlin.random.Random
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 /**
  * "Add from Lilies Lib": null (no button) unless the extension is on for this account and Lilies Lib is
@@ -72,4 +74,36 @@ suspend fun BookDao.addPickedBook(userId: Long, picked: PickedBook): Boolean {
         ),
     )
     return true
+}
+
+/**
+ * Runs [onReady] once Target may read Lilies Lib's library: asks Android's permission first when needed;
+ * a toast explains when Lilies Lib can't share its library or the user said no.
+ */
+@Composable
+fun rememberLiliesAccess(onReady: () -> Unit): () -> Unit {
+    val context = LocalContext.current
+    val latestOnReady by rememberUpdatedState(onReady)
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) latestOnReady() else Toast.makeText(context, R.string.extensions_sync_needs_permission, Toast.LENGTH_LONG).show()
+    }
+    return {
+        when (com.ridvan.target.data.extensions.LiliesSync.access(context)) {
+            com.ridvan.target.data.extensions.LiliesAccess.READY -> latestOnReady()
+            com.ridvan.target.data.extensions.LiliesAccess.NEEDS_PERMISSION -> permissionLauncher.launch(LiliesLibContract.PERMISSION_READ_LIBRARY)
+            com.ridvan.target.data.extensions.LiliesAccess.UNSUPPORTED ->
+                Toast.makeText(context, R.string.extensions_sync_unsupported, Toast.LENGTH_LONG).show()
+        }
+    }
+}
+
+/** Silent background sync when Reading/Library opens, only with Lilies Lib and its auto-sync option on. */
+fun kotlinx.coroutines.CoroutineScope.autoSyncLilies(application: TargetApplication, bookDao: BookDao, userId: Long?) {
+    val uid = userId ?: return
+    launch {
+        val on = com.ridvan.target.data.extensions.parseExtensions(application.database.userDao().getById(uid).first()?.enabledExtensions)
+        if (TargetExtension.LILIES_LIB in on && TargetExtension.LILIES_LIB_AUTO_SYNC in on) {
+            com.ridvan.target.data.extensions.LiliesSync.sync(application, bookDao, uid)
+        }
+    }
 }

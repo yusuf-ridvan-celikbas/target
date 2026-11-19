@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.LibraryAdd
 import com.ridvan.target.ui.focustimer.NotesDialog
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -62,6 +64,50 @@ fun BookDetailScreen(
     viewModel: BookDetailViewModel = viewModel(),
 ) {
     val progress by viewModel.progress.collectAsStateWithLifecycle()
+    val detailContext = androidx.compose.ui.platform.LocalContext.current
+    val liliesOn = com.ridvan.target.data.extensions.TargetExtension.LILIES_LIB in
+        (detailContext.applicationContext as com.ridvan.target.TargetApplication).extensions.enabled.collectAsStateWithLifecycle().value
+    val sendLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val id = com.ridvan.target.data.extensions.LiliesLib.parseAddResult(result.resultCode, result.data) ?: return@rememberLauncherForActivityResult
+        val book = progress?.book ?: return@rememberLauncherForActivityResult
+        viewModel.linkToLilies(book, id) { linked ->
+            android.widget.Toast.makeText(
+                detailContext,
+                if (linked) R.string.reading_lilies_sent else R.string.reading_lilies_already_linked,
+                android.widget.Toast.LENGTH_SHORT,
+            ).show()
+        }
+    }
+    val sendToLilies: () -> Unit = {
+        val intent = progress?.book?.let { com.ridvan.target.data.extensions.LiliesLib.addBookIntent(detailContext, it) }
+        val launched = intent != null && try {
+            sendLauncher.launch(intent)
+            true
+        } catch (_: android.content.ActivityNotFoundException) {
+            false
+        }
+        if (!launched) android.widget.Toast.makeText(detailContext, R.string.reading_lilies_send_unsupported, android.widget.Toast.LENGTH_LONG).show()
+    }
+    val liliesInstalled = androidx.compose.runtime.remember {
+        com.ridvan.target.data.extensions.LiliesLib.isInstalled(detailContext) ||
+            com.ridvan.target.data.extensions.LiliesLib.pickerIntent(detailContext) != null
+    }
+    val refreshFromLilies = rememberLiliesAccess {
+        viewModel.refreshFromLilies { result ->
+            val message = when (result) {
+                is com.ridvan.target.data.extensions.LiliesSyncResult.Done -> when {
+                    result.missing > 0 -> R.string.reading_lilies_missing
+                    result.updated > 0 -> R.string.reading_lilies_refreshed
+                    else -> R.string.reading_lilies_up_to_date
+                }
+                com.ridvan.target.data.extensions.LiliesSyncResult.NeedsPermission -> R.string.extensions_sync_needs_permission
+                com.ridvan.target.data.extensions.LiliesSyncResult.Unsupported -> R.string.extensions_sync_unsupported
+            }
+            android.widget.Toast.makeText(detailContext, message, android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
     val allReadingSessions by viewModel.allReadingSessions.collectAsStateWithLifecycle()
     var showEdit by remember { mutableStateOf(false) }
@@ -81,6 +127,15 @@ fun BookDetailScreen(
                     }
                 },
                 actions = {
+                    if (progress?.book?.externalSource == com.ridvan.target.data.extensions.LiliesLibContract.SOURCE && liliesOn) {
+                        IconButton(onClick = refreshFromLilies) {
+                            Icon(Icons.Filled.Sync, contentDescription = stringResource(R.string.reading_lilies_refresh))
+                        }
+                    } else if (progress != null && progress?.book?.externalSource == null && liliesOn && liliesInstalled) {
+                        IconButton(onClick = sendToLilies) {
+                            Icon(Icons.Filled.LibraryAdd, contentDescription = stringResource(R.string.reading_lilies_send))
+                        }
+                    }
                     IconButton(onClick = { showEdit = true }, enabled = progress != null) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.reading_edit_book))
                     }

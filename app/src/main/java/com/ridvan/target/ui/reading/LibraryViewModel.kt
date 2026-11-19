@@ -20,6 +20,10 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     val books: StateFlow<List<BookProgress>> = bookProgressFlow(bookDao, focusSessionDao, userId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    init {
+        viewModelScope.autoSyncLilies(targetApplication, bookDao, userId)
+    }
+
     fun addBook(book: Book) {
         val uid = userId ?: return
         viewModelScope.launch { bookDao.insert(book.copy(userId = uid)) }

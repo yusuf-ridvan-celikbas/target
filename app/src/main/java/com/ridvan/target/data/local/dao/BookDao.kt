@@ -30,6 +30,9 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE userId = :userId AND externalSource = :source AND externalId = :externalId LIMIT 1")
     suspend fun findExternal(userId: Long, source: String, externalId: String): Book?
 
+    @Query("SELECT * FROM books WHERE userId = :userId AND externalSource = :source AND externalId IS NOT NULL")
+    suspend fun getExternal(userId: Long, source: String): List<Book>
+
     @Query("UPDATE books SET isFinished = 1 WHERE id = :id")
     suspend fun markFinished(id: Long)
 

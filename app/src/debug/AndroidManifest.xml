@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Debug builds only: a stand-in for Lilies Lib's book picker, used when the real app doesn't answer PICK_BOOK. -->
+<!-- Debug builds only: stand-ins for Lilies Lib (picker, add-book, library provider), used when the real app doesn't answer. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity
@@ -10,6 +10,14 @@
                 <action android:name="com.ridvan.target.action.PICK_BOOK" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.ridvan.target.action.ADD_BOOK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
+        <provider
+            android:name=".debug.FakeLiliesProvider"
+            android:authorities="${applicationId}.fakelilies"
+            android:exported="false" />
     </application>
 </manifest>

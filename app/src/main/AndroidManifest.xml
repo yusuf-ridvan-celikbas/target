@@ -8,6 +8,9 @@
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Lilies Lib extension: read its library for sync; Android asks the user (declared by Lilies Lib). -->
+    <uses-permission android:name="com.anonymous.eighteeneleven.permission.READ_LIBRARY" />
+
     <!-- Lilies Lib extension: package visibility for the install check and its book picker (Android 11+). -->
     <queries>
         <package android:name="com.anonymous.eighteeneleven" />
